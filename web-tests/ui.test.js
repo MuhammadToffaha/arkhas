@@ -76,3 +76,38 @@ test("bottom nav holds the buttons; slow stores start switched off", async () =>
   assert.deepEqual(JSON.parse(prefs.enabled), ["Sigma Computer"]);
   assert.deepEqual(JSON.parse(prefs.disabled), []);
 });
+
+test("settings → updates: red dot, download progress, install; hidden on old apps", async () => {
+  // old app (no update bridge): section stays hidden
+  const old = boot();
+  await old.win.arkhasReady;
+  assert.equal(old.doc.querySelector("#upd").hidden, true);
+
+  // new app: fake native update methods
+  const calls = [];
+  const html = readFileSync(new URL("index.html", W), "utf8").replace('<script src="engine.js"></script>', () => `<script>${readFileSync(new URL("engine.js", W), "utf8")}</script>`);
+  const dom = new JSDOM(html, { runScripts: "dangerously", url: "file:///android_asset/web/index.html", beforeParse(win) {
+    const reply = (id, ok, v) => setTimeout(() => win.__native(id, ok, v), 5);
+    win.Native = {
+      fetch: (id) => reply(id, false, "offline"), getPref: () => "", setPref() {}, appVersion: () => "1.0.5", pendingQuery: () => "",
+      readConfig: (n) => readFileSync(new URL(n, W), "utf8"),
+      checkUpdate(id, force) { calls.push(["check", force]); reply(id, true, JSON.stringify({ available: true, latestName: "1.0.6", latest: 6,
+        url: "https://github.com/MuhammadToffaha/arkhas/releases/download/v6/arkhas-1.0.6.apk", size: 2621440 })); },
+      installUpdate(id, url) { calls.push(["install", url]); setTimeout(() => win.__updProgress(42), 1); setTimeout(() => reply(id, true, "need-permission"), 10); },
+      refreshWeb(id) { calls.push(["web"]); reply(id, true, "same"); },
+    };
+  } });
+  const { window: win } = dom, doc = win.document;
+  await win.arkhasReady;
+  await until(() => !doc.querySelector("#dot").hidden);
+  assert.deepEqual(calls[0], ["check", false], "quiet check on start");
+  doc.querySelector("#gear").click();
+  assert.equal(doc.querySelector("#upd").hidden, false);
+  assert.match(doc.querySelector("#u_msg").textContent, /1\.0\.6.*2\.5/);
+  doc.querySelector("#u_install").click();
+  await until(() => calls.some((c) => c[0] === "install"));
+  await until(() => /ارجع|come back/.test(doc.querySelector("#u_msg").textContent));
+  assert.ok(calls.find((c) => c[0] === "install")[1].endsWith("arkhas-1.0.6.apk"));
+  doc.querySelector("#u_web").click();
+  await until(() => /محدّثة|up to date/.test(doc.querySelector("#u_msg").textContent));
+});

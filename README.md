@@ -24,7 +24,7 @@ phone ── web/engine.js ──► Amazon.eg · Noon · Jumia · B.TECH · 2B 
 | You change… | Then | Phone gets it |
 |---|---|---|
 | `web/stores.json` (fix/add a store), `web/synonyms.json`, `web/index.html`, `web/engine.js` | `git push` | Downloaded on next app start, active the start after. **No new APK.** |
-| `android/` (native app) | `git push` | Actions builds APK → Release → app shows "New version" |
+| `android/` (native app) | `git push` | Actions builds APK → Release → red dot on ⚙️ → **Settings → 🔄 Updates → Download & install** (inside the app) |
 
 **Stores (26)**: Amazon.eg · Noon · Jumia · B.TECH · 2B · Raya · Carrefour · Dream 2000 · Compumarts · Kimo Store · Tradeline · Raneen · Cairo Cart · Hyper One · Aman Stores · El Araby · Cairo Sales · Decathlon · Dubai Phone · El Nekhely · El Badr · Maximum Hardware · IKEA · Sigma 🐢 · Homzmart 🐢 · Fresh 🐢 (🐢 = slow JS sites, off by default, switch on in ⚙️).
 
@@ -35,6 +35,8 @@ phone ── web/engine.js ──► Amazon.eg · Noon · Jumia · B.TECH · 2B 
 - `render: true` = JS site, loaded in a hidden browser (slower) · `default_off: true` = off until enabled in ⚙️ · `enabled: false` = removed.
 
 **Speed**: one request per store, 10 s limit per store (18 s for JS sites), 3 hidden browsers in parallel, results show as each store answers, same search within 15 min is instant.
+
+**Accuracy before price**: sizes and specs in the search must match — persons/place settings, GB/TB, inch, HP, kg, liter, ft, doors, burners (Arabic or English, ١٤ or 14). A title with a different value is dropped (asked 14 persons → 10-person models never show). Top 3 = cheapest **exact** matches; if fewer than 3 exist, close matches fill in, marked ≈. Extra model words (Pro, Max, Ultra…) are marked "other model".
 
 **Arabic**: ال/بال/وال prefixes, 230+ Arabic↔English words and brands in `web/synonyms.json`, Google Translate for words not in the list (brands, slang), words like "ارخص / سعر / بكام" are ignored.
 

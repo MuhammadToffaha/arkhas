@@ -121,3 +121,47 @@ test("one query per store, slow store times out, fast results arrive first, cach
   assert.ok(again.cached);
   assert.equal(seen.length, n, "cache hit: no network");
 });
+
+// ---------- accuracy: specs beat price ----------
+const off = (title, price, src = "S") => ({ title, price, source: src, url: `https://${src}/${encodeURIComponent(title)}` });
+
+test("accuracy: 'Beko dishwasher 14 persons' never shows 10-person models; exact before cheaper", () => {
+  const offers = [
+    off("Beko Dishwasher 10 Place Settings, Silver", 14999, "A"),
+    off("Beko Slim Dishwasher 10 Persons", 13500, "B"),
+    off("Beko Dishwasher 14 Place Settings, Inox", 24999, "C"),
+    off("بيكو غسالة أطباق 14 فرد فضي", 23900, "D"),
+    off("Beko DFN05R14 Dishwasher", 21000, "E"),
+    off("Bosch Dishwasher 14 Place Settings", 19000, "F"),
+  ];
+  const { kept } = E.rank("Beko dishwasher 14 persons", offers, 0.6, ["Beko dishwasher 14 persons", "غساله اطباق بيكو 14 فرد"]);
+  const titles = kept.map((o) => o.title);
+  assert.ok(!titles.some((t) => /10/.test(t)), "10-person models removed");
+  assert.ok(!titles.some((t) => /Bosch/.test(t)), "wrong brand removed");
+  assert.deepEqual(E.top(kept).map((o) => o.price), [23900, 24999, 21000], "two exact (cheapest first), then the close one");
+  assert.deepEqual(E.top(kept).map((o) => o.match), [0, 0, 1]);
+});
+
+test("accuracy: Arabic query with Arabic digits and unit", () => {
+  const { kept } = E.rank("غسالة اطباق بيكو ١٤ فرد",
+    [off("Beko Dishwasher 10 Place Settings", 15000), off("Beko Dishwasher 14 Place Settings", 25000, "X")],
+    0.6, ["غسالة اطباق بيكو ١٤ فرد", "dishwasher beko 14 persons"]);
+  assert.deepEqual(kept.map((o) => o.price), [25000]);
+});
+
+test("accuracy: model numbers and storage", () => {
+  const { kept } = E.rank("iphone 15 256gb", [
+    off("Apple iPhone 15 128GB", 38000, "a"), off("Apple iPhone 15 256GB Black", 44000, "b"),
+    off("Apple iPhone 15 Pro 256GB", 52000, "c"), off("Apple iPhone 14 256GB", 33000, "d"),
+    off("Samsung Galaxy A15 256GB", 9000, "e"), off("Apple iPhone15 256 GB 5G", 43500, "f"),
+  ]);
+  assert.deepEqual(kept.map((o) => o.price), [43500, 44000, 52000]);
+  assert.ok(kept.at(-1).flags.includes("other-model"));
+});
+
+test("accuracy: TV inches and AC horsepower", () => {
+  assert.equal(E.matchInfo("شاشة سامسونج 55 بوصة", "Samsung 65 Inch Crystal UHD 4K TV", ["samsung tv 55 inch"]).tier, -1);
+  assert.equal(E.matchInfo("شاشة سامسونج 55 بوصة", "Samsung 55\" Crystal UHD 4K Smart TV", ["tv samsung 55 inch"]).tier, 0);
+  assert.equal(E.matchInfo("تكييف شارب 1.5 حصان", "Sharp Split AC 2.25 HP Cool", ["air conditioner sharp 1.5 hp"]).tier, -1);
+  assert.equal(E.matchInfo("تكييف شارب 1.5 حصان", "Sharp Split Air Conditioner 1.5 HP Cool Only", ["air conditioner sharp 1.5 hp"]).tier, 0);
+});

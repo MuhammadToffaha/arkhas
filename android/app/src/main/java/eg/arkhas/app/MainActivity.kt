@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
-import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import android.webkit.JavascriptInterface
@@ -14,14 +13,11 @@ import android.webkit.WebViewClient
 import android.widget.FrameLayout
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import org.json.JSONObject
-import java.net.HttpURLConnection
-import java.net.URL
 import kotlin.concurrent.thread
 
 /**
@@ -67,7 +63,6 @@ class MainActivity : AppCompatActivity() {
 
         // newest UI / store rules from GitHub -> used from next start
         thread { runCatching { WebFiles.update(this) } }
-        checkForApkUpdate()
     }
 
     /**
@@ -129,6 +124,44 @@ class MainActivity : AppCompatActivity() {
         @JavascriptInterface fun readConfig(name: String): String = WebFiles.read(this@MainActivity, name)
         @JavascriptInterface fun appVersion(): String = BuildConfig.VERSION_NAME
         @JavascriptInterface fun pendingQuery(): String = pendingQuery.also { pendingQuery = "" }
+
+        // ---- in-app update (Settings → Updates). Answers via window.__native(id, ok, text) like fetch. ----
+        private fun answer(id: Int, ok: Boolean, text: String) =
+            runOnUiThread { web.evaluateJavascript("window.__native($id,$ok,${JSONObject.quote(text)})", null) }
+
+        /** Latest GitHub release vs this app. force=false uses a 6 h cache. */
+        @JavascriptInterface
+        fun checkUpdate(id: Int, force: Boolean) = Net.pool.execute {
+            try { answer(id, true, Updater.check(this@MainActivity, force).toString()) }
+            catch (e: Exception) { answer(id, false, e.message ?: "error") }
+        }
+
+        /** Download the APK (progress -> window.__updProgress(pct)) and open the Android installer. */
+        @JavascriptInterface
+        fun installUpdate(id: Int, url: String) = Net.pool.execute {
+            try {
+                val apk = Updater.download(this@MainActivity, url) { pct ->
+                    runOnUiThread { web.evaluateJavascript("window.__updProgress&&window.__updProgress($pct)", null) }
+                }
+                runOnUiThread {
+                    if (Updater.canInstall(this@MainActivity)) { Updater.install(this@MainActivity, apk); answer(id, true, "installing") }
+                    else answer(id, true, "need-permission")   // user flips the switch, comes back, taps again
+                }
+            } catch (e: Exception) { answer(id, false, e.message ?: "error") }
+        }
+
+        /** Pull the newest store list / search page from GitHub now; reloads the page when something changed. */
+        @JavascriptInterface
+        fun refreshWeb(id: Int) = Net.pool.execute {
+            try {
+                val changed = WebFiles.update(this@MainActivity)
+                answer(id, true, if (changed) "changed" else "same")
+                if (changed) runOnUiThread { web.postDelayed({ web.loadUrl(WebFiles.indexUrl(this@MainActivity)) }, 1200) }
+            } catch (e: Exception) { answer(id, false, e.message ?: "error") }
+        }
+
+        @JavascriptInterface fun webVersion(): String =
+            java.io.File(WebFiles.dir(this@MainActivity), "stores.json").takeIf { it.exists() }?.lastModified()?.toString() ?: "bundled"
     }
 
     // ---------------- links: result pages open in their own app / browser ----------------
@@ -142,30 +175,4 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // ---------------- APK self-update via GitHub Releases ----------------
-    private fun checkForApkUpdate() {
-        val now = System.currentTimeMillis()
-        if (now - prefs.getLong("lastUpdateCheck", 0) < 12 * 3600_000) return
-        prefs.edit().putLong("lastUpdateCheck", now).apply()
-        thread {
-            runCatching {
-                val c = URL("https://api.github.com/repos/${BuildConfig.UPDATE_REPO}/releases/latest").openConnection() as HttpURLConnection
-                c.setRequestProperty("Accept", "application/vnd.github+json")
-                c.connectTimeout = 8000; c.readTimeout = 8000
-                val json = JSONObject(c.inputStream.bufferedReader().readText())
-                val latest = json.getString("tag_name").removePrefix("v").toIntOrNull() ?: 0
-                val assets = json.getJSONArray("assets")
-                val apk = (0 until assets.length()).map { assets.getJSONObject(it) }
-                    .firstOrNull { it.getString("name").endsWith(".apk") }?.getString("browser_download_url")
-                if (latest > BuildConfig.VERSION_CODE && apk != null) runOnUiThread {
-                    AlertDialog.Builder(this)
-                        .setTitle(R.string.update_title)
-                        .setMessage(getString(R.string.update_msg, "1.0.$latest"))
-                        .setPositiveButton(R.string.download) { _, _ -> startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(apk))) }
-                        .setNegativeButton(R.string.later, null)
-                        .show()
-                }
-            }
-        }
-    }
 }

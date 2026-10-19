@@ -42,6 +42,14 @@ input:focus{outline:none;border-color:var(--accent)}
 .save{font-size:12px;color:var(--accent);font-weight:600}
 .row{display:flex;gap:10px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px 10px;color:inherit;text-decoration:none;margin-bottom:6px}
 .row img{width:46px;height:46px}.row .t{flex:1;min-width:0}.row .p{font-size:15px;color:var(--ink)}
+.upd{background:var(--card);border:1.5px solid var(--line);border-radius:14px;padding:12px;margin:4px 0 8px}
+.upd.new{border-color:var(--accent)}
+.upd-h{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:4px}
+.upd-b{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}.upd-b .go{padding:10px 16px}
+.ib2{font:inherit;font-size:14px;padding:9px 14px;border-radius:12px;border:1px solid var(--line);background:var(--bg);color:var(--ink)}
+.ib2:disabled,.go:disabled{opacity:.5}
+.nav b{position:relative}.dot{position:absolute;top:0;inset-inline-end:-4px;width:9px;height:9px;border-radius:50%;background:#e0412f;border:2px solid var(--card)}
+.mb{font-size:11px;font-weight:700;border-radius:6px;padding:0 5px}.mb.ex{color:var(--accent);background:color-mix(in srgb,var(--accent) 14%,transparent)}.mb.si{color:var(--muted);border:1px solid var(--line)}
 .flag{font-size:11px;color:var(--warn);border:1px solid var(--warn);border-radius:6px;padding:0 5px;margin-inline-start:4px}
 h3{margin:22px 0 8px;font-size:15px}
 .links{display:grid;grid-template-columns:1fr 1fr;gap:8px}
@@ -76,11 +84,21 @@ table{border-collapse:collapse;width:100%;font-size:12.5px}td{padding:4px;border
   <button id="nav_search" class="on"><b>🔍</b><span id="l_search"></span></button>
   <button id="nav_status"><b>🏪</b><span id="l_status"></span></button>
   <button id="lang"><b>🌐</b><span id="l_lang"></span></button>
-  <button id="gear" aria-label="settings"><b>⚙️</b><span id="l_gear"></span></button>
+  <button id="gear" aria-label="settings"><b>⚙️<i class="dot" id="dot" hidden></i></b><span id="l_gear"></span></button>
 </nav>
 
 <div class="sheet" id="sheet"><div>
   <h3 id="s_title" style="margin-top:0"></h3>
+  <div class="upd" id="upd" hidden>
+    <div class="upd-h"><b id="u_title"></b><span class="muted" id="u_cur"></span></div>
+    <div id="u_msg" class="muted"></div>
+    <div class="bar" id="u_bar" hidden><i></i></div>
+    <div class="upd-b">
+      <button class="go" id="u_install" hidden></button>
+      <button class="ib2" id="u_check"></button>
+      <button class="ib2" id="u_web"></button>
+    </div>
+  </div>
   <label for="serp">SerpAPI key</label>
   <input id="serp" placeholder="optional" autocomplete="off">
   <div class="muted" id="s_serp"></div>
@@ -103,6 +121,9 @@ function fetcher(url, o = {}) {
   if (!N) return fetch(url).then((r) => { if (!r.ok) throw new Error("HTTP " + r.status); return r.text(); });
   return new Promise((res, rej) => { const id = ++seq; pending.set(id, { res, rej }); N.fetch(id, url, JSON.stringify(o)); });
 }
+function call(fn, ...args) {   // async native methods that answer through window.__native
+  return new Promise((res, rej) => { const id = ++seq; pending.set(id, { res, rej }); N[fn](id, ...args); });
+}
 const pref = (k, d = "") => { try { return (N ? N.getPref(k) : localStorage.getItem(k)) || d; } catch (_) { return d; } };
 const setPref = (k, v) => { try { N ? N.setPref(k, v) : localStorage.setItem(k, v); } catch (_) {} };
 const readConfig = async (name) => (N ? N.readConfig(name) : (await fetch(name)).text());
@@ -111,12 +132,18 @@ const readConfig = async (name) => (N ? N.readConfig(name) : (await fetch(name))
 const T = {
   ar: { tag: "أرخص سعر في مصر", go: "ابحث", ph: "اكتب المنتج… مثال: ايفون 15 برو", hint: "نبحث في المتاجر المصرية بالعربي والإنجليزي ونجيب لك أرخص 3",
     top: "🏆 أرخص 3 أسعار", all: "كل العروض ({n})", fb: "📘 فيسبوك والمستعمل", searched: "بحثنا عن:", none: "مفيش نتائج مطابقة لسه…",
-    noneDone: "مفيش نتائج مطابقة. جرّب اسم أدق.", src: "حالة المتاجر", navSearch: "بحث", navStatus: "المتاجر", navGear: "الإعدادات", acc: "إكسسوار؟", cheap: "سعر مريب", egp: "ج.م", save: "وفّر {n}",
+    noneDone: "مفيش نتائج مطابقة. جرّب اسم أدق.", src: "حالة المتاجر", navSearch: "بحث", navStatus: "المتاجر", navGear: "الإعدادات", acc: "إكسسوار؟", cheap: "سعر مريب", upd: "🔄 التحديثات", cur: "نسختك {v}", check: "تحقق من التحديث", checking: "جاري التحقق…", latest: "عندك أحدث نسخة ✓",
+    newVer: "نسخة جديدة {v} متاحة ({mb} ميجا)", install: "⬇️ تنزيل وتثبيت {v}", downloading: "جاري التنزيل… {p}%", installing: "افتح شاشة التثبيت واضغط تثبيت",
+    perm: "اسمح لـ أرخص بتثبيت التحديثات (فتحنا لك الإعداد) ثم ارجع واضغط تثبيت تاني", webBtn: "تحديث قائمة المتاجر", webSame: "قائمة المتاجر محدّثة ✓",
+    webChanged: "تم تحديث المتاجر — جاري إعادة التحميل…", updErr: "تعذّر: {e}", exact: "✓ مطابق", similar: "≈ مشابه", other: "موديل مختلف", fewExact: "لقينا {n} بس مطابقين تمامًا — الباقي مشابه", egp: "ج.م", save: "وفّر {n}",
     searching: "جاري البحث في {done}/{all} متجر…", settings: "الإعدادات", serpNote: "اختياري: يضيف جوجل شوبينج (مئات المتاجر). مفتاح مجاني من serpapi.com",
     city: "مدينة فيسبوك ماركت بليس", stores: "المتاجر", saveBtn: "حفظ", ver: "نسخة", hidden: "تم إخفاء {n} نتيجة غير مطابقة" },
   en: { tag: "Best price in Egypt", go: "Search", ph: "Product… e.g. iphone 15 pro", hint: "Searching Egyptian stores in Arabic & English — top 3 cheapest",
     top: "🏆 Top 3 prices", all: "All offers ({n})", fb: "📘 Facebook & used", searched: "Searched:", none: "No matches yet…",
-    noneDone: "No matching results. Try a more specific name.", src: "Store status", navSearch: "Search", navStatus: "Stores", navGear: "Settings", acc: "accessory?", cheap: "suspicious price", egp: "EGP", save: "save {n}",
+    noneDone: "No matching results. Try a more specific name.", src: "Store status", navSearch: "Search", navStatus: "Stores", navGear: "Settings", acc: "accessory?", cheap: "suspicious price", upd: "🔄 Updates", cur: "You have {v}", check: "Check for update", checking: "Checking…", latest: "You have the latest version ✓",
+    newVer: "New version {v} available ({mb} MB)", install: "⬇️ Download & install {v}", downloading: "Downloading… {p}%", installing: "Tap Install on the Android screen",
+    perm: "Allow Arkhas to install updates (settings opened), then come back and tap install again", webBtn: "Refresh store list", webSame: "Store list is up to date ✓",
+    webChanged: "Stores updated — reloading…", updErr: "Failed: {e}", exact: "✓ exact", similar: "≈ similar", other: "other model", fewExact: "Only {n} exact match(es) — the rest are similar", egp: "EGP", save: "save {n}",
     searching: "Searching {done}/{all} stores…", settings: "Settings", serpNote: "Optional: adds Google Shopping (hundreds of stores). Free key at serpapi.com",
     city: "Facebook Marketplace city", stores: "Stores", saveBtn: "Save", ver: "Version", hidden: "{n} irrelevant results hidden" },
 };
@@ -136,23 +163,28 @@ function applyLang() {
   $("#s_title").textContent = "⚙️ " + t.settings; $("#s_serp").textContent = t.serpNote; $("#s_city").textContent = t.city;
   $("#s_stores").textContent = t.stores; $("#s_save").textContent = t.saveBtn;
   $("#s_ver").textContent = t.ver + " " + (N && N.appVersion ? N.appVersion() : "web");
+  if (typeof canUpdate !== "undefined" && canUpdate) showUpd();
   if (last) render(last, !busy);
 }
 $("#lang").onclick = () => { L = L === "ar" ? "en" : "ar"; setPref("lang", L); applyLang(); };
 
 // ---------- render ----------
 const img = (o) => (o.image ? `<img src="${esc(o.image)}" alt="" loading="lazy" referrerpolicy="no-referrer">` : "");
-const flags = (o) => o.flags.map((f) => `<span class="flag">${f === "possible-accessory" ? T[L].acc : T[L].cheap}</span>`).join("");
+const flags = (o) => o.flags.map((f) => `<span class="flag">${f === "possible-accessory" ? T[L].acc : f === "other-model" ? T[L].other : T[L].cheap}</span>`).join("");
+const badge = (o) => `<span class="mb ${o.match === 0 ? "ex" : "si"}">${o.match === 0 ? T[L].exact : T[L].similar}</span>`;
 
 function render(r, done) {
   const t = T[L]; let h = "";
   h += `<div class="muted">${t.searched} ${r.variants.map((v) => `<span class="chip">${esc(v)}</span>`).join("")}</div>`;
   if (r.top3.length) {
-    h += `<h3>${t.top}</h3><div class="podium">`;
+    h += `<h3>${t.top}</h3>`;
+    const nExact = r.top3.filter((o) => o.match === 0).length;
+    if (done && nExact < r.top3.length && nExact < 3) h += `<div class="muted">${fmt(t.fewExact, { n: nExact })}</div>`;
+    h += `<div class="podium">`;
     r.top3.forEach((o, i) => {
       const off = o.old_price && o.old_price > o.price ? `<div class="old">${money(o.old_price)}</div><div class="save">${fmt(t.save, { n: money(o.old_price - o.price) })}</div>` : "";
       h += `<a class="pc r${i + 1}" href="${esc(o.url)}"><div class="medal">${["🥇", "🥈", "🥉"][i]}</div>${img(o)}
-        <div class="t"><div class="ttl">${esc(o.title)}</div><div class="src">${esc(o.source)}${flags(o)}</div></div>
+        <div class="t"><div class="ttl">${esc(o.title)}</div><div class="src">${badge(o)} ${esc(o.source)}${flags(o)}</div></div>
         <div style="text-align:end"><div class="p">${money(o.price)}</div>${off}</div></a>`;
     });
     h += `</div>`;
@@ -162,7 +194,7 @@ function render(r, done) {
   if (rest.length) {
     h += `<details><summary>${fmt(t.all, { n: r.offers.length })}</summary>`;
     for (const o of rest) h += `<a class="row" href="${esc(o.url)}">${img(o)}<div class="t"><div class="ttl">${esc(o.title)}</div>
-      <div class="src">${esc(o.source)}${flags(o)}</div></div><div class="p">${money(o.price)}</div></a>`;
+      <div class="src">${badge(o)} ${esc(o.source)}${flags(o)}</div></div><div class="p">${money(o.price)}</div></a>`;
     h += `</details>`;
   }
   if (done && r.hidden) h += `<div class="muted">${fmt(t.hidden, { n: r.hidden })}</div>`;
@@ -212,6 +244,7 @@ $("#f").onsubmit = (e) => { e.preventDefault(); run($("#q").value); };
 
 // ---------- settings ----------
 $("#gear").onclick = () => {
+  if (canUpdate) { showUpd(); checkUpd(false); }
   $("#serp").value = pref("serp"); $("#city").value = pref("city", "cairo");
   $("#storelist").innerHTML = STORES.filter((s) => s.enabled !== false).map((s) =>
     `<label class="st"><input type="checkbox" data-n="${esc(s.name)}" ${isOn(s) ? "checked" : ""}> ${esc(s.name)}${s.default_off ? ' <span class="muted">🐢</span>' : ""}</label>`).join("");
@@ -233,6 +266,53 @@ $("#s_save").onclick = () => {
   $("#sheet").classList.remove("on");
 };
 
+// ---------- in-app update (needs app 1.0.6+; hidden on older apps) ----------
+const canUpdate = !!(N && N.checkUpdate && N.installUpdate);
+let updInfo = null;
+function showUpd(msgKey, vars) {
+  const t = T[L];
+  $("#u_title").textContent = t.upd;
+  $("#u_cur").textContent = fmt(t.cur, { v: N.appVersion() });
+  $("#u_check").textContent = t.check; $("#u_web").textContent = t.webBtn;
+  const has = updInfo && updInfo.available;
+  $("#upd").classList.toggle("new", !!has);
+  $("#dot").hidden = !has;
+  $("#u_install").hidden = !has;
+  if (has) $("#u_install").textContent = fmt(t.install, { v: updInfo.latestName });
+  if (msgKey) $("#u_msg").textContent = fmt(t[msgKey], vars || {});
+  else if (updInfo) $("#u_msg").textContent = has ? fmt(t.newVer, { v: updInfo.latestName, mb: (updInfo.size / 1048576).toFixed(1) }) : t.latest;
+}
+async function checkUpd(force) {
+  if (!canUpdate) return;
+  if (force) { $("#u_check").disabled = true; showUpd("checking"); }
+  try { updInfo = JSON.parse(await call("checkUpdate", !!force)); showUpd(); }
+  catch (e) { if (force) showUpd("updErr", { e: e.message }); }
+  finally { $("#u_check").disabled = false; }
+}
+window.__updProgress = (p) => {
+  $("#u_bar").hidden = false;
+  $("#u_bar i").style.width = (p < 0 ? 50 : p) + "%";
+  $("#u_msg").textContent = fmt(T[L].downloading, { p: p < 0 ? "…" : p });
+};
+if (canUpdate) {
+  $("#upd").hidden = false;
+  $("#u_check").onclick = () => checkUpd(true);
+  $("#u_install").onclick = async () => {
+    $("#u_install").disabled = true;
+    try {
+      const r = await call("installUpdate", updInfo.url);
+      showUpd(r === "need-permission" ? "perm" : "installing");
+    } catch (e) { showUpd("updErr", { e: e.message }); }
+    finally { $("#u_install").disabled = false; $("#u_bar").hidden = true; }
+  };
+  $("#u_web").onclick = async () => {
+    $("#u_web").disabled = true;
+    try { showUpd((await call("refreshWeb")) === "changed" ? "webChanged" : "webSame"); }
+    catch (e) { showUpd("updErr", { e: e.message }); }
+    finally { $("#u_web").disabled = false; }
+  };
+}
+
 // ---------- boot ----------
 window.arkhasReady = (async () => {
   applyLang();
@@ -242,6 +322,7 @@ window.arkhasReady = (async () => {
   } catch (e) { $("#out").innerHTML = `<div class="empty">⚠️ config: ${esc(e.message)}</div>`; }
   const q = new URLSearchParams(location.search).get("q") || (N && N.pendingQuery ? N.pendingQuery() : "");
   if (q) run(q); else $("#q").focus();
+  checkUpd(false);   // quiet check (cached 6 h) -> red dot on ⚙️ when a new version exists
 })();
 </script>
 </body>

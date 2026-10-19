@@ -148,26 +148,120 @@
     return kept.length ? kept.join(" ") : String(q).trim();
   }
 
-  function relevanceOne(query, title) {
-    const q = tokens(query).filter((t) => !STOP.has(t));
-    if (!q.length) return 0;
-    const tt = tokens(title), tnorm = tt.join(" ");
-    const tset = new Set(tt.concat(tt.map(stripAr)));
-    let hits = 0;
-    for (const t of q) {
-      const eq = equivalents(t);
-      if ([...eq].some((e) => (e.includes(" ") && tnorm.includes(e)) || tset.has(e))) hits += 1;
-      else if (/^\d+$/.test(t) && tt.some((w) => w.includes(t))) hits += 0.8;
-      else if (t.length >= 4 && [...tset].some((w) => w.length >= 3 && (w.startsWith(stripAr(t)) || stripAr(t).startsWith(w)))) hits += 0.6;
+  // ---------------- specs: "14 persons", "256GB", "55 بوصة", "1.5 حصان" ----------------
+  // Each unit group = all the ways stores and people write it. Numbers next to these words must match exactly.
+  const UNITS = [
+    ["persons", ["place settings", "place setting", "settings", "setting", "persons", "person", "people", "place", "places", "ps",
+      "pcs persons", "فرد", "افراد", "شخص", "اشخاص", "طقم", "اطقم"]],
+    ["tb", ["tb", "terabyte", "تيرا", "تيرابايت"]],
+    ["gb", ["gb", "gigabyte", "جيجا", "جيجابايت", "جيجا بايت"]],
+    ["inch", ["inches", "inch", "\"", "''", "بوصه", "بوصة", "انش", "إنش"]],
+    ["hp", ["hp", "horsepower", "horse", "حصان"]],
+    ["kg", ["kg", "kilo", "kilogram", "كيلو", "كجم", "كغ"]],
+    ["liter", ["liters", "liter", "litres", "litre", "ltr", "lt", "l", "لتر"]],
+    ["ft", ["feet", "foot", "ft", "قدم"]],
+    ["mah", ["mah", "مللي امبير"]],
+    ["w", ["watts", "watt", "w", "وات"]],
+    ["hz", ["hz", "هرتز"]],
+    ["cm", ["cm", "سم"]],
+    ["mp", ["mp", "megapixel", "ميجابكسل", "ميجا"]],
+    ["burners", ["burners", "burner", "شعله", "شعلة", "عين"]],
+    ["doors", ["doors", "door", "باب", "ابواب"]],
+  ];
+  const AR_DIG = /[٠-٩]/g;
+  const UNIT_RE = (() => {
+    const alts = [];
+    for (const [u, words] of UNITS) for (const w of words) alts.push([w, u]);
+    alts.sort((a, b) => b[0].length - a[0].length);   // longest first: "place settings" before "place"
+    const escR = (x) => x.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const map = new Map(alts.map(([w, u]) => [w, u]));
+    const re = new RegExp(`(\\d+(?:[.,]\\d+)?)\\s*-?\\s*(${alts.map(([w]) => escR(w)).join("|")})(?![\\p{L}\\p{N}])`, "giu");
+    return { re, map };
+  })();
+
+  /** {persons:Set(["14"]), gb:Set(["256"])} found in a title or query. */
+  function specs(text) {
+    const t = String(text || "").replace(AR_DIG, (c) => DIGITS[c]).replace(/[٬]/g, "").replace(/٫/g, ".")
+      .replace(/[أإآ]/g, "ا").replace(/ة/g, "ه").toLowerCase();
+    const out = {};
+    for (const m of t.matchAll(UNIT_RE.re)) {
+      const unit = UNIT_RE.map.get(m[2].toLowerCase());
+      if (!unit) continue;
+      const num = String(parseFloat(m[1].replace(",", ".")));
+      (out[unit] = out[unit] || new Set()).add(num);
     }
-    return Math.round((hits / q.length) * 1000) / 1000;
+    // 1TB == 1024GB is written either way
+    if (out.tb) for (const n of out.tb) (out.gb = out.gb || new Set()).add(String(+n * 1024)), (out.gb).add(String(+n * 1000));
+    return out;
   }
 
-  /** Best match over the original query and its translations (an Arabic query vs English titles and vice versa). */
+  /** Remove "14 persons" style specs from text so the plain-word matching doesn't double count them. */
+  const stripSpecs = (text) => String(text || "").replace(AR_DIG, (c) => DIGITS[c]).replace(/[أإآ]/g, "ا").replace(/ة/g, "ه")
+    .replace(UNIT_RE.re, " ");
+
+  // Product-line words: "iphone 15" ≠ "iphone 15 pro max". Extra ones in a title = different model.
+  const TIER = new Set(["pro", "max", "plus", "ultra", "mini", "lite", "fe", "neo", "se", "edge",
+    "برو", "ماكس", "بلس", "الترا", "ميني", "لايت"]);
+
+  function wordScore(query, title) {
+    const q = tokens(stripSpecs(query)).filter((t) => !STOP.has(t));
+    if (!q.length) return { score: 1, miss: [] };
+    const tt = tokens(title), tnorm = tt.join(" ");
+    const tset = new Set(tt.concat(tt.map(stripAr)));
+    // "iPhone15" -> iphone + 15 (only simple word+number glue; model codes like DFN05R14 stay whole)
+    for (const w of tt) { const m = w.match(/^([a-z]{3,})(\d+)$/); if (m) { tset.add(m[1]); tset.add(m[2]); } }
+    let hits = 0; const miss = [];
+    for (const t of q) {
+      const eq = equivalents(t);
+      if ([...eq].some((e) => (e.includes(" ") && tnorm.includes(e)) || tset.has(e))) { hits += 1; continue; }
+      if (/^\d+$/.test(t)) {
+        // model numbers must be the whole word ("15" ≠ "a15", "dfn05r14"); "15gb"-style glue is handled by specs
+        miss.push(t); continue;
+      }
+      if (t.length >= 4 && [...tset].some((w) => w.length >= 3 && (w.startsWith(stripAr(t)) || stripAr(t).startsWith(w)))) hits += 0.6;
+      else miss.push(t);
+    }
+    return { score: hits / q.length, miss };
+  }
+
+  /**
+   * How well an offer title matches what was asked.
+   * tier 0 = exact (all words + all specs), 1 = close (spec not stated in title / extra model word), 2 = loose,
+   * -1 = wrong (a spec in the title contradicts the query, e.g. asked 14 persons, title says 10).
+   */
+  function matchInfo(query, title, variants) {
+    const qs = specs(query);
+    for (const v of variants || []) { const s2 = specs(v); for (const u in s2) if (!qs[u]) qs[u] = s2[u]; }
+    const ts = specs(title);
+    const tWords = new Set(tokens(title));
+    let specOk = 0, specUnknown = 0;
+    for (const u in qs) {
+      if (u === "tb") continue;
+      const want = [...qs[u]];
+      if (ts[u] && ts[u].size) {
+        if (want.some((n) => ts[u].has(n))) specOk++;
+        else return { tier: -1, score: 0, why: `${u}: ${[...ts[u]].join("/")} ≠ ${want.join("/")}` };
+      } else if (want.some((n) => tWords.has(n))) specOk++;   // "Beko 14 Dishwasher" — number without the unit word
+      else specUnknown++;
+    }
+    let best = { score: 0, miss: [] };
+    for (const v of [query, ...(variants || [])]) {
+      const w = wordScore(v, title);
+      if (w.score > best.score) best = w;
+    }
+    const qAll = new Set([query, ...(variants || [])].flatMap((v) => tokens(v)));
+    const extraTier = [...tWords].filter((w) => TIER.has(w) && !qAll.has(w) && ![...equivalents(w)].some((e) => qAll.has(e)));
+    const words = Math.round(best.score * 1000) / 1000;
+    let tier = 2;
+    if (words >= 0.999 && !specUnknown && !extraTier.length) tier = 0;
+    else if (words >= 0.8) tier = 1;
+    return { tier, score: words, specOk, specUnknown, extraTier, miss: best.miss };
+  }
+
+  /** 0..1 word match (kept for callers/tests); specs that contradict give 0. */
   function relevance(query, title, variants) {
-    let best = relevanceOne(query, title);
-    for (const v of variants || []) if (v !== query) best = Math.max(best, relevanceOne(v, title));
-    return best;
+    const m = matchInfo(query, title, variants);
+    return m.tier === -1 ? 0 : m.score;
   }
 
   function isAccessory(query, title) {
@@ -175,29 +269,42 @@
     return tokens(title).slice(0, 6).some((t) => ACCESSORY.has(t));
   }
 
+  /**
+   * Accuracy first, then price: exact matches (cheapest first) → close matches → loose.
+   * Offers whose specs contradict the query are dropped.
+   */
   function rank(query, offers, minRelevance = 0.6, variants) {
     const seen = new Map();
     for (const o of offers) {
-      o.relevance = relevance(query, o.title, variants);
-      o.flags = o.flags || [];
       const key = o.source.toLowerCase() + "|" + o.url.split("?")[0].replace(/\/$/, "");
       if (!seen.has(key) || o.price < seen.get(key).price) seen.set(key, o);
     }
     const pool = [...seen.values()];
-    const kept = pool.filter((o) => o.relevance >= minRelevance);
+    const kept = [];
+    for (const o of pool) {
+      const m = matchInfo(query, o.title, variants);
+      o.relevance = m.tier === -1 ? 0 : m.score;
+      o.match = m.tier;
+      o.flags = o.flags || [];
+      if (m.tier === -1 || m.score < minRelevance) continue;
+      if (m.extraTier && m.extraTier.length) o.flags.push("other-model");
+      kept.push(o);
+    }
     for (const o of kept) if (isAccessory(query, o.title)) o.flags.push("possible-accessory");
-    const core = kept.filter((o) => !o.flags.length).map((o) => o.price).sort((a, b) => a - b);
+    const core = kept.filter((o) => o.match === 0 && !o.flags.length).map((o) => o.price).sort((a, b) => a - b);
     if (core.length >= 4) {
       const mid = core.length >> 1;
       const med = core.length % 2 ? core[mid] : (core[mid - 1] + core[mid]) / 2;
       for (const o of kept) if (o.price < med * 0.3 && !o.flags.includes("suspiciously-cheap")) o.flags.push("suspiciously-cheap");
     }
-    kept.sort((a, b) => (a.flags.length > 0) - (b.flags.length > 0) || a.price - b.price);
+    const bad = (o) => o.flags.some((f) => f !== "other-model");
+    kept.sort((a, b) => bad(a) - bad(b) || a.match - b.match || a.price - b.price);
     return { kept, hidden: pool.length - kept.length };
   }
 
+  /** Top 3: exact matches first; only if fewer than 3 exist, closest others fill the gap (marked in the UI). */
   function top(offers, n = 3) {
-    const clean = offers.filter((o) => !o.flags.length);
+    const clean = offers.filter((o) => !o.flags.some((f) => f !== "other-model"));
     return (clean.length ? clean : offers).slice(0, n);
   }
 
@@ -493,7 +600,7 @@
   }
 
   const API = { normalize, tokens, isArabic, setSynonyms, equivalents, translateQuery, queryVariants, queryVariantsAsync, cleanQuery, parsePrice, ADAPTERS,
-    relevance, rank, top, parse, parseSerp, buildUrl, serpUrl, externalLinks, search };
+    relevance, matchInfo, specs, rank, top, parse, parseSerp, buildUrl, serpUrl, externalLinks, search };
   if (typeof module !== "undefined" && module.exports) module.exports = API;
   else root.Arkhas = API;
 })(typeof globalThis !== "undefined" ? globalThis : this);
