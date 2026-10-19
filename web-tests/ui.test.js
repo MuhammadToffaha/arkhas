@@ -58,16 +58,20 @@ test("settings sheet saves prefs; language toggle", async () => {
   doc.querySelector("#s_save").click();
   assert.equal(prefs.serp, "abc");
   assert.deepEqual(JSON.parse(prefs.disabled), ["Amazon.eg"]);
-  doc.querySelector("#lang").click();
+  doc.querySelector("#gear").click();
+  doc.querySelector("#lang_en").click();   // language now lives in settings
   assert.equal(doc.documentElement.dir, "ltr");
   assert.equal(prefs.lang, "en");
+  assert.ok(doc.querySelector("#lang_en").classList.contains("on"));
 });
 
 test("bottom nav holds the buttons; slow stores start switched off", async () => {
   const { win, doc, prefs } = boot();
   await win.arkhasReady;
   const nav = doc.querySelector("nav.nav");
-  assert.ok(nav && nav.querySelector("#gear") && nav.querySelector("#lang") && nav.querySelector("#nav_search"));
+  assert.deepEqual([...nav.querySelectorAll("button")].map((b) => b.id), ["nav_search", "nav_deals", "gear"], "bottom bar = search, deals, settings");
+  assert.equal(doc.querySelector("#nav_status"), null);
+  assert.ok(doc.querySelector(".sheet #langseg"), "language switch is inside settings");
   assert.equal(doc.querySelector("header #gear"), null, "nothing clickable left in the top area");
   doc.querySelector("#gear").click();
   const box = (n) => doc.querySelector(`#storelist input[data-n="${n}"]`);
@@ -117,4 +121,27 @@ test("settings → updates: red dot, download progress, install; hidden on old a
   assert.ok(calls.find((c) => c[0] === "install")[1].endsWith("arkhas-1.0.6.apk"));
   doc.querySelector("#u_web").click();
   await until(() => /محدّثة|up to date/.test(doc.querySelector("#u_msg").textContent));
+});
+
+test("search box: editable, cursor goes to the end (no select-all), ✕ clears; store status shown in settings", async () => {
+  const { win, doc } = boot({ disabled: JSON.stringify(["Noon", "B.TECH", "Carrefour Egypt"]) });
+  await win.arkhasReady;
+  const q = doc.querySelector("#q");
+  assert.equal(q.readOnly, false);
+  q.value = "ايفون 15";
+  doc.querySelector("#f").dispatchEvent(new win.Event("submit", { cancelable: true }));
+  await until(() => doc.querySelector("#bar").hidden && doc.querySelectorAll(".pc").length > 0, 5000);
+  assert.equal(doc.querySelector("#qx").hidden, false, "✕ visible when there is text");
+  doc.querySelector("#nav_search").click();
+  assert.equal(doc.activeElement, q);
+  assert.equal(q.selectionStart, q.value.length, "cursor at the end");
+  assert.equal(q.selectionEnd, q.value.length, "nothing selected");
+  q.setSelectionRange(3, 3); q.setRangeText("X"); q.dispatchEvent(new win.Event("input"));
+  assert.equal(q.value, "ايفXون 15", "user can edit in the middle");
+  doc.querySelector("#qx").click();
+  assert.equal(q.value, "");
+  assert.equal(doc.querySelector("#qx").hidden, true);
+  doc.querySelector("#gear").click();
+  const jumia = doc.querySelector('#storelist input[data-n="Jumia"]').parentElement;
+  assert.match(jumia.textContent, /✅ 3/);
 });

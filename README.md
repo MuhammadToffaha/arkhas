@@ -42,7 +42,7 @@ phone ── web/engine.js ──► Amazon.eg · Noon · Jumia · B.TECH · 2B 
 
 **Arabic**: ال/بال/وال prefixes, 230+ Arabic↔English words and brands in `web/synonyms.json`, Google Translate for words not in the list (brands, slang), words like "ارخص / سعر / بكام" are ignored.
 
-To check stores: after a search tap **🏪 Stores** in the bottom bar → count, time, error per store. Fix the card selectors with Chrome DevTools on the store's search page.
+To check stores: after a search open ⚙️ — each store shows its result count, time or error from the last search. Fix the card selectors with Chrome DevTools on the store's search page.
 
 If `web/index.html` ever needs new native features, bump `arkhas-bridge` in it; older apps then keep their current copy until they update.
 
