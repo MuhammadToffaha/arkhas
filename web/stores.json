@@ -67,19 +67,29 @@
       "render": true,
       "urls": [
         {
-          "url": "https://www.noon.com/egypt-en/megadeals-eg/",
+          "url": "https://www.noon.com/egypt-en/fashion/eg-oct26-hp-mega/?f%5Bdeal_tag%5D%5B%5D=egmega&sort%5Bby%5D=popularity&sort%5Bdir%5D=desc",
           "tag": "mega"
         },
         {
-          "url": "https://www.noon.com/egypt-ar/megadeals-eg/",
+          "url": "https://www.noon.com/egypt-en/electronics-and-mobiles/?f%5Bdeal_tag%5D%5B%5D=egmega&sort%5Bby%5D=popularity&sort%5Bdir%5D=desc",
+          "tag": "mega"
+        },
+        {
+          "url": "https://www.noon.com/egypt-en/home-and-kitchen/?f%5Bdeal_tag%5D%5B%5D=egmega&sort%5Bby%5D=popularity&sort%5Bdir%5D=desc",
+          "tag": "mega"
+        },
+        {
+          "url": "https://www.noon.com/egypt-en/fashion/?f%5Bdeal_tag%5D%5B%5D=egmega&sort%5Bby%5D=popularity&sort%5Bdir%5D=desc",
+          "tag": "mega"
+        },
+        {
+          "url": "https://www.noon.com/egypt-en/beauty/?f%5Bdeal_tag%5D%5B%5D=egmega&sort%5Bby%5D=popularity&sort%5Bdir%5D=desc",
           "tag": "mega"
         },
         {
           "url": "https://www.noon.com/egypt-en/daily-deals-eg/",
           "tag": "daily"
-        },
-        "https://www.noon.com/egypt-en/deals/",
-        "https://www.noon.com/egypt-en/search/?q=sale&sort[by]=discount_percent&sort[dir]=desc"
+        }
       ],
       "wait": "a[href*=\"/p/\"]"
     },

@@ -50,13 +50,14 @@ test("noon: hidden browser waits for product links", () => {
 
 test("noon mega deals: own page, tagged, kept even without old price, preferred over duplicates", async () => {
   const urls = NOON.deals.urls.map((u) => (typeof u === "string" ? u : u.url));
-  assert.ok(urls.includes("https://www.noon.com/egypt-en/megadeals-eg/"));
+  assert.ok(urls[0].startsWith("https://www.noon.com/egypt-en/fashion/eg-oct26-hp-mega/"), "user's Mega Deals link first");
+  assert.ok(NOON.deals.urls.filter((u) => u.tag === "mega").every((u) => u.url.includes("f%5Bdeal_tag%5D%5B%5D=egmega")), "all mega pages use the egmega deal tag");
   const card = (href, name, price, old) => `<span class="productContainer"><a href="${href}"><div data-qa="product-name">${name}</div>
     <strong class="amount">${price}</strong>${old ? `<span class="oldPrice">${old}</span>` : ""}</a></span>`;
   const fetcher = (url) => {
-    if (url.includes("megadeals-eg") && url.includes("egypt-en")) return Promise.resolve(
+    if (url.includes("eg-oct26-hp-mega")) return Promise.resolve(
       card("/egypt-en/airpods/N1/p/", "AirPods Pro 2", "7,999", "13,999") + card("/egypt-en/kettle/N2/p/", "Tefal Kettle", "999", null));
-    if (url.includes("/deals/")) return Promise.resolve(card("/egypt-en/airpods/N1/p/", "AirPods Pro 2", "7,999", "13,999"));
+    if (url.includes("daily-deals-eg")) return Promise.resolve(card("/egypt-en/airpods/N1/p/", "AirPods Pro 2", "7,999", "13,999"));
     return Promise.reject(new Error("HTTP 404"));
   };
   const r = await E.deals({ stores: [NOON], fetcher, DOMParser, timeout: 200, renderTimeout: 200 });
