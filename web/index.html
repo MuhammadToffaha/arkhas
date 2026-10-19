@@ -70,6 +70,17 @@ input:focus{outline:none;border-color:var(--accent)}
 .dd-row:last-child{border-bottom:0}
 .dd-row input{width:20px;height:20px;accent-color:var(--accent)}
 .dd-row .c{margin-inline-start:auto;font-size:12px;color:var(--muted)}
+.pc,.row,.dc{position:relative}
+.fav{position:absolute;z-index:2;top:6px;inset-inline-end:6px;width:34px;height:34px;border-radius:50%;border:0;background:var(--card);box-shadow:0 1px 4px #0002;font-size:17px;line-height:34px;padding:0;color:#c9c2b6}
+.fav.on{color:#e0412f}
+.row .fav{top:50%;transform:translateY(-50%);width:30px;height:30px;line-height:30px;font-size:15px}
+.pc .fav{top:-10px;inset-inline-end:-6px}
+.row{padding-inline-end:44px}
+.cnt{position:absolute;top:-4px;inset-inline-end:-10px;min-width:16px;height:16px;border-radius:8px;background:#e0412f;color:#fff;font-size:10px;font-style:normal;line-height:16px;padding:0 4px;font-weight:700}
+.fr{display:flex;gap:10px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px;margin-top:8px;color:inherit;text-decoration:none;position:relative}
+.fr img{width:64px;height:64px;object-fit:contain;border-radius:10px;background:#fff;flex:none}
+.fr .t{flex:1;min-width:0}
+.fr .fav{position:static;transform:none;box-shadow:none;background:none;color:var(--muted);font-size:18px;width:36px;height:36px;flex:none}
 .dg{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
 .dc{position:relative;display:flex;flex-direction:column;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px;color:inherit;text-decoration:none}
 .dc img{width:100%;height:120px;object-fit:contain;border-radius:10px;background:#fff}
@@ -125,6 +136,12 @@ table{border-collapse:collapse;width:100%;font-size:12.5px}td{padding:4px;border
   <div id="out"></div>
   </section>
 
+  <section id="favView" hidden>
+    <div class="dh"><h2 class="dt">❤️ <span id="f_title"></span></h2></div>
+    <div class="muted" id="f_sub"></div>
+    <div id="f_out"></div>
+  </section>
+
   <section id="dealsView" hidden>
     <div class="dh">
       <h2 class="dt"><span class="bolt">⚡</span> <span id="d_title"></span></h2>
@@ -148,6 +165,7 @@ table{border-collapse:collapse;width:100%;font-size:12.5px}td{padding:4px;border
 <nav class="nav">
   <button id="nav_search" class="on"><b>🔍</b><span id="l_search"></span></button>
   <button id="nav_deals" class="flash"><b>⚡</b><span id="l_deals"></span></button>
+  <button id="nav_fav"><b>❤️<i class="cnt" id="favcnt" hidden></i></b><span id="l_fav"></span></button>
   <button id="gear" aria-label="settings"><b>⚙️<i class="dot" id="dot" hidden></i></b><span id="l_gear"></span></button>
 </nav>
 
@@ -198,7 +216,7 @@ const readConfig = async (name) => (N ? N.readConfig(name) : (await fetch(name))
 const T = {
   ar: { tag: "أرخص سعر في مصر", go: "ابحث", ph: "اكتب المنتج… مثال: ايفون 15 برو", hint: "نبحث في المتاجر المصرية بالعربي والإنجليزي ونجيب لك أرخص 3",
     top: "🏆 أرخص 3 أسعار", all: "كل العروض ({n})", fb: "📘 فيسبوك والمستعمل", searched: "بحثنا عن:", none: "مفيش نتائج مطابقة لسه…",
-    noneDone: "مفيش نتائج مطابقة. جرّب اسم أدق.", src: "حالة المتاجر", langLbl: "🌐 اللغة", storesHint: "آخر بحث: عدد النتائج من كل متجر", navSearch: "بحث", navStatus: "المتاجر", navGear: "الإعدادات", acc: "إكسسوار؟", cheap: "سعر مريب", rAll: "كل الخصومات", r30: "30%+", r5070: "🔥 50–70%", r70: "70%+", rNone: "مفيش عروض في النطاق ده — جرّب نطاق تاني", refresh: "تحديث", ddAll: "كل المتاجر", ddSome: "{n} متاجر مختارة", ddOne: "{s}", selAll: "تحديد الكل", selNone: "إلغاء الكل", navDeals: "عروض", dealsTitle: "عروض فلاش", dealsSub: "أكبر الخصومات من أشهر {n} مواقع في مصر — اتحدّثت {t}", dealsLoading: "جاري جلب العروض من {done}/{all} موقع…", dealsNone: "مفيش عروض دلوقتي — اضغط ↻", sortPct: "أكبر خصم", sortPrice: "الأرخص", sortSave: "أكبر توفير", allStores: "الكل", justNow: "الآن", minAgo: "من {m} دقيقة", banner: "🎉 نسخة جديدة {v} — اضغط للتحديث", openRel: "⬇️ تنزيل {v} من GitHub", relNote: "هتتفتح صفحة التنزيل — نزّل الملف وافتحه للتثبيت. بعد كده التحديث هيكون من جوه التطبيق", upd: "🔄 التحديثات", cur: "نسختك {v}", check: "تحقق من التحديث", checking: "جاري التحقق…", latest: "عندك أحدث نسخة ✓",
+    noneDone: "مفيش نتائج مطابقة. جرّب اسم أدق.", src: "حالة المتاجر", langLbl: "🌐 اللغة", storesHint: "آخر بحث: عدد النتائج من كل متجر", navSearch: "بحث", navStatus: "المتاجر", navGear: "الإعدادات", acc: "إكسسوار؟", cheap: "سعر مريب", rAll: "كل الخصومات", r30: "30%+", r5070: "🔥 50–70%", r70: "70%+", rNone: "مفيش عروض في النطاق ده — جرّب نطاق تاني", navFav: "المفضلة", favTitle: "المفضلة", favSub: "{n} منتج محفوظ — السعر وقت الحفظ", favEmpty: "اضغط ♥ على أي منتج عشان يتحفظ هنا", savedOn: "اتحفظ {d}", favAdded: "اتضاف للمفضلة ❤️", favRemoved: "اتشال من المفضلة", refresh: "تحديث", ddAll: "كل المتاجر", ddSome: "{n} متاجر مختارة", ddOne: "{s}", selAll: "تحديد الكل", selNone: "إلغاء الكل", navDeals: "عروض", dealsTitle: "عروض فلاش", dealsSub: "أكبر الخصومات من أشهر {n} مواقع في مصر — اتحدّثت {t}", dealsLoading: "جاري جلب العروض من {done}/{all} موقع…", dealsNone: "مفيش عروض دلوقتي — اضغط ↻", sortPct: "أكبر خصم", sortPrice: "الأرخص", sortSave: "أكبر توفير", allStores: "الكل", justNow: "الآن", minAgo: "من {m} دقيقة", banner: "🎉 نسخة جديدة {v} — اضغط للتحديث", openRel: "⬇️ تنزيل {v} من GitHub", relNote: "هتتفتح صفحة التنزيل — نزّل الملف وافتحه للتثبيت. بعد كده التحديث هيكون من جوه التطبيق", upd: "🔄 التحديثات", cur: "نسختك {v}", check: "تحقق من التحديث", checking: "جاري التحقق…", latest: "عندك أحدث نسخة ✓",
     newVer: "نسخة جديدة {v} متاحة ({mb} ميجا)", install: "⬇️ تنزيل وتثبيت {v}", downloading: "جاري التنزيل… {p}%", installing: "افتح شاشة التثبيت واضغط تثبيت",
     perm: "اسمح لـ أرخص بتثبيت التحديثات (فتحنا لك الإعداد) ثم ارجع واضغط تثبيت تاني", webBtn: "تحديث قائمة المتاجر", webSame: "قائمة المتاجر محدّثة ✓",
     webChanged: "تم تحديث المتاجر — جاري إعادة التحميل…", updErr: "تعذّر: {e}", exact: "✓ مطابق", similar: "≈ مشابه", other: "موديل مختلف", fewExact: "لقينا {n} بس مطابقين تمامًا — الباقي مشابه", egp: "ج.م", save: "وفّر {n}",
@@ -206,7 +224,7 @@ const T = {
     city: "مدينة فيسبوك ماركت بليس", stores: "المتاجر", saveBtn: "حفظ", ver: "نسخة", hidden: "تم إخفاء {n} نتيجة غير مطابقة" },
   en: { tag: "Best price in Egypt", go: "Search", ph: "Product… e.g. iphone 15 pro", hint: "Searching Egyptian stores in Arabic & English — top 3 cheapest",
     top: "🏆 Top 3 prices", all: "All offers ({n})", fb: "📘 Facebook & used", searched: "Searched:", none: "No matches yet…",
-    noneDone: "No matching results. Try a more specific name.", src: "Store status", langLbl: "🌐 Language", storesHint: "Last search: results per store", navSearch: "Search", navStatus: "Stores", navGear: "Settings", acc: "accessory?", cheap: "suspicious price", rAll: "All discounts", r30: "30%+", r5070: "🔥 50–70%", r70: "70%+", rNone: "No deals in this range — try another one", refresh: "Refresh", ddAll: "All stores", ddSome: "{n} stores selected", ddOne: "{s}", selAll: "Select all", selNone: "Clear all", navDeals: "Deals", dealsTitle: "Flash deals", dealsSub: "Biggest discounts from {n} top Egyptian sites — updated {t}", dealsLoading: "Fetching deals from {done}/{all} sites…", dealsNone: "No deals right now — tap ↻", sortPct: "Biggest % off", sortPrice: "Cheapest", sortSave: "Most saved", allStores: "All", justNow: "just now", minAgo: "{m} min ago", banner: "🎉 New version {v} — tap to update", openRel: "⬇️ Download {v} from GitHub", relNote: "The download page opens — download the file and open it to install. After this, updates happen inside the app", upd: "🔄 Updates", cur: "You have {v}", check: "Check for update", checking: "Checking…", latest: "You have the latest version ✓",
+    noneDone: "No matching results. Try a more specific name.", src: "Store status", langLbl: "🌐 Language", storesHint: "Last search: results per store", navSearch: "Search", navStatus: "Stores", navGear: "Settings", acc: "accessory?", cheap: "suspicious price", rAll: "All discounts", r30: "30%+", r5070: "🔥 50–70%", r70: "70%+", rNone: "No deals in this range — try another one", navFav: "Favourites", favTitle: "Favourites", favSub: "{n} saved items — price when saved", favEmpty: "Tap ♥ on any product to save it here", savedOn: "saved {d}", favAdded: "Added to favourites ❤️", favRemoved: "Removed from favourites", refresh: "Refresh", ddAll: "All stores", ddSome: "{n} stores selected", ddOne: "{s}", selAll: "Select all", selNone: "Clear all", navDeals: "Deals", dealsTitle: "Flash deals", dealsSub: "Biggest discounts from {n} top Egyptian sites — updated {t}", dealsLoading: "Fetching deals from {done}/{all} sites…", dealsNone: "No deals right now — tap ↻", sortPct: "Biggest % off", sortPrice: "Cheapest", sortSave: "Most saved", allStores: "All", justNow: "just now", minAgo: "{m} min ago", banner: "🎉 New version {v} — tap to update", openRel: "⬇️ Download {v} from GitHub", relNote: "The download page opens — download the file and open it to install. After this, updates happen inside the app", upd: "🔄 Updates", cur: "You have {v}", check: "Check for update", checking: "Checking…", latest: "You have the latest version ✓",
     newVer: "New version {v} available ({mb} MB)", install: "⬇️ Download & install {v}", downloading: "Downloading… {p}%", installing: "Tap Install on the Android screen",
     perm: "Allow Arkhas to install updates (settings opened), then come back and tap install again", webBtn: "Refresh store list", webSame: "Store list is up to date ✓",
     webChanged: "Stores updated — reloading…", updErr: "Failed: {e}", exact: "✓ exact", similar: "≈ similar", other: "other model", fewExact: "Only {n} exact match(es) — the rest are similar", egp: "EGP", save: "save {n}",
@@ -226,6 +244,8 @@ function applyLang() {
   $("#tag").textContent = t.tag; $("#go").textContent = t.go; $("#q").placeholder = t.ph; $("#hint").textContent = t.hint;
   $("#s_lang").textContent = t.langLbl;
   for (const b of document.querySelectorAll("#langseg button")) b.classList.toggle("on", b.dataset.l === L);
+  $("#l_fav").textContent = t.navFav; $("#f_title").textContent = t.favTitle;
+  if (typeof renderFavs === "function" && !$("#favView").hidden) renderFavs();
   $("#l_deals").textContent = t.navDeals; $("#d_title").textContent = t.dealsTitle; $("#d_ref_l").textContent = t.refresh;
   if (typeof renderDeals === "function" && dealsData) renderDeals();
   $("#l_search").textContent = t.navSearch; $("#l_gear").textContent = t.navGear;
@@ -252,7 +272,7 @@ function render(r, done) {
     h += `<div class="podium">`;
     r.top3.forEach((o, i) => {
       const off = o.old_price && o.old_price > o.price ? `<div class="old">${money(o.old_price)}</div><div class="save">${fmt(t.save, { n: money(o.old_price - o.price) })}</div>` : "";
-      h += `<a class="pc r${i + 1}" href="${esc(o.url)}"><div class="medal">${["🥇", "🥈", "🥉"][i]}</div>${img(o)}
+      h += `<a class="pc r${i + 1}" href="${esc(o.url)}">${heart(o)}<div class="medal">${["🥇", "🥈", "🥉"][i]}</div>${img(o)}
         <div class="t"><div class="ttl">${esc(o.title)}</div><div class="src">${badge(o)} ${esc(o.source)}${flags(o)}</div></div>
         <div style="text-align:end"><div class="p">${money(o.price)}</div>${off}</div></a>`;
     });
@@ -262,7 +282,7 @@ function render(r, done) {
   const rest = r.offers.filter((o) => !r.top3.includes(o));
   if (rest.length) {
     h += `<details><summary>${fmt(t.all, { n: r.offers.length })}</summary>`;
-    for (const o of rest) h += `<a class="row" href="${esc(o.url)}">${img(o)}<div class="t"><div class="ttl">${esc(o.title)}</div>
+    for (const o of rest) h += `<a class="row" href="${esc(o.url)}">${heart(o)}${img(o)}<div class="t"><div class="ttl">${esc(o.title)}</div>
       <div class="src">${badge(o)} ${esc(o.source)}${flags(o)}</div></div><div class="p">${money(o.price)}</div></a>`;
     h += `</details>`;
   }
@@ -343,6 +363,50 @@ $("#s_save").onclick = () => {
   $("#sheet").classList.remove("on");
 };
 
+// ---------- ❤️ favourites (saved on the phone) ----------
+const OFFERS = new Map();   // url -> offer, for the cards currently on screen
+let FAVS = null;
+const favs = () => { if (!FAVS) { try { FAVS = JSON.parse(pref("favs", "[]")) || []; } catch (_) { FAVS = []; } } return FAVS; };
+const isFav = (url) => favs().some((f) => f.url === url);
+function saveFavs() { setPref("favs", JSON.stringify(favs())); syncFavCount(); }
+function syncFavCount() { const n = favs().length; $("#favcnt").hidden = !n; $("#favcnt").textContent = n; }
+function heart(o) {
+  OFFERS.set(o.url, o);
+  const on = isFav(o.url);
+  return `<button type="button" class="fav${on ? " on" : ""}" data-u="${esc(o.url)}" aria-label="favourite">${on ? "♥" : "♡"}</button>`;
+}
+function toggleFav(url) {
+  const list = favs(), i = list.findIndex((f) => f.url === url);
+  if (i >= 0) list.splice(i, 1);
+  else {
+    const o = OFFERS.get(url); if (!o) return;
+    list.unshift({ title: o.title, price: o.price, old_price: o.old_price || null, url: o.url, image: o.image || null,
+      source: o.source, pct: o.pct || null, savedAt: Date.now() });
+  }
+  saveFavs();
+  for (const b of document.querySelectorAll(".fav")) if (b.dataset.u === url) { const on = i < 0; b.classList.toggle("on", on); b.textContent = on ? "♥" : "♡"; }
+  if (!$("#favView").hidden) renderFavs();
+}
+// hearts sit inside the product links: catch the tap before the link opens the store
+document.addEventListener("click", (e) => {
+  const b = e.target.closest && e.target.closest(".fav");
+  if (!b) return;
+  e.preventDefault(); e.stopPropagation();
+  toggleFav(b.dataset.u);
+}, true);
+
+function renderFavs() {
+  const t = T[L], list = favs();
+  $("#f_sub").textContent = list.length ? fmt(t.favSub, { n: list.length }) : "";
+  if (!list.length) { $("#f_out").innerHTML = `<div class="empty">♡<br>${t.favEmpty}</div>`; return; }
+  const day = (ms) => new Date(ms).toLocaleDateString(L === "ar" ? "ar-EG" : "en-GB", { day: "numeric", month: "short" });
+  $("#f_out").innerHTML = list.map((o) => { OFFERS.set(o.url, o); return `<a class="fr" href="${esc(o.url)}">${img(o)}
+    <div class="t"><div class="ttl">${esc(o.title)}</div><div class="src">${esc(o.source)} · ${fmt(t.savedOn, { d: day(o.savedAt) })}</div></div>
+    <div style="text-align:end"><div class="p">${money(o.price)}</div>${o.old_price && o.old_price > o.price ? `<div class="old">${money(o.old_price)}</div>` : ""}</div>
+    <button type="button" class="fav on rm" data-u="${esc(o.url)}" aria-label="remove">✕</button></a>`; }).join("");
+}
+$("#nav_fav").onclick = () => { showView("fav"); renderFavs(); };
+
 // ---------- ⚡ flash deals ----------
 let dealsData = null, dealsBusy = false, dealSort = "pct";
 let dealHide = null;   // stores unticked in the dropdown (remembered)
@@ -355,8 +419,10 @@ const DEALS_TTL = 60 * 60 * 1000;   // reuse fetched deals for 1 hour
 function showView(v) {
   $("#searchView").hidden = v !== "search";
   $("#dealsView").hidden = v !== "deals";
+  $("#favView").hidden = v !== "fav";
   $("#nav_search").classList.toggle("on", v === "search");
   $("#nav_deals").classList.toggle("on", v === "deals");
+  $("#nav_fav").classList.toggle("on", v === "fav");
   window.scrollTo({ top: 0 });
 }
 
@@ -389,7 +455,7 @@ function renderDeals(done = true) {
   const by = { pct: (a, b) => b.pct - a.pct, save: (a, b) => (b.old_price - b.price) - (a.old_price - a.price), price: (a, b) => a.price - b.price };
   list = list.slice().sort(by[dealSort]).slice(0, 120);
   if (!list.length) { $("#d_out").innerHTML = done ? `<div class="empty">${d.deals.length ? t.rNone : t.dealsNone}</div>` : ""; return; }
-  $("#d_out").innerHTML = `<div class="dg">${list.map((o) => `<a class="dc" href="${esc(o.url)}"><span class="off">-${o.pct}%</span>${img(o)}
+  $("#d_out").innerHTML = `<div class="dg">${list.map((o) => `<a class="dc" href="${esc(o.url)}"><span class="off">-${o.pct}%</span>${heart(o)}${img(o)}
     <div class="ttl">${esc(o.title)}</div><div class="p">${money(o.price)}</div><div class="old">${money(o.old_price)}</div>
     <div class="src">${esc(o.source)}</div></a>`).join("")}</div>`;
 }
@@ -502,6 +568,7 @@ window.arkhasReady = (async () => {
   } catch (e) { $("#out").innerHTML = `<div class="empty">⚠️ config: ${esc(e.message)}</div>`; }
   const q = new URLSearchParams(location.search).get("q") || (N && N.pendingQuery ? N.pendingQuery() : "");
   if (q) run(q); else $("#q").focus();
+  syncFavCount();
   checkUpd(false);   // quiet check (cached 6 h) -> red dot on ⚙️ when a new version exists
 })();
 </script>

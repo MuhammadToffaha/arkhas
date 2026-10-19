@@ -69,7 +69,7 @@ test("bottom nav holds the buttons; slow stores start switched off", async () =>
   const { win, doc, prefs } = boot();
   await win.arkhasReady;
   const nav = doc.querySelector("nav.nav");
-  assert.deepEqual([...nav.querySelectorAll("button")].map((b) => b.id), ["nav_search", "nav_deals", "gear"], "bottom bar = search, deals, settings");
+  assert.deepEqual([...nav.querySelectorAll("button")].map((b) => b.id), ["nav_search", "nav_deals", "nav_fav", "gear"], "bottom bar = search, deals, favourites, settings");
   assert.equal(doc.querySelector("#nav_status"), null);
   assert.ok(doc.querySelector(".sheet #langseg"), "language switch is inside settings");
   assert.equal(doc.querySelector("header #gear"), null, "nothing clickable left in the top area");
@@ -144,4 +144,38 @@ test("search box: editable, cursor goes to the end (no select-all), ✕ clears; 
   doc.querySelector("#gear").click();
   const jumia = doc.querySelector('#storelist input[data-n="Jumia"]').parentElement;
   assert.match(jumia.textContent, /✅ 3/);
+});
+
+test("favourites: ♡ on cards saves without opening the store, ❤️ tab lists and removes, survives restart", async () => {
+  const prefs = { disabled: JSON.stringify(["Noon", "B.TECH", "Carrefour Egypt"]) };
+  const { win, doc } = boot(prefs);
+  await win.arkhasReady;
+  doc.querySelector("#q").value = "ايفون 15";
+  doc.querySelector("#f").dispatchEvent(new win.Event("submit", { cancelable: true }));
+  await until(() => doc.querySelector("#bar").hidden && doc.querySelectorAll(".pc .fav").length === 3, 5000);
+  const heartBtn = doc.querySelector(".pc .fav");
+  const url = heartBtn.dataset.u;
+  let navigated = false;
+  heartBtn.closest("a").addEventListener("click", (e) => { if (!e.defaultPrevented) navigated = true; });
+  heartBtn.click();
+  assert.equal(navigated, false, "tapping the heart must not open the store");
+  assert.equal(doc.querySelector(".pc .fav").textContent, "♥");
+  assert.equal(doc.querySelector("#favcnt").textContent, "1");
+  const saved = JSON.parse(prefs.favs);
+  assert.equal(saved[0].url, url);
+  assert.ok(saved[0].price > 0 && saved[0].source);
+
+  doc.querySelector("#nav_fav").click();
+  assert.equal(doc.querySelector("#favView").hidden, false);
+  assert.equal(doc.querySelectorAll("#f_out .fr").length, 1);
+
+  // restart: favourites come back from storage
+  const again = boot(prefs);
+  await again.win.arkhasReady;
+  assert.equal(again.doc.querySelector("#favcnt").textContent, "1");
+  again.doc.querySelector("#nav_fav").click();
+  again.doc.querySelector("#f_out .fav").click();   // ✕ remove
+  assert.equal(again.doc.querySelectorAll("#f_out .fr").length, 0);
+  assert.equal(again.doc.querySelector("#favcnt").hidden, true);
+  assert.deepEqual(JSON.parse(prefs.favs), []);
 });
