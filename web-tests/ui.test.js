@@ -17,7 +17,9 @@ function boot(prefs = {}) {
       win.Native = {
         fetch(id, url, opts) {
           fetched.push([url, JSON.parse(opts)]);
-          const body = url.includes("jumia.com.eg") ? read(new URL("jumia.html", FX))
+          const body = url.startsWith("https://api.github.com/") ? JSON.stringify({ tag_name: "v6", assets: [{ name: "arkhas-1.0.6.apk", size: 2621440,
+              browser_download_url: "https://github.com/MuhammadToffaha/arkhas/releases/download/v6/arkhas-1.0.6.apk" }] })
+            : url.includes("jumia.com.eg") ? read(new URL("jumia.html", FX))
             : url.includes("amazon.eg") ? read(new URL("amazon.html", FX))
             : url.includes("serpapi.com") ? read(new URL("serpapi.json", FX)) : null;
           setTimeout(() => win.__native(id, body !== null, body ?? "HTTP 503"), 5);
@@ -78,10 +80,15 @@ test("bottom nav holds the buttons; slow stores start switched off", async () =>
 });
 
 test("settings → updates: red dot, download progress, install; hidden on old apps", async () => {
-  // old app (no update bridge): section stays hidden
+  // old app 1.0.5 (no update bridge): checks GitHub through fetch, banner + download link
   const old = boot();
   await old.win.arkhasReady;
-  assert.equal(old.doc.querySelector("#upd").hidden, true);
+  await until(() => !old.doc.querySelector("#newver").hidden);
+  assert.match(old.doc.querySelector("#newver").textContent, /1\.0\.6/);
+  old.doc.querySelector("#newver").click();
+  assert.equal(old.doc.querySelector("#upd").hidden, false);
+  assert.equal(old.doc.querySelector("#u_web").hidden, true);
+  assert.match(old.doc.querySelector("#u_install").textContent, /GitHub/);
 
   // new app: fake native update methods
   const calls = [];

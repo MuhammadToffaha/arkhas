@@ -165,3 +165,15 @@ test("accuracy: TV inches and AC horsepower", () => {
   assert.equal(E.matchInfo("تكييف شارب 1.5 حصان", "Sharp Split AC 2.25 HP Cool", ["air conditioner sharp 1.5 hp"]).tier, -1);
   assert.equal(E.matchInfo("تكييف شارب 1.5 حصان", "Sharp Split Air Conditioner 1.5 HP Cool Only", ["air conditioner sharp 1.5 hp"]).tier, 0);
 });
+
+test("accuracy: screenshot case 'ثلاجة توشيبا 450 لتر' drops 296 L / 468 L", () => {
+  const q = "ثلاجة توشيبا 450 لتر";
+  const { kept } = E.rank(q, [
+    off("ثلاجة GR-RT468WE-PMN(57) من توشيبا، عاكس، 468 لتر", 18499, "Amazon.eg"),
+    off("ثلاجة نوفروست توشيبا، 296 لتر، 2 باب، فضي - GR-EF31-S", 18999, "Raneen"),
+    off("Toshiba Refrigerator 450 Liters No Frost", 24999, "B.TECH"),
+    off("ثلاجة توشيبا نوفروست ٤٥٠ لتر", 25500, "Raneen"),
+  ], 0.6, E.queryVariants(q));
+  assert.deepEqual(kept.map((o) => o.price), [24999, 25500]);
+  assert.ok(kept.every((o) => o.match === 0));
+});
