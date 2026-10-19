@@ -1,0 +1,5 @@
+{"shopping_results":[
+ {"title":"Apple iPhone 15 128GB","price":"EGP 39,900.00","extracted_price":39900,"link":"https://shop-a.eg/iphone15","source":"Shop A","thumbnail":"https://t/1.jpg"},
+ {"title":"iPhone 15 128GB","price":"$799.00","extracted_price":799,"link":"https://us.example/iphone15","source":"US Store"},
+ {"title":"ايفون 15 - 128 جيجا","price":"٣٩٬٥٠٠ ج.م.","product_link":"https://www.google.com.eg/shopping/product/1","source":"محل ب"}
+]}

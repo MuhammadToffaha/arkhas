@@ -1,0 +1,13 @@
+services:
+  app:
+    build: ./backend
+    image: arkhas:latest
+    container_name: arkhas
+    restart: unless-stopped
+    ports:
+      - "${PORT:-8080}:8000"
+    env_file: .env
+    shm_size: "1gb"            # Chromium needs shared memory
+    volumes:
+      # edit stores / synonyms without rebuilding (restart container after edit)
+      - ./backend/app/data:/srv/app/data:ro

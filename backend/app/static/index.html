@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>أرخص · Arkhas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f6f3ec;--card:#fffdf8;--ink:#1d1a16;--muted:#6f685d;--line:#e4ddcf;--accent:#0e7a5f;--accent-ink:#fff;--warn:#b25b00;--best:#fff4d6}
+@media (prefers-color-scheme:dark){:root{--bg:#14130f;--card:#1e1c17;--ink:#f1ece2;--muted:#a59d8f;--line:#33302a;--accent:#2fb38c;--accent-ink:#0b1410;--warn:#f0a24a;--best:#2a2416}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"IBM Plex Sans Arabic",system-ui,sans-serif;line-height:1.5}
+.wrap{max-width:980px;margin:0 auto;padding:24px 16px 64px}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.logo{font-size:30px;font-weight:700;letter-spacing:-.5px}
+.logo small{font-size:14px;color:var(--muted);font-weight:400;margin-inline-start:8px}
+.lang{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:6px 14px;cursor:pointer;font:inherit}
+form{display:flex;gap:8px;margin:24px 0 8px}
+input{flex:1;min-width:0;font:inherit;font-size:18px;padding:14px 16px;border-radius:14px;border:1.5px solid var(--line);background:var(--card);color:var(--ink)}
+input:focus{outline:none;border-color:var(--accent)}
+button.go{font:inherit;font-weight:600;font-size:17px;padding:0 22px;border:0;border-radius:14px;background:var(--accent);color:var(--accent-ink);cursor:pointer}
+.hint{color:var(--muted);font-size:13px}
+.variants{margin:12px 0;color:var(--muted);font-size:14px}
+.chip{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:2px 10px;margin:2px;background:var(--card)}
+.best{background:var(--best);border:1.5px solid var(--accent);border-radius:18px;padding:18px;margin:16px 0;display:flex;gap:16px;align-items:center}
+.best img,.row img{width:72px;height:72px;object-fit:contain;border-radius:10px;background:#fff;flex:none}
+.best .p{font-size:28px;font-weight:700;color:var(--accent)}
+.tag{font-size:12px;font-weight:600;color:var(--accent)}
+.list{display:flex;flex-direction:column;gap:8px}
+.row{display:flex;gap:12px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 12px;text-decoration:none;color:inherit}
+.row:hover{border-color:var(--accent)}
+.row .t{flex:1;min-width:0}
+.row .t div:first-child{overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.src{font-size:13px;color:var(--muted)}
+.price{font-weight:700;font-size:18px;white-space:nowrap;text-align:end}
+.old{font-size:12px;color:var(--muted);text-decoration:line-through}
+.flag{font-size:11px;color:var(--warn);border:1px solid var(--warn);border-radius:6px;padding:0 6px;margin-inline-start:6px}
+h3{margin:28px 0 10px;font-size:16px}
+.links{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:8px}
+.links a{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;color:var(--ink);text-decoration:none;font-weight:600}
+.links a span{display:block;font-weight:400;font-size:12px;color:var(--muted)}
+details{margin-top:24px;color:var(--muted);font-size:13px}
+table{border-collapse:collapse;width:100%}td{padding:4px 6px;border-bottom:1px solid var(--line)}
+.spin{display:none;margin:30px auto;width:36px;height:36px;border:4px solid var(--line);border-top-color:var(--accent);border-radius:50%;animation:s 1s linear infinite}
+@keyframes s{to{transform:rotate(360deg)}}
+.empty{color:var(--muted);text-align:center;margin:40px 0}
+@media (max-width:560px){.best{flex-direction:column;align-items:flex-start}.row img{width:52px;height:52px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo">🏷️ أرخص <small data-i18n="tag">أرخص سعر في مصر</small></div>
+    <button class="lang" id="lang">English</button>
+  </header>
+
+  <form id="f">
+    <input id="q" autocomplete="off" autofocus data-i18n-ph="ph" placeholder="ابحث بالعربي أو English… مثال: ايفون 15 برو">
+    <button class="go" data-i18n="go">ابحث</button>
+  </form>
+  <div class="hint" data-i18n="hint">نبحث في أمازون، نون، جوميا، بي تك، 2B، راية، كارفور + جوجل شوبينج — بالعربي والإنجليزي معًا</div>
+
+  <div class="spin" id="spin"></div>
+  <div id="out"></div>
+</div>
+
+<script>
+const T = {
+  ar:{tag:"أرخص سعر في مصر",go:"ابحث",ph:"ابحث بالعربي أو English… مثال: ايفون 15 برو",
+      hint:"نبحث في أمازون، نون، جوميا، بي تك، 2B، راية، كارفور + جوجل شوبينج — بالعربي والإنجليزي معًا",
+      best:"🏆 أرخص سعر",open:"افتح العرض ↗",all:"كل العروض (من الأرخص)",fb:"📘 فيسبوك والمستعمل",
+      fbnote:"فيسبوك لا يسمح بالسحب الآلي — افتح البحث مباشرة مرتب بالسعر",searched:"بحثنا عن:",
+      none:"مفيش نتائج مطابقة. جرّب اسم أدق.",hidden:"تم إخفاء {n} نتيجة غير مطابقة",src:"حالة المصادر",
+      acc:"إكسسوار؟",cheap:"سعر مريب",egp:"ج.م",cached:"(من الذاكرة المؤقتة)",err:"حصل خطأ: "},
+  en:{tag:"Best price in Egypt",go:"Search",ph:"Search in Arabic or English… e.g. iphone 15 pro",
+      hint:"Searching Amazon, Noon, Jumia, B.TECH, 2B, Raya, Carrefour + Google Shopping — Arabic & English together",
+      best:"🏆 Best price",open:"Open offer ↗",all:"All offers (cheapest first)",fb:"📘 Facebook & used",
+      fbnote:"Facebook does not allow scraping — open the search directly, sorted by price",searched:"Searched:",
+      none:"No matching results. Try a more specific name.",hidden:"{n} irrelevant results hidden",src:"Source status",
+      acc:"accessory?",cheap:"suspicious price",egp:"EGP",cached:"(cached)",err:"Error: "}
+};
+let L = localStorage.getItem("lang") || "ar";
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const money = v => Math.round(v).toLocaleString(L==="ar"?"ar-EG":"en-EG") + " " + T[L].egp;
+let last = null;
+
+function applyLang(){
+  document.documentElement.lang = L; document.documentElement.dir = L==="ar"?"rtl":"ltr";
+  document.querySelectorAll("[data-i18n]").forEach(e=>e.textContent=T[L][e.dataset.i18n]);
+  document.querySelectorAll("[data-i18n-ph]").forEach(e=>e.placeholder=T[L][e.dataset.i18nPh]);
+  $("#lang").textContent = L==="ar"?"English":"عربي";
+  try{localStorage.setItem("lang",L)}catch(e){}
+  if(last) render(last);
+}
+$("#lang").onclick = ()=>{L = L==="ar"?"en":"ar"; applyLang()};
+
+const flagHtml = o => o.flags.map(f=>`<span class="flag">${f==="possible-accessory"?T[L].acc:T[L].cheap}</span>`).join("");
+const img = o => o.image ? `<img src="${esc(o.image)}" alt="" loading="lazy" referrerpolicy="no-referrer">` : "";
+
+function render(r){
+  const t=T[L]; let h="";
+  h += `<div class="variants">${t.searched} ${r.variants.map(v=>`<span class="chip">${esc(v)}</span>`).join("")} ${r.cached?t.cached:""}</div>`;
+  if(r.best){
+    const b=r.best;
+    h += `<div class="best">${img(b)}<div style="flex:1;min-width:0"><div class="tag">${t.best}</div>
+      <div>${esc(b.title)}</div><div class="src">${esc(b.source)}</div></div>
+      <div style="text-align:end"><div class="p">${money(b.price)}</div>
+      <a class="go" style="display:inline-block;padding:8px 16px;margin-top:6px;background:var(--accent);color:var(--accent-ink);border-radius:10px;text-decoration:none;font-weight:600" href="${esc(b.url)}" target="_blank" rel="noopener">${t.open}</a></div></div>`;
+  } else h += `<div class="empty">${t.none}</div>`;
+
+  if(r.offers.length){
+    h += `<h3>${t.all} · ${r.offers.length}</h3><div class="list">`;
+    for(const o of r.offers) h += `<a class="row" href="${esc(o.url)}" target="_blank" rel="noopener">${img(o)}
+      <div class="t"><div>${esc(o.title)}</div><div class="src">${esc(o.source)}${flagHtml(o)}</div></div>
+      <div><div class="price">${money(o.price)}</div>${o.old_price&&o.old_price>o.price?`<div class="old">${money(o.old_price)}</div>`:""}</div></a>`;
+    h += `</div>`;
+    if(r.hidden) h += `<div class="hint" style="margin-top:8px">${t.hidden.replace("{n}",r.hidden)}</div>`;
+  }
+
+  h += `<h3>${t.fb}</h3><div class="hint" style="margin-bottom:8px">${t.fbnote}</div><div class="links">`;
+  for(const l of r.links) h += `<a href="${esc(l.url)}" target="_blank" rel="noopener">${esc(l.name)}<span>${esc(r.query)}</span></a>`;
+  h += `</div>`;
+
+  h += `<details><summary>${t.src}</summary><table>${r.sources.map(s=>
+    `<tr><td>${s.ok&&s.count?"✅":"⚠️"} ${esc(s.source)}</td><td>${s.count}</td><td>${s.ms} ms</td><td>${esc(s.error||"")}</td></tr>`).join("")}</table></details>`;
+  $("#out").innerHTML = h;
+}
+
+$("#f").onsubmit = async e=>{
+  e.preventDefault();
+  const q = $("#q").value.trim(); if(q.length<2) return;
+  history.replaceState(null,"","?q="+encodeURIComponent(q));
+  $("#out").innerHTML=""; $("#spin").style.display="block";
+  try{
+    const r = await fetch("/api/search?q="+encodeURIComponent(q));
+    if(!r.ok) throw new Error(r.status+" "+await r.text());
+    last = await r.json(); render(last);
+  }catch(err){ $("#out").innerHTML=`<div class="empty">${T[L].err}${esc(err.message)}</div>`; }
+  finally{ $("#spin").style.display="none"; }
+};
+
+applyLang();
+const pre = new URLSearchParams(location.search).get("q");
+if(pre){ $("#q").value=pre; $("#f").requestSubmit(); }
+</script>
+</body>
+</html>
