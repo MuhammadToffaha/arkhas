@@ -1,96 +1,71 @@
 # 🏷️ Arkhas — أرخص
 
-Search once in **Arabic or English** → get the **cheapest price in Egypt** across online stores, with a **direct link** to the offer. Facebook Marketplace and Dubizzle open in one click, sorted by price.
+Android app: type a product in **Arabic or English** → get the **3 cheapest prices in Egypt** with direct links. Facebook Marketplace and Dubizzle open in one click, sorted by price.
+
+**No server needed.** The phone searches the stores itself; GitHub only hosts the code, the store rules and the APK.
 
 ```
-"ايفون 15"  ──►  ["ايفون 15", "iphone 15"]  ──►  Amazon.eg · Noon · Jumia · B.TECH · 2B · Raya · Carrefour
-                                              ──►  Google Shopping Egypt (SerpAPI, long tail of stores)
-                                              ──►  rank: relevance filter → accessory/outlier flags → sort by EGP
-                                              ──►  🏆 best offer + full list + Facebook / Dubizzle deep links
+phone ── web/engine.js ──► Amazon.eg · Noon · Jumia · B.TECH · 2B · Raya · Carrefour   (+ Google Shopping with a SerpAPI key)
+  │                        rank: relevance → accessory / outlier flags → 🥇🥈🥉
+  ├── on start: newest web/ files from GitHub  (store fixes, UI)
+  └── every 12 h: newest APK from GitHub Releases
 ```
 
-## 🚀 Run (Docker)
+## 📱 Install
 
-```bash
-git clone https://github.com/<you>/arkhas.git && cd arkhas
-cp .env.example .env          # add SERPAPI_KEY (optional but recommended)
-docker compose up -d --build
-# open http://<server-ip>:8080
-```
-
-API: `GET /api/search?q=غسالة سامسونج` · `GET /api/health` · add `&fresh=true` to skip the 15-min cache.
-
-## 📱 Android app
-
-The app is a light native shell; the search UI and scrapers live on your server.
-
-```
-phone app ──► your Arkhas server (Docker) ──► stores / Google Shopping
-   │                    ▲
-   └── checks GitHub Releases for new APK
-```
-
-**Install**
 1. On the phone open **[Releases](https://github.com/MuhammadToffaha/arkhas/releases/latest)** → download `arkhas-1.0.N.apk` → allow "install unknown apps" once.
-2. First launch asks for the server address, e.g. `http://192.168.1.50:8080` (home Wi-Fi) or your HTTPS tunnel URL.
+2. Open **أرخص**, type e.g. `ايفون 15` → top 3 appear as stores answer (JS-heavy stores take a few seconds more).
+3. Optional ⚙️: add a free [SerpAPI](https://serpapi.com) key for Google Shopping (hundreds of extra Egyptian stores), set your Facebook city, turn stores on/off.
 
-**Extras**
-- 🔗 **Share** a product from any app (Amazon, Facebook, WhatsApp…) → choose **أرخص** → instant price search.
-- ✂️ Select text anywhere → **بحث بأرخص سعر** in the text menu.
-- Store / Facebook links open in their own apps.
-- ⋮ menu: Reload · Server · Check for updates.
+**Extras**: Share a product from any app → **أرخص** · select text anywhere → **بحث بأرخص سعر** · result links open in the store's own app.
 
-**Updating**
+## 🔄 Updating
 
-| You changed… | What to do | Phone |
+| You change… | Then | Phone gets it |
 |---|---|---|
-| Scrapers, stores, UI (`backend/`) | `git pull && docker compose up -d --build` on server | Pull-to-refresh. No new APK. |
-| The app itself (`android/`) | `git push` | GitHub Actions builds APK + Release → app says "New version" |
+| `web/stores.json` (fix/add a store), `web/synonyms.json`, `web/index.html`, `web/engine.js` | `git push` | Downloaded on next app start, active the start after. **No new APK.** |
+| `android/` (native app) | `git push` | Actions builds APK → Release → app shows "New version" |
 
-Rebuild without code change: Actions → **android-apk** → Run workflow (can pre-fill your server URL).
+`web/stores.json` fields: `search_url` (`{q}` = query), optional `search_url_ar`, `lang` (`en`/`ar`/`both`), `render` (true = JS site, loaded in hidden browser), `item` (CSS for one product card), `title` / `price` / `old_price` / `link` / `image` (CSS inside the card, `sel@attr` = attribute), `enabled`. If CSS finds nothing, JSON-LD on the page is used.
 
-**Reaching the server outside home**: put it behind [Cloudflare Tunnel](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/) or [Tailscale](https://tailscale.com) and use that HTTPS URL in the app.
+To check selectors when a store stops returning results: in the app ⚙️ → **Store status** after a search shows count / error per store. Fix the card selectors with Chrome DevTools on the store's search page.
 
-**Signing key**: `android/keystore/arkhas.jks` keeps every build installable over the last one. For better security move it into repo secrets `ARKHAS_KEYSTORE_B64` (base64 of the file) and `ARKHAS_KEYSTORE_PASSWORD` (Settings → Secrets → Actions), then delete the file and the fallback password from `.github/workflows/android.yml`. Keep the same key, or users must uninstall once.
+If `web/index.html` ever needs new native features, bump `arkhas-bridge` in it; older apps then keep their current copy until they update.
 
-Web alternative: open the server in Chrome → ⋮ → **Add to Home screen**.
+**Signing key**: `android/keystore/arkhas.jks` keeps every build installable over the last one. Before sharing the app with others, move it into repo secrets `ARKHAS_KEYSTORE_B64` + `ARKHAS_KEYSTORE_PASSWORD` and remove the file and fallback password from `.github/workflows/android.yml`. Keep the same key.
+
+## 📘 Why Facebook is a link, not scraped
+
+Marketplace requires login and Meta forbids automated collection (account bans). The app opens Marketplace / posts search with your query, sorted by price.
+
+## ⚖️ Good citizen
+
+One search = 1–2 page loads per store, from your phone, like a person browsing. Personal use. Prices are scraped — confirm on the store page before paying.
+
+## 🖥️ Optional: self-hosted web version
+
+`backend/` is a FastAPI + Playwright server with the same logic and the same `web/*.json` config, if you later get a server:
+`cp .env.example .env && docker compose up -d --build` → `http://server:8080`.
 
 ## 🧩 How it works
 
 | Part | File | Notes |
 |---|---|---|
 | Arabic/English normalization | `backend/app/normalize.py` | أ/إ/آ→ا, ة→ه, ى→ي, tashkeel, ٠-٩ digits, `ايفون15`→`ايفون 15` |
-| Bilingual dictionary | `backend/app/data/synonyms.yaml` | Add words here (first Arabic spelling = preferred) |
-| Stores (no code needed) | `backend/app/data/stores.yaml` | Search URL + CSS selectors; JSON-LD fallback; `render: true` = headless Chromium |
+| Bilingual dictionary | `web/synonyms.json` | Add words here (first Arabic spelling = preferred) |
+| Stores (no code needed) | `web/stores.json` | Search URL + CSS selectors; JSON-LD fallback; `render: true` = headless browser |
+| Phone engine | `web/engine.js` + `web/index.html` | Same logic as the Python backend, runs in the app |
+| Native app | `android/` | Network bridge, hidden renderer, self-update |
 | Google Shopping Egypt | `backend/app/sources/serpapi.py` | `gl=eg`, Arabic + English; foreign-currency listings dropped |
 | Facebook / Dubizzle | `backend/app/sources/links.py` | Deep links only, sorted by price (`FB_CITY` in `.env`) |
 | Ranking | `backend/app/ranking.py` | Drops off-topic results, flags accessories ("case for iPhone") and prices < 30 % of median |
 | UI | `backend/app/static/index.html` | RTL/LTR toggle, best-offer card, source status |
 
-## 🩺 When a store stops returning results
-
-Stores redesign their pages. Check which source broke:
-
-```bash
-docker compose exec app python -m app.doctor "iphone 15"
-```
-
-Then fix that store's selectors in `stores.yaml` (browser DevTools → inspect a product card) and `docker compose restart`. Same way you add a new store.
-
-## 📘 Why Facebook is a link, not scraped
-
-Marketplace requires login, Meta's terms forbid automated collection, and scraping gets accounts banned. Arkhas opens Marketplace / posts search with your query already sorted by price — one click, no risk.
-
-## ⚖️ Be a good citizen
-
-- Results are cached 15 min; one search ≈ 1–2 requests per store. Keep it for personal use.
-- Respect each site's terms. If a store blocks your server IP, set `SCRAPER_PROXY` or disable that store.
-- Prices are scraped — always confirm on the store page before paying.
-
 ## 🧪 Tests
 
 ```bash
-cd backend && pip install -r requirements-dev.txt && pytest
+cd web-tests && npm install && npm test                      # phone engine + UI (jsdom)
+cd backend && pip install -r requirements-dev.txt && pytest  # optional server
 ```
 
 Fixtures cover Jumia/Amazon HTML, JSON-LD fallback, SerpAPI, Arabic price formats, cross-language relevance, accessory filtering and an end-to-end mocked search.

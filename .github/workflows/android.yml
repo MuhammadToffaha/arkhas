@@ -7,10 +7,6 @@ on:
     branches: [main]
     paths: ["android/**", ".github/workflows/android.yml"]
   workflow_dispatch:
-    inputs:
-      default_server:
-        description: "Server URL pre-filled on first launch (optional), e.g. http://192.168.1.50:8080"
-        required: false
 
 permissions:
   contents: write
@@ -21,8 +17,6 @@ jobs:
     defaults:
       run:
         working-directory: android
-    env:
-      ARKHAS_DEFAULT_SERVER: ${{ inputs.default_server }}
     steps:
       - uses: actions/checkout@v5
 

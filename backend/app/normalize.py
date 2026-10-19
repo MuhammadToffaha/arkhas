@@ -14,7 +14,9 @@ _DIGITS = str.maketrans("٠١٢٣٤٥٦٧٨٩۰۱۲۳۴۵۶۷۸۹", "01234567890
 _LETTERS = str.maketrans({"أ": "ا", "إ": "ا", "آ": "ا", "ٱ": "ا", "ى": "ي", "ة": "ه", "ؤ": "و", "ئ": "ي"})
 _NON_WORD = re.compile(r"[^\w\s]+", re.UNICODE)
 
-DICT_PATH = Path(__file__).parent / "data" / "synonyms.yaml"
+from .config import WEB
+
+DICT_PATH = WEB / "synonyms.json"  # JSON is valid YAML, so yaml.safe_load reads it
 
 
 def is_arabic(text: str) -> bool:

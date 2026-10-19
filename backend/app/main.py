@@ -9,7 +9,7 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
 from . import aggregator
-from .config import load_stores, settings
+from .config import WEB, load_stores, settings
 from .models import SearchResponse
 from .sources.fetch import shutdown
 
@@ -50,3 +50,4 @@ async def index():
 
 
 app.mount("/static", StaticFiles(directory=STATIC), name="static")
+app.mount("/web", StaticFiles(directory=WEB), name="web")

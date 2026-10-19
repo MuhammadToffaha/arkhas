@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- Your Arkhas server may be http://192.168.x.x:8080 on the home network, so plain HTTP is allowed.
-     Use HTTPS (Cloudflare Tunnel / Tailscale) when reaching it from outside. -->
-<network-security-config>
-    <base-config cleartextTrafficPermitted="true" />
-</network-security-config>

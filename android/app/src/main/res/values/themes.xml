@@ -3,7 +3,7 @@
     <color name="green">#0E7A5F</color>
     <color name="green_dark">#0A5A46</color>
     <color name="sand">#F6F3EC</color>
-    <style name="Theme.Arkhas" parent="Theme.AppCompat.DayNight.DarkActionBar">
+    <style name="Theme.Arkhas" parent="Theme.AppCompat.DayNight.NoActionBar">
         <item name="colorPrimary">@color/green</item>
         <item name="colorPrimaryDark">@color/green_dark</item>
         <item name="colorAccent">@color/green</item>

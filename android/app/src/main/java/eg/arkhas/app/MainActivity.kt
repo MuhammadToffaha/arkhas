@@ -3,210 +3,140 @@ package eg.arkhas.app
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
-import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
-import android.text.InputType
-import android.view.Menu
-import android.view.MenuItem
-import android.webkit.WebResourceError
+import android.view.View
+import android.webkit.JavascriptInterface
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
-import android.widget.EditText
 import android.widget.FrameLayout
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import org.json.JSONObject
 import java.net.HttpURLConnection
 import java.net.URL
-import java.net.URLEncoder
 import kotlin.concurrent.thread
 
 /**
- * Thin native shell around the Arkhas web UI.
- * The UI and all scraping logic live on YOUR server, so most updates need no new APK:
- * change the server, pull-to-refresh, done. The APK itself only checks GitHub Releases for shell updates.
+ * Arkhas runs entirely on the phone: the page (web/index.html + engine.js) does the searching,
+ * this activity gives it network access (Net), a hidden browser for JS-heavy stores (Renderer),
+ * settings storage, and self-updates (web files from GitHub, APK from GitHub Releases).
  */
 class MainActivity : AppCompatActivity() {
 
     private lateinit var web: WebView
-    private lateinit var swipe: SwipeRefreshLayout
+    private lateinit var renderer: Renderer
     private val prefs by lazy { getSharedPreferences("arkhas", Context.MODE_PRIVATE) }
-
-    private var server: String
-        get() = prefs.getString("server", BuildConfig.DEFAULT_SERVER) ?: ""
-        set(v) = prefs.edit().putString("server", v.trim().trimEnd('/')).apply()
+    @Volatile private var pendingQuery: String = ""
 
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        val root = FrameLayout(this)
+        // invisible browser for rendering JS stores; still laid out so pages run normally
+        val hidden = WebView(this).apply { visibility = View.INVISIBLE }
+        root.addView(hidden, FrameLayout.LayoutParams(-1, -1))
         web = WebView(this).apply {
             settings.javaScriptEnabled = true
             settings.domStorageEnabled = true
-            settings.setSupportMultipleWindows(false) // target=_blank -> shouldOverrideUrlLoading
+            settings.allowFileAccess = true
+            addJavascriptInterface(Bridge(), "Native")
             webViewClient = ShellClient()
         }
-        swipe = SwipeRefreshLayout(this).apply {
-            addView(web, FrameLayout.LayoutParams(-1, -1))
-            setOnRefreshListener { web.reload() }
-            // only pull-to-refresh when the page is scrolled to the top
-            setOnChildScrollUpCallback { _, _ -> web.scrollY > 0 }
-        }
-        setContentView(swipe)
+        root.addView(web, FrameLayout.LayoutParams(-1, -1))
+        setContentView(root)
+        renderer = Renderer(hidden)
 
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
-            override fun handleOnBackPressed() {
-                if (web.canGoBack()) web.goBack() else finish()
-            }
+            override fun handleOnBackPressed() { if (web.canGoBack()) web.goBack() else finish() }
         })
 
-        if (savedInstanceState != null) web.restoreState(savedInstanceState)
-        else if (server.isBlank()) askServer(firstRun = true)
-        else open(intent)
+        pendingQuery = sharedText(intent) ?: ""
+        web.loadUrl(WebFiles.indexUrl(this))
 
-        checkForUpdate(silent = true)
+        // newest UI / store rules from GitHub -> used from next start
+        thread { runCatching { WebFiles.update(this) } }
+        checkForApkUpdate()
     }
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
-        open(intent)
+        sharedText(intent)?.let { q -> web.evaluateJavascript("window.arkhasSearch(${JSONObject.quote(q)})", null) }
     }
 
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        web.saveState(outState)
-    }
+    /** Text from Share / text-selection menu, cleaned to a short product phrase. */
+    private fun sharedText(i: Intent?): String? = when (i?.action) {
+        Intent.ACTION_SEND -> i.getStringExtra(Intent.EXTRA_TEXT)
+        Intent.ACTION_PROCESS_TEXT -> i.getCharSequenceExtra(Intent.EXTRA_PROCESS_TEXT)?.toString()
+        else -> null
+    }?.replace(Regex("https?://\\S+"), " ")?.replace(Regex("\\s+"), " ")?.trim()?.take(80)?.ifBlank { null }
 
-    /** Opens the home page, or a search if the app was launched via Share / text selection. */
-    private fun open(intent: Intent?) {
-        if (server.isBlank()) return askServer(firstRun = true)
-        val shared = when (intent?.action) {
-            Intent.ACTION_SEND -> intent.getStringExtra(Intent.EXTRA_TEXT)
-            Intent.ACTION_PROCESS_TEXT -> intent.getCharSequenceExtra(Intent.EXTRA_PROCESS_TEXT)?.toString()
-            else -> null
-        }?.let(::cleanShared)
-        val url = if (shared.isNullOrBlank()) "$server/"
-        else "$server/?q=" + URLEncoder.encode(shared, "UTF-8")
-        web.loadUrl(url)
-    }
-
-    /** Shared text often includes a link + promo text; keep a short product-like phrase. */
-    private fun cleanShared(t: String): String =
-        t.replace(Regex("https?://\\S+"), " ").replace(Regex("\\s+"), " ").trim().take(80)
-
-    // ---------------- menu ----------------
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menu.add(0, 1, 0, R.string.menu_reload)
-        menu.add(0, 2, 1, R.string.menu_server)
-        menu.add(0, 3, 2, R.string.menu_update)
-        return true
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when (item.itemId) {
-            1 -> web.reload()
-            2 -> askServer(firstRun = false)
-            3 -> checkForUpdate(silent = false)
-            else -> return super.onOptionsItemSelected(item)
-        }
-        return true
-    }
-
-    private fun askServer(firstRun: Boolean) {
-        val input = EditText(this).apply {
-            inputType = InputType.TYPE_TEXT_VARIATION_URI
-            setText(server.ifBlank { "http://" })
-            setSelection(text.length)
-        }
-        val pad = (20 * resources.displayMetrics.density).toInt()
-        val box = FrameLayout(this).apply { setPadding(pad, 0, pad, 0); addView(input) }
-        AlertDialog.Builder(this)
-            .setTitle(R.string.server_title)
-            .setMessage(R.string.server_msg)
-            .setView(box)
-            .setCancelable(!firstRun)
-            .setPositiveButton(R.string.save) { _, _ ->
-                var v = input.text.toString().trim()
-                if (!v.startsWith("http")) v = "http://$v"
-                server = v
-                open(null)
+    // ---------------- bridge used by web/index.html ----------------
+    inner class Bridge {
+        /** Async fetch; answers via window.__native(id, ok, text). opts: {lang, render, wait, json} */
+        @JavascriptInterface
+        fun fetch(id: Int, url: String, opts: String) {
+            val o = runCatching { JSONObject(opts) }.getOrDefault(JSONObject())
+            val lang = o.optString("lang", "en")
+            val reply = { ok: Boolean, text: String ->
+                runOnUiThread { web.evaluateJavascript("window.__native($id,$ok,${JSONObject.quote(text)})", null) }
             }
-            .apply { if (!firstRun) setNegativeButton(R.string.cancel, null) }
-            .show()
+            if (!url.startsWith("https://") && !url.startsWith("http://")) return reply(false, "bad url")
+            if (o.optBoolean("render")) {
+                renderer.render(url, o.optString("wait").ifBlank { null }) { ok, html -> reply(ok, html) }
+            } else {
+                Net.pool.execute {
+                    try { reply(true, Net.get(url, lang, o.optBoolean("json"))) }
+                    catch (e: Exception) { reply(false, e.message ?: e.javaClass.simpleName) }
+                }
+            }
+        }
+
+        @JavascriptInterface fun getPref(k: String): String = prefs.getString("p_$k", "") ?: ""
+        @JavascriptInterface fun setPref(k: String, v: String) = prefs.edit().putString("p_$k", v).apply()
+        @JavascriptInterface fun readConfig(name: String): String = WebFiles.read(this@MainActivity, name)
+        @JavascriptInterface fun appVersion(): String = BuildConfig.VERSION_NAME
+        @JavascriptInterface fun pendingQuery(): String = pendingQuery.also { pendingQuery = "" }
     }
 
-    // ---------------- web client ----------------
+    // ---------------- links: result pages open in their own app / browser ----------------
     private inner class ShellClient : WebViewClient() {
         override fun shouldOverrideUrlLoading(view: WebView, req: WebResourceRequest): Boolean {
-            val target = req.url
-            val home = Uri.parse(server)
-            if (target.host == home.host && target.port == home.port) return false // our UI
-            // store / Facebook / Dubizzle links -> their app if installed, else the browser
-            try {
-                startActivity(Intent(Intent.ACTION_VIEW, target))
-            } catch (_: Exception) {
-                Toast.makeText(this@MainActivity, target.toString(), Toast.LENGTH_SHORT).show()
-            }
+            val u = req.url
+            if (u.scheme == "file") return false
+            try { startActivity(Intent(Intent.ACTION_VIEW, u)) }
+            catch (_: Exception) { Toast.makeText(this@MainActivity, u.toString(), Toast.LENGTH_SHORT).show() }
             return true
-        }
-
-        override fun onPageStarted(view: WebView, url: String?, favicon: Bitmap?) {
-            swipe.isRefreshing = true
-        }
-
-        override fun onPageFinished(view: WebView, url: String?) {
-            swipe.isRefreshing = false
-        }
-
-        override fun onReceivedError(view: WebView, req: WebResourceRequest, err: WebResourceError) {
-            if (!req.isForMainFrame) return
-            swipe.isRefreshing = false
-            Toast.makeText(this@MainActivity, R.string.cant_reach, Toast.LENGTH_LONG).show()
-            askServer(firstRun = false)
         }
     }
 
-    // ---------------- self-update via GitHub Releases ----------------
-    private fun checkForUpdate(silent: Boolean) {
+    // ---------------- APK self-update via GitHub Releases ----------------
+    private fun checkForApkUpdate() {
         val now = System.currentTimeMillis()
-        if (silent && now - prefs.getLong("lastUpdateCheck", 0) < 12 * 3600_000) return
+        if (now - prefs.getLong("lastUpdateCheck", 0) < 12 * 3600_000) return
         prefs.edit().putLong("lastUpdateCheck", now).apply()
         thread {
-            try {
-                val conn = URL("https://api.github.com/repos/${BuildConfig.UPDATE_REPO}/releases/latest")
-                    .openConnection() as HttpURLConnection
-                conn.setRequestProperty("Accept", "application/vnd.github+json")
-                conn.connectTimeout = 8000; conn.readTimeout = 8000
-                val json = JSONObject(conn.inputStream.bufferedReader().readText())
-                val tag = json.getString("tag_name")               // "v42"
-                val latest = tag.removePrefix("v").toIntOrNull() ?: 0
+            runCatching {
+                val c = URL("https://api.github.com/repos/${BuildConfig.UPDATE_REPO}/releases/latest").openConnection() as HttpURLConnection
+                c.setRequestProperty("Accept", "application/vnd.github+json")
+                c.connectTimeout = 8000; c.readTimeout = 8000
+                val json = JSONObject(c.inputStream.bufferedReader().readText())
+                val latest = json.getString("tag_name").removePrefix("v").toIntOrNull() ?: 0
                 val assets = json.getJSONArray("assets")
-                var apk: String? = null
-                for (i in 0 until assets.length()) {
-                    val a = assets.getJSONObject(i)
-                    if (a.getString("name").endsWith(".apk")) apk = a.getString("browser_download_url")
+                val apk = (0 until assets.length()).map { assets.getJSONObject(it) }
+                    .firstOrNull { it.getString("name").endsWith(".apk") }?.getString("browser_download_url")
+                if (latest > BuildConfig.VERSION_CODE && apk != null) runOnUiThread {
+                    AlertDialog.Builder(this)
+                        .setTitle(R.string.update_title)
+                        .setMessage(getString(R.string.update_msg, "1.0.$latest"))
+                        .setPositiveButton(R.string.download) { _, _ -> startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(apk))) }
+                        .setNegativeButton(R.string.later, null)
+                        .show()
                 }
-                runOnUiThread {
-                    if (latest > BuildConfig.VERSION_CODE && apk != null) {
-                        AlertDialog.Builder(this)
-                            .setTitle(R.string.update_title)
-                            .setMessage(getString(R.string.update_msg, "1.0.$latest"))
-                            .setPositiveButton(R.string.download) { _, _ ->
-                                startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(apk)))
-                            }
-                            .setNegativeButton(R.string.later, null)
-                            .show()
-                    } else if (!silent) {
-                        Toast.makeText(this, R.string.update_none, Toast.LENGTH_SHORT).show()
-                    }
-                }
-            } catch (e: Exception) {
-                if (!silent) runOnUiThread { Toast.makeText(this, e.message ?: "error", Toast.LENGTH_SHORT).show() }
             }
         }
     }

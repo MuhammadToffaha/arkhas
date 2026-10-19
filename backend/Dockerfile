@@ -4,12 +4,13 @@ ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 PIP_NO_CACHE_DIR=1 \
     PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
 WORKDIR /srv
 
-COPY requirements.txt .
+COPY backend/requirements.txt .
 RUN pip install -r requirements.txt \
  && python -m playwright install --with-deps chromium \
  && rm -rf /var/lib/apt/lists/*
 
-COPY app ./app
+COPY backend/app ./app
+COPY web ./web
 RUN useradd -m arkhas && chown -R arkhas /srv /ms-playwright
 USER arkhas
 

@@ -2,17 +2,8 @@
 <resources>
     <string name="app_name">أرخص</string>
     <string name="process_text">بحث بأرخص سعر</string>
-    <string name="menu_server">Server / السيرفر</string>
-    <string name="menu_reload">Reload / تحديث</string>
-    <string name="menu_update">Check for updates / تحديث التطبيق</string>
-    <string name="server_title">Arkhas server</string>
-    <string name="server_msg">Address of your Arkhas server\nعنوان سيرفر أرخص\n\nمثال: http://192.168.1.50:8080</string>
-    <string name="save">Save</string>
-    <string name="cancel">Cancel</string>
-    <string name="cant_reach">Can\'t reach server — check the address / مش قادر يوصل للسيرفر</string>
-    <string name="update_title">New version / نسخة جديدة</string>
-    <string name="update_msg">Version %1$s is available. Download and install?</string>
-    <string name="update_none">You have the latest version ✓</string>
-    <string name="download">Download</string>
-    <string name="later">Later</string>
+    <string name="update_title">نسخة جديدة · New version</string>
+    <string name="update_msg">Version %1$s is available. Download and install?\nفيه نسخة جديدة، تحب تنزلها؟</string>
+    <string name="download">Download / تنزيل</string>
+    <string name="later">Later / بعدين</string>
 </resources>

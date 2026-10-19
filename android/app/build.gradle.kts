@@ -18,8 +18,6 @@ android {
         versionName = "1.0.$runNumber"
         // GitHub repo used for the in-app "new version" check
         buildConfigField("String", "UPDATE_REPO", "\"MuhammadToffaha/arkhas\"")
-        // Pre-filled server address on first launch (change in app: ⋮ → Server)
-        buildConfigField("String", "DEFAULT_SERVER", "\"${System.getenv("ARKHAS_DEFAULT_SERVER") ?: ""}\"")
     }
 
     signingConfigs {
@@ -51,6 +49,16 @@ android {
     }
     kotlinOptions { jvmTarget = "17" }
 }
+
+// Bundle <repo>/web (UI + engine + store rules) into the APK as assets/web.
+// At runtime the app also pulls the newest copy of these files from GitHub.
+val webAssets = layout.buildDirectory.dir("generated/webassets")
+val copyWeb by tasks.registering(Copy::class) {
+    from(rootProject.file("../web")) { include("*.html", "*.js", "*.json", "*.svg") }
+    into(webAssets.map { it.dir("web") })
+}
+android.sourceSets.getByName("main").assets.srcDir(webAssets)
+tasks.named("preBuild") { dependsOn(copyWeb) }
 
 dependencies {
     implementation("androidx.appcompat:appcompat:1.7.0")
