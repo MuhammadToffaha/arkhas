@@ -13,14 +13,20 @@
     "image": "img.s-image@src",
     "deals": {
       "kind": "html",
-      "render": true,
-      "url": "https://www.amazon.eg/deals?language=en_AE",
-      "item": "[data-testid=\"product-card\"], [data-testid=\"deal-card\"], div[class*=\"DealGridItem\"]",
-      "title": "[class*=\"truncate\"], [class*=\"DealContent\"] a, p",
-      "price": ".a-price:not(.a-text-price) .a-offscreen, [class*=\"price\"] .a-offscreen",
-      "old_price": ".a-text-price .a-offscreen",
-      "link": "a@href",
-      "image": "img@src"
+      "urls": [
+        "https://www.amazon.eg/s?k=electronics&rh=p_8%3A50-&language=en_AE",
+        "https://www.amazon.eg/s?k=mobile+phone&rh=p_8%3A50-&language=en_AE",
+        "https://www.amazon.eg/s?k=laptop&rh=p_8%3A50-&language=en_AE",
+        "https://www.amazon.eg/s?k=headphones&rh=p_8%3A50-&language=en_AE",
+        "https://www.amazon.eg/s?k=smart+watch&rh=p_8%3A50-&language=en_AE",
+        "https://www.amazon.eg/s?k=kitchen+appliances&rh=p_8%3A50-&language=en_AE",
+        "https://www.amazon.eg/s?k=home&rh=p_8%3A50-&language=en_AE",
+        "https://www.amazon.eg/s?k=fashion&rh=p_8%3A50-&language=en_AE",
+        "https://www.amazon.eg/s?k=shoes&rh=p_8%3A50-&language=en_AE",
+        "https://www.amazon.eg/s?k=beauty&rh=p_8%3A50-&language=en_AE",
+        "https://www.amazon.eg/s?k=toys&rh=p_8%3A50-&language=en_AE",
+        "https://www.amazon.eg/s?k=sports&rh=p_8%3A50-&language=en_AE"
+      ]
     }
   },
   {
@@ -36,7 +42,11 @@
     "image": "img.img@data-src",
     "deals": {
       "kind": "html",
-      "url": "https://www.jumia.com.eg/flash-sales/"
+      "urls": [
+        "https://www.jumia.com.eg/flash-sales/",
+        "https://www.jumia.com.eg/catalog/?q=offers&sort=discount",
+        "https://www.jumia.com.eg/mlp-deals/?sort=discount"
+      ]
     }
   },
   {
@@ -55,7 +65,10 @@
     "deals": {
       "kind": "html",
       "render": true,
-      "url": "https://www.noon.com/egypt-en/deals/"
+      "urls": [
+        "https://www.noon.com/egypt-en/deals/",
+        "https://www.noon.com/egypt-en/search/?q=sale&sort[by]=discount_percent&sort[dir]=desc"
+      ]
     }
   },
   {

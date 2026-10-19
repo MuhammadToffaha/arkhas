@@ -570,7 +570,7 @@
             old_price: parsePrice(prev.numeral ?? prev.wholeNumber ?? sp.previousPrice), url: p.pipUrl, image: p.mainImageUrl || null }); }),
     },
     // Any store: a deals / specials / flash-sale page read with the store's CSS selectors (overridable in "deals")
-    html: { url: (s) => s.deals.url, json: false, parse: null },
+    html: { url: (s) => s.deals.url, urls: (s) => s.deals.urls || [s.deals.url], json: false, parse: null },
   };
 
   /** Percent off, or 0 when there's no real old price. */
@@ -582,7 +582,7 @@
    * Returns { deals: [...offer, pct], sources: [...] } sorted by biggest discount.
    */
   async function deals(opts) {
-    const opt = Object.assign({ minPct: 10, perStore: 12, timeout: 12000, renderTimeout: 20000 }, opts);
+    const opt = Object.assign({ minPct: 10, perStore: 40, timeout: 12000, renderTimeout: 20000 }, opts);
     const stores = (opt.stores || []).filter((s) => s.enabled !== false && s.deals);
     const all = [], sources = [];
     const snap = () => {
@@ -601,9 +601,13 @@
           got = feed.parse(JSON.parse(await withTimeout(opt.fetcher(feed.url(s), { json: true, lang: "en" }), opt.timeout)), s);
         } else {
           const sel = Object.assign({}, s, s.deals);   // deals page may need its own selectors
-          const html = await withTimeout(opt.fetcher(feed.url(s), s.deals.render
-            ? { render: true, wait: (sel.item || "").split(",")[0] || null, lang: "en" } : { lang: "en" }), s.deals.render ? opt.renderTimeout : opt.timeout);
-          got = parse(html, sel, opt.DOMParser, 80);
+          const opts = s.deals.render ? { render: true, wait: (sel.item || "").split(",")[0] || null, lang: "en" } : { lang: "en" };
+          // several pages per store (e.g. Amazon: one percent-off page per category); keep whatever answers
+          const pages = await Promise.allSettled(feed.urls(s).map((u) =>
+            withTimeout(opt.fetcher(u, opts), s.deals.render ? opt.renderTimeout : opt.timeout).then((html) => parse(html, sel, opt.DOMParser, 80))));
+          const okPages = pages.filter((x) => x.status === "fulfilled");
+          if (!okPages.length) throw pages[0].reason;
+          got = okPages.flatMap((x) => x.value);
         }
         const keep = got.filter((o) => o.title && o.price && o.url)
           .map((o) => Object.assign(o, { pct: pctOff(o), source: s.name }))

@@ -97,7 +97,13 @@ test("UI: ⚡ tab shows deal cards, sorting and store filter", async () => {
   assert.equal(doc.querySelector("#dealsView").hidden, false);
   assert.equal(doc.querySelector("#searchView").hidden, true);
   const until = async (f) => { const t = Date.now(); while (!f()) { if (Date.now() - t > 5000) throw new Error("timeout"); await new Promise((r) => setTimeout(r, 20)); } };
-  await until(() => doc.querySelector("#d_bar").hidden && doc.querySelectorAll(".dc").length >= 5);
+  await until(() => doc.querySelector("#d_bar").hidden && doc.querySelectorAll(".dc").length >= 1);
+  // default range = 50–70%: only the 50% Jumia deal
+  assert.equal(doc.querySelector("#d_range button.on").dataset.r, "r5070");
+  assert.deepEqual([...doc.querySelectorAll(".dc .off")].map((x) => x.textContent), ["-50%"]);
+  [...doc.querySelectorAll("#d_range button")].find((b) => b.dataset.r === "all").click();
+  assert.ok(doc.querySelectorAll(".dc").length >= 5);
+  assert.equal(prefs.dealRange, "all");
   assert.equal(doc.querySelector(".dc .off").textContent, "-50%");
   [...doc.querySelectorAll("#d_sort button")].find((b) => b.dataset.k === "price").click();
   assert.match(doc.querySelector(".dc .ttl").textContent, /SSD|Air Fryer/);
@@ -106,4 +112,22 @@ test("UI: ⚡ tab shows deal cards, sorting and store filter", async () => {
   assert.ok(prefs.dealsCache, "cached for instant reopen");
   doc.querySelector("#nav_search").click();
   assert.equal(doc.querySelector("#searchView").hidden, false);
+});
+
+test("Amazon deals: several percent-off pages, merged; one failing page doesn't kill the store", async () => {
+  const amazon = S["Amazon.eg"];
+  assert.ok(amazon.deals.urls.length >= 8 && amazon.deals.urls.every((u) => u.includes("rh=p_8%3A50-")));
+  const page = (title, p, old, asin) => `<div data-component-type="s-search-result"><a class="a-link-normal" href="/dp/${asin}"><h2><span>${title}</span></h2></a>
+    <span class="a-price"><span class="a-offscreen">EGP ${p}</span></span><span class="a-price a-text-price"><span class="a-offscreen">EGP ${old}</span></span></div>`;
+  let n = 0;
+  const fetcher = (url) => {
+    n++;
+    if (url.includes("k=electronics")) return Promise.resolve(page("JBL Speaker", "1,200", "3,000", "B1"));
+    if (url.includes("k=kitchen")) return Promise.resolve(page("Air Fryer", "1,500", "3,000", "B2") + page("Toaster", "900", "1,000", "B3"));
+    return Promise.reject(new Error("HTTP 503"));
+  };
+  const r = await E.deals({ stores: [amazon], fetcher, DOMParser, timeout: 200 });
+  assert.equal(n, amazon.deals.urls.length);
+  assert.deepEqual(r.deals.map((o) => [o.title, o.pct]), [["JBL Speaker", 60], ["Air Fryer", 50], ["Toaster", 10]]);  // range chips in the UI pick 50–70%
+  assert.equal(r.sources[0].ok, true);
 });

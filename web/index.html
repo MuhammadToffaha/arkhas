@@ -51,6 +51,7 @@ input:focus{outline:none;border-color:var(--accent)}
 .chips{display:flex;gap:6px;overflow-x:auto;padding:8px 0 2px;scrollbar-width:none}
 .chips button{flex:none;font:inherit;font-size:13px;padding:5px 12px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--ink)}
 .chips button.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+#d_range button.on{background:#e0412f;border-color:#e0412f;color:#fff}
 .dg{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
 .dc{position:relative;display:flex;flex-direction:column;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px;color:inherit;text-decoration:none}
 .dc img{width:100%;height:120px;object-fit:contain;border-radius:10px;background:#fff}
@@ -106,6 +107,7 @@ table{border-collapse:collapse;width:100%;font-size:12.5px}td{padding:4px;border
     </div>
     <div class="muted" id="d_sub"></div>
     <div class="bar" id="d_bar" hidden><i></i></div>
+    <div class="chips" id="d_range"></div>
     <div class="chips" id="d_sort"></div>
     <div class="chips" id="d_stores"></div>
     <div id="d_out"></div>
@@ -165,7 +167,7 @@ const readConfig = async (name) => (N ? N.readConfig(name) : (await fetch(name))
 const T = {
   ar: { tag: "أرخص سعر في مصر", go: "ابحث", ph: "اكتب المنتج… مثال: ايفون 15 برو", hint: "نبحث في المتاجر المصرية بالعربي والإنجليزي ونجيب لك أرخص 3",
     top: "🏆 أرخص 3 أسعار", all: "كل العروض ({n})", fb: "📘 فيسبوك والمستعمل", searched: "بحثنا عن:", none: "مفيش نتائج مطابقة لسه…",
-    noneDone: "مفيش نتائج مطابقة. جرّب اسم أدق.", src: "حالة المتاجر", navSearch: "بحث", navStatus: "المتاجر", navGear: "الإعدادات", acc: "إكسسوار؟", cheap: "سعر مريب", navDeals: "عروض", dealsTitle: "عروض فلاش", dealsSub: "أكبر الخصومات من أشهر {n} مواقع في مصر — اتحدّثت {t}", dealsLoading: "جاري جلب العروض من {done}/{all} موقع…", dealsNone: "مفيش عروض دلوقتي — اضغط ↻", sortPct: "أكبر خصم", sortPrice: "الأرخص", sortSave: "أكبر توفير", allStores: "الكل", justNow: "الآن", minAgo: "من {m} دقيقة", banner: "🎉 نسخة جديدة {v} — اضغط للتحديث", openRel: "⬇️ تنزيل {v} من GitHub", relNote: "هتتفتح صفحة التنزيل — نزّل الملف وافتحه للتثبيت. بعد كده التحديث هيكون من جوه التطبيق", upd: "🔄 التحديثات", cur: "نسختك {v}", check: "تحقق من التحديث", checking: "جاري التحقق…", latest: "عندك أحدث نسخة ✓",
+    noneDone: "مفيش نتائج مطابقة. جرّب اسم أدق.", src: "حالة المتاجر", navSearch: "بحث", navStatus: "المتاجر", navGear: "الإعدادات", acc: "إكسسوار؟", cheap: "سعر مريب", rAll: "كل الخصومات", r30: "30%+", r5070: "🔥 50–70%", r70: "70%+", rNone: "مفيش عروض في النطاق ده — جرّب نطاق تاني", navDeals: "عروض", dealsTitle: "عروض فلاش", dealsSub: "أكبر الخصومات من أشهر {n} مواقع في مصر — اتحدّثت {t}", dealsLoading: "جاري جلب العروض من {done}/{all} موقع…", dealsNone: "مفيش عروض دلوقتي — اضغط ↻", sortPct: "أكبر خصم", sortPrice: "الأرخص", sortSave: "أكبر توفير", allStores: "الكل", justNow: "الآن", minAgo: "من {m} دقيقة", banner: "🎉 نسخة جديدة {v} — اضغط للتحديث", openRel: "⬇️ تنزيل {v} من GitHub", relNote: "هتتفتح صفحة التنزيل — نزّل الملف وافتحه للتثبيت. بعد كده التحديث هيكون من جوه التطبيق", upd: "🔄 التحديثات", cur: "نسختك {v}", check: "تحقق من التحديث", checking: "جاري التحقق…", latest: "عندك أحدث نسخة ✓",
     newVer: "نسخة جديدة {v} متاحة ({mb} ميجا)", install: "⬇️ تنزيل وتثبيت {v}", downloading: "جاري التنزيل… {p}%", installing: "افتح شاشة التثبيت واضغط تثبيت",
     perm: "اسمح لـ أرخص بتثبيت التحديثات (فتحنا لك الإعداد) ثم ارجع واضغط تثبيت تاني", webBtn: "تحديث قائمة المتاجر", webSame: "قائمة المتاجر محدّثة ✓",
     webChanged: "تم تحديث المتاجر — جاري إعادة التحميل…", updErr: "تعذّر: {e}", exact: "✓ مطابق", similar: "≈ مشابه", other: "موديل مختلف", fewExact: "لقينا {n} بس مطابقين تمامًا — الباقي مشابه", egp: "ج.م", save: "وفّر {n}",
@@ -173,7 +175,7 @@ const T = {
     city: "مدينة فيسبوك ماركت بليس", stores: "المتاجر", saveBtn: "حفظ", ver: "نسخة", hidden: "تم إخفاء {n} نتيجة غير مطابقة" },
   en: { tag: "Best price in Egypt", go: "Search", ph: "Product… e.g. iphone 15 pro", hint: "Searching Egyptian stores in Arabic & English — top 3 cheapest",
     top: "🏆 Top 3 prices", all: "All offers ({n})", fb: "📘 Facebook & used", searched: "Searched:", none: "No matches yet…",
-    noneDone: "No matching results. Try a more specific name.", src: "Store status", navSearch: "Search", navStatus: "Stores", navGear: "Settings", acc: "accessory?", cheap: "suspicious price", navDeals: "Deals", dealsTitle: "Flash deals", dealsSub: "Biggest discounts from {n} top Egyptian sites — updated {t}", dealsLoading: "Fetching deals from {done}/{all} sites…", dealsNone: "No deals right now — tap ↻", sortPct: "Biggest % off", sortPrice: "Cheapest", sortSave: "Most saved", allStores: "All", justNow: "just now", minAgo: "{m} min ago", banner: "🎉 New version {v} — tap to update", openRel: "⬇️ Download {v} from GitHub", relNote: "The download page opens — download the file and open it to install. After this, updates happen inside the app", upd: "🔄 Updates", cur: "You have {v}", check: "Check for update", checking: "Checking…", latest: "You have the latest version ✓",
+    noneDone: "No matching results. Try a more specific name.", src: "Store status", navSearch: "Search", navStatus: "Stores", navGear: "Settings", acc: "accessory?", cheap: "suspicious price", rAll: "All discounts", r30: "30%+", r5070: "🔥 50–70%", r70: "70%+", rNone: "No deals in this range — try another one", navDeals: "Deals", dealsTitle: "Flash deals", dealsSub: "Biggest discounts from {n} top Egyptian sites — updated {t}", dealsLoading: "Fetching deals from {done}/{all} sites…", dealsNone: "No deals right now — tap ↻", sortPct: "Biggest % off", sortPrice: "Cheapest", sortSave: "Most saved", allStores: "All", justNow: "just now", minAgo: "{m} min ago", banner: "🎉 New version {v} — tap to update", openRel: "⬇️ Download {v} from GitHub", relNote: "The download page opens — download the file and open it to install. After this, updates happen inside the app", upd: "🔄 Updates", cur: "You have {v}", check: "Check for update", checking: "Checking…", latest: "You have the latest version ✓",
     newVer: "New version {v} available ({mb} MB)", install: "⬇️ Download & install {v}", downloading: "Downloading… {p}%", installing: "Tap Install on the Android screen",
     perm: "Allow Arkhas to install updates (settings opened), then come back and tap install again", webBtn: "Refresh store list", webSame: "Store list is up to date ✓",
     webChanged: "Stores updated — reloading…", updErr: "Failed: {e}", exact: "✓ exact", similar: "≈ similar", other: "other model", fewExact: "Only {n} exact match(es) — the rest are similar", egp: "EGP", save: "save {n}",
@@ -304,6 +306,8 @@ $("#s_save").onclick = () => {
 
 // ---------- ⚡ flash deals ----------
 let dealsData = null, dealsBusy = false, dealSort = "pct", dealStore = "";
+let dealRange = null;   // read from prefs on first use; default 50–70%
+const RANGES = { all: [10, 95], r30: [30, 95], r5070: [50, 70], r70: [70, 95] };
 const DEALS_TTL = 60 * 60 * 1000;   // reuse fetched deals for 1 hour
 
 function showView(v) {
@@ -320,16 +324,21 @@ function renderDeals(done = true) {
   const mins = Math.round((Date.now() - d.at) / 60000);
   $("#d_sub").textContent = done ? fmt(t.dealsSub, { n: d.total, t: mins < 1 ? t.justNow : fmt(t.minAgo, { m: mins }) })
     : fmt(t.dealsLoading, { done: d.sources.length, all: d.total });
+  if (!dealRange) dealRange = RANGES[pref("dealRange")] ? pref("dealRange") : "r5070";
+  const [lo, hi] = RANGES[dealRange];
+  $("#d_range").innerHTML = [["all", t.rAll], ["r30", t.r30], ["r5070", t.r5070], ["r70", t.r70]]
+    .map(([k, n]) => `<button data-r="${k}" class="${dealRange === k ? "on" : ""}">${n} · ${d.deals.filter((o) => o.pct >= RANGES[k][0] && o.pct <= RANGES[k][1]).length}</button>`).join("");
+  const inRange = d.deals.filter((o) => o.pct >= lo && o.pct <= hi);
   const sorts = [["pct", t.sortPct], ["save", t.sortSave], ["price", t.sortPrice]];
   $("#d_sort").innerHTML = sorts.map(([k, n]) => `<button data-k="${k}" class="${dealSort === k ? "on" : ""}">${n}</button>`).join("");
   const counts = {};
-  for (const o of d.deals) counts[o.source] = (counts[o.source] || 0) + 1;
-  $("#d_stores").innerHTML = [["", `${t.allStores} · ${d.deals.length}`], ...Object.entries(counts).sort((a, b) => b[1] - a[1]).map(([n, c]) => [n, `${n} · ${c}`])]
+  for (const o of inRange) counts[o.source] = (counts[o.source] || 0) + 1;
+  $("#d_stores").innerHTML = [["", `${t.allStores} · ${inRange.length}`], ...Object.entries(counts).sort((a, b) => b[1] - a[1]).map(([n, c]) => [n, `${n} · ${c}`])]
     .map(([k, n]) => `<button data-s="${esc(k)}" class="${dealStore === k ? "on" : ""}">${esc(n)}</button>`).join("");
-  let list = d.deals.filter((o) => !dealStore || o.source === dealStore);
+  let list = inRange.filter((o) => !dealStore || o.source === dealStore);
   const by = { pct: (a, b) => b.pct - a.pct, save: (a, b) => (b.old_price - b.price) - (a.old_price - a.price), price: (a, b) => a.price - b.price };
   list = list.slice().sort(by[dealSort]).slice(0, 120);
-  if (!list.length) { $("#d_out").innerHTML = done ? `<div class="empty">${t.dealsNone}</div>` : ""; return; }
+  if (!list.length) { $("#d_out").innerHTML = done ? `<div class="empty">${d.deals.length ? t.rNone : t.dealsNone}</div>` : ""; return; }
   $("#d_out").innerHTML = `<div class="dg">${list.map((o) => `<a class="dc" href="${esc(o.url)}"><span class="off">-${o.pct}%</span>${img(o)}
     <div class="ttl">${esc(o.title)}</div><div class="p">${money(o.price)}</div><div class="old">${money(o.old_price)}</div>
     <div class="src">${esc(o.source)}</div></a>`).join("")}</div>`;
@@ -354,6 +363,7 @@ async function loadDeals(force) {
 
 $("#nav_deals").onclick = () => { showView("deals"); loadDeals(false); };
 $("#d_refresh").onclick = () => loadDeals(true);
+$("#d_range").onclick = (e) => { const k = e.target.dataset && e.target.dataset.r; if (k) { dealRange = k; setPref("dealRange", k); dealStore = ""; renderDeals(); } };
 $("#d_sort").onclick = (e) => { const k = e.target.dataset && e.target.dataset.k; if (k) { dealSort = k; renderDeals(); } };
 $("#d_stores").onclick = (e) => { const k = e.target.dataset ? e.target.dataset.s : undefined; if (k !== undefined) { dealStore = k; renderDeals(); } };
 
