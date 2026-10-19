@@ -20,6 +20,41 @@ docker compose up -d --build
 
 API: `GET /api/search?q=غسالة سامسونج` · `GET /api/health` · add `&fresh=true` to skip the 15-min cache.
 
+## 📱 Android app
+
+The app is a light native shell; the search UI and scrapers live on your server.
+
+```
+phone app ──► your Arkhas server (Docker) ──► stores / Google Shopping
+   │                    ▲
+   └── checks GitHub Releases for new APK
+```
+
+**Install**
+1. On the phone open **[Releases](https://github.com/MuhammadToffaha/arkhas/releases/latest)** → download `arkhas-1.0.N.apk` → allow "install unknown apps" once.
+2. First launch asks for the server address, e.g. `http://192.168.1.50:8080` (home Wi-Fi) or your HTTPS tunnel URL.
+
+**Extras**
+- 🔗 **Share** a product from any app (Amazon, Facebook, WhatsApp…) → choose **أرخص** → instant price search.
+- ✂️ Select text anywhere → **بحث بأرخص سعر** in the text menu.
+- Store / Facebook links open in their own apps.
+- ⋮ menu: Reload · Server · Check for updates.
+
+**Updating**
+
+| You changed… | What to do | Phone |
+|---|---|---|
+| Scrapers, stores, UI (`backend/`) | `git pull && docker compose up -d --build` on server | Pull-to-refresh. No new APK. |
+| The app itself (`android/`) | `git push` | GitHub Actions builds APK + Release → app says "New version" |
+
+Rebuild without code change: Actions → **android-apk** → Run workflow (can pre-fill your server URL).
+
+**Reaching the server outside home**: put it behind [Cloudflare Tunnel](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/) or [Tailscale](https://tailscale.com) and use that HTTPS URL in the app.
+
+**Signing key**: `android/keystore/arkhas.jks` keeps every build installable over the last one. For better security move it into repo secrets `ARKHAS_KEYSTORE_B64` (base64 of the file) and `ARKHAS_KEYSTORE_PASSWORD` (Settings → Secrets → Actions), then delete the file and the fallback password from `.github/workflows/android.yml`. Keep the same key, or users must uninstall once.
+
+Web alternative: open the server in Chrome → ⋮ → **Add to Home screen**.
+
 ## 🧩 How it works
 
 | Part | File | Notes |

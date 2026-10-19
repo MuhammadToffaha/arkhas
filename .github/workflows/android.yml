@@ -1,0 +1,75 @@
+name: android-apk
+
+# Builds the Android app and publishes it as a GitHub Release.
+# The app checks the latest release on start and offers the update.
+on:
+  push:
+    branches: [main]
+    paths: ["android/**", ".github/workflows/android.yml"]
+  workflow_dispatch:
+    inputs:
+      default_server:
+        description: "Server URL pre-filled on first launch (optional), e.g. http://192.168.1.50:8080"
+        required: false
+
+permissions:
+  contents: write
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: android
+    env:
+      ARKHAS_DEFAULT_SERVER: ${{ inputs.default_server }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: android-actions/setup-android@v3
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.10.2"
+
+      # Signing: repo secrets win; otherwise the keystore committed in android/keystore is used.
+      # Same key every build -> new APK installs over the old one.
+      - name: Prepare signing key
+        env:
+          KS_B64: ${{ secrets.ARKHAS_KEYSTORE_B64 }}
+          KS_PW: ${{ secrets.ARKHAS_KEYSTORE_PASSWORD }}
+        run: |
+          if [ -n "$KS_B64" ]; then
+            echo "$KS_B64" | base64 -d > "$RUNNER_TEMP/arkhas.jks"
+            echo "ARKHAS_KEYSTORE=$RUNNER_TEMP/arkhas.jks" >> "$GITHUB_ENV"
+            echo "ARKHAS_KEYSTORE_PASSWORD=$KS_PW" >> "$GITHUB_ENV"
+          else
+            echo "ARKHAS_KEYSTORE=$GITHUB_WORKSPACE/android/keystore/arkhas.jks" >> "$GITHUB_ENV"
+            echo "ARKHAS_KEYSTORE_PASSWORD=aUx1xb-XXA9InBr-fZ1jxs4hQ_RmVy6c" >> "$GITHUB_ENV"
+          fi
+
+      - name: Build APK
+        run: gradle --no-daemon assembleRelease
+
+      - name: Rename
+        run: cp app/build/outputs/apk/release/app-release.apk "$GITHUB_WORKSPACE/arkhas-1.0.${{ github.run_number }}.apk"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: arkhas-apk
+          path: arkhas-*.apk
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ github.run_number }}
+          name: Arkhas 1.0.${{ github.run_number }}
+          body: |
+            📱 Install: open this page on your phone → download the APK → allow "install unknown apps" once.
+            Already installed? The app shows "New version" on next start.
+          files: arkhas-*.apk
+          make_latest: true

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="green">#0E7A5F</color>
+    <color name="green_dark">#0A5A46</color>
+    <color name="sand">#F6F3EC</color>
+    <style name="Theme.Arkhas" parent="Theme.AppCompat.DayNight.DarkActionBar">
+        <item name="colorPrimary">@color/green</item>
+        <item name="colorPrimaryDark">@color/green_dark</item>
+        <item name="colorAccent">@color/green</item>
+        <item name="android:windowBackground">@color/sand</item>
+    </style>
+</resources>
