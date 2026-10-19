@@ -107,8 +107,22 @@ test("UI: ⚡ tab shows deal cards, sorting and store filter", async () => {
   assert.equal(doc.querySelector(".dc .off").textContent, "-50%");
   [...doc.querySelectorAll("#d_sort button")].find((b) => b.dataset.k === "price").click();
   assert.match(doc.querySelector(".dc .ttl").textContent, /SSD|Air Fryer/);
-  [...doc.querySelectorAll("#d_stores button")].find((b) => b.dataset.s === "Cairo Sales").click();
+  // store dropdown: closed by default, opens, "clear all" then tick one store
+  assert.equal(doc.querySelector("#d_panel").hidden, true);
+  doc.querySelector("#d_ddbtn").click();
+  assert.equal(doc.querySelector("#d_panel").hidden, false);
+  assert.ok(doc.querySelectorAll("#d_stores input[type=checkbox]").length >= 20, "every store with deals is listed");
+  doc.querySelector("#d_none").click();
+  assert.equal(doc.querySelectorAll(".dc").length, 0);
+  const box = doc.querySelector('#d_stores input[data-s="Cairo Sales"]');
+  box.checked = true; box.dispatchEvent(new win.Event("change", { bubbles: true }));
   assert.equal(doc.querySelectorAll(".dc").length, 1);
+  assert.match(doc.querySelector("#d_ddlbl").textContent, /Cairo Sales/);
+  assert.ok(!JSON.parse(prefs.dealHide).includes("Cairo Sales"), "choice remembered");
+  doc.body.click();
+  assert.equal(doc.querySelector("#d_panel").hidden, true, "tap outside closes the list");
+  // bigger labelled refresh button
+  assert.ok(doc.querySelector("#d_refresh.dref #d_ref_l").textContent.length > 0);
   assert.ok(prefs.dealsCache, "cached for instant reopen");
   doc.querySelector("#nav_search").click();
   assert.equal(doc.querySelector("#searchView").hidden, false);
