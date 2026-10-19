@@ -64,3 +64,17 @@ test("noon mega deals: own page, tagged, kept even without old price, preferred 
   const t = r.deals.map((o) => [o.title, o.pct, o.tag || null]);
   assert.deepEqual(t, [["AirPods Pro 2", 43, "mega"], ["Tefal Kettle", 0, "mega"]], "deduped, mega copy kept, no-old-price mega item kept");
 });
+
+test("pictures: lazy-load placeholders skipped, real URL found (data-src, srcset, picture, CDN url in markup)", () => {
+  const cases = [
+    [`<img src="data:image/gif;base64,R0lGOD" data-src="https://f.nooncdn.com/p/a.jpg">`, "https://f.nooncdn.com/p/a.jpg"],
+    [`<img src="data:image/gif;base64,R0" srcset="https://f.nooncdn.com/p/s1.jpg 1x, https://f.nooncdn.com/p/s2.jpg 2x">`, "https://f.nooncdn.com/p/s2.jpg"],
+    [`<picture><source srcset="https://f.nooncdn.com/p/w.webp"><img src="/placeholder.png"></picture>`, "https://f.nooncdn.com/p/w.webp"],
+    [`<div style="background-image:url('https://f.nooncdn.com/p/bg.jpg')"></div>`, "https://f.nooncdn.com/p/bg.jpg"],
+    [`<img src="https://f.nooncdn.com/p/plain.jpg">`, "https://f.nooncdn.com/p/plain.jpg"],
+  ];
+  for (const [imgHtml, want] of cases) {
+    const html = `<span class="productContainer"><a href="/egypt-en/x/N1/p/">${imgHtml}<div data-qa="product-name">Item name here</div><strong class="amount">1,000</strong></a></span>`;
+    assert.equal(E.parse(html, NOON, DOMParser)[0].image, want, imgHtml);
+  }
+});

@@ -324,18 +324,44 @@
     return sel1(el, spec);
   }
 
+  const isPlaceholder = (u) => !u || /^data:|^blob:|placeholder|spacer|blank\.(gif|png)|loading\.(gif|svg)|1x1/i.test(u);
+  const firstSrcset = (v) => { const parts = String(v || "").split(",").map((p) => p.trim().split(/\s+/)[0]).filter(Boolean); return parts[parts.length - 1] || null; };
+
+  /**
+   * Real picture URL for a product, even on lazy-loading sites (Noon, Amazon…) whose <img src> is a placeholder
+   * until the image scrolls into view: data-src / data-lazy / srcset / <source srcset> / background-image / CDN URL in markup.
+   */
+  function realImg(card, css) {
+    let imgs = [];
+    try { imgs = [...card.querySelectorAll(css || "img")]; } catch (_) {}
+    if (!imgs.length) try { imgs = [...card.querySelectorAll("img")]; } catch (_) {}
+    for (const im of imgs) {
+      for (const a of ["data-src", "data-lazy-src", "data-original", "data-lazy", "data-image", "data-img"]) {
+        const v = im.getAttribute(a); if (!isPlaceholder(v)) return v;
+      }
+      const ss = firstSrcset(im.getAttribute("data-srcset") || im.getAttribute("srcset"));
+      if (!isPlaceholder(ss)) return ss;
+      const v = im.getAttribute("src"); if (!isPlaceholder(v)) return v;
+      const pic = im.closest && im.closest("picture");
+      const src = pic && pic.querySelector("source[srcset]");
+      if (src && !isPlaceholder(firstSrcset(src.getAttribute("srcset")))) return firstSrcset(src.getAttribute("srcset"));
+    }
+    const html = (card.innerHTML || "").replace(/&quot;/g, '"').replace(/&amp;/g, "&");
+    const bg = html.match(/background-image:\s*url\((['"]?)([^'")]+)\1\)/i);
+    if (bg && !isPlaceholder(bg[2])) return bg[2];
+    const cdn = html.match(/https?:\/\/[^"'\s)]*(?:nooncdn\.com|media-amazon\.com|jumia\.is)[^"'\s)]*?\.(?:jpe?g|png|webp)(?:\?[^"'\s)]*)?/i);
+    return cdn ? cdn[0] : null;
+  }
+
   function sel1(el, spec) {
     const i = spec.lastIndexOf("@");
     const css = i > 0 ? spec.slice(0, i) : spec, attr = i > 0 ? spec.slice(i + 1) : null;
+    if (attr === "src" || attr === "data-src") return realImg(el, css);   // works even when the card has no <img> yet
     let node;
     try { node = el.querySelector(css); } catch (_) { return null; }
     if (!node) return null;
     if (attr) {
-      let v = node.getAttribute(attr);
-      if (!v && (attr === "src" || attr === "data-src")) {
-        v = node.getAttribute("data-src") || node.getAttribute("src") || (node.getAttribute("srcset") || "").split(" ")[0];
-      }
-      return v || null;
+      return node.getAttribute(attr) || null;
     }
     return (node.textContent || "").replace(/\s+/g, " ").trim() || null;
   }

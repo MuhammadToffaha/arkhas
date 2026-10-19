@@ -75,6 +75,9 @@ input:focus{outline:none;border-color:var(--accent)}
 .dd-row input{width:20px;height:20px;accent-color:var(--accent)}
 .dd-row .c{margin-inline-start:auto;font-size:12px;color:var(--muted)}
 .pc,.row,.dc{position:relative}
+.noimg{display:flex;align-items:center;justify-content:center;width:64px;height:64px;flex:none;border-radius:10px;background:var(--line);font-size:26px;opacity:.7}
+.row .noimg{width:46px;height:46px;font-size:20px}
+.dc .noimg{width:100%;height:120px;font-size:40px}
 .fav{position:absolute;z-index:2;top:6px;inset-inline-end:6px;width:34px;height:34px;border-radius:50%;border:0;background:var(--card);box-shadow:0 1px 4px #0002;font-size:17px;line-height:34px;padding:0;color:#c9c2b6}
 .fav.on{color:#e0412f}
 .row .fav{top:50%;transform:translateY(-50%);width:30px;height:30px;line-height:30px;font-size:15px}
@@ -262,7 +265,10 @@ function applyLang() {
 $("#langseg").onclick = (e) => { const l = e.target.dataset && e.target.dataset.l; if (l && l !== L) { L = l; setPref("lang", L); applyLang(); if ($("#sheet").classList.contains("on")) $("#gear").click(); } };
 
 // ---------- render ----------
-const img = (o) => (o.image ? `<img src="${esc(o.image)}" alt="" loading="lazy" referrerpolicy="no-referrer">` : "");
+// product picture; if missing or it fails to load, a neutral placeholder keeps the card layout
+const img = (o) => o.image
+  ? `<img src="${esc(o.image)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.outerHTML='<span class=noimg>🛍️</span>'">`
+  : `<span class="noimg">🛍️</span>`;
 const flags = (o) => o.flags.map((f) => `<span class="flag">${f === "possible-accessory" ? T[L].acc : f === "other-model" ? T[L].other : T[L].cheap}</span>`).join("");
 const badge = (o) => `<span class="mb ${o.match === 0 ? "ex" : "si"}">${o.match === 0 ? T[L].exact : T[L].similar}</span>`;
 
