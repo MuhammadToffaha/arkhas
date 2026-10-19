@@ -66,6 +66,18 @@
       "kind": "html",
       "render": true,
       "urls": [
+        {
+          "url": "https://www.noon.com/egypt-en/megadeals-eg/",
+          "tag": "mega"
+        },
+        {
+          "url": "https://www.noon.com/egypt-ar/megadeals-eg/",
+          "tag": "mega"
+        },
+        {
+          "url": "https://www.noon.com/egypt-en/daily-deals-eg/",
+          "tag": "daily"
+        },
         "https://www.noon.com/egypt-en/deals/",
         "https://www.noon.com/egypt-en/search/?q=sale&sort[by]=discount_percent&sort[dir]=desc"
       ],

@@ -617,7 +617,9 @@
     const all = [], sources = [];
     const snap = () => {
       const seen = new Set();
-      const list = all.filter((o) => { const k = o.source + "|" + o.url.split("?")[0]; if (seen.has(k)) return false; seen.add(k); return true; })
+      // same product from several pages: keep the tagged (Mega Deals) copy
+      const list = all.slice().sort((a, b) => !!b.tag - !!a.tag)
+        .filter((o) => { const k = o.source + "|" + o.url.split("?")[0]; if (seen.has(k)) return false; seen.add(k); return true; })
         .sort((a, b) => b.pct - a.pct || a.price - b.price);
       return { deals: list, sources: sources.slice(), total: stores.length, at: Date.now() };
     };
@@ -633,16 +635,21 @@
           const sel = Object.assign({}, s, s.deals);   // deals page may need its own selectors
           const opts = s.deals.render ? { render: true, wait: sel.wait || (sel.item || "").split(",")[0] || null, lang: "en" } : { lang: "en" };
           // several pages per store (e.g. Amazon: one percent-off page per category); keep whatever answers
-          const pages = await Promise.allSettled(feed.urls(s).map((u) =>
-            withTimeout(opt.fetcher(u, opts), s.deals.render ? opt.renderTimeout : opt.timeout).then((html) => parse(html, sel, opt.DOMParser, 80))));
+          // a page may be {url, tag}: e.g. Noon "mega" deals get a badge and their own filter
+          const pages = await Promise.allSettled(feed.urls(s).map((p) => {
+            const u = typeof p === "string" ? p : p.url, tag = typeof p === "string" ? null : p.tag || null;
+            return withTimeout(opt.fetcher(u, opts), s.deals.render ? opt.renderTimeout : opt.timeout)
+              .then((html) => parse(html, sel, opt.DOMParser, 80).map((o) => Object.assign(o, tag ? { tag } : {})));
+          }));
           const okPages = pages.filter((x) => x.status === "fulfilled");
           if (!okPages.length) throw pages[0].reason;
           got = okPages.flatMap((x) => x.value);
         }
         const keep = got.filter((o) => o.title && o.price && o.url)
           .map((o) => Object.assign(o, { pct: pctOff(o), source: s.name }))
-          .filter((o) => o.pct >= opt.minPct && o.pct < 95)            // 95%+ off is almost always a data error
-          .sort((a, b) => b.pct - a.pct).slice(0, opt.perStore);
+          // tagged pages (Mega Deals) are deals by definition, even when the old price isn't shown
+          .filter((o) => (o.pct >= opt.minPct || o.tag) && o.pct < 95)   // 95%+ off is almost always a data error
+          .sort((a, b) => !!b.tag - !!a.tag || b.pct - a.pct).slice(0, Math.max(opt.perStore, got.filter((o) => o.tag).length));
         all.push(...keep);
         sources.push({ source: s.name, ok: true, count: keep.length, ms: Date.now() - t0, error: null });
       } catch (e) {
