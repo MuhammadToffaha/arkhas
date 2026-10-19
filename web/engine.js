@@ -43,10 +43,16 @@
     }
   }
 
+  // Arabic attached prefixes: الايفون / بالايفون / والشاشه / للغساله -> bare word
+  const AR_PREFIX = /^(وال|بال|فال|كال|لل|ال)(?=[؀-ۿ]{3,})/;
+  const stripAr = (t) => (isArabic(t) ? t.replace(AR_PREFIX, "") : t);
+
   function equivalents(token) {
     const t = normalize(token);
     const s = new Set(LOOKUP.get(t) || []);
     s.add(t);
+    const bare = stripAr(t);
+    if (bare !== t) { s.add(bare); for (const g of LOOKUP.get(bare) || []) s.add(g); }
     return s;
   }
 
@@ -69,7 +75,10 @@
     const words = [];
     for (const part of out.split(/(\u0000[^\u0000]*\u0000)/)) {
       if (part.startsWith("\u0000")) { words.push(part.replace(/\u0000/g, "")); continue; }
-      for (const w of part.split(" ").filter(Boolean)) words.push(LOOKUP.has(w) ? pick(LOOKUP.get(w), toArabic) : w);
+      for (const w of part.split(" ").filter(Boolean)) {
+        const k = LOOKUP.has(w) ? w : LOOKUP.has(stripAr(w)) ? stripAr(w) : null;
+        words.push(k ? pick(LOOKUP.get(k), toArabic) : w);
+      }
     }
     return words.join(" ").trim();
   }
@@ -78,6 +87,33 @@
     const q = query.trim();
     const other = translateQuery(q, !isArabic(q));
     return other && normalize(other) !== normalize(q) ? [q, other] : [q];
+  }
+
+  /** Arabic words the dictionary could not translate (brands, models, slang). */
+  const untranslated = (q) => tokens(translateQuery(q, false)).filter((w) => isArabic(w));
+
+  /** Google Translate (free web endpoint) for queries the dictionary can't fully handle. Falls back silently. */
+  async function translateRemote(q, fetcher, from = "ar", to = "en") {
+    const url = "https://translate.googleapis.com/translate_a/single?client=gtx&dt=t&sl=" + from + "&tl=" + to + "&q=" + encodeURIComponent(q);
+    const data = JSON.parse(await fetcher(url, { json: true, lang: "en" }));
+    const out = (data[0] || []).map((p) => p[0]).join("").trim();
+    return out || null;
+  }
+
+  /** [original, translation] — dictionary first, Google for Arabic words it doesn't know. */
+  async function queryVariantsAsync(query, fetcher, timeoutMs = 2500) {
+    const v = queryVariants(query);
+    if (!isArabic(query) || !untranslated(query).length || !fetcher) return v;
+    try {
+      const t = await withTimeout(translateRemote(query, fetcher), timeoutMs);
+      if (t && !isArabic(t)) return [v[0], t.toLowerCase()];
+    } catch (_) { /* offline / blocked: keep dictionary version */ }
+    return v;
+  }
+
+  function withTimeout(p, ms, label = "timeout") {
+    let t;
+    return Promise.race([p, new Promise((_, rej) => { t = setTimeout(() => rej(new Error(label)), ms); })]).finally(() => clearTimeout(t));
   }
 
   // ---------------- price ----------------
@@ -103,20 +139,35 @@
   const ACCESSORY = new Set(["case", "cover", "protector", "screen protector", "glass", "skin", "strap", "cable", "adapter",
     "holder", "stand", "sticker", "pouch", "sleeve", "replacement", "spare", "charger", "cases",
     "جراب", "كفر", "اسكرينه", "سكرينه", "حمايه", "لزقه", "كابل", "وصله", "حامل", "استاند", "غطاء", "شاحن"]);
-  const STOP = new Set(["the", "a", "an", "and", "with", "of", "in", "new", "ال", "و", "مع", "في", "من", "جديد"]);
+  const STOP = new Set(["the", "a", "an", "and", "with", "of", "in", "new", "for", "ال", "و", "مع", "في", "من", "جديد", "ل"]);
+  // words that describe the wish, not the product: "ارخص ايفون 15" -> "ايفون 15"
+  const INTENT = new Set(["سعر", "اسعار", "ارخص", "رخيص", "افضل", "احسن", "عرض", "عروض", "بكام", "كام", "price", "prices",
+    "cheap", "cheapest", "best", "offer", "offers", "deal", "deals", "buy"]);
+  function cleanQuery(q) {
+    const kept = String(q).trim().split(/\s+/).filter((w) => !INTENT.has(normalize(w)));
+    return kept.length ? kept.join(" ") : String(q).trim();
+  }
 
-  function relevance(query, title) {
+  function relevanceOne(query, title) {
     const q = tokens(query).filter((t) => !STOP.has(t));
     if (!q.length) return 0;
-    const tt = tokens(title), tset = new Set(tt), tnorm = tt.join(" ");
+    const tt = tokens(title), tnorm = tt.join(" ");
+    const tset = new Set(tt.concat(tt.map(stripAr)));
     let hits = 0;
     for (const t of q) {
       const eq = equivalents(t);
       if ([...eq].some((e) => (e.includes(" ") && tnorm.includes(e)) || tset.has(e))) hits += 1;
       else if (/^\d+$/.test(t) && tt.some((w) => w.includes(t))) hits += 0.8;
-      else if (t.length >= 4 && tt.some((w) => w.length >= 3 && (w.startsWith(t) || t.startsWith(w)))) hits += 0.6;
+      else if (t.length >= 4 && [...tset].some((w) => w.length >= 3 && (w.startsWith(stripAr(t)) || stripAr(t).startsWith(w)))) hits += 0.6;
     }
     return Math.round((hits / q.length) * 1000) / 1000;
+  }
+
+  /** Best match over the original query and its translations (an Arabic query vs English titles and vice versa). */
+  function relevance(query, title, variants) {
+    let best = relevanceOne(query, title);
+    for (const v of variants || []) if (v !== query) best = Math.max(best, relevanceOne(v, title));
+    return best;
   }
 
   function isAccessory(query, title) {
@@ -124,10 +175,10 @@
     return tokens(title).slice(0, 6).some((t) => ACCESSORY.has(t));
   }
 
-  function rank(query, offers, minRelevance = 0.6) {
+  function rank(query, offers, minRelevance = 0.6, variants) {
     const seen = new Map();
     for (const o of offers) {
-      o.relevance = relevance(query, o.title);
+      o.relevance = relevance(query, o.title, variants);
       o.flags = o.flags || [];
       const key = o.source.toLowerCase() + "|" + o.url.split("?")[0].replace(/\/$/, "");
       if (!seen.has(key) || o.price < seen.get(key).price) seen.set(key, o);
@@ -155,8 +206,18 @@
     try { return new URL(link, base || undefined).href; } catch (_) { return link; }
   }
 
+  /** "a, b@href" -> tries each comma option in order; each option may carry its own @attr. */
   function sel(el, spec) {
     if (!spec) return null;
+    const parts = spec.split(/,(?![^\[]*\])/).map((p) => p.trim()).filter(Boolean);
+    if (parts.length > 1 && parts.some((p) => p.includes("@"))) {
+      for (const p of parts) { const v = sel1(el, p); if (v) return v; }
+      return null;
+    }
+    return sel1(el, spec);
+  }
+
+  function sel1(el, spec) {
     const i = spec.lastIndexOf("@");
     const css = i > 0 ? spec.slice(0, i) : spec, attr = i > 0 ? spec.slice(i + 1) : null;
     let node;
@@ -277,68 +338,161 @@
     ];
   }
 
+  // ---------------- fast JSON adapters (no page rendering) ----------------
+  const enc = (q) => encodeURIComponent(q);
+  const ENT = { amp: "&", lt: "<", gt: ">", quot: '"', apos: "'", nbsp: " " };
+  const decode = (t) => String(t || "").replace(/&(#x?[0-9a-f]+|\w+);/gi, (m, e) =>
+    e[0] === "#" ? String.fromCodePoint(e[1].toLowerCase() === "x" ? parseInt(e.slice(2), 16) : +e.slice(1)) : ENT[e.toLowerCase()] ?? m)
+    .replace(/<[^>]+>/g, "").trim();
+  const offer = (store, o) => Object.assign({ source: store.name, via: store.type, old_price: null, image: null }, o);
+
+  const MAGENTO_Q = (q) => `{products(search:${JSON.stringify(q)},pageSize:20){items{name url_key url_suffix small_image{url} ` +
+    `price_range{minimum_price{final_price{value} regular_price{value}}}}}}`;
+
+  const ADAPTERS = {
+    // Shopify predictive search — Dream 2000, Compumarts, Kimo Store, Tradeline …
+    shopify: {
+      url: (s, q) => `${s.base_url}/search/suggest.json?q=${enc(q)}&resources[type]=product&resources[limit]=10`,
+      parse: (d, s) => ((d.resources && d.resources.results && d.resources.results.products) || [])
+        .filter((p) => p.available !== false)
+        .map((p) => offer(s, { title: decode(p.title), price: parsePrice(p.price), old_price: parsePrice(p.compare_at_price_max),
+          url: absUrl(String(p.url || "").split("?")[0], s.base_url), image: p.image || (p.featured_image && p.featured_image.url) || null })),
+    },
+    // WooCommerce Store API — WordPress shops
+    woo: {
+      url: (s, q) => `${s.base_url}/wp-json/wc/store/v1/products?search=${enc(q)}&per_page=20`,
+      parse: (d, s) => (Array.isArray(d) ? d : []).filter((p) => p.is_in_stock !== false).map((p) => {
+        const pr = p.prices || {}, div = Math.pow(10, pr.currency_minor_unit ?? 2);
+        return offer(s, { title: decode(p.name), price: parsePrice(+pr.price / div), old_price: parsePrice(+pr.regular_price / div),
+          url: p.permalink, image: (p.images && p.images[0] && p.images[0].src) || null });
+      }),
+    },
+    // Magento 2 GraphQL — Raneen, Cairo Cart, Hyper One …
+    magento: {
+      url: (s, q) => `${s.graphql || s.base_url + "/graphql"}?query=${enc(MAGENTO_Q(q))}`,
+      parse: (d, s) => ((d.data && d.data.products && d.data.products.items) || []).map((p) => {
+        const mp = (p.price_range && p.price_range.minimum_price) || {};
+        return offer(s, { title: decode(p.name), price: parsePrice(mp.final_price && mp.final_price.value),
+          old_price: parsePrice(mp.regular_price && mp.regular_price.value),
+          url: `${s.product_base || s.base_url}/${p.url_key}${p.url_suffix ?? ".html"}`, image: (p.small_image && p.small_image.url) || null });
+      }),
+    },
+    // PrestaShop 1.7+ search controller in AJAX mode — Cairo Sales …
+    prestashop: {
+      url: (s, q) => `${s.base_url}${s.path ?? "/en"}/search?controller=search&s=${enc(q)}&ajax=1&resultsPerPage=20`,
+      parse: (d, s) => (d.products || []).map((p) => offer(s, { title: decode(p.name),
+        price: parsePrice(p.price_amount ?? p.price), old_price: parsePrice(p.regular_price_amount),
+        url: p.url || p.link, image: (p.cover && ((p.cover.medium && p.cover.medium.url) || (p.cover.small && p.cover.small.url))) || null })),
+    },
+    // IKEA public search service
+    ikea: {
+      url: (s, q) => `https://sik.search.blue.cdtapps.com/eg/${s.locale || "en"}/search-result-page?max-num-filters=0&size=24&q=${enc(q)}`,
+      parse: (d, s) => (((d.searchResultPage || {}).products || {}).main || { items: [] }).items.map((i) => i.product).filter(Boolean)
+        .map((p) => offer(s, { title: [p.name, p.typeName].filter(Boolean).join(" "),
+          price: parsePrice(p.salesPrice && p.salesPrice.numeral), url: p.pipUrl, image: p.mainImageUrl || null })),
+    },
+  };
+
   // ---------------- orchestration ----------------
-  function plan(variants, wanted) {
-    const by = {};
-    for (const v of variants) { const l = isArabic(v) ? "ar" : "en"; if (!(l in by)) by[l] = v; }
-    if (wanted === "both") return Object.entries(by);
-    if (by[wanted]) return [[wanted, by[wanted]]];
-    return [[isArabic(variants[0]) ? "ar" : "en", variants[0]]];
+  const qLang = (q) => (isArabic(q) ? "ar" : "en");
+
+  /** One query per store (halves the requests): stores that handle both languages get the original text. */
+  function storeQuery(store, variants) {
+    const want = store.lang || "both";
+    if (want === "both") return [qLang(variants[0]), variants[0]];
+    const hit = variants.find((v) => qLang(v) === want);
+    return [want, hit || variants[0]];
+  }
+
+  async function htmlSearch(store, q, lang, fetcher, opt) {
+    const url = buildUrl(store, q, lang);
+    if (store.render) {
+      const wait = (store.item || "").split(",")[0] || null;
+      return parse(await withTimeout(fetcher(url, { lang, render: true, wait }), opt.renderTimeout), store, opt.DOMParser, opt.maxPerSource);
+    }
+    return parse(await withTimeout(fetcher(url, { lang }), opt.timeout), store, opt.DOMParser, opt.maxPerSource);
   }
 
   async function searchStore(store, q, lang, fetcher, opt) {
-    const url = buildUrl(store, q, lang);
-    const wait = (store.item || "").split(",")[0] || null;
-    if (store.render) return parse(await fetcher(url, { lang, render: true, wait }), store, opt.DOMParser, opt.maxPerSource);
-    let html = null, blocked = null;
-    try {
-      html = await fetcher(url, { lang });
-      const offers = parse(html, store, opt.DOMParser, opt.maxPerSource);
-      if (offers.length) return offers;
-    } catch (e) { blocked = e; }
-    if (opt.renderFallback && store.render_fallback !== false) {
-      return parse(await fetcher(url, { lang, render: true, wait }), store, opt.DOMParser, opt.maxPerSource);
+    const ad = ADAPTERS[store.type];
+    if (ad) {
+      try {
+        const d = JSON.parse(await withTimeout(fetcher(ad.url(store, q), { lang, json: true }), opt.timeout));
+        const got = ad.parse(d, store).filter((o) => o.title && o.price && o.url).slice(0, opt.maxPerSource);
+        if (got.length || !store.search_url) return got;
+      } catch (e) {
+        if (!store.search_url) throw e;
+      }
     }
-    if (blocked) throw blocked;
-    return [];
+    return htmlSearch(store, q, lang, fetcher, opt);  // HTML page: CSS selectors, then JSON-LD
   }
+
+  const CACHE = new Map();
 
   /**
-   * opts: { stores, fetcher, serpKey, minRelevance, maxPerSource, renderFallback, city, DOMParser, onProgress }
-   * onProgress(result) fires after each source finishes, so the UI can show results as they arrive.
+   * opts: { stores, fetcher, serpKey, minRelevance, maxPerSource, city, DOMParser, onProgress,
+   *         timeout (ms, plain/JSON), renderTimeout (ms, hidden browser), cacheMs }
+   * onProgress(result) fires as each store finishes, so the UI fills in while slow stores are still loading.
    */
-  async function search(query, opts) {
-    const opt = Object.assign({ minRelevance: 0.6, maxPerSource: 20, renderFallback: true, city: "cairo" }, opts);
-    const variants = queryVariants(query);
+  async function search(rawQuery, opts) {
+    const query = cleanQuery(rawQuery);
+    const opt = Object.assign({ minRelevance: 0.6, maxPerSource: 20, city: "cairo", timeout: 10000, renderTimeout: 18000,
+      cacheMs: 15 * 60 * 1000 }, opts);
+    const stores = (opt.stores || []).filter((s) => s.enabled !== false);
+    const key = normalize(query) + "|" + stores.map((s) => s.name).join(",") + "|" + (opt.serpKey ? 1 : 0);
+    const hit = CACHE.get(key);
+    if (hit && Date.now() - hit.t < opt.cacheMs) {
+      const r = Object.assign({}, hit.r, { cached: true });
+      if (opt.onProgress) opt.onProgress(r);
+      return r;
+    }
+
+    let variants = queryVariants(query);
+    const variantsP = queryVariantsAsync(query, opt.fetcher).then((v) => (variants = v));
     const all = [], sources = [];
     const snapshot = () => {
-      const { kept, hidden } = rank(query, all.map((o) => Object.assign({}, o, { flags: [] })), opt.minRelevance);
-      return { query, variants, offers: kept, top3: top(kept, 3), hidden, sources: sources.slice(),
+      const { kept, hidden } = rank(query, all.map((o) => Object.assign({}, o, { flags: [] })), opt.minRelevance, variants);
+      return { query, variants, offers: kept, top3: top(kept, 3), hidden, sources: sources.slice(), total: jobs.length,
         links: externalLinks(query, opt.city) };
     };
-    const jobs = [];
-    for (const store of (opt.stores || []).filter((s) => s.enabled !== false)) {
-      jobs.push({ name: store.name, run: () => plan(variants, store.lang || "both").map(([l, q]) => searchStore(store, q, l, opt.fetcher, opt)) });
-    }
+
+    const jobs = stores.map((store) => ({
+      name: store.name,
+      run: async () => {
+        // stores that take the original language start immediately; the others wait for the translation
+        let [lang, q] = storeQuery(store, variants);
+        if (lang !== qLang(query)) [lang, q] = storeQuery(store, await variantsP);
+        return { q, offers: await searchStore(store, q, lang, opt.fetcher, opt) };
+      },
+    }));
     if (opt.serpKey) {
-      jobs.push({ name: "Google Shopping", run: () => plan(variants, "both").map(([l, q]) =>
-        opt.fetcher(serpUrl(q, l, opt.serpKey), { lang: l, json: true }).then((t) => {
-          const d = JSON.parse(t); if (d.error) throw new Error(d.error); return parseSerp(d);
-        })) });
+      jobs.push({ name: "Google Shopping", run: async () => {
+        const q = query, lang = qLang(query);
+        const d = JSON.parse(await withTimeout(opt.fetcher(serpUrl(q, lang, opt.serpKey), { lang, json: true }), opt.timeout));
+        if (d.error) throw new Error(d.error);
+        return { q, offers: parseSerp(d) };
+      } });
     }
+
     await Promise.all(jobs.map(async (j) => {
       const t0 = Date.now();
-      const res = await Promise.allSettled(j.run());
-      const got = res.filter((r) => r.status === "fulfilled").flatMap((r) => r.value);
-      const errs = res.filter((r) => r.status === "rejected").map((r) => String(r.reason && r.reason.message || r.reason));
-      all.push(...got);
-      sources.push({ source: j.name, ok: got.length > 0 || !errs.length, count: got.length, ms: Date.now() - t0, error: errs.join("; ").slice(0, 200) || null });
+      try {
+        const { q, offers } = await j.run();
+        all.push(...offers);
+        sources.push({ source: j.name, ok: true, count: offers.length, ms: Date.now() - t0, query: q, error: null });
+      } catch (e) {
+        sources.push({ source: j.name, ok: false, count: 0, ms: Date.now() - t0, error: String((e && e.message) || e).slice(0, 160) });
+      }
       if (opt.onProgress) opt.onProgress(snapshot());
     }));
-    return snapshot();
+    await variantsP;
+    const r = snapshot();
+    if (sources.some((s) => s.count)) CACHE.set(key, { t: Date.now(), r });
+    if (CACHE.size > 50) CACHE.delete(CACHE.keys().next().value);
+    return r;
   }
 
-  const API = { normalize, tokens, isArabic, setSynonyms, equivalents, translateQuery, queryVariants, parsePrice,
+  const API = { normalize, tokens, isArabic, setSynonyms, equivalents, translateQuery, queryVariants, queryVariantsAsync, cleanQuery, parsePrice, ADAPTERS,
     relevance, rank, top, parse, parseSerp, buildUrl, serpUrl, externalLinks, search };
   if (typeof module !== "undefined" && module.exports) module.exports = API;
   else root.Arkhas = API;

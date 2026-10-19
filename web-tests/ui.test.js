@@ -60,3 +60,19 @@ test("settings sheet saves prefs; language toggle", async () => {
   assert.equal(doc.documentElement.dir, "ltr");
   assert.equal(prefs.lang, "en");
 });
+
+test("bottom nav holds the buttons; slow stores start switched off", async () => {
+  const { win, doc, prefs } = boot();
+  await win.arkhasReady;
+  const nav = doc.querySelector("nav.nav");
+  assert.ok(nav && nav.querySelector("#gear") && nav.querySelector("#lang") && nav.querySelector("#nav_search"));
+  assert.equal(doc.querySelector("header #gear"), null, "nothing clickable left in the top area");
+  doc.querySelector("#gear").click();
+  const box = (n) => doc.querySelector(`#storelist input[data-n="${n}"]`);
+  assert.equal(box("Sigma Computer").checked, false);
+  assert.equal(box("Dream 2000").checked, true);
+  box("Sigma Computer").checked = true;
+  doc.querySelector("#s_save").click();
+  assert.deepEqual(JSON.parse(prefs.enabled), ["Sigma Computer"]);
+  assert.deepEqual(JSON.parse(prefs.disabled), []);
+});

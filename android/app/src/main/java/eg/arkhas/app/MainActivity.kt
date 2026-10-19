@@ -3,6 +3,7 @@ package eg.arkhas.app
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
+import android.content.res.Configuration
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
@@ -15,6 +16,9 @@ import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
 import org.json.JSONObject
 import java.net.HttpURLConnection
 import java.net.URL
@@ -28,7 +32,7 @@ import kotlin.concurrent.thread
 class MainActivity : AppCompatActivity() {
 
     private lateinit var web: WebView
-    private lateinit var renderer: Renderer
+    private val renderers = mutableListOf<Renderer>()  // 3 hidden browsers -> JS stores load in parallel
     private val prefs by lazy { getSharedPreferences("arkhas", Context.MODE_PRIVATE) }
     @Volatile private var pendingQuery: String = ""
 
@@ -37,9 +41,12 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         val root = FrameLayout(this)
-        // invisible browser for rendering JS stores; still laid out so pages run normally
-        val hidden = WebView(this).apply { visibility = View.INVISIBLE }
-        root.addView(hidden, FrameLayout.LayoutParams(-1, -1))
+        // invisible browsers for rendering JS stores; still laid out so pages run normally
+        repeat(3) {
+            val hidden = WebView(this).apply { visibility = View.INVISIBLE }
+            root.addView(hidden, FrameLayout.LayoutParams(-1, -1))
+            renderers += Renderer(hidden)
+        }
         web = WebView(this).apply {
             settings.javaScriptEnabled = true
             settings.domStorageEnabled = true
@@ -49,7 +56,7 @@ class MainActivity : AppCompatActivity() {
         }
         root.addView(web, FrameLayout.LayoutParams(-1, -1))
         setContentView(root)
-        renderer = Renderer(hidden)
+        keepClearOfNotch(root)
 
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() { if (web.canGoBack()) web.goBack() else finish() }
@@ -61,6 +68,26 @@ class MainActivity : AppCompatActivity() {
         // newest UI / store rules from GitHub -> used from next start
         thread { runCatching { WebFiles.update(this) } }
         checkForApkUpdate()
+    }
+
+    /**
+     * Android 15 draws apps edge-to-edge: without this the page sits under the status bar / camera notch.
+     * Pad the content by the system bars, the display cutout and the keyboard.
+     */
+    private fun keepClearOfNotch(root: View) {
+        val dark = (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
+        root.setBackgroundColor(if (dark) 0xFF14130F.toInt() else 0xFFF6F3EC.toInt())
+        WindowCompat.getInsetsController(window, root).apply {
+            isAppearanceLightStatusBars = !dark
+            isAppearanceLightNavigationBars = !dark
+        }
+        ViewCompat.setOnApplyWindowInsetsListener(root) { v, insets ->
+            val b = insets.getInsets(
+                WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout() or WindowInsetsCompat.Type.ime()
+            )
+            v.setPadding(b.left, b.top, b.right, b.bottom)
+            WindowInsetsCompat.CONSUMED
+        }
     }
 
     override fun onNewIntent(intent: Intent) {
@@ -87,7 +114,8 @@ class MainActivity : AppCompatActivity() {
             }
             if (!url.startsWith("https://") && !url.startsWith("http://")) return reply(false, "bad url")
             if (o.optBoolean("render")) {
-                renderer.render(url, o.optString("wait").ifBlank { null }) { ok, html -> reply(ok, html) }
+                val wait = o.optString("wait").ifBlank { null }
+                runOnUiThread { renderers.minBy { it.load }.render(url, wait) { ok, html -> reply(ok, html) } }
             } else {
                 Net.pool.execute {
                     try { reply(true, Net.get(url, lang, o.optBoolean("json"))) }

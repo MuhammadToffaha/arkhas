@@ -62,5 +62,6 @@ tasks.named("preBuild") { dependsOn(copyWeb) }
 
 dependencies {
     implementation("androidx.appcompat:appcompat:1.7.0")
+    implementation("androidx.core:core:1.13.1")
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
 }

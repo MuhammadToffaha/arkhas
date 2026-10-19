@@ -54,8 +54,10 @@
   },
   {
     "name": "2B",
-    "search_url": "https://2b.com.eg/en/catalogsearch/result/?q={q}",
+    "type": "magento",
     "base_url": "https://2b.com.eg",
+    "product_base": "https://2b.com.eg/en",
+    "search_url": "https://2b.com.eg/en/catalogsearch/result/?q={q}",
     "lang": "en",
     "item": "li.product-item",
     "title": ".product-item-link",
@@ -66,8 +68,10 @@
   },
   {
     "name": "Raya Shop",
-    "search_url": "https://www.rayashop.com/en/catalogsearch/result/?q={q}",
+    "type": "magento",
     "base_url": "https://www.rayashop.com",
+    "product_base": "https://www.rayashop.com/en",
+    "search_url": "https://www.rayashop.com/en/catalogsearch/result/?q={q}",
     "lang": "en",
     "item": "li.product-item",
     "title": ".product-item-link",
@@ -88,16 +92,188 @@
     "link": "a[href*=\"/p/\"]@href",
     "image": "img@src"
   },
+
+  { "name": "Dream 2000", "type": "shopify", "base_url": "https://dream2000.com", "lang": "both" },
+  { "name": "Compumarts", "type": "shopify", "base_url": "https://www.compumarts.com", "lang": "en" },
+  { "name": "Kimo Store", "type": "shopify", "base_url": "https://kimostore.net", "lang": "en" },
+  { "name": "Tradeline", "type": "shopify", "base_url": "https://www.tradelinestores.com", "lang": "en" },
+
   {
-    "name": "Dubai Phone",
-    "enabled": false,
-    "search_url": "https://dubaiphone.net/en/catalogsearch/result/?q={q}",
-    "base_url": "https://dubaiphone.net",
+    "name": "Raneen",
+    "type": "magento",
+    "base_url": "https://www.raneen.com",
+    "product_base": "https://www.raneen.com/en",
+    "search_url": "https://www.raneen.com/en/catalogsearch/result/?q={q}",
+    "search_url_ar": "https://www.raneen.com/ar/catalogsearch/result/?q={q}",
+    "lang": "both",
+    "item": "li.product-item",
+    "title": ".product-item-link",
+    "price": "[data-price-type=\"finalPrice\"] .price",
+    "old_price": "[data-price-type=\"oldPrice\"] .price",
+    "link": "a.product-item-link@href",
+    "image": "img.product-image-photo@src"
+  },
+  {
+    "name": "Cairo Cart",
+    "type": "magento",
+    "base_url": "https://cairocart.com",
+    "product_base": "https://cairocart.com/en",
+    "search_url": "https://cairocart.com/en/catalogsearch/result/?q={q}",
     "lang": "en",
     "item": "li.product-item",
     "title": ".product-item-link",
     "price": "[data-price-type=\"finalPrice\"] .price",
+    "old_price": "[data-price-type=\"oldPrice\"] .price",
     "link": "a.product-item-link@href",
     "image": "img.product-image-photo@src"
+  },
+  {
+    "name": "Hyper One",
+    "type": "magento",
+    "base_url": "https://www.hyperone.com.eg",
+    "graphql": "https://mcprod.hyperone.com.eg/graphql",
+    "product_base": "https://www.hyperone.com.eg/en/product",
+    "lang": "en"
+  },
+  {
+    "name": "Aman Stores",
+    "type": "magento",
+    "base_url": "https://amanstores.com",
+    "graphql": "https://marketplace.amanstores.com/graphql",
+    "product_base": "https://amanstores.com/en",
+    "lang": "en"
+  },
+  {
+    "name": "El Araby",
+    "type": "magento",
+    "base_url": "https://elarabygroup.com",
+    "product_base": "https://elarabygroup.com/en",
+    "search_url": "https://elarabygroup.com/en/catalogsearch/result/?q={q}",
+    "lang": "en",
+    "item": "li.product-item",
+    "title": ".product-item-link",
+    "price": "[data-price-type=\"finalPrice\"] .price",
+    "old_price": "[data-price-type=\"oldPrice\"] .price",
+    "link": "a.product-item-link@href",
+    "image": "img.product-image-photo@src"
+  },
+
+  {
+    "name": "Cairo Sales",
+    "type": "prestashop",
+    "base_url": "https://www.cairosales.com",
+    "path": "/en",
+    "search_url": "https://www.cairosales.com/en/search?controller=search&s={q}",
+    "lang": "en",
+    "item": "article.product-miniature",
+    "title": ".product-title a",
+    "price": ".price",
+    "old_price": ".regular-price",
+    "link": ".product-title a@href",
+    "image": "img@src"
+  },
+  {
+    "name": "Decathlon",
+    "type": "prestashop",
+    "base_url": "https://www.decathlon.eg",
+    "path": "/en",
+    "search_url": "https://www.decathlon.eg/en/search?controller=search&s={q}",
+    "lang": "en",
+    "item": "article.product-miniature, div.product-miniature",
+    "title": ".product-title a, .product-title",
+    "price": ".price",
+    "old_price": ".regular-price",
+    "link": "a@href",
+    "image": "img@src"
+  },
+
+  {
+    "name": "Dubai Phone",
+    "type": "woo",
+    "base_url": "https://www.dubaiphone.net",
+    "search_url": "https://www.dubaiphone.net/?s={q}&post_type=product",
+    "lang": "en",
+    "item": "li.product, div.product",
+    "title": ".woocommerce-loop-product__title, h2, h3",
+    "price": ".price ins .amount, .price .amount",
+    "old_price": ".price del .amount",
+    "link": "a@href",
+    "image": "img@src"
+  },
+
+  {
+    "name": "El Nekhely",
+    "base_url": "https://elnekhelytechnology.com",
+    "search_url": "https://elnekhelytechnology.com/index.php?route=product/search&search={q}",
+    "lang": "en",
+    "item": ".product-layout, .product-thumb",
+    "title": ".name a, .caption h4 a",
+    "price": ".price-new, .price-normal, .price",
+    "old_price": ".price-old",
+    "link": ".name a@href, .caption h4 a@href",
+    "image": ".image img@src"
+  },
+  {
+    "name": "El Badr Group",
+    "base_url": "https://www.elbadrgroupeg.store",
+    "search_url": "https://www.elbadrgroupeg.store/index.php?route=product/search&search={q}",
+    "lang": "en",
+    "item": ".product-layout, .product-thumb",
+    "title": ".name a, .caption h4 a",
+    "price": ".price-new, .price-normal, .price",
+    "old_price": ".price-old",
+    "link": ".name a@href",
+    "image": ".image img@src"
+  },
+  {
+    "name": "Maximum Hardware",
+    "base_url": "https://maximumhardware.store",
+    "search_url": "https://maximumhardware.store/index.php?route=product/search&search={q}",
+    "lang": "en",
+    "item": ".product-layout, .product-thumb",
+    "title": ".name a, .caption h4 a",
+    "price": ".price-new, .price-normal, .price",
+    "old_price": ".price-old",
+    "link": ".name a@href",
+    "image": ".image img@src"
+  },
+
+  { "name": "IKEA Egypt", "type": "ikea", "base_url": "https://www.ikea.com/eg/en", "locale": "en", "lang": "en" },
+
+  {
+    "name": "Sigma Computer",
+    "default_off": true,
+    "base_url": "https://www.sigma-computer.com",
+    "search_url": "https://www.sigma-computer.com/en/search?q={q}",
+    "lang": "en",
+    "render": true,
+    "item": "a[href*=\"/product/\"]",
+    "title": "h2, h3, [class*=\"name\"], [class*=\"title\"]",
+    "price": "[class*=\"price\"]",
+    "image": "img@src"
+  },
+  {
+    "name": "Homzmart",
+    "default_off": true,
+    "base_url": "https://homzmart.com",
+    "search_url": "https://homzmart.com/en/search?q={q}",
+    "lang": "en",
+    "render": true,
+    "item": "a[href*=\"/p/\"]",
+    "title": "h2, h3, [class*=\"name\"], [class*=\"title\"]",
+    "price": "[class*=\"price\"]",
+    "image": "img@src"
+  },
+  {
+    "name": "Fresh",
+    "default_off": true,
+    "base_url": "https://fresh.com.eg",
+    "search_url": "https://fresh.com.eg/en/search?q={q}",
+    "lang": "en",
+    "render": true,
+    "item": "a[href*=\"/product\"]",
+    "title": "h2, h3, [class*=\"name\"], [class*=\"title\"]",
+    "price": "[class*=\"price\"]",
+    "image": "img@src"
   }
 ]

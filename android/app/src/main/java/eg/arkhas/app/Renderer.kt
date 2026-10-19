@@ -13,6 +13,9 @@ import org.json.JSONTokener
  * and hands back the rendered HTML. One page at a time; everything runs on the main thread.
  */
 class Renderer(private val view: WebView) {
+    val busy get() = current != null || queue.isNotEmpty()
+    val load get() = queue.size + (if (current != null) 1 else 0)
+
     private data class Job(val url: String, val wait: String?, val done: (Boolean, String) -> Unit)
 
     private val queue = ArrayDeque<Job>()
@@ -32,6 +35,10 @@ class Renderer(private val view: WebView) {
             override fun onPageFinished(v: WebView, url: String?) {
                 if (current != null && polls == 0) poll()
             }
+            override fun onPageStarted(v: WebView, url: String?, favicon: android.graphics.Bitmap?) {
+                // don't wait for the whole page: start checking for product cards right away
+                if (current != null && polls == 0) main.postDelayed({ if (polls == 0) poll() }, 900)
+            }
         }
     }
 
@@ -44,7 +51,7 @@ class Renderer(private val view: WebView) {
         val job = queue.removeFirstOrNull() ?: run { current = null; return }
         current = job; polls = 0
         view.loadUrl(job.url)
-        main.postDelayed({ if (current === job) grab(job) }, 20_000)  // hard timeout
+        main.postDelayed({ if (current === job) grab(job) }, 14_000)  // hard timeout
     }
 
     /** Wait until the product-card selector shows up (max ~10s), then grab the HTML. */
@@ -55,8 +62,8 @@ class Renderer(private val view: WebView) {
         else "!!document.querySelector(${JSONObject.quote(job.wait)})"
         view.evaluateJavascript("(function(){window.scrollBy(0,1500);try{return $check}catch(e){return false}})()") { r ->
             if (current !== job) return@evaluateJavascript
-            if (r == "true" || polls >= 14) main.postDelayed({ grab(job) }, 600)
-            else main.postDelayed({ poll() }, 700)
+            if (r == "true" || polls >= 20) main.postDelayed({ grab(job) }, 250)
+            else main.postDelayed({ poll() }, 350)
         }
     }
 

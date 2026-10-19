@@ -36,4 +36,6 @@ settings = Settings()
 
 def load_stores() -> list[dict]:
     data = yaml.safe_load(settings.stores_file.read_text(encoding="utf-8")) or []
-    return [s for s in data if s.get("enabled", True)]
+    # The phone engine (web/engine.js) also speaks Shopify/Woo/Magento/PrestaShop/IKEA JSON APIs;
+    # this server scrapes HTML only, so it uses stores that have a search page.
+    return [s for s in data if s.get("enabled", True) and not s.get("default_off") and (not s.get("type") or s.get("search_url"))]

@@ -26,9 +26,19 @@ phone ── web/engine.js ──► Amazon.eg · Noon · Jumia · B.TECH · 2B 
 | `web/stores.json` (fix/add a store), `web/synonyms.json`, `web/index.html`, `web/engine.js` | `git push` | Downloaded on next app start, active the start after. **No new APK.** |
 | `android/` (native app) | `git push` | Actions builds APK → Release → app shows "New version" |
 
-`web/stores.json` fields: `search_url` (`{q}` = query), optional `search_url_ar`, `lang` (`en`/`ar`/`both`), `render` (true = JS site, loaded in hidden browser), `item` (CSS for one product card), `title` / `price` / `old_price` / `link` / `image` (CSS inside the card, `sel@attr` = attribute), `enabled`. If CSS finds nothing, JSON-LD on the page is used.
+**Stores (26)**: Amazon.eg · Noon · Jumia · B.TECH · 2B · Raya · Carrefour · Dream 2000 · Compumarts · Kimo Store · Tradeline · Raneen · Cairo Cart · Hyper One · Aman Stores · El Araby · Cairo Sales · Decathlon · Dubai Phone · El Nekhely · El Badr · Maximum Hardware · IKEA · Sigma 🐢 · Homzmart 🐢 · Fresh 🐢 (🐢 = slow JS sites, off by default, switch on in ⚙️).
 
-To check selectors when a store stops returning results: in the app ⚙️ → **Store status** after a search shows count / error per store. Fix the card selectors with Chrome DevTools on the store's search page.
+`web/stores.json` fields:
+- `type` — fast JSON search, no page loading: `shopify`, `woo` (WooCommerce), `magento` (GraphQL; `graphql` / `product_base` optional), `prestashop` (`path`), `ikea`. If it fails and `search_url` is set, the HTML page is used.
+- `search_url` (`{q}` = query), optional `search_url_ar`; `item` / `title` / `price` / `old_price` / `link` / `image` CSS (`sel@attr` = attribute, comma = alternatives); JSON-LD fallback.
+- `lang`: `both` (store gets the text as typed) · `en` / `ar` (store gets the translation).
+- `render: true` = JS site, loaded in a hidden browser (slower) · `default_off: true` = off until enabled in ⚙️ · `enabled: false` = removed.
+
+**Speed**: one request per store, 10 s limit per store (18 s for JS sites), 3 hidden browsers in parallel, results show as each store answers, same search within 15 min is instant.
+
+**Arabic**: ال/بال/وال prefixes, 230+ Arabic↔English words and brands in `web/synonyms.json`, Google Translate for words not in the list (brands, slang), words like "ارخص / سعر / بكام" are ignored.
+
+To check stores: after a search tap **🏪 Stores** in the bottom bar → count, time, error per store. Fix the card selectors with Chrome DevTools on the store's search page.
 
 If `web/index.html` ever needs new native features, bump `arkhas-bridge` in it; older apps then keep their current copy until they update.
 

@@ -11,11 +11,16 @@
 @media (prefers-color-scheme:dark){:root{--bg:#14130f;--card:#1e1c17;--ink:#f1ece2;--muted:#a59d8f;--line:#33302a;--accent:#2fb38c;--accent-ink:#0b1410;--warn:#f0a24a}}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,"Noto Sans Arabic",sans-serif;line-height:1.5}
-.wrap{max-width:720px;margin:0 auto;padding:16px 16px 48px}
+.wrap{max-width:720px;margin:0 auto;padding:calc(12px + env(safe-area-inset-top,0px)) 16px calc(96px + env(safe-area-inset-bottom,0px))}
 header{display:flex;align-items:center;justify-content:space-between;gap:8px}
 .logo{font-size:26px;font-weight:800}
 .logo small{font-size:13px;color:var(--muted);font-weight:400;margin-inline-start:6px}
-.ib{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:6px 12px;font:inherit;font-size:14px}
+.nav{position:fixed;left:0;right:0;bottom:0;z-index:5;display:flex;justify-content:space-around;background:var(--card);border-top:1px solid var(--line);
+  padding:6px 4px calc(6px + env(safe-area-inset-bottom,0px));box-shadow:0 -2px 12px #0001}
+.nav button{flex:1;border:0;background:none;color:var(--muted);font:inherit;font-size:11.5px;display:flex;flex-direction:column;align-items:center;gap:1px;padding:4px 0;border-radius:12px}
+.nav button b{font-size:21px;line-height:1.2;font-weight:400}
+.nav button:active{background:var(--line)}
+.nav button.on{color:var(--accent);font-weight:600}
 form{display:flex;gap:8px;margin:16px 0 6px}
 input{flex:1;min-width:0;font:inherit;font-size:17px;padding:13px 14px;border-radius:14px;border:1.5px solid var(--line);background:var(--card);color:var(--ink)}
 input:focus{outline:none;border-color:var(--accent)}
@@ -45,7 +50,7 @@ details{margin-top:14px}summary{cursor:pointer;color:var(--muted);font-size:14px
 table{border-collapse:collapse;width:100%;font-size:12.5px}td{padding:4px;border-bottom:1px solid var(--line)}
 .empty{color:var(--muted);text-align:center;margin:36px 0}
 .sheet{position:fixed;inset:0;background:#0007;display:none;align-items:flex-end;z-index:9}
-.sheet.on{display:flex}.sheet>div{background:var(--bg);width:100%;border-radius:18px 18px 0 0;padding:18px 16px 28px;max-height:85vh;overflow:auto}
+.sheet.on{display:flex}.sheet>div{background:var(--bg);width:100%;border-radius:18px 18px 0 0;padding:18px 16px calc(28px + env(safe-area-inset-bottom,0px));max-height:85vh;overflow:auto}
 .sheet label{display:block;margin:12px 0 4px;font-weight:600;font-size:14px}
 .sheet input{font-size:15px;padding:10px 12px;width:100%}
 .st{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--line);font-size:14px}
@@ -56,7 +61,6 @@ table{border-collapse:collapse;width:100%;font-size:12.5px}td{padding:4px;border
 <div class="wrap">
   <header>
     <div class="logo">🏷️ أرخص <small id="tag"></small></div>
-    <div><button class="ib" id="lang"></button> <button class="ib" id="gear" aria-label="settings">⚙️</button></div>
   </header>
 
   <form id="f">
@@ -67,6 +71,13 @@ table{border-collapse:collapse;width:100%;font-size:12.5px}td{padding:4px;border
   <div class="bar" id="bar" hidden><i></i></div>
   <div id="out"></div>
 </div>
+
+<nav class="nav">
+  <button id="nav_search" class="on"><b>🔍</b><span id="l_search"></span></button>
+  <button id="nav_status"><b>🏪</b><span id="l_status"></span></button>
+  <button id="lang"><b>🌐</b><span id="l_lang"></span></button>
+  <button id="gear" aria-label="settings"><b>⚙️</b><span id="l_gear"></span></button>
+</nav>
 
 <div class="sheet" id="sheet"><div>
   <h3 id="s_title" style="margin-top:0"></h3>
@@ -100,12 +111,12 @@ const readConfig = async (name) => (N ? N.readConfig(name) : (await fetch(name))
 const T = {
   ar: { tag: "أرخص سعر في مصر", go: "ابحث", ph: "اكتب المنتج… مثال: ايفون 15 برو", hint: "نبحث في المتاجر المصرية بالعربي والإنجليزي ونجيب لك أرخص 3",
     top: "🏆 أرخص 3 أسعار", all: "كل العروض ({n})", fb: "📘 فيسبوك والمستعمل", searched: "بحثنا عن:", none: "مفيش نتائج مطابقة لسه…",
-    noneDone: "مفيش نتائج مطابقة. جرّب اسم أدق.", src: "حالة المتاجر", acc: "إكسسوار؟", cheap: "سعر مريب", egp: "ج.م", save: "وفّر {n}",
+    noneDone: "مفيش نتائج مطابقة. جرّب اسم أدق.", src: "حالة المتاجر", navSearch: "بحث", navStatus: "المتاجر", navGear: "الإعدادات", acc: "إكسسوار؟", cheap: "سعر مريب", egp: "ج.م", save: "وفّر {n}",
     searching: "جاري البحث في {done}/{all} متجر…", settings: "الإعدادات", serpNote: "اختياري: يضيف جوجل شوبينج (مئات المتاجر). مفتاح مجاني من serpapi.com",
     city: "مدينة فيسبوك ماركت بليس", stores: "المتاجر", saveBtn: "حفظ", ver: "نسخة", hidden: "تم إخفاء {n} نتيجة غير مطابقة" },
   en: { tag: "Best price in Egypt", go: "Search", ph: "Product… e.g. iphone 15 pro", hint: "Searching Egyptian stores in Arabic & English — top 3 cheapest",
     top: "🏆 Top 3 prices", all: "All offers ({n})", fb: "📘 Facebook & used", searched: "Searched:", none: "No matches yet…",
-    noneDone: "No matching results. Try a more specific name.", src: "Store status", acc: "accessory?", cheap: "suspicious price", egp: "EGP", save: "save {n}",
+    noneDone: "No matching results. Try a more specific name.", src: "Store status", navSearch: "Search", navStatus: "Stores", navGear: "Settings", acc: "accessory?", cheap: "suspicious price", egp: "EGP", save: "save {n}",
     searching: "Searching {done}/{all} stores…", settings: "Settings", serpNote: "Optional: adds Google Shopping (hundreds of stores). Free key at serpapi.com",
     city: "Facebook Marketplace city", stores: "Stores", saveBtn: "Save", ver: "Version", hidden: "{n} irrelevant results hidden" },
 };
@@ -120,7 +131,8 @@ function applyLang() {
   const t = T[L];
   document.documentElement.lang = L; document.documentElement.dir = L === "ar" ? "rtl" : "ltr";
   $("#tag").textContent = t.tag; $("#go").textContent = t.go; $("#q").placeholder = t.ph; $("#hint").textContent = t.hint;
-  $("#lang").textContent = L === "ar" ? "EN" : "ع";
+  $("#l_lang").textContent = L === "ar" ? "English" : "عربي";
+  $("#l_search").textContent = t.navSearch; $("#l_status").textContent = t.navStatus; $("#l_gear").textContent = t.navGear;
   $("#s_title").textContent = "⚙️ " + t.settings; $("#s_serp").textContent = t.serpNote; $("#s_city").textContent = t.city;
   $("#s_stores").textContent = t.stores; $("#s_save").textContent = t.saveBtn;
   $("#s_ver").textContent = t.ver + " " + (N && N.appVersion ? N.appVersion() : "web");
@@ -156,9 +168,22 @@ function render(r, done) {
   if (done && r.hidden) h += `<div class="muted">${fmt(t.hidden, { n: r.hidden })}</div>`;
 
   h += `<h3>${t.fb}</h3><div class="links">${r.links.map((l) => `<a href="${esc(l.url)}">${esc(l.name)}</a>`).join("")}</div>`;
-  h += `<details><summary>${t.src}</summary><table>${r.sources.map((s) =>
-    `<tr><td>${s.ok && s.count ? "✅" : "⚠️"} ${esc(s.source)}</td><td>${s.count}</td><td>${(s.ms / 1000).toFixed(1)}s</td><td>${esc(s.error || "")}</td></tr>`).join("")}</table></details>`;
+  const srcs = r.sources.slice().sort((a, b) => b.count - a.count || a.ms - b.ms);
+  h += `<details id="status"${statusOpen ? " open" : ""}><summary>${t.src} · ${srcs.filter((x) => x.count).length}/${r.total || srcs.length}</summary><table>${srcs.map((s) =>
+    `<tr><td>${s.count ? "✅" : s.ok ? "➖" : "⚠️"} ${esc(s.source)}</td><td>${s.count}</td><td>${(s.ms / 1000).toFixed(1)}s</td>` +
+    `<td>${esc(s.error || (s.query && s.query !== r.query ? "→ " + s.query : ""))}</td></tr>`).join("")}</table></details>`;
+  const st = document.getElementById("status");
+  if (st) statusOpen = st.open;
   $("#out").innerHTML = h;
+  const st2 = document.getElementById("status");
+  if (st2) st2.ontoggle = () => { statusOpen = st2.open; };
+}
+let statusOpen = false;
+
+// stores marked default_off (slow, JS-only sites) stay off until switched on in ⚙️
+function isOn(s) {
+  if (s.enabled === false) return false;
+  return s.default_off ? JSON.parse(pref("enabled", "[]")).includes(s.name) : !JSON.parse(pref("disabled", "[]")).includes(s.name);
 }
 
 function progress(r) {
@@ -171,8 +196,7 @@ function progress(r) {
 async function run(q) {
   q = (q || "").trim(); if (q.length < 2 || busy) return;
   $("#q").value = q; $("#q").blur(); busy = true; $("#out").innerHTML = "";
-  const disabled = new Set(JSON.parse(pref("disabled", "[]")));
-  const stores = STORES.filter((s) => s.enabled !== false && !disabled.has(s.name));
+  const stores = STORES.filter(isOn);
   const serpKey = pref("serp");
   total = stores.length + (serpKey ? 1 : 0);
   progress({ sources: [] });
@@ -188,16 +212,24 @@ $("#f").onsubmit = (e) => { e.preventDefault(); run($("#q").value); };
 
 // ---------- settings ----------
 $("#gear").onclick = () => {
-  const off = new Set(JSON.parse(pref("disabled", "[]")));
   $("#serp").value = pref("serp"); $("#city").value = pref("city", "cairo");
   $("#storelist").innerHTML = STORES.filter((s) => s.enabled !== false).map((s) =>
-    `<label class="st"><input type="checkbox" data-n="${esc(s.name)}" ${off.has(s.name) ? "" : "checked"}> ${esc(s.name)}</label>`).join("");
+    `<label class="st"><input type="checkbox" data-n="${esc(s.name)}" ${isOn(s) ? "checked" : ""}> ${esc(s.name)}${s.default_off ? ' <span class="muted">🐢</span>' : ""}</label>`).join("");
   $("#sheet").classList.add("on");
+};
+$("#nav_search").onclick = () => { window.scrollTo({ top: 0, behavior: "smooth" }); $("#q").focus(); $("#q").select(); };
+$("#nav_status").onclick = () => {
+  const st = document.getElementById("status");
+  if (!st) { $("#gear").click(); return; }   // no search yet: show the store list in settings
+  statusOpen = st.open = true; st.scrollIntoView({ behavior: "smooth", block: "start" });
 };
 $("#sheet").onclick = (e) => { if (e.target.id === "sheet") $("#sheet").classList.remove("on"); };
 $("#s_save").onclick = () => {
   setPref("serp", $("#serp").value.trim()); setPref("city", ($("#city").value.trim() || "cairo").toLowerCase());
-  setPref("disabled", JSON.stringify([...document.querySelectorAll("#storelist input")].filter((i) => !i.checked).map((i) => i.dataset.n)));
+  const boxes = [...document.querySelectorAll("#storelist input")];
+  const slow = new Set(STORES.filter((x) => x.default_off).map((x) => x.name));
+  setPref("disabled", JSON.stringify(boxes.filter((i) => !i.checked && !slow.has(i.dataset.n)).map((i) => i.dataset.n)));
+  setPref("enabled", JSON.stringify(boxes.filter((i) => i.checked && slow.has(i.dataset.n)).map((i) => i.dataset.n)));
   $("#sheet").classList.remove("on");
 };
 
