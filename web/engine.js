@@ -534,6 +534,76 @@
     return htmlSearch(store, q, lang, fetcher, opt);  // HTML page: CSS selectors, then JSON-LD
   }
 
+  // ---------------- ⚡ flash deals (no query: each store's own sale feed) ----------------
+  const DEAL_FEEDS = {
+    // Shopify: whole catalog JSON; a deal = variant with compare_at_price above price
+    shopify: {
+      url: (s) => `${s.base_url}/products.json?limit=250`,
+      json: true,
+      parse: (d, s) => (d.products || []).flatMap((p) => {
+        const v = (p.variants || []).filter((x) => x.available !== false && parsePrice(x.compare_at_price) > parsePrice(x.price))
+          .sort((a, b) => parsePrice(a.price) - parsePrice(b.price))[0];
+        if (!v) return [];
+        return [offer(s, { title: decode(p.title), price: parsePrice(v.price), old_price: parsePrice(v.compare_at_price),
+          url: `${s.base_url}/products/${p.handle}`, image: (p.images && p.images[0] && p.images[0].src) || null })];
+      }),
+    },
+    // WooCommerce: products currently on sale
+    woo: { url: (s) => `${s.base_url}/wp-json/wc/store/v1/products?on_sale=true&per_page=60`, json: true,
+      parse: (d, s) => ADAPTERS.woo.parse(d, s) },
+    // PrestaShop: built-in "prices drop" page in AJAX mode
+    prestashop: { url: (s) => `${s.base_url}${s.path ?? "/en"}/prices-drop?ajax=1&resultsPerPage=60`, json: true,
+      parse: (d, s) => ADAPTERS.prestashop.parse(d, s) },
+    // Any store: a deals / specials / flash-sale page read with the store's CSS selectors (overridable in "deals")
+    html: { url: (s) => s.deals.url, json: false, parse: null },
+  };
+
+  /** Percent off, or 0 when there's no real old price. */
+  const pctOff = (o) => (o.old_price && o.old_price > o.price ? Math.round((1 - o.price / o.old_price) * 100) : 0);
+
+  /**
+   * ⚡ Deals from every store that has a "deals" entry in stores.json.
+   * opts: { stores, fetcher, DOMParser, minPct (default 10), perStore (default 12), timeout, renderTimeout, onProgress }
+   * Returns { deals: [...offer, pct], sources: [...] } sorted by biggest discount.
+   */
+  async function deals(opts) {
+    const opt = Object.assign({ minPct: 10, perStore: 12, timeout: 12000, renderTimeout: 20000 }, opts);
+    const stores = (opt.stores || []).filter((s) => s.enabled !== false && s.deals);
+    const all = [], sources = [];
+    const snap = () => {
+      const seen = new Set();
+      const list = all.filter((o) => { const k = o.source + "|" + o.url.split("?")[0]; if (seen.has(k)) return false; seen.add(k); return true; })
+        .sort((a, b) => b.pct - a.pct || a.price - b.price);
+      return { deals: list, sources: sources.slice(), total: stores.length, at: Date.now() };
+    };
+    await Promise.all(stores.map(async (s) => {
+      const t0 = Date.now();
+      try {
+        const feed = DEAL_FEEDS[s.deals.kind];
+        if (!feed) throw new Error("unknown deals kind " + s.deals.kind);
+        let got;
+        if (feed.json) {
+          got = feed.parse(JSON.parse(await withTimeout(opt.fetcher(feed.url(s), { json: true, lang: "en" }), opt.timeout)), s);
+        } else {
+          const sel = Object.assign({}, s, s.deals);   // deals page may need its own selectors
+          const html = await withTimeout(opt.fetcher(feed.url(s), s.deals.render
+            ? { render: true, wait: (sel.item || "").split(",")[0] || null, lang: "en" } : { lang: "en" }), s.deals.render ? opt.renderTimeout : opt.timeout);
+          got = parse(html, sel, opt.DOMParser, 80);
+        }
+        const keep = got.filter((o) => o.title && o.price && o.url)
+          .map((o) => Object.assign(o, { pct: pctOff(o), source: s.name }))
+          .filter((o) => o.pct >= opt.minPct && o.pct < 95)            // 95%+ off is almost always a data error
+          .sort((a, b) => b.pct - a.pct).slice(0, opt.perStore);
+        all.push(...keep);
+        sources.push({ source: s.name, ok: true, count: keep.length, ms: Date.now() - t0, error: null });
+      } catch (e) {
+        sources.push({ source: s.name, ok: false, count: 0, ms: Date.now() - t0, error: String((e && e.message) || e).slice(0, 160) });
+      }
+      if (opt.onProgress) opt.onProgress(snap());
+    }));
+    return snap();
+  }
+
   const CACHE = new Map();
 
   /**
@@ -599,7 +669,7 @@
     return r;
   }
 
-  const API = { normalize, tokens, isArabic, setSynonyms, equivalents, translateQuery, queryVariants, queryVariantsAsync, cleanQuery, parsePrice, ADAPTERS,
+  const API = { normalize, tokens, isArabic, setSynonyms, equivalents, translateQuery, queryVariants, queryVariantsAsync, cleanQuery, parsePrice, ADAPTERS, DEAL_FEEDS, deals, pctOff,
     relevance, matchInfo, specs, rank, top, parse, parseSerp, buildUrl, serpUrl, externalLinks, search };
   if (typeof module !== "undefined" && module.exports) module.exports = API;
   else root.Arkhas = API;

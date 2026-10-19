@@ -10,7 +10,18 @@
     "price": "span.a-price:not(.a-text-price) span.a-offscreen",
     "old_price": "span.a-price.a-text-price span.a-offscreen",
     "link": "a.a-link-normal[href*='/dp/']@href",
-    "image": "img.s-image@src"
+    "image": "img.s-image@src",
+    "deals": {
+      "kind": "html",
+      "render": true,
+      "url": "https://www.amazon.eg/deals?language=en_AE",
+      "item": "[data-testid=\"product-card\"], [data-testid=\"deal-card\"], div[class*=\"DealGridItem\"]",
+      "title": "[class*=\"truncate\"], [class*=\"DealContent\"] a, p",
+      "price": ".a-price:not(.a-text-price) .a-offscreen, [class*=\"price\"] .a-offscreen",
+      "old_price": ".a-text-price .a-offscreen",
+      "link": "a@href",
+      "image": "img@src"
+    }
   },
   {
     "name": "Jumia",
@@ -22,7 +33,11 @@
     "price": ".prc",
     "old_price": ".old",
     "link": "a.core@href",
-    "image": "img.img@data-src"
+    "image": "img.img@data-src",
+    "deals": {
+      "kind": "html",
+      "url": "https://www.jumia.com.eg/flash-sales/"
+    }
   },
   {
     "name": "Noon",
@@ -92,12 +107,42 @@
     "link": "a[href*=\"/p/\"]@href",
     "image": "img@src"
   },
-
-  { "name": "Dream 2000", "type": "shopify", "base_url": "https://dream2000.com", "lang": "both" },
-  { "name": "Compumarts", "type": "shopify", "base_url": "https://www.compumarts.com", "lang": "en" },
-  { "name": "Kimo Store", "type": "shopify", "base_url": "https://kimostore.net", "lang": "en" },
-  { "name": "Tradeline", "type": "shopify", "base_url": "https://www.tradelinestores.com", "lang": "en" },
-
+  {
+    "name": "Dream 2000",
+    "type": "shopify",
+    "base_url": "https://dream2000.com",
+    "lang": "both",
+    "deals": {
+      "kind": "shopify"
+    }
+  },
+  {
+    "name": "Compumarts",
+    "type": "shopify",
+    "base_url": "https://www.compumarts.com",
+    "lang": "en",
+    "deals": {
+      "kind": "shopify"
+    }
+  },
+  {
+    "name": "Kimo Store",
+    "type": "shopify",
+    "base_url": "https://kimostore.net",
+    "lang": "en",
+    "deals": {
+      "kind": "shopify"
+    }
+  },
+  {
+    "name": "Tradeline",
+    "type": "shopify",
+    "base_url": "https://www.tradelinestores.com",
+    "lang": "en",
+    "deals": {
+      "kind": "shopify"
+    }
+  },
   {
     "name": "Raneen",
     "type": "magento",
@@ -157,7 +202,6 @@
     "link": "a.product-item-link@href",
     "image": "img.product-image-photo@src"
   },
-
   {
     "name": "Cairo Sales",
     "type": "prestashop",
@@ -170,7 +214,10 @@
     "price": ".price",
     "old_price": ".regular-price",
     "link": ".product-title a@href",
-    "image": "img@src"
+    "image": "img@src",
+    "deals": {
+      "kind": "prestashop"
+    }
   },
   {
     "name": "Decathlon",
@@ -186,7 +233,6 @@
     "link": "a@href",
     "image": "img@src"
   },
-
   {
     "name": "Dubai Phone",
     "type": "woo",
@@ -198,9 +244,11 @@
     "price": ".price ins .amount, .price .amount",
     "old_price": ".price del .amount",
     "link": "a@href",
-    "image": "img@src"
+    "image": "img@src",
+    "deals": {
+      "kind": "woo"
+    }
   },
-
   {
     "name": "El Nekhely",
     "base_url": "https://elnekhelytechnology.com",
@@ -211,7 +259,11 @@
     "price": ".price-new, .price-normal, .price",
     "old_price": ".price-old",
     "link": ".name a@href, .caption h4 a@href",
-    "image": ".image img@src"
+    "image": ".image img@src",
+    "deals": {
+      "kind": "html",
+      "url": "https://elnekhelytechnology.com/index.php?route=product/special&limit=50"
+    }
   },
   {
     "name": "El Badr Group",
@@ -235,11 +287,19 @@
     "price": ".price-new, .price-normal, .price",
     "old_price": ".price-old",
     "link": ".name a@href",
-    "image": ".image img@src"
+    "image": ".image img@src",
+    "deals": {
+      "kind": "html",
+      "url": "https://maximumhardware.store/index.php?route=product/special&limit=50"
+    }
   },
-
-  { "name": "IKEA Egypt", "type": "ikea", "base_url": "https://www.ikea.com/eg/en", "locale": "en", "lang": "en" },
-
+  {
+    "name": "IKEA Egypt",
+    "type": "ikea",
+    "base_url": "https://www.ikea.com/eg/en",
+    "locale": "en",
+    "lang": "en"
+  },
   {
     "name": "Sigma Computer",
     "default_off": true,
