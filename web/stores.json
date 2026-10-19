@@ -56,10 +56,10 @@
     "base_url": "https://www.noon.com",
     "lang": "both",
     "render": true,
-    "item": "div[data-qa^=\"product-\"], div[class*=\"ProductBoxLinkHandler\"]",
-    "title": "[data-qa=\"product-name\"], h2",
-    "price": "strong[class*=\"amount\"], [data-qa=\"price-now\"]",
-    "old_price": "[class*=\"oldPrice\"]",
+    "item": "span.productContainer, div[data-qa=\"plp-product-box\"], div[class*=\"ProductBoxLinkHandler\"], div[class*=\"productContainer\"]",
+    "title": "[data-qa=\"product-name\"], [data-qa*=\"name\"], h2, h3, [class*=\"name\"]",
+    "price": "strong.amount, [class*=\"amount\"], [data-qa*=\"price\"] strong, [data-qa*=\"price\"]",
+    "old_price": "[class*=\"oldPrice\"], [data-qa*=\"old\"], del, s",
     "link": "a[href*=\"/p/\"]@href",
     "image": "img@src",
     "deals": {
@@ -68,8 +68,13 @@
       "urls": [
         "https://www.noon.com/egypt-en/deals/",
         "https://www.noon.com/egypt-en/search/?q=sale&sort[by]=discount_percent&sort[dir]=desc"
-      ]
-    }
+      ],
+      "wait": "a[href*=\"/p/\"]"
+    },
+    "wait": "a[href*=\"/p/\"]",
+    "url_template": "https://www.noon.com/egypt-en/{url}/{sku}/p/",
+    "image_template": "https://f.nooncdn.com/p/{image_key}.jpg",
+    "link_cards": true
   },
   {
     "name": "B.TECH",

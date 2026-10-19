@@ -389,12 +389,41 @@
       const [raw, offerUrl] = firstPrice(d);
       const price = parsePrice(raw);
       const title = d.name || d.title;
-      const url = d.url || offerUrl || d.url_slug;
+      let url = d.url || offerUrl || d.url_slug;
+      if (store.url_template && d.sku && url && !/^https?:/.test(String(url)))
+        url = store.url_template.replace("{url}", String(url).replace(/^\/|\/$/g, "")).replace("{sku}", d.sku);
+      const old = d.sale_price != null && d.price != null && parsePrice(d.price) > price ? parsePrice(d.price) : null;
+      if (!d.image && store.image_template && d.image_key) d.image = store.image_template.replace("{image_key}", d.image_key);
       if (!(price && typeof title === "string" && url)) continue;
       let img = d.image;
       if (Array.isArray(img)) img = img[0] || null;
       if (img && typeof img === "object") img = img.url;
-      out.push({ title, price, url: absUrl(String(url), store.base_url), image: img || null, source: store.name, via: "scraper" });
+      out.push({ title, price, old_price: old, url: absUrl(String(url), store.base_url), image: img || null, source: store.name, via: "scraper" });
+    }
+    return out;
+  }
+
+  /** Last resort for JS sites with hashed class names: start at each product link, climb to the block holding a price. */
+  function parseLinkCards(doc, store) {
+    const out = [], seen = new Set();
+    const linkSel = (store.link || "a@href").split("@")[0];
+    let links; try { links = doc.querySelectorAll(linkSel); } catch (_) { return out; }
+    for (const a of links) {
+      const href = a.getAttribute("href");
+      if (!href || seen.has(href.split("?")[0])) continue;
+      let el = a, price = null;
+      for (let i = 0; i < 6 && el; i++, el = el.parentElement) {
+        const pt = sel(el, store.price) || ((el.textContent || "").match(/(?:EGP|ج\.?م|جنيه)\s*[\d٠-٩][\d٠-٩.,٬]*|[\d٠-٩][\d٠-٩.,٬]*\s*(?:EGP|ج\.?م|جنيه)/) || [])[0];
+        price = parsePrice(pt);
+        if (price) break;
+      }
+      if (!price || !el) continue;
+      const title = sel(el, store.title) || a.getAttribute("title") || (a.textContent || "").replace(/\s+/g, " ").trim().slice(0, 160);
+      if (!title || title.length < 4) continue;
+      seen.add(href.split("?")[0]);
+      const img = sel(el, store.image);
+      out.push({ title, price, old_price: parsePrice(sel(el, store.old_price)), url: absUrl(href, store.base_url),
+        image: img ? absUrl(img, store.base_url) : null, source: store.name, via: "scraper" });
     }
     return out;
   }
@@ -404,6 +433,7 @@
     const doc = new P().parseFromString(html, "text/html");
     let offers = parseCss(doc, store);
     if (!offers.length) offers = parseStructured(doc, store);
+    if (!offers.length && store.link_cards) offers = parseLinkCards(doc, store);
     return offers.slice(0, max);
   }
 
@@ -514,7 +544,7 @@
   async function htmlSearch(store, q, lang, fetcher, opt) {
     const url = buildUrl(store, q, lang);
     if (store.render) {
-      const wait = (store.item || "").split(",")[0] || null;
+      const wait = store.wait || (store.item || "").split(",")[0] || null;
       return parse(await withTimeout(fetcher(url, { lang, render: true, wait }), opt.renderTimeout), store, opt.DOMParser, opt.maxPerSource);
     }
     return parse(await withTimeout(fetcher(url, { lang }), opt.timeout), store, opt.DOMParser, opt.maxPerSource);
@@ -601,7 +631,7 @@
           got = feed.parse(JSON.parse(await withTimeout(opt.fetcher(feed.url(s), { json: true, lang: "en" }), opt.timeout)), s);
         } else {
           const sel = Object.assign({}, s, s.deals);   // deals page may need its own selectors
-          const opts = s.deals.render ? { render: true, wait: (sel.item || "").split(",")[0] || null, lang: "en" } : { lang: "en" };
+          const opts = s.deals.render ? { render: true, wait: sel.wait || (sel.item || "").split(",")[0] || null, lang: "en" } : { lang: "en" };
           // several pages per store (e.g. Amazon: one percent-off page per category); keep whatever answers
           const pages = await Promise.allSettled(feed.urls(s).map((u) =>
             withTimeout(opt.fetcher(u, opts), s.deals.render ? opt.renderTimeout : opt.timeout).then((html) => parse(html, sel, opt.DOMParser, 80))));
