@@ -328,7 +328,7 @@ function renderDeals(done = true) {
     .map(([k, n]) => `<button data-s="${esc(k)}" class="${dealStore === k ? "on" : ""}">${esc(n)}</button>`).join("");
   let list = d.deals.filter((o) => !dealStore || o.source === dealStore);
   const by = { pct: (a, b) => b.pct - a.pct, save: (a, b) => (b.old_price - b.price) - (a.old_price - a.price), price: (a, b) => a.price - b.price };
-  list = list.slice().sort(by[dealSort]).slice(0, 60);
+  list = list.slice().sort(by[dealSort]).slice(0, 120);
   if (!list.length) { $("#d_out").innerHTML = done ? `<div class="empty">${t.dealsNone}</div>` : ""; return; }
   $("#d_out").innerHTML = `<div class="dg">${list.map((o) => `<a class="dc" href="${esc(o.url)}"><span class="off">-${o.pct}%</span>${img(o)}
     <div class="ttl">${esc(o.title)}</div><div class="p">${money(o.price)}</div><div class="old">${money(o.old_price)}</div>

@@ -554,6 +554,21 @@
     // PrestaShop: built-in "prices drop" page in AJAX mode
     prestashop: { url: (s) => `${s.base_url}${s.path ?? "/en"}/prices-drop?ajax=1&resultsPerPage=60`, json: true,
       parse: (d, s) => ADAPTERS.prestashop.parse(d, s) },
+    // Magento 2: catalog via GraphQL (no search word needed); deals = final price below regular price
+    magento: {
+      url: (s) => `${s.graphql || s.base_url + "/graphql"}?query=${enc(`{products(filter:{price:{from:"1"}},pageSize:100,currentPage:1){items{name url_key url_suffix small_image{url} price_range{minimum_price{final_price{value} regular_price{value}}}}}}`)}`,
+      json: true,
+      parse: (d, s) => ADAPTERS.magento.parse(d, s),
+    },
+    // IKEA: public search service; "previous" price = IKEA's own "new lower price"
+    ikea: {
+      url: (s) => `https://sik.search.blue.cdtapps.com/eg/${s.locale || "en"}/search-result-page?max-num-filters=0&size=96&q=${enc(s.deals.q || "lower price")}`,
+      json: true,
+      parse: (d, s) => (((d.searchResultPage || {}).products || {}).main || { items: [] }).items.map((i) => i.product).filter(Boolean)
+        .map((p) => { const sp = p.salesPrice || {}, prev = sp.previous || {};
+          return offer(s, { title: [p.name, p.typeName].filter(Boolean).join(" "), price: parsePrice(sp.numeral),
+            old_price: parsePrice(prev.numeral ?? prev.wholeNumber ?? sp.previousPrice), url: p.pipUrl, image: p.mainImageUrl || null }); }),
+    },
     // Any store: a deals / specials / flash-sale page read with the store's CSS selectors (overridable in "deals")
     html: { url: (s) => s.deals.url, json: false, parse: null },
   };

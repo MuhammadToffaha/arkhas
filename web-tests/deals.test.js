@@ -39,10 +39,27 @@ function fakeFetch(url) {
   return new Promise(() => {});   // amazon render etc: hangs -> timeout
 }
 
-test("top 10 sites have a deals feed", () => {
-  const withDeals = STORES.filter((s) => s.deals);
-  assert.equal(withDeals.length, 10);
-  for (const s of withDeals) assert.ok(E.DEAL_FEEDS[s.deals.kind], s.name);
+test("every site in the app has a deals feed", () => {
+  const normal = STORES.filter((s) => !s.default_off && s.enabled !== false);
+  assert.ok(normal.length >= 23);
+  for (const s of normal) {
+    assert.ok(s.deals, `${s.name} has no deals feed`);
+    assert.ok(E.DEAL_FEEDS[s.deals.kind], `${s.name}: unknown kind ${s.deals.kind}`);
+  }
+});
+
+test("magento + ikea deal feeds keep only real discounts", () => {
+  const mag = { data: { products: { items: [
+    { name: "Sharp Split AC 1.5 HP", url_key: "sharp-ac", url_suffix: ".html", price_range: { minimum_price: { final_price: { value: 21000 }, regular_price: { value: 28000 } } } },
+    { name: "Normal price TV", url_key: "tv", url_suffix: ".html", price_range: { minimum_price: { final_price: { value: 9000 }, regular_price: { value: 9000 } } } },
+  ] } } };
+  const m = E.DEAL_FEEDS.magento.parse(mag, S["Raneen"]).map((o) => [o.title, E.pctOff(o)]);
+  assert.deepEqual(m, [["Sharp Split AC 1.5 HP", 25], ["Normal price TV", 0]]);
+  assert.ok(decodeURIComponent(E.DEAL_FEEDS.magento.url(S["Raya Shop"])).includes('filter:{price:{from:"1"}}'));
+  const ik = { searchResultPage: { products: { main: { items: [{ product: { name: "BILLY", typeName: "Bookcase", pipUrl: "https://www.ikea.com/eg/en/p/billy/",
+    salesPrice: { numeral: 2995, previous: { numeral: 3995 } } } }] } } } };
+  const k = E.DEAL_FEEDS.ikea.parse(ik, S["IKEA Egypt"])[0];
+  assert.deepEqual([k.price, k.old_price, E.pctOff(k)], [2995, 3995, 25]);
 });
 
 test("deals: % off computed, non-sale / sold-out / tiny discounts dropped, biggest discount first", async () => {

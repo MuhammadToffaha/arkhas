@@ -51,7 +51,12 @@
     "price": "strong[class*=\"amount\"], [data-qa=\"price-now\"]",
     "old_price": "[class*=\"oldPrice\"]",
     "link": "a[href*=\"/p/\"]@href",
-    "image": "img@src"
+    "image": "img@src",
+    "deals": {
+      "kind": "html",
+      "render": true,
+      "url": "https://www.noon.com/egypt-en/deals/"
+    }
   },
   {
     "name": "B.TECH",
@@ -65,7 +70,11 @@
     "price": "[data-price-type=\"finalPrice\"] .price, .special-price .price, .price",
     "old_price": "[data-price-type=\"oldPrice\"] .price",
     "link": "a.product-item-link@href",
-    "image": "img.product-image-photo@src"
+    "image": "img.product-image-photo@src",
+    "deals": {
+      "kind": "magento"
+    },
+    "product_base": "https://btech.com/en"
   },
   {
     "name": "2B",
@@ -79,7 +88,11 @@
     "price": "[data-price-type=\"finalPrice\"] .price",
     "old_price": "[data-price-type=\"oldPrice\"] .price",
     "link": "a.product-item-link@href",
-    "image": "img.product-image-photo@src"
+    "image": "img.product-image-photo@src",
+    "deals": {
+      "kind": "html",
+      "url": "https://2b.com.eg/en/offer.html?product_list_limit=60"
+    }
   },
   {
     "name": "Raya Shop",
@@ -93,7 +106,10 @@
     "price": "[data-price-type=\"finalPrice\"] .price",
     "old_price": "[data-price-type=\"oldPrice\"] .price",
     "link": "a.product-item-link@href",
-    "image": "img.product-image-photo@src"
+    "image": "img.product-image-photo@src",
+    "deals": {
+      "kind": "magento"
+    }
   },
   {
     "name": "Carrefour Egypt",
@@ -105,7 +121,12 @@
     "title": "[data-testid=\"product_name\"], a[href*=\"/p/\"]",
     "price": "[data-testid=\"product_price\"], div[class*=\"price\"]",
     "link": "a[href*=\"/p/\"]@href",
-    "image": "img@src"
+    "image": "img@src",
+    "deals": {
+      "kind": "html",
+      "render": true,
+      "url": "https://www.carrefouregypt.com/mafegy/en/online-deals/c/deals"
+    }
   },
   {
     "name": "Dream 2000",
@@ -156,7 +177,10 @@
     "price": "[data-price-type=\"finalPrice\"] .price",
     "old_price": "[data-price-type=\"oldPrice\"] .price",
     "link": "a.product-item-link@href",
-    "image": "img.product-image-photo@src"
+    "image": "img.product-image-photo@src",
+    "deals": {
+      "kind": "magento"
+    }
   },
   {
     "name": "Cairo Cart",
@@ -170,7 +194,10 @@
     "price": "[data-price-type=\"finalPrice\"] .price",
     "old_price": "[data-price-type=\"oldPrice\"] .price",
     "link": "a.product-item-link@href",
-    "image": "img.product-image-photo@src"
+    "image": "img.product-image-photo@src",
+    "deals": {
+      "kind": "magento"
+    }
   },
   {
     "name": "Hyper One",
@@ -178,7 +205,10 @@
     "base_url": "https://www.hyperone.com.eg",
     "graphql": "https://mcprod.hyperone.com.eg/graphql",
     "product_base": "https://www.hyperone.com.eg/en/product",
-    "lang": "en"
+    "lang": "en",
+    "deals": {
+      "kind": "magento"
+    }
   },
   {
     "name": "Aman Stores",
@@ -186,7 +216,10 @@
     "base_url": "https://amanstores.com",
     "graphql": "https://marketplace.amanstores.com/graphql",
     "product_base": "https://amanstores.com/en",
-    "lang": "en"
+    "lang": "en",
+    "deals": {
+      "kind": "magento"
+    }
   },
   {
     "name": "El Araby",
@@ -200,7 +233,10 @@
     "price": "[data-price-type=\"finalPrice\"] .price",
     "old_price": "[data-price-type=\"oldPrice\"] .price",
     "link": "a.product-item-link@href",
-    "image": "img.product-image-photo@src"
+    "image": "img.product-image-photo@src",
+    "deals": {
+      "kind": "magento"
+    }
   },
   {
     "name": "Cairo Sales",
@@ -231,7 +267,10 @@
     "price": ".price",
     "old_price": ".regular-price",
     "link": "a@href",
-    "image": "img@src"
+    "image": "img@src",
+    "deals": {
+      "kind": "prestashop"
+    }
   },
   {
     "name": "Dubai Phone",
@@ -275,7 +314,11 @@
     "price": ".price-new, .price-normal, .price",
     "old_price": ".price-old",
     "link": ".name a@href",
-    "image": ".image img@src"
+    "image": ".image img@src",
+    "deals": {
+      "kind": "html",
+      "url": "https://www.elbadrgroupeg.store/index.php?route=product/special&limit=50"
+    }
   },
   {
     "name": "Maximum Hardware",
@@ -298,7 +341,10 @@
     "type": "ikea",
     "base_url": "https://www.ikea.com/eg/en",
     "locale": "en",
-    "lang": "en"
+    "lang": "en",
+    "deals": {
+      "kind": "ikea"
+    }
   },
   {
     "name": "Sigma Computer",
