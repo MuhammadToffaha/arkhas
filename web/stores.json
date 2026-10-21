@@ -14,6 +14,18 @@
     "deals": {
       "kind": "html",
       "urls": [
+        "https://www.amazon.eg/s?k=electronics&rh=p_8%3A70-&language=en_AE",
+        "https://www.amazon.eg/s?k=mobile+phone&rh=p_8%3A70-&language=en_AE",
+        "https://www.amazon.eg/s?k=laptop&rh=p_8%3A70-&language=en_AE",
+        "https://www.amazon.eg/s?k=headphones&rh=p_8%3A70-&language=en_AE",
+        "https://www.amazon.eg/s?k=smart+watch&rh=p_8%3A70-&language=en_AE",
+        "https://www.amazon.eg/s?k=kitchen+appliances&rh=p_8%3A70-&language=en_AE",
+        "https://www.amazon.eg/s?k=home&rh=p_8%3A70-&language=en_AE",
+        "https://www.amazon.eg/s?k=fashion&rh=p_8%3A70-&language=en_AE",
+        "https://www.amazon.eg/s?k=shoes&rh=p_8%3A70-&language=en_AE",
+        "https://www.amazon.eg/s?k=beauty&rh=p_8%3A70-&language=en_AE",
+        "https://www.amazon.eg/s?k=toys&rh=p_8%3A70-&language=en_AE",
+        "https://www.amazon.eg/s?k=sports&rh=p_8%3A70-&language=en_AE",
         "https://www.amazon.eg/s?k=electronics&rh=p_8%3A50-&language=en_AE",
         "https://www.amazon.eg/s?k=mobile+phone&rh=p_8%3A50-&language=en_AE",
         "https://www.amazon.eg/s?k=laptop&rh=p_8%3A50-&language=en_AE",

@@ -638,7 +638,7 @@
    * Returns { deals: [...offer, pct], sources: [...] } sorted by biggest discount.
    */
   async function deals(opts) {
-    const opt = Object.assign({ minPct: 10, perStore: 40, timeout: 12000, renderTimeout: 20000 }, opts);
+    const opt = Object.assign({ minPct: 10, perStore: 60, timeout: 12000, renderTimeout: 20000 }, opts);
     const stores = (opt.stores || []).filter((s) => s.enabled !== false && s.deals);
     const all = [], sources = [];
     const snap = () => {

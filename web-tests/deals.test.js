@@ -130,7 +130,7 @@ test("UI: ⚡ tab shows deal cards, sorting and store filter", async () => {
 
 test("Amazon deals: several percent-off pages, merged; one failing page doesn't kill the store", async () => {
   const amazon = S["Amazon.eg"];
-  assert.ok(amazon.deals.urls.length >= 8 && amazon.deals.urls.every((u) => u.includes("rh=p_8%3A50-")));
+  assert.ok(amazon.deals.urls.length >= 8 && amazon.deals.urls.every((u) => /rh=p_8%3A[57]0-/.test(u)));
   const page = (title, p, old, asin) => `<div data-component-type="s-search-result"><a class="a-link-normal" href="/dp/${asin}"><h2><span>${title}</span></h2></a>
     <span class="a-price"><span class="a-offscreen">EGP ${p}</span></span><span class="a-price a-text-price"><span class="a-offscreen">EGP ${old}</span></span></div>`;
   let n = 0;
@@ -144,4 +144,23 @@ test("Amazon deals: several percent-off pages, merged; one failing page doesn't 
   assert.equal(n, amazon.deals.urls.length);
   assert.deepEqual(r.deals.map((o) => [o.title, o.pct]), [["JBL Speaker", 60], ["Air Fryer", 50], ["Toaster", 10]]);  // range chips in the UI pick 50–70%
   assert.equal(r.sources[0].ok, true);
+});
+
+test("70%+ chip shows every deal from 70% up (70, 75, 77, 88), biggest first; Amazon has 70%+ pages", async () => {
+  assert.ok(S["Amazon.eg"].deals.urls.some((u) => u.includes("p_8%3A70-")));
+  const html = readFileSync(new URL("index.html", W), "utf8").replace('<script src="engine.js"></script>', () => `<script>${readFileSync(new URL("engine.js", W), "utf8")}</script>`);
+  const mk = (n, p, o) => `<article class="prd"><a class="core" href="/${n}.html"><h3 class="name">${n} item</h3><div class="prc">EGP ${p}</div><div class="old">EGP ${o}</div></a></article>`;
+  const page = mk("a70", 300, 1000) + mk("b75", 250, 1000) + mk("c77", 230, 1000) + mk("d88", 120, 1000) + mk("e60", 400, 1000) + mk("f50", 500, 1000);
+  const prefs = { dealRange: "r70" };
+  const dom = new JSDOM(html, { runScripts: "dangerously", url: "file:///x/index.html", beforeParse(win) {
+    win.Native = { fetch(id, url) { setTimeout(() => win.__native(id, url.includes("jumia.com.eg/flash") , url.includes("jumia.com.eg/flash") ? page : "HTTP 404"), 3); },
+      getPref: (k) => prefs[k] || "", setPref: (k, v) => { prefs[k] = v; }, readConfig: (n) => readFileSync(new URL(n, W), "utf8"),
+      appVersion: () => "1.0.22", pendingQuery: () => "" };
+  } });
+  const win = dom.window, doc = win.document;
+  await win.arkhasReady;
+  doc.querySelector("#nav_deals").click();
+  const until = async (f) => { const t = Date.now(); while (!f()) { if (Date.now() - t > 8000) throw new Error("timeout"); await new Promise((r) => setTimeout(r, 20)); } };
+  await until(() => doc.querySelector("#d_bar").hidden && doc.querySelectorAll(".dc").length);
+  assert.deepEqual([...doc.querySelectorAll(".dc .off")].map((x) => x.textContent), ["-88%", "-77%", "-75%", "-70%"]);
 });

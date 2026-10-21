@@ -13,6 +13,13 @@ const JUMIA = `<article class="prd"><a class="core" href="/fryer.html"><h3 class
   <article class="prd"><a class="core" href="/kettle.html"><h3 class="name">Kettle</h3><div class="prc">EGP 800</div><div class="old">EGP 1,000</div></a></article>`;
 const NOONMEGA = `<span class="productContainer"><a href="/egypt-en/watch/N7/p/"><div data-qa="product-name">Smart Watch</div><strong class="amount">999</strong></a></span>`;
 
+
+async function unlockTg(win, doc, pin = "1234") {
+  doc.querySelector("#tg_lock").click();
+  const t = async () => { doc.querySelector("#tg_pin").value = pin; doc.querySelector("#tg_pin_ok").click(); await new Promise((r) => setTimeout(r, 30)); };
+  await t(); if (!doc.querySelector("#tg_pin_box").hidden) await t();
+  await until(() => !doc.querySelector("#tg_sec").hidden);
+}
 function boot({ bg = false, prefs = {}, calls = [] } = {}) {
   const dom = new JSDOM(html(), { runScripts: "dangerously", url: "file:///android_asset/web/index.html", beforeParse(win) {
     win.Native = {
@@ -85,6 +92,7 @@ test("telegram setup: token -> find group -> pick -> test message", async () => 
   await win.arkhasReady;
   doc.querySelector("#gear").click();
   const on = doc.querySelector("#al_on"); on.checked = true; on.dispatchEvent(new win.Event("change"));
+  await unlockTg(win, doc);
   const tg = doc.querySelector("#tg_on"); tg.checked = true; tg.dispatchEvent(new win.Event("change"));
   assert.equal(doc.querySelector("#tg_box").hidden, false);
   assert.equal(doc.querySelectorAll("#tg_steps li").length, 3);
@@ -127,6 +135,7 @@ test("telegram one-tap: '➕ add bot' opens Telegram's add-to-group screen, wait
   win.__tgEmpty = true;                       // group not added yet
   doc.querySelector("#gear").click();
   const on = doc.querySelector("#al_on"); on.checked = true; on.dispatchEvent(new win.Event("change"));
+  await unlockTg(win, doc);
   const tg = doc.querySelector("#tg_on"); tg.checked = true; tg.dispatchEvent(new win.Event("change"));
   doc.querySelector("#tg_token").value = "123:ABC";
   doc.querySelector("#tg_add").click();
@@ -144,6 +153,7 @@ test("telegram: wrong token is reported clearly", async () => {
   await win.arkhasReady;
   doc.querySelector("#gear").click();
   const on = doc.querySelector("#al_on"); on.checked = true; on.dispatchEvent(new win.Event("change"));
+  await unlockTg(win, doc);
   const tg = doc.querySelector("#tg_on"); tg.checked = true; tg.dispatchEvent(new win.Event("change"));
   doc.querySelector("#tg_token").value = "BAD";
   doc.querySelector("#tg_find").click();
@@ -162,9 +172,41 @@ test("telegram: built-in bot token (from the GitHub secret) -> no token field, w
   await win.arkhasReady;
   doc.querySelector("#gear").click();
   const on = doc.querySelector("#al_on"); on.checked = true; on.dispatchEvent(new win.Event("change"));
+  await unlockTg(win, doc);
   const tg = doc.querySelector("#tg_on"); tg.checked = true; tg.dispatchEvent(new win.Event("change"));
   assert.equal(doc.querySelector("#tg_token").hidden, true);
   assert.match(doc.querySelector("#tg_steps").textContent, /@ToffahaBot/);
   doc.querySelector("#tg_find").click();
   await until(() => calls.some((u) => u.includes("/bot999:BUILTIN/getMe")));
+});
+
+test("🔒 telegram settings hidden until passcode: set (twice), wrong code rejected, relocks on close", async () => {
+  const { win, doc, prefs } = boot();
+  await win.arkhasReady;
+  doc.querySelector("#gear").click();
+  const on = doc.querySelector("#al_on"); on.checked = true; on.dispatchEvent(new win.Event("change"));
+  assert.equal(doc.querySelector("#tg_sec").hidden, true, "telegram hidden");
+  assert.equal(doc.querySelector("#tg_lock").hidden, false);
+  // first time: choose + confirm
+  doc.querySelector("#tg_lock").click();
+  doc.querySelector("#tg_pin").value = "12"; doc.querySelector("#tg_pin_ok").click();
+  await until(() => /4/.test(doc.querySelector("#tg_pin_msg").textContent));
+  doc.querySelector("#tg_pin").value = "2468"; doc.querySelector("#tg_pin_ok").click();
+  await until(() => /again|تاني/.test(doc.querySelector("#tg_pin_msg").textContent));
+  doc.querySelector("#tg_pin").value = "2468"; doc.querySelector("#tg_pin_ok").click();
+  await until(() => !doc.querySelector("#tg_sec").hidden);
+  assert.ok(prefs.tgPin && !prefs.tgPin.includes("2468"), "only a hash is stored");
+  // relock, wrong code, right code
+  doc.querySelector("#tg_relock").click();
+  assert.equal(doc.querySelector("#tg_sec").hidden, true);
+  doc.querySelector("#tg_lock").click();
+  doc.querySelector("#tg_pin").value = "1111"; doc.querySelector("#tg_pin_ok").click();
+  await until(() => /❌/.test(doc.querySelector("#tg_pin_msg").textContent));
+  assert.equal(doc.querySelector("#tg_sec").hidden, true);
+  doc.querySelector("#tg_pin").value = "2468"; doc.querySelector("#tg_pin_ok").click();
+  await until(() => !doc.querySelector("#tg_sec").hidden);
+  // closing settings locks again
+  doc.querySelector("#sheet").dispatchEvent(new win.MouseEvent("click", { bubbles: true }));
+  doc.querySelector("#gear").click();
+  assert.equal(doc.querySelector("#tg_sec").hidden, true);
 });

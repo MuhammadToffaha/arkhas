@@ -105,6 +105,10 @@ input:focus{outline:none;border-color:var(--accent)}
 .sw input:checked+i{background:var(--accent)}
 .sw input:checked+i:before{transform:translateX(20px)}
 [dir=rtl] .sw input:checked+i:before{transform:translateX(-20px)}
+.lockrow{width:100%;background:none;border:0;border-bottom:1px solid var(--line);color:var(--ink);font:inherit;text-align:start;cursor:pointer}
+.lockbox{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:10px;margin:6px 0}
+.lockbox input{width:100%;font-size:22px;letter-spacing:8px;text-align:center;padding:10px;margin-top:6px}
+.relock{margin-inline-start:auto;padding:4px 10px}
 .tg-steps{padding-inline-start:18px;margin:6px 0;line-height:1.7}
 #tg_box input{margin-top:8px;font-size:14px;padding:10px 12px;width:100%}
 #tg_chats button{display:block;width:100%;text-align:start;margin-top:6px}
@@ -216,7 +220,15 @@ table{border-collapse:collapse;width:100%;font-size:12.5px}td{padding:4px;border
       <div class="al-l" id="al_h_l"></div><div class="chips" id="al_h"></div>
       <div class="al-l" id="al_to_l"></div>
       <label class="dd-row"><input type="checkbox" id="al_notify"> <span id="al_notify_l"></span></label>
-      <label class="dd-row"><input type="checkbox" id="tg_on"> <span id="tg_on_l"></span></label>
+      <button type="button" class="dd-row lockrow" id="tg_lock"><span>🔒</span><span id="tg_lock_l"></span></button>
+      <div class="lockbox" id="tg_pin_box" hidden>
+        <div class="muted" id="tg_pin_msg"></div>
+        <input id="tg_pin" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="8" autocomplete="off" dir="ltr">
+        <div class="upd-b"><button class="go" id="tg_pin_ok"></button><button class="ib2" id="tg_pin_x"></button></div>
+      </div>
+      <div id="tg_sec" hidden>
+      <label class="dd-row"><input type="checkbox" id="tg_on"> <span id="tg_on_l"></span>
+        <button type="button" class="ib2 relock" id="tg_relock">🔒</button></label>
       <div id="tg_box" hidden>
         <ol class="muted tg-steps" id="tg_steps"></ol>
         <input id="tg_token" placeholder="123456789:AA…  (bot token)" autocomplete="off" spellcheck="false" dir="ltr">
@@ -226,6 +238,7 @@ table{border-collapse:collapse;width:100%;font-size:12.5px}td{padding:4px;border
         <input id="tg_chat" placeholder="chat id  (-100…)" autocomplete="off" dir="ltr">
         <div class="upd-b"><button class="ib2" id="tg_test"></button></div>
         <div class="muted" id="tg_msg"></div>
+      </div>
       </div>
       <div class="upd-b"><button class="ib2" id="al_test"></button></div>
       <div class="muted" id="al_last"></div>
@@ -271,7 +284,9 @@ const T = {
     alTesting: "جاري الفحص في الخلفية… هيوصلك إشعار لو فيه جديد", alLast: "آخر فحص {t}: {f} عرض، {n} جديد", alErr: "آخر فحص {t}: فشل ({e})",
     alNever: "لسه مفيش فحص", alTo: "ابعت العروض الجديدة على", alNotify: "🔔 إشعار على الموبايل", tgOn: "✈️ جروب تليجرام (تلقائي بالكامل)",
     tgSteps: ["في تليجرام افتح @BotFather واكتب /newbot — هيديك Token", "الصق الـ Token هنا", "اضغط «➕ ضيف البوت لجروبي» واختار الجروب — التطبيق هيلاقيه لوحده"],
-    tgAdd: "➕ ضيف البوت لجروبي", tgPrivate: "الشات الخاص",
+    tgLock: "✈️ إعدادات تليجرام (مقفولة)", pinNew: "اختار رقم سري (4–8 أرقام) لإعدادات تليجرام", pinAgain: "اكتب الرقم السري تاني للتأكيد",
+    pinEnter: "اكتب الرقم السري", pinWrong: "❌ الرقم السري غلط", pinMismatch: "❌ الرقمين مش زي بعض — ابدأ تاني", pinShort: "❌ لازم 4 أرقام على الأقل",
+    pinOk: "فتح", pinCancel: "إلغاء", tgAdd: "➕ ضيف البوت لجروبي", tgPrivate: "الشات الخاص",
     tgStepsBuiltIn: ["البوت @ToffahaBot متركّب في التطبيق — مش محتاج Token", "اضغط «➕ ضيف البوت لجروبي» واختار الجروب", "أو اضغط «دوّر على جروبي» واختار الشات الخاص عشان توصلك العروض لوحدك"], tgWaiting: "⏳ مستني… اختار الجروب في تليجرام وارجع هنا (أو اكتب /arkhas في الجروب)", tgBot: "🤖 البوت: @{u}",
     tgBadTok: "⚠️ الـ Token غلط — انسخه تاني من @BotFather", tgTimeout: "لسه مش لاقي الجروب — اكتب /arkhas في الجروب واضغط «دوّر على جروبي»",
     tgFind: "🔎 دوّر على جروبي", tgTest: "✉️ ابعت رسالة تجربة", tgNoChats: "مش لاقي الجروب — اكتب /arkhas في الجروب (البوت مش بيشوف الرسايل العادية) وحاول تاني",
@@ -289,7 +304,9 @@ const T = {
     alTesting: "Checking in the background… you'll get a notification if there's something new", alLast: "Last check {t}: {f} deals, {n} new", alErr: "Last check {t}: failed ({e})",
     alNever: "No check yet", alTo: "Send new deals to", alNotify: "🔔 Phone notification", tgOn: "✈️ Telegram group (fully automatic)",
     tgSteps: ["In Telegram open @BotFather, send /newbot — you get a token", "Paste the token here", "Tap “➕ Add bot to my group” and pick the group — the app finds it by itself"],
-    tgAdd: "➕ Add bot to my group", tgPrivate: "private chat",
+    tgLock: "✈️ Telegram settings (locked)", pinNew: "Choose a passcode (4–8 digits) for the Telegram settings", pinAgain: "Enter the passcode again to confirm",
+    pinEnter: "Enter passcode", pinWrong: "❌ Wrong passcode", pinMismatch: "❌ Codes don't match — start again", pinShort: "❌ At least 4 digits",
+    pinOk: "Unlock", pinCancel: "Cancel", tgAdd: "➕ Add bot to my group", tgPrivate: "private chat",
     tgStepsBuiltIn: ["The bot @ToffahaBot is built into the app — no token needed", "Tap “➕ Add bot to my group” and pick the group", "Or tap “Find my group” and pick your private chat to get the deals just for you"], tgWaiting: "⏳ Waiting… pick the group in Telegram and come back (or send /arkhas in the group)", tgBot: "🤖 Bot: @{u}",
     tgBadTok: "⚠️ Token is wrong — copy it again from @BotFather", tgTimeout: "Group not found yet — send /arkhas in the group, then tap “Find my group”",
     tgFind: "🔎 Find my group", tgTest: "✉️ Send test message", tgNoChats: "Group not found — send /arkhas in the group (bots don't see normal messages) and try again",
@@ -429,14 +446,14 @@ function focusEnd() {
 const syncX = () => { $("#qx").hidden = !$("#q").value; };
 $("#q").addEventListener("input", syncX);
 $("#qx").onclick = () => { $("#q").value = ""; syncX(); $("#q").focus(); };
-$("#sheet").onclick = (e) => { if (e.target.id === "sheet") $("#sheet").classList.remove("on"); };
+$("#sheet").onclick = (e) => { if (e.target.id === "sheet") { $("#sheet").classList.remove("on"); tgUnlocked = false; } };
 $("#s_save").onclick = () => {
   setPref("serp", $("#serp").value.trim()); setPref("city", ($("#city").value.trim() || "cairo").toLowerCase());
   const boxes = [...document.querySelectorAll("#storelist input")];
   const slow = new Set(STORES.filter((x) => x.default_off).map((x) => x.name));
   setPref("disabled", JSON.stringify(boxes.filter((i) => !i.checked && !slow.has(i.dataset.n)).map((i) => i.dataset.n)));
   setPref("enabled", JSON.stringify(boxes.filter((i) => i.checked && slow.has(i.dataset.n)).map((i) => i.dataset.n)));
-  $("#sheet").classList.remove("on");
+  $("#sheet").classList.remove("on"); tgUnlocked = false;
 };
 
 // ---------- ❤️ favourites (saved on the phone) ----------
@@ -516,7 +533,7 @@ let dealHide = null;   // stores unticked in the dropdown (remembered)
 const getHide = () => { if (!dealHide) { try { dealHide = new Set(JSON.parse(pref("dealHide", "[]"))); } catch (_) { dealHide = new Set(); } } return dealHide; };
 const saveHide = () => setPref("dealHide", JSON.stringify([...getHide()]));
 let dealRange = null;   // read from prefs on first use; default 50–70%
-const RANGES = { mega: [0, 95], all: [10, 95], r30: [30, 95], r5070: [50, 70], r70: [70, 95] };
+const RANGES = { mega: [0, 100], all: [10, 100], r30: [30, 100], r5070: [50, 70], r70: [70, 100] };
 const inR = (o, k) => k === "mega" ? o.tag === "mega" : o.pct >= RANGES[k][0] && o.pct <= RANGES[k][1];
 const DEALS_TTL = 60 * 60 * 1000;   // reuse fetched deals for 1 hour
 
@@ -555,6 +572,7 @@ function renderDeals(done = true) {
     + " · " + inRange.filter((o) => !hide.has(o.source)).length;
   $("#d_all").textContent = t.selAll; $("#d_none").textContent = t.selNone;
   let list = inRange.filter((o) => !hide.has(o.source));
+  if (dealRange === "r70" && dealSort === "pct") list = list.slice().sort((a, b) => b.pct - a.pct || a.price - b.price);
   const by = { pct: (a, b) => b.pct - a.pct, save: (a, b) => (b.old_price - b.price) - (a.old_price - a.price), price: (a, b) => a.price - b.price };
   list = list.slice().sort(by[dealSort]).slice(0, 120);
   shownDeals = list;
@@ -597,6 +615,43 @@ $("#d_stores").onchange = (e) => {
 $("#d_all").onclick = () => { getHide().clear(); saveHide(); renderDeals(); };
 $("#d_none").onclick = () => { for (const x of STORES) if (x.deals) getHide().add(x.name); saveHide(); renderDeals(); };
 
+// ---------- 🔒 passcode (stored only as a salted SHA-256 hash on the phone) ----------
+let tgUnlocked = false;
+async function pinHash(pin) {
+  const str = "arkhas-tg:" + pin;
+  const data = typeof TextEncoder !== "undefined" ? new TextEncoder().encode(str)
+    : Uint8Array.from(unescape(encodeURIComponent(str)), (c) => c.charCodeAt(0));
+  if (window.crypto && crypto.subtle) {
+    const h = await crypto.subtle.digest("SHA-256", data);
+    return [...new Uint8Array(h)].map((b) => b.toString(16).padStart(2, "0")).join("");
+  }
+  let x = 5381; for (const b of data) x = ((x * 33) ^ b) >>> 0; return "djb2:" + x.toString(16);   // fallback
+}
+let pinStage = null, pinFirst = "";
+function pinAsk() {
+  const has = !!pref("tgPin");
+  pinStage = has ? "enter" : "new"; pinFirst = "";
+  $("#tg_pin_msg").textContent = has ? T[L].pinEnter : T[L].pinNew;
+  $("#tg_pin").value = ""; $("#tg_pin_box").hidden = false; $("#tg_pin").focus();
+}
+async function pinSubmit() {
+  const v = $("#tg_pin").value.trim(), t = T[L];
+  if (!/^\d{4,8}$/.test(v)) { $("#tg_pin_msg").textContent = t.pinShort; return; }
+  if (pinStage === "enter") {
+    if ((await pinHash(v)) !== pref("tgPin")) { $("#tg_pin_msg").textContent = t.pinWrong; $("#tg_pin").value = ""; return; }
+  } else if (pinStage === "new") { pinFirst = v; pinStage = "again"; $("#tg_pin").value = ""; $("#tg_pin_msg").textContent = t.pinAgain; return; }
+  else if (pinStage === "again") {
+    if (v !== pinFirst) { pinStage = "new"; pinFirst = ""; $("#tg_pin").value = ""; $("#tg_pin_msg").textContent = t.pinMismatch; return; }
+    setPref("tgPin", await pinHash(v));
+  }
+  tgUnlocked = true; $("#tg_pin_box").hidden = true; $("#tg_pin").value = ""; renderAl();
+}
+$("#tg_lock").onclick = pinAsk;
+$("#tg_pin_ok").onclick = pinSubmit;
+$("#tg_pin").onkeydown = (e) => { if (e.key === "Enter") { e.preventDefault(); pinSubmit(); } };
+$("#tg_pin_x").onclick = () => { $("#tg_pin_box").hidden = true; $("#tg_pin").value = ""; };
+$("#tg_relock").onclick = (e) => { e.preventDefault(); tgUnlocked = false; renderAl(); };
+
 // ---------- 🔔 deal alerts (needs app with Native.setAlerts) ----------
 const canAlert = !!(N && N.setAlerts);
 const AL_STORES = ["Amazon.eg", "Noon", "Jumia"];
@@ -618,7 +673,11 @@ function renderAl() {
   $("#al_st").innerHTML = AL_STORES.map((n) => `<button data-s="${n}" class="${c.stores.includes(n) ? "on" : ""}">${n.replace(".eg", "")}</button>`).join("");
   $("#al_h").innerHTML = [1, 3, 6, 12].map((h) => `<button data-h="${h}" class="${c.hours === h ? "on" : ""}">${fmt(t.alHours, { h })}</button>`).join("");
   $("#al_to_l").textContent = t.alTo; $("#al_notify_l").textContent = t.alNotify; $("#al_notify").checked = c.notify;
-  $("#tg_on_l").textContent = t.tgOn; $("#tg_on").checked = c.tg.on; $("#tg_box").hidden = !c.tg.on;
+  $("#tg_lock_l").textContent = t.tgLock;
+  $("#tg_lock").hidden = tgUnlocked; $("#tg_sec").hidden = !tgUnlocked;
+  if (!tgUnlocked) $("#tg_box").hidden = true;
+  $("#tg_pin_ok").textContent = t.pinOk; $("#tg_pin_x").textContent = t.pinCancel;
+  $("#tg_on_l").textContent = t.tgOn; $("#tg_on").checked = c.tg.on; $("#tg_box").hidden = !c.tg.on || !tgUnlocked;
   $("#tg_steps").innerHTML = t.tgSteps.map((x) => `<li>${esc(x)}</li>`).join("");
   $("#tg_find").textContent = t.tgFind; $("#tg_test").textContent = t.tgTest; $("#tg_add").textContent = t.tgAdd;
   const builtIn = !!(N && N.defaultTgToken && N.defaultTgToken());
