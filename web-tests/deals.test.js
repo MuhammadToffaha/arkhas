@@ -130,7 +130,7 @@ test("UI: ⚡ tab shows deal cards, sorting and store filter", async () => {
 
 test("Amazon deals: several percent-off pages, merged; one failing page doesn't kill the store", async () => {
   const amazon = S["Amazon.eg"];
-  assert.ok(amazon.deals.urls.length >= 8 && amazon.deals.urls.every((u) => /rh=p_8%3A[57]0-/.test(u)));
+  assert.ok(amazon.deals.urls.length >= 8 && amazon.deals.urls.every((u) => /rh=p_8%3A[57]0-/.test(u.url || u)));
   const page = (title, p, old, asin) => `<div data-component-type="s-search-result"><a class="a-link-normal" href="/dp/${asin}"><h2><span>${title}</span></h2></a>
     <span class="a-price"><span class="a-offscreen">EGP ${p}</span></span><span class="a-price a-text-price"><span class="a-offscreen">EGP ${old}</span></span></div>`;
   let n = 0;
@@ -147,7 +147,7 @@ test("Amazon deals: several percent-off pages, merged; one failing page doesn't 
 });
 
 test("70%+ chip shows every deal from 70% up (70, 75, 77, 88), biggest first; Amazon has 70%+ pages", async () => {
-  assert.ok(S["Amazon.eg"].deals.urls.some((u) => u.includes("p_8%3A70-")));
+  assert.ok(S["Amazon.eg"].deals.urls.some((u) => (u.url || u).includes("p_8%3A70-")));
   const html = readFileSync(new URL("index.html", W), "utf8").replace('<script src="engine.js"></script>', () => `<script>${readFileSync(new URL("engine.js", W), "utf8")}</script>`);
   const mk = (n, p, o) => `<article class="prd"><a class="core" href="/${n}.html"><h3 class="name">${n} item</h3><div class="prc">EGP ${p}</div><div class="old">EGP ${o}</div></a></article>`;
   const page = mk("a70", 300, 1000) + mk("b75", 250, 1000) + mk("c77", 230, 1000) + mk("d88", 120, 1000) + mk("e60", 400, 1000) + mk("f50", 500, 1000);

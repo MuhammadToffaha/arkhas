@@ -6,6 +6,8 @@
 <!-- bump when this page needs new native bridge methods; old apps then keep their bundled copy -->
 <meta name="arkhas-bridge" content="1">
 <title>أرخص · Arkhas</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#f6f3ec;--card:#fffdf8;--ink:#1d1a16;--muted:#6f685d;--line:#e4ddcf;--accent:#0e7a5f;--accent-ink:#fff;--warn:#b25b00;--gold:#c9961a;--silver:#8d949c;--bronze:#a8673a}
 @media (prefers-color-scheme:dark){:root{--bg:#14130f;--card:#1e1c17;--ink:#f1ece2;--muted:#a59d8f;--line:#33302a;--accent:#2fb38c;--accent-ink:#0b1410;--warn:#f0a24a}}
@@ -139,6 +141,72 @@ table{border-collapse:collapse;width:100%;font-size:12.5px}td{padding:4px;border
 .sheet input{font-size:15px;padding:10px 12px;width:100%}
 .st{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--line);font-size:14px}
 .st input{width:auto;flex:none}
+
+/* ===== 🎨 Trendy deal-app themes (Settings → theme). data-theme on <html>; default "hot". ===== */
+:root,[data-theme=hot]{--bg:#fff4f1;--card:#ffffff;--ink:#1c1217;--muted:#7d6a72;--line:#f3dfe0;--accent:#ff2d63;--accent-ink:#fff;
+  --g1:#ff6a2b;--g2:#ff2d75;--grad:linear-gradient(120deg,var(--g1),var(--g2));--hot:#ff2d55;--glow:#ff2d6340;--hero-ink:#fff}
+[data-theme=neon]{--bg:#f4f1ff;--card:#fff;--ink:#16122a;--muted:#6e6890;--line:#e3ddfa;--accent:#7b2ff7;--accent-ink:#fff;
+  --g1:#7b2ff7;--g2:#00b4ff;--hot:#ff2bd6;--glow:#7b2ff740;--hero-ink:#fff}
+[data-theme=sun]{--bg:#fffbea;--card:#fff;--ink:#141414;--muted:#6b6658;--line:#f1e8c3;--accent:#141414;--accent-ink:#ffd60a;
+  --g1:#ffd60a;--g2:#ffb100;--hot:#ff3b30;--glow:#ffb10040;--hero-ink:#141414}
+[data-theme=mint]{--bg:#effaf6;--card:#fff;--ink:#0f1f1a;--muted:#5e7068;--line:#d6ece4;--accent:#00a676;--accent-ink:#fff;
+  --g1:#00c389;--g2:#00897b;--hot:#ff4d4f;--glow:#00a67640;--hero-ink:#fff}
+@media (prefers-color-scheme:dark){
+  :root,[data-theme=hot]{--bg:#120c10;--card:#1e151b;--ink:#fbeff3;--muted:#b39aa6;--line:#3a2731;--accent:#ff4d7d;--glow:#ff2d6355}
+  [data-theme=neon]{--bg:#0d0b1a;--card:#18152c;--ink:#eeeaff;--muted:#a39dc6;--line:#2e2950;--accent:#9d6bff;--glow:#7b2ff766}
+  [data-theme=sun]{--bg:#121108;--card:#1d1b10;--ink:#fff8d6;--muted:#b3ab86;--line:#373218;--accent:#ffd60a;--accent-ink:#141414}
+  [data-theme=mint]{--bg:#08130f;--card:#12201b;--ink:#e6fff6;--muted:#93b3a7;--line:#22382f;--accent:#2fe0a8;--accent-ink:#06130e}}
+:root{--grad:linear-gradient(120deg,var(--g1),var(--g2))}
+body{font-family:"Cairo","Tajawal",system-ui,"Noto Sans Arabic",sans-serif}
+header{margin:calc(-12px - env(safe-area-inset-top,0px)) -16px 0;padding:calc(14px + env(safe-area-inset-top,0px)) 18px 20px;
+  background:var(--grad);color:var(--hero-ink);border-radius:0 0 26px 26px;box-shadow:0 10px 28px var(--glow);position:relative;overflow:hidden}
+header:after{content:"";position:absolute;width:180px;height:180px;border-radius:50%;background:#ffffff22;top:-70px;inset-inline-end:-40px}
+header:before{content:"";position:absolute;width:90px;height:90px;border-radius:50%;background:#ffffff18;bottom:-40px;inset-inline-start:30%}
+.logo{font-size:28px;letter-spacing:-.5px;position:relative;z-index:1}
+.logo small{color:inherit;opacity:.85}
+form{margin-top:-2px;position:relative;z-index:1}
+#searchView form{margin-top:16px}
+input{border-radius:16px;border-width:1.5px;box-shadow:0 2px 10px #0000000d}
+input:focus{border-color:var(--accent);box-shadow:0 0 0 4px var(--glow)}
+.go,.dref,.newver{background:var(--grad);color:var(--hero-ink);box-shadow:0 6px 18px var(--glow);border-radius:16px}
+.go:active,.dref:active{transform:scale(.97)}
+.bar i{background:var(--grad)}
+.p{color:var(--hot)}
+.save{color:var(--hot)}
+.pc{border:0;border-radius:20px;box-shadow:0 4px 18px #0000000f}
+.pc.r1{box-shadow:0 0 0 2px var(--accent),0 8px 22px var(--glow)}
+.row,.fr,.links a,.upd,.dd-btn{border-color:transparent;box-shadow:0 2px 12px #0000000c}
+.chips button{border-radius:999px;font-weight:600;padding:7px 14px;box-shadow:0 1px 4px #0000000a}
+.chips button.on,#d_range button.on,#al_min button.on,#al_st button.on,#al_h button.on,.seg button.on{background:var(--grad);border-color:transparent;color:var(--hero-ink);box-shadow:0 4px 12px var(--glow)}
+#d_range button.mega.on{background:#feee00;color:#1d1a16}
+.dt{font-size:24px;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.dg{gap:12px}
+.dc{border:0;border-radius:18px;padding:8px;box-shadow:0 4px 16px #00000012;overflow:hidden;transition:transform .15s}
+.dc:active{transform:scale(.98)}
+.dc img{height:130px;border-radius:14px}
+.dc .off{background:linear-gradient(135deg,var(--hot),#ff8a00);font-size:14px;padding:3px 10px;border-radius:10px 4px 10px 4px;box-shadow:0 3px 10px #ff2d5540}
+.dc .off:before{content:"🔥 "}
+.dc .p{font-size:17px}
+.fav,.share{box-shadow:0 2px 8px #0000001f}
+.fav.on,.cnt,.dot{color:var(--hot)}.cnt,.dot{background:var(--hot);color:#fff}
+.nav{left:12px;right:12px;bottom:calc(10px + env(safe-area-inset-bottom,0px));border-radius:24px;border:1px solid var(--line);
+  background:color-mix(in srgb,var(--card) 82%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);padding:6px;box-shadow:0 10px 30px #0000002a}
+.nav button{border-radius:18px;transition:background .2s}
+.nav button.on{color:var(--accent)}
+.nav button.on b{background:var(--grad);border-radius:14px;padding:0 14px;filter:none;box-shadow:0 4px 12px var(--glow)}
+.nav button.flash.on{color:var(--accent)}
+.sw input:checked+i{background:var(--grad)}
+.sheet>div{border-radius:26px 26px 0 0}
+[hidden]{display:none!important}
+.dc .off,.megab{z-index:2}
+.dt{font-size:21px;line-height:1.2;min-width:0}
+.dh .dref{padding:8px 12px;font-size:14px;min-height:42px;flex:none}
+.dh .dref b{font-size:19px}
+html,body{overflow-x:hidden}
+.themes{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.themes button{font:inherit;font-size:12.5px;font-weight:700;border:2px solid transparent;border-radius:16px;padding:8px 4px;background:var(--card);color:var(--ink);box-shadow:0 2px 8px #0000000f;display:flex;flex-direction:column;align-items:center;gap:5px}
+.themes button i{display:block;width:100%;height:30px;border-radius:10px}
+.themes button.on{border-color:var(--accent)}
 </style>
 </head>
 <body>
@@ -246,6 +314,13 @@ table{border-collapse:collapse;width:100%;font-size:12.5px}td{padding:4px;border
   </div>
   <label id="s_lang"></label>
   <div class="seg" id="langseg"><button id="lang_ar" data-l="ar">عربي</button><button id="lang_en" data-l="en">English</button></div>
+  <label id="s_theme"></label>
+  <div class="themes" id="themes">
+    <button data-th="hot"><i style="background:linear-gradient(120deg,#ff6a2b,#ff2d75)"></i><span>🔥 Hot</span></button>
+    <button data-th="neon"><i style="background:linear-gradient(120deg,#7b2ff7,#00b4ff)"></i><span>💜 Neon</span></button>
+    <button data-th="sun"><i style="background:linear-gradient(120deg,#ffd60a,#ffb100)"></i><span>🟡 Sun</span></button>
+    <button data-th="mint"><i style="background:linear-gradient(120deg,#00c389,#00897b)"></i><span>🌿 Mint</span></button>
+  </div>
   <label for="serp">SerpAPI key</label>
   <input id="serp" placeholder="optional" autocomplete="off">
   <div class="muted" id="s_serp"></div>
@@ -279,7 +354,7 @@ const readConfig = async (name) => (N ? N.readConfig(name) : (await fetch(name))
 const T = {
   ar: { tag: "أرخص سعر في مصر", go: "ابحث", ph: "اكتب المنتج… مثال: ايفون 15 برو", hint: "نبحث في المتاجر المصرية بالعربي والإنجليزي ونجيب لك أرخص 3",
     top: "🏆 أرخص 3 أسعار", all: "كل العروض ({n})", fb: "📘 فيسبوك والمستعمل", searched: "بحثنا عن:", none: "مفيش نتائج مطابقة لسه…",
-    noneDone: "مفيش نتائج مطابقة. جرّب اسم أدق.", src: "حالة المتاجر", langLbl: "🌐 اللغة", storesHint: "آخر بحث: عدد النتائج من كل متجر", navSearch: "بحث", navStatus: "المتاجر", navGear: "الإعدادات", acc: "إكسسوار؟", cheap: "سعر مريب", rMega: "🟡 ميجا ديلز نون", mega: "ميجا", rAll: "كل الخصومات", r30: "30%+", r5070: "🔥 50–70%", r70: "70%+", rNone: "مفيش عروض في النطاق ده — جرّب نطاق تاني", alTitle: "🔔 تنبيهات الخصومات الكبيرة", alDesc: "إشعار على الموبايل لما يظهر خصم كبير جديد — حتى والتطبيق مقفول",
+    noneDone: "مفيش نتائج مطابقة. جرّب اسم أدق.", src: "حالة المتاجر", langLbl: "🌐 اللغة", themeLbl: "🎨 شكل التطبيق", storesHint: "آخر بحث: عدد النتائج من كل متجر", navSearch: "بحث", navStatus: "المتاجر", navGear: "الإعدادات", acc: "إكسسوار؟", cheap: "سعر مريب", rMega: "🟡 ميجا ديلز نون", rElec: "📱 عروض الإلكترونيات", mega: "ميجا", rAll: "كل الخصومات", r30: "30%+", r5070: "🔥 50–70%", r70: "70%+", rNone: "مفيش عروض في النطاق ده — جرّب نطاق تاني", alTitle: "🔔 تنبيهات الخصومات الكبيرة", alDesc: "إشعار على الموبايل لما يظهر خصم كبير جديد — حتى والتطبيق مقفول",
     alMin: "أقل خصم", alStores: "المتاجر", alMega: "🟡 ميجا ديلز نون كمان", alEvery: "افحص كل", alHours: "{h} ساعة", alTest: "🔍 افحص دلوقتي",
     alTesting: "جاري الفحص في الخلفية… هيوصلك إشعار لو فيه جديد", alLast: "آخر فحص {t}: {f} عرض، {n} جديد", alErr: "آخر فحص {t}: فشل ({e})",
     alNever: "لسه مفيش فحص", alTo: "ابعت العروض الجديدة على", alNotify: "🔔 إشعار على الموبايل", tgOn: "✈️ جروب تليجرام (تلقائي بالكامل)",
@@ -299,7 +374,7 @@ const T = {
     city: "مدينة فيسبوك ماركت بليس", stores: "المتاجر", saveBtn: "حفظ", ver: "نسخة", hidden: "تم إخفاء {n} نتيجة غير مطابقة" },
   en: { tag: "Best price in Egypt", go: "Search", ph: "Product… e.g. iphone 15 pro", hint: "Searching Egyptian stores in Arabic & English — top 3 cheapest",
     top: "🏆 Top 3 prices", all: "All offers ({n})", fb: "📘 Facebook & used", searched: "Searched:", none: "No matches yet…",
-    noneDone: "No matching results. Try a more specific name.", src: "Store status", langLbl: "🌐 Language", storesHint: "Last search: results per store", navSearch: "Search", navStatus: "Stores", navGear: "Settings", acc: "accessory?", cheap: "suspicious price", rMega: "🟡 Noon Mega Deals", mega: "MEGA", rAll: "All discounts", r30: "30%+", r5070: "🔥 50–70%", r70: "70%+", rNone: "No deals in this range — try another one", alTitle: "🔔 Big discount alerts", alDesc: "Phone notification when a new big discount appears — even with the app closed",
+    noneDone: "No matching results. Try a more specific name.", src: "Store status", langLbl: "🌐 Language", themeLbl: "🎨 App theme", storesHint: "Last search: results per store", navSearch: "Search", navStatus: "Stores", navGear: "Settings", acc: "accessory?", cheap: "suspicious price", rMega: "🟡 Noon Mega Deals", rElec: "📱 Electronics offers", mega: "MEGA", rAll: "All discounts", r30: "30%+", r5070: "🔥 50–70%", r70: "70%+", rNone: "No deals in this range — try another one", alTitle: "🔔 Big discount alerts", alDesc: "Phone notification when a new big discount appears — even with the app closed",
     alMin: "Minimum discount", alStores: "Stores", alMega: "🟡 Noon Mega Deals too", alEvery: "Check every", alHours: "{h} h", alTest: "🔍 Check now",
     alTesting: "Checking in the background… you'll get a notification if there's something new", alLast: "Last check {t}: {f} deals, {n} new", alErr: "Last check {t}: failed ({e})",
     alNever: "No check yet", alTo: "Send new deals to", alNotify: "🔔 Phone notification", tgOn: "✈️ Telegram group (fully automatic)",
@@ -329,7 +404,7 @@ function applyLang() {
   const t = T[L];
   document.documentElement.lang = L; document.documentElement.dir = L === "ar" ? "rtl" : "ltr";
   $("#tag").textContent = t.tag; $("#go").textContent = t.go; $("#q").placeholder = t.ph; $("#hint").textContent = t.hint;
-  $("#s_lang").textContent = t.langLbl;
+  $("#s_lang").textContent = t.langLbl; $("#s_theme").textContent = t.themeLbl;
   for (const b of document.querySelectorAll("#langseg button")) b.classList.toggle("on", b.dataset.l === L);
   $("#l_fav").textContent = t.navFav; $("#f_title").textContent = t.favTitle;
   if (typeof renderFavs === "function" && !$("#favView").hidden) renderFavs();
@@ -344,6 +419,16 @@ function applyLang() {
   if (typeof renderAl === "function" && $("#sheet").classList.contains("on")) renderAl();
   if (last) render(last, !busy);
 }
+// 🎨 theme: CSS variables per data-theme; the phone's status bar follows the header colour
+const THEMES = { hot: ["#ff6a2b", false], neon: ["#7b2ff7", false], sun: ["#ffd60a", true], mint: ["#00c389", false] };
+function applyTheme(th) {
+  if (!THEMES[th]) th = "hot";
+  document.documentElement.dataset.theme = th;
+  for (const b of document.querySelectorAll("#themes button")) b.classList.toggle("on", b.dataset.th === th);
+  try { if (window.Native && Native.setBars) Native.setBars(THEMES[th][0], THEMES[th][1]); } catch (e) {}
+}
+$("#themes").onclick = (e) => { const b = e.target.closest("button[data-th]"); if (b) { setPref("theme", b.dataset.th); applyTheme(b.dataset.th); } };
+applyTheme(pref("theme"));
 $("#langseg").onclick = (e) => { const l = e.target.dataset && e.target.dataset.l; if (l && l !== L) { L = l; setPref("lang", L); applyLang(); if ($("#sheet").classList.contains("on")) $("#gear").click(); } };
 
 // ---------- render ----------
@@ -533,8 +618,8 @@ let dealHide = null;   // stores unticked in the dropdown (remembered)
 const getHide = () => { if (!dealHide) { try { dealHide = new Set(JSON.parse(pref("dealHide", "[]"))); } catch (_) { dealHide = new Set(); } } return dealHide; };
 const saveHide = () => setPref("dealHide", JSON.stringify([...getHide()]));
 let dealRange = null;   // read from prefs on first use; default 50–70%
-const RANGES = { mega: [0, 100], all: [10, 100], r30: [30, 100], r5070: [50, 70], r70: [70, 100] };
-const inR = (o, k) => k === "mega" ? o.tag === "mega" : o.pct >= RANGES[k][0] && o.pct <= RANGES[k][1];
+const RANGES = { mega: [0, 100], elec: [10, 100], all: [10, 100], r30: [30, 100], r5070: [50, 70], r70: [70, 100] };
+const inR = (o, k) => k === "mega" ? o.tag === "mega" : k === "elec" ? o.cat === "electronics" && (o.pct >= 10 || o.tag === "mega") : o.pct >= RANGES[k][0] && o.pct <= RANGES[k][1];
 const DEALS_TTL = 60 * 60 * 1000;   // reuse fetched deals for 1 hour
 
 function showView(v) {
@@ -554,7 +639,7 @@ function renderDeals(done = true) {
   $("#d_sub").textContent = done ? fmt(t.dealsSub, { n: d.total, t: mins < 1 ? t.justNow : fmt(t.minAgo, { m: mins }) })
     : fmt(t.dealsLoading, { done: d.sources.length, all: d.total });
   if (!dealRange) dealRange = RANGES[pref("dealRange")] ? pref("dealRange") : "r5070";
-  $("#d_range").innerHTML = [["r5070", t.r5070], ["mega", t.rMega], ["r70", t.r70], ["r30", t.r30], ["all", t.rAll]]
+  $("#d_range").innerHTML = [["r5070", t.r5070], ["elec", t.rElec], ["mega", t.rMega], ["r70", t.r70], ["r30", t.r30], ["all", t.rAll]]
     .map(([k, n]) => `<button data-r="${k}" class="${dealRange === k ? "on" : ""}${k === "mega" ? " mega" : ""}">${n} · ${d.deals.filter((o) => inR(o, k)).length}</button>`).join("");
   const inRange = d.deals.filter((o) => inR(o, dealRange));
   const sorts = [["pct", t.sortPct], ["save", t.sortSave], ["price", t.sortPrice]];
@@ -572,7 +657,7 @@ function renderDeals(done = true) {
     + " · " + inRange.filter((o) => !hide.has(o.source)).length;
   $("#d_all").textContent = t.selAll; $("#d_none").textContent = t.selNone;
   let list = inRange.filter((o) => !hide.has(o.source));
-  if (dealRange === "r70" && dealSort === "pct") list = list.slice().sort((a, b) => b.pct - a.pct || a.price - b.price);
+  if ((dealRange === "r70" || dealRange === "elec") && dealSort === "pct") list = list.slice().sort((a, b) => b.pct - a.pct || a.price - b.price);
   const by = { pct: (a, b) => b.pct - a.pct, save: (a, b) => (b.old_price - b.price) - (a.old_price - a.price), price: (a, b) => a.price - b.price };
   list = list.slice().sort(by[dealSort]).slice(0, 120);
   shownDeals = list;

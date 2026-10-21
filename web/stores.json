@@ -14,11 +14,318 @@
     "deals": {
       "kind": "html",
       "urls": [
-        "https://www.amazon.eg/s?k=electronics&rh=p_8%3A70-&language=en_AE",
-        "https://www.amazon.eg/s?k=mobile+phone&rh=p_8%3A70-&language=en_AE",
-        "https://www.amazon.eg/s?k=laptop&rh=p_8%3A70-&language=en_AE",
-        "https://www.amazon.eg/s?k=headphones&rh=p_8%3A70-&language=en_AE",
-        "https://www.amazon.eg/s?k=smart+watch&rh=p_8%3A70-&language=en_AE",
+        {
+          "url": "https://www.amazon.eg/s?k=smartphone&rh=p_8%3A70-&language=en_AE",
+          "cat": "electronics"
+        },
+        {
+          "url": "https://www.amazon.eg/s?k=smartphone&rh=p_8%3A50-&language=en_AE",
+          "cat": "electronics"
+        },
+        {
+          "url": "https://www.amazon.eg/s?k=samsung+galaxy&rh=p_8%3A70-&language=en_AE",
+          "cat": "electronics"
+        },
+        {
+          "url": "https://www.amazon.eg/s?k=samsung+galaxy&rh=p_8%3A50-&language=en_AE",
+          "cat": "electronics"
+        },
+        {
+          "url": "https://www.amazon.eg/s?k=iphone&rh=p_8%3A70-&language=en_AE",
+          "cat": "electronics"
+        },
+        {
+          "url": "https://www.amazon.eg/s?k=iphone&rh=p_8%3A50-&language=en_AE",
+          "cat": "electronics"
+        },
+        {
+          "url": "https://www.amazon.eg/s?k=xiaomi&rh=p_8%3A70-&language=en_AE",
+          "cat": "electronics"
+        },
+        {
+          "url": "https://www.amazon.eg/s?k=xiaomi&rh=p_8%3A50-&language=en_AE",
+          "cat": "electronics"
+        },
+        {
+          "url": "https://www.amazon.eg/s?k=laptop&rh=p_8%3A70-&language=en_AE",
+          "cat": "electronics"
+        },
+        {
+          "url": "https://www.amazon.eg/s?k=laptop&rh=p_8%3A50-&language=en_AE",
+          "cat": "electronics"
+        },
+        {
+          "url": "https://www.amazon.eg/s?k=gaming+laptop&rh=p_8%3A70-&language=en_AE",
+          "cat": "electronics"
+        },
+        {
+          "url": "https://www.amazon.eg/s?k=gaming+laptop&rh=p_8%3A50-&language=en_AE",
+          "cat": "electronics"
+        },
+        {
+          "url": "https://www.amazon.eg/s?k=tablet&rh=p_8%3A70-&language=en_AE",
+          "cat": "electronics"
+        },
+        {
+          "url": "https://www.amazon.eg/s?k=tablet&rh=p_8%3A50-&language=en_AE",
+          "cat": "electronics"
+        },
+        {
+          "url": "https://www.amazon.eg/s?k=smart+tv&rh=p_8%3A70-&language=en_AE",
+          "cat": "electronics"
+        },
+        {
+          "url": "https://www.amazon.eg/s?k=smart+tv&rh=p_8%3A50-&language=en_AE",
+          "cat": "electronics"
+        },
+        {
+          "url": "https://www.amazon.eg/s?k=monitor&rh=p_8%3A70-&language=en_AE",
+          "cat": "electronics"
+        },
+        {
+          "url": "https://www.amazon.eg/s?k=monitor&rh=p_8%3A50-&language=en_AE",
+          "cat": "electronics"
+        },
+        {
+          "url": "https://www.amazon.eg/s?k=earbuds&rh=p_8%3A70-&language=en_AE",
+          "cat": "electronics"
+        },
+        {
+          "url": "https://www.amazon.eg/s?k=earbuds&rh=p_8%3A50-&language=en_AE",
+          "cat": "electronics"
+        },
+        {
+          "url": "https://www.amazon.eg/s?k=bluetooth+speaker&rh=p_8%3A70-&language=en_AE",
+          "cat": "electronics"
+        },
+        {
+          "url": "https://www.amazon.eg/s?k=bluetooth+speaker&rh=p_8%3A50-&language=en_AE",
+          "cat": "electronics"
+        },
+        {
+          "url": "https://www.amazon.eg/s?k=smartwatch&rh=p_8%3A70-&language=en_AE",
+          "cat": "electronics"
+        },
+        {
+          "url": "https://www.amazon.eg/s?k=smartwatch&rh=p_8%3A50-&language=en_AE",
+          "cat": "electronics"
+        },
+        {
+          "url": "https://www.amazon.eg/s?k=power+bank&rh=p_8%3A70-&language=en_AE",
+          "cat": "electronics"
+        },
+        {
+          "url": "https://www.amazon.eg/s?k=power+bank&rh=p_8%3A50-&language=en_AE",
+          "cat": "electronics"
+        },
+        {
+          "url": "https://www.amazon.eg/s?k=charger&rh=p_8%3A70-&language=en_AE",
+          "cat": "electronics"
+        },
+        {
+          "url": "https://www.amazon.eg/s?k=charger&rh=p_8%3A50-&language=en_AE",
+          "cat": "electronics"
+        },
+        {
+          "url": "https://www.amazon.eg/s?k=ssd&rh=p_8%3A70-&language=en_AE",
+          "cat": "electronics"
+        },
+        {
+          "url": "https://www.amazon.eg/s?k=ssd&rh=p_8%3A50-&language=en_AE",
+          "cat": "electronics"
+        },
+        {
+          "url": "https://www.amazon.eg/s?k=hard+drive&rh=p_8%3A70-&language=en_AE",
+          "cat": "electronics"
+        },
+        {
+          "url": "https://www.amazon.eg/s?k=hard+drive&rh=p_8%3A50-&language=en_AE",
+          "cat": "electronics"
+        },
+        {
+          "url": "https://www.amazon.eg/s?k=router&rh=p_8%3A70-&language=en_AE",
+          "cat": "electronics"
+        },
+        {
+          "url": "https://www.amazon.eg/s?k=router&rh=p_8%3A50-&language=en_AE",
+          "cat": "electronics"
+        },
+        {
+          "url": "https://www.amazon.eg/s?k=printer&rh=p_8%3A70-&language=en_AE",
+          "cat": "electronics"
+        },
+        {
+          "url": "https://www.amazon.eg/s?k=printer&rh=p_8%3A50-&language=en_AE",
+          "cat": "electronics"
+        },
+        {
+          "url": "https://www.amazon.eg/s?k=playstation&rh=p_8%3A70-&language=en_AE",
+          "cat": "electronics"
+        },
+        {
+          "url": "https://www.amazon.eg/s?k=playstation&rh=p_8%3A50-&language=en_AE",
+          "cat": "electronics"
+        },
+        {
+          "url": "https://www.amazon.eg/s?k=gaming+headset&rh=p_8%3A70-&language=en_AE",
+          "cat": "electronics"
+        },
+        {
+          "url": "https://www.amazon.eg/s?k=gaming+headset&rh=p_8%3A50-&language=en_AE",
+          "cat": "electronics"
+        },
+        {
+          "url": "https://www.amazon.eg/s?k=keyboard+mouse&rh=p_8%3A70-&language=en_AE",
+          "cat": "electronics"
+        },
+        {
+          "url": "https://www.amazon.eg/s?k=keyboard+mouse&rh=p_8%3A50-&language=en_AE",
+          "cat": "electronics"
+        },
+        {
+          "url": "https://www.amazon.eg/s?k=camera&rh=p_8%3A70-&language=en_AE",
+          "cat": "electronics"
+        },
+        {
+          "url": "https://www.amazon.eg/s?k=camera&rh=p_8%3A50-&language=en_AE",
+          "cat": "electronics"
+        },
+        {
+          "url": "https://www.amazon.eg/s?k=soundbar&rh=p_8%3A70-&language=en_AE",
+          "cat": "electronics"
+        },
+        {
+          "url": "https://www.amazon.eg/s?k=soundbar&rh=p_8%3A50-&language=en_AE",
+          "cat": "electronics"
+        },
+        {
+          "url": "https://www.amazon.eg/s?k=projector&rh=p_8%3A70-&language=en_AE",
+          "cat": "electronics"
+        },
+        {
+          "url": "https://www.amazon.eg/s?k=projector&rh=p_8%3A50-&language=en_AE",
+          "cat": "electronics"
+        },
+        {
+          "url": "https://www.amazon.eg/s?k=electronics&rh=p_8%3A70-&language=en_AE",
+          "cat": "electronics"
+        },
+        {
+          "url": "https://www.amazon.eg/s?k=electronics&rh=p_8%3A70-&language=en_AE&page=2",
+          "cat": "electronics"
+        },
+        {
+          "url": "https://www.amazon.eg/s?k=electronics&rh=p_8%3A70-&language=en_AE&page=3",
+          "cat": "electronics"
+        },
+        {
+          "url": "https://www.amazon.eg/s?k=electronics&rh=p_8%3A50-&language=en_AE",
+          "cat": "electronics"
+        },
+        {
+          "url": "https://www.amazon.eg/s?k=electronics&rh=p_8%3A50-&language=en_AE&page=2",
+          "cat": "electronics"
+        },
+        {
+          "url": "https://www.amazon.eg/s?k=electronics&rh=p_8%3A50-&language=en_AE&page=3",
+          "cat": "electronics"
+        },
+        {
+          "url": "https://www.amazon.eg/s?k=mobile+phone&rh=p_8%3A70-&language=en_AE",
+          "cat": "electronics"
+        },
+        {
+          "url": "https://www.amazon.eg/s?k=mobile+phone&rh=p_8%3A70-&language=en_AE&page=2",
+          "cat": "electronics"
+        },
+        {
+          "url": "https://www.amazon.eg/s?k=mobile+phone&rh=p_8%3A70-&language=en_AE&page=3",
+          "cat": "electronics"
+        },
+        {
+          "url": "https://www.amazon.eg/s?k=mobile+phone&rh=p_8%3A50-&language=en_AE",
+          "cat": "electronics"
+        },
+        {
+          "url": "https://www.amazon.eg/s?k=mobile+phone&rh=p_8%3A50-&language=en_AE&page=2",
+          "cat": "electronics"
+        },
+        {
+          "url": "https://www.amazon.eg/s?k=mobile+phone&rh=p_8%3A50-&language=en_AE&page=3",
+          "cat": "electronics"
+        },
+        {
+          "url": "https://www.amazon.eg/s?k=laptop&rh=p_8%3A70-&language=en_AE",
+          "cat": "electronics"
+        },
+        {
+          "url": "https://www.amazon.eg/s?k=laptop&rh=p_8%3A70-&language=en_AE&page=2",
+          "cat": "electronics"
+        },
+        {
+          "url": "https://www.amazon.eg/s?k=laptop&rh=p_8%3A70-&language=en_AE&page=3",
+          "cat": "electronics"
+        },
+        {
+          "url": "https://www.amazon.eg/s?k=laptop&rh=p_8%3A50-&language=en_AE",
+          "cat": "electronics"
+        },
+        {
+          "url": "https://www.amazon.eg/s?k=laptop&rh=p_8%3A50-&language=en_AE&page=2",
+          "cat": "electronics"
+        },
+        {
+          "url": "https://www.amazon.eg/s?k=laptop&rh=p_8%3A50-&language=en_AE&page=3",
+          "cat": "electronics"
+        },
+        {
+          "url": "https://www.amazon.eg/s?k=headphones&rh=p_8%3A70-&language=en_AE",
+          "cat": "electronics"
+        },
+        {
+          "url": "https://www.amazon.eg/s?k=headphones&rh=p_8%3A70-&language=en_AE&page=2",
+          "cat": "electronics"
+        },
+        {
+          "url": "https://www.amazon.eg/s?k=headphones&rh=p_8%3A70-&language=en_AE&page=3",
+          "cat": "electronics"
+        },
+        {
+          "url": "https://www.amazon.eg/s?k=headphones&rh=p_8%3A50-&language=en_AE",
+          "cat": "electronics"
+        },
+        {
+          "url": "https://www.amazon.eg/s?k=headphones&rh=p_8%3A50-&language=en_AE&page=2",
+          "cat": "electronics"
+        },
+        {
+          "url": "https://www.amazon.eg/s?k=headphones&rh=p_8%3A50-&language=en_AE&page=3",
+          "cat": "electronics"
+        },
+        {
+          "url": "https://www.amazon.eg/s?k=smart+watch&rh=p_8%3A70-&language=en_AE",
+          "cat": "electronics"
+        },
+        {
+          "url": "https://www.amazon.eg/s?k=smart+watch&rh=p_8%3A70-&language=en_AE&page=2",
+          "cat": "electronics"
+        },
+        {
+          "url": "https://www.amazon.eg/s?k=smart+watch&rh=p_8%3A70-&language=en_AE&page=3",
+          "cat": "electronics"
+        },
+        {
+          "url": "https://www.amazon.eg/s?k=smart+watch&rh=p_8%3A50-&language=en_AE",
+          "cat": "electronics"
+        },
+        {
+          "url": "https://www.amazon.eg/s?k=smart+watch&rh=p_8%3A50-&language=en_AE&page=2",
+          "cat": "electronics"
+        },
+        {
+          "url": "https://www.amazon.eg/s?k=smart+watch&rh=p_8%3A50-&language=en_AE&page=3",
+          "cat": "electronics"
+        },
         "https://www.amazon.eg/s?k=kitchen+appliances&rh=p_8%3A70-&language=en_AE",
         "https://www.amazon.eg/s?k=home&rh=p_8%3A70-&language=en_AE",
         "https://www.amazon.eg/s?k=fashion&rh=p_8%3A70-&language=en_AE",
@@ -26,11 +333,6 @@
         "https://www.amazon.eg/s?k=beauty&rh=p_8%3A70-&language=en_AE",
         "https://www.amazon.eg/s?k=toys&rh=p_8%3A70-&language=en_AE",
         "https://www.amazon.eg/s?k=sports&rh=p_8%3A70-&language=en_AE",
-        "https://www.amazon.eg/s?k=electronics&rh=p_8%3A50-&language=en_AE",
-        "https://www.amazon.eg/s?k=mobile+phone&rh=p_8%3A50-&language=en_AE",
-        "https://www.amazon.eg/s?k=laptop&rh=p_8%3A50-&language=en_AE",
-        "https://www.amazon.eg/s?k=headphones&rh=p_8%3A50-&language=en_AE",
-        "https://www.amazon.eg/s?k=smart+watch&rh=p_8%3A50-&language=en_AE",
         "https://www.amazon.eg/s?k=kitchen+appliances&rh=p_8%3A50-&language=en_AE",
         "https://www.amazon.eg/s?k=home&rh=p_8%3A50-&language=en_AE",
         "https://www.amazon.eg/s?k=fashion&rh=p_8%3A50-&language=en_AE",
@@ -55,6 +357,114 @@
     "deals": {
       "kind": "html",
       "urls": [
+        {
+          "url": "https://www.jumia.com.eg/mobile-phones/?price_discount=50-100",
+          "cat": "electronics"
+        },
+        {
+          "url": "https://www.jumia.com.eg/mobile-phones/?price_discount=50-100&page=2",
+          "cat": "electronics"
+        },
+        {
+          "url": "https://www.jumia.com.eg/android-phones/?price_discount=50-100",
+          "cat": "electronics"
+        },
+        {
+          "url": "https://www.jumia.com.eg/ios-phones/?price_discount=50-100",
+          "cat": "electronics"
+        },
+        {
+          "url": "https://www.jumia.com.eg/tablets/?price_discount=50-100",
+          "cat": "electronics"
+        },
+        {
+          "url": "https://www.jumia.com.eg/tablets/?price_discount=50-100&page=2",
+          "cat": "electronics"
+        },
+        {
+          "url": "https://www.jumia.com.eg/smart-watches/?price_discount=50-100",
+          "cat": "electronics"
+        },
+        {
+          "url": "https://www.jumia.com.eg/smart-watches/?price_discount=50-100&page=2",
+          "cat": "electronics"
+        },
+        {
+          "url": "https://www.jumia.com.eg/electronics-headphone/?price_discount=50-100",
+          "cat": "electronics"
+        },
+        {
+          "url": "https://www.jumia.com.eg/electronics-headphone/?price_discount=50-100&page=2",
+          "cat": "electronics"
+        },
+        {
+          "url": "https://www.jumia.com.eg/mobile-phone-bluetooth-headsets/?price_discount=50-100",
+          "cat": "electronics"
+        },
+        {
+          "url": "https://www.jumia.com.eg/mlp-portable-power-banks/?price_discount=50-100",
+          "cat": "electronics"
+        },
+        {
+          "url": "https://www.jumia.com.eg/mobile-phone-chargers-adaptors/?price_discount=50-100",
+          "cat": "electronics"
+        },
+        {
+          "url": "https://www.jumia.com.eg/mobile-phone-speakers/?price_discount=50-100",
+          "cat": "electronics"
+        },
+        {
+          "url": "https://www.jumia.com.eg/electronic-television-video/?price_discount=50-100",
+          "cat": "electronics"
+        },
+        {
+          "url": "https://www.jumia.com.eg/electronic-television-video/?price_discount=50-100&page=2",
+          "cat": "electronics"
+        },
+        {
+          "url": "https://www.jumia.com.eg/led-lcd-tvs/?price_discount=50-100",
+          "cat": "electronics"
+        },
+        {
+          "url": "https://www.jumia.com.eg/mlp-smart-tv/?price_discount=50-100",
+          "cat": "electronics"
+        },
+        {
+          "url": "https://www.jumia.com.eg/home-audio-electronics/?price_discount=50-100",
+          "cat": "electronics"
+        },
+        {
+          "url": "https://www.jumia.com.eg/home-audio-speakers-speakers/?price_discount=50-100",
+          "cat": "electronics"
+        },
+        {
+          "url": "https://www.jumia.com.eg/camera-photo-accessories/?price_discount=50-100",
+          "cat": "electronics"
+        },
+        {
+          "url": "https://www.jumia.com.eg/electronics-cameras-digital-cameras/?price_discount=50-100",
+          "cat": "electronics"
+        },
+        {
+          "url": "https://www.jumia.com.eg/computing/?price_discount=50-100",
+          "cat": "electronics"
+        },
+        {
+          "url": "https://www.jumia.com.eg/computing/?price_discount=50-100&page=2",
+          "cat": "electronics"
+        },
+        {
+          "url": "https://www.jumia.com.eg/laptops/?price_discount=50-100",
+          "cat": "electronics"
+        },
+        {
+          "url": "https://www.jumia.com.eg/computer-accessories/?price_discount=50-100",
+          "cat": "electronics"
+        },
+        {
+          "url": "https://www.jumia.com.eg/video-games/?price_discount=50-100",
+          "cat": "electronics"
+        },
         "https://www.jumia.com.eg/flash-sales/",
         "https://www.jumia.com.eg/catalog/?q=offers&sort=discount",
         "https://www.jumia.com.eg/mlp-deals/?sort=discount"
@@ -84,7 +494,8 @@
         },
         {
           "url": "https://www.noon.com/egypt-en/electronics-and-mobiles/?f%5Bdeal_tag%5D%5B%5D=egmega&sort%5Bby%5D=popularity&sort%5Bdir%5D=desc",
-          "tag": "mega"
+          "tag": "mega",
+          "cat": "electronics"
         },
         {
           "url": "https://www.noon.com/egypt-en/home-and-kitchen/?f%5Bdeal_tag%5D%5B%5D=egmega&sort%5Bby%5D=popularity&sort%5Bdir%5D=desc",
@@ -101,6 +512,43 @@
         {
           "url": "https://www.noon.com/egypt-en/daily-deals-eg/",
           "tag": "daily"
+        },
+        {
+          "url": "https://www.noon.com/egypt-en/electronics-and-mobiles/?f%5Bdeal_tag%5D%5B%5D=mega-deal&sort%5Bby%5D=popularity&sort%5Bdir%5D=desc",
+          "tag": "mega",
+          "cat": "electronics"
+        },
+        {
+          "url": "https://www.noon.com/egypt-en/electronics-and-mobiles/?f%5Bdeal_tag%5D%5B%5D=deals-generic&sort%5Bby%5D=popularity&sort%5Bdir%5D=desc",
+          "cat": "electronics"
+        },
+        {
+          "url": "https://www.noon.com/egypt-en/electronics-and-mobiles/mobiles-and-accessories/mobiles-20905/?f%5Bdeal_tag%5D%5B%5D=deals-generic&sort%5Bby%5D=popularity&sort%5Bdir%5D=desc",
+          "cat": "electronics"
+        },
+        {
+          "url": "https://www.noon.com/egypt-en/electronics-and-mobiles/computers-and-accessories/laptops/?f%5Bdeal_tag%5D%5B%5D=deals-generic&sort%5Bby%5D=popularity&sort%5Bdir%5D=desc",
+          "cat": "electronics"
+        },
+        {
+          "url": "https://www.noon.com/egypt-en/electronics-and-mobiles/television-and-video/televisions/?f%5Bdeal_tag%5D%5B%5D=deals-generic&sort%5Bby%5D=popularity&sort%5Bdir%5D=desc",
+          "cat": "electronics"
+        },
+        {
+          "url": "https://www.noon.com/egypt-en/electronics-and-mobiles/mobiles-and-accessories/accessories-16176/?f%5Bdeal_tag%5D%5B%5D=deals-generic&sort%5Bby%5D=popularity&sort%5Bdir%5D=desc",
+          "cat": "electronics"
+        },
+        {
+          "url": "https://www.noon.com/egypt-en/electronics-and-mobiles/video-games-10181/?f%5Bdeal_tag%5D%5B%5D=deals-generic&sort%5Bby%5D=popularity&sort%5Bdir%5D=desc",
+          "cat": "electronics"
+        },
+        {
+          "url": "https://www.noon.com/egypt-en/electronics-and-mobiles/home-audio/?f%5Bdeal_tag%5D%5B%5D=deals-generic&sort%5Bby%5D=popularity&sort%5Bdir%5D=desc",
+          "cat": "electronics"
+        },
+        {
+          "url": "https://www.noon.com/egypt-en/electronics-and-mobiles/camera-and-photo-16165/?f%5Bdeal_tag%5D%5B%5D=deals-generic&sort%5Bby%5D=popularity&sort%5Bdir%5D=desc",
+          "cat": "electronics"
         }
       ],
       "wait": "a[href*=\"/p/\"]"

@@ -74,7 +74,10 @@ class MainActivity : AppCompatActivity() {
      * Android 15 draws apps edge-to-edge: without this the page sits under the status bar / camera notch.
      * Pad the content by the system bars, the display cutout and the keyboard.
      */
+    private var rootView: View? = null
+
     private fun keepClearOfNotch(root: View) {
+        rootView = root
         val dark = (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
         root.setBackgroundColor(if (dark) 0xFF14130F.toInt() else 0xFFF6F3EC.toInt())
         WindowCompat.getInsetsController(window, root).apply {
@@ -129,6 +132,18 @@ class MainActivity : AppCompatActivity() {
         @JavascriptInterface fun setPref(k: String, v: String) = prefs.edit().putString("p_$k", v).apply()
         @JavascriptInterface fun readConfig(name: String): String = WebFiles.read(this@MainActivity, name)
         @JavascriptInterface fun appVersion(): String = BuildConfig.VERSION_NAME
+        /** 🎨 status/nav bar colour follows the page theme (header gradient start). */
+        @JavascriptInterface fun setBars(color: String, lightBars: Boolean) {
+            val c = runCatching { android.graphics.Color.parseColor(color) }.getOrNull() ?: return
+            runOnUiThread {
+                val r = rootView ?: return@runOnUiThread
+                r.setBackgroundColor(c)
+                WindowCompat.getInsetsController(window, r).apply {
+                    isAppearanceLightStatusBars = lightBars
+                    isAppearanceLightNavigationBars = lightBars
+                }
+            }
+        }
         @JavascriptInterface fun pendingQuery(): String = pendingQuery.also { pendingQuery = "" }
 
         // ---- 🔔 deal alerts (Settings). Config is saved by the page in pref "alerts". ----

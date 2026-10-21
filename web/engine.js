@@ -642,11 +642,11 @@
 
   /**
    * ⚡ Deals from every store that has a "deals" entry in stores.json.
-   * opts: { stores, fetcher, DOMParser, minPct (default 10), perStore (default 12), timeout, renderTimeout, onProgress }
+   * opts: { stores, fetcher, DOMParser, minPct (default 10), perStore (default 60), perCat (150), pool (6), renderPool (3), timeout, renderTimeout, onProgress }
    * Returns { deals: [...offer, pct], sources: [...] } sorted by biggest discount.
    */
   async function deals(opts) {
-    const opt = Object.assign({ minPct: 10, perStore: 60, timeout: 12000, renderTimeout: 20000 }, opts);
+    const opt = Object.assign({ minPct: 10, perStore: 60, perCat: 150, pool: 6, renderPool: 3, timeout: 12000, renderTimeout: 20000 }, opts);
     const stores = (opt.stores || []).filter((s) => s.enabled !== false && s.deals);
     const all = [], sources = [];
     const snap = () => {
@@ -670,11 +670,22 @@
           const opts = s.deals.render ? { render: true, wait: sel.wait || (sel.item || "").split(",")[0] || null, lang: "en" } : { lang: "en" };
           // several pages per store (e.g. Amazon: one percent-off page per category); keep whatever answers
           // a page may be {url, tag}: e.g. Noon "mega" deals get a badge and their own filter
-          const pages = await Promise.allSettled(feed.urls(s).map((p) => {
-            const u = typeof p === "string" ? p : p.url, tag = typeof p === "string" ? null : p.tag || null;
-            return withTimeout(opt.fetcher(u, opts), s.deals.render ? opt.renderTimeout : opt.timeout)
-              .then((html) => parse(html, sel, opt.DOMParser, 80).map((o) => Object.assign(o, tag ? { tag } : {})));
-          }));
+          // deep feeds have dozens of pages: a small pool keeps the phone (and the store) happy
+          const list = feed.urls(s), pages = new Array(list.length);
+          let next = 0;
+          const one = async () => {
+            while (next < list.length) {
+              const i = next++, p = list[i];
+              const u = typeof p === "string" ? p : p.url, tag = typeof p === "string" ? null : p.tag || null,
+                cat = typeof p === "string" ? null : p.cat || null;
+              try {
+                const html = await withTimeout(opt.fetcher(u, opts), s.deals.render ? opt.renderTimeout : opt.timeout);
+                pages[i] = { status: "fulfilled", value: parse(html, sel, opt.DOMParser, 80)
+                  .map((o) => Object.assign(o, tag ? { tag } : {}, cat ? { cat } : {})) };
+              } catch (e) { pages[i] = { status: "rejected", reason: e }; }
+            }
+          };
+          await Promise.all(Array.from({ length: Math.min(list.length, s.deals.render ? opt.renderPool : opt.pool) }, one));
           const okPages = pages.filter((x) => x.status === "fulfilled");
           if (!okPages.length) throw pages[0].reason;
           got = okPages.flatMap((x) => x.value);
@@ -683,9 +694,13 @@
           .map((o) => Object.assign(o, { pct: pctOff(o), source: s.name }))
           // tagged pages (Mega Deals) are deals by definition, even when the old price isn't shown
           .filter((o) => (o.pct >= opt.minPct || o.tag) && o.pct < 95)   // 95%+ off is almost always a data error
-          .sort((a, b) => !!b.tag - !!a.tag || b.pct - a.pct).slice(0, Math.max(opt.perStore, got.filter((o) => o.tag).length));
-        all.push(...keep);
-        sources.push({ source: s.name, ok: true, count: keep.length, ms: Date.now() - t0, error: null });
+          .sort((a, b) => !!b.tag - !!a.tag || b.pct - a.pct);
+        // tagged (Mega) all stay; general deals capped by perStore; the electronics deep search gets its own bigger cap
+        const first = new Map(), uniq = keep.filter((o) => { const k = productId(o.url), f = first.get(k); if (f) { if (o.cat && !f.cat) f.cat = o.cat; return false; } first.set(k, o); return true; });
+        const tagged = uniq.filter((o) => o.tag), rest = uniq.filter((o) => !o.tag);
+        const plain = rest.filter((o) => !o.cat).slice(0, opt.perStore), byCat = rest.filter((o) => o.cat).slice(0, opt.perCat);
+        all.push(...tagged, ...plain, ...byCat);
+        sources.push({ source: s.name, ok: true, count: tagged.length + plain.length + byCat.length, ms: Date.now() - t0, error: null });
       } catch (e) {
         sources.push({ source: s.name, ok: false, count: 0, ms: Date.now() - t0, error: String((e && e.message) || e).slice(0, 160) });
       }

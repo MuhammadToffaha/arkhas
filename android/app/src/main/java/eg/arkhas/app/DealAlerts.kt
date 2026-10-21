@@ -174,7 +174,7 @@ object DealAlerts {
  * else by its link without tracking parts, and also by store + normalised title, so the same item found on
  * two pages, with a different ?ref= or a slightly different % is still recognised as the same item.
  */
-class SentLog(private val prefs: android.content.SharedPreferences, private val name: String, private val days: Int = 45) {
+class SentLog(private val prefs: android.content.SharedPreferences, private val name: String, private val days: Int = 7) {
     private val log = runCatching { JSONObject(prefs.getString(name, "{}") ?: "{}") }.getOrDefault(JSONObject())
     init {
         val now = System.currentTimeMillis()
@@ -245,7 +245,7 @@ class DealWatchWorker(ctx: Context, params: WorkerParameters) : CoroutineWorker(
             val tok = tg?.optString("token").orEmpty().ifBlank { BuildConfig.TG_TOKEN }
             val chat = if (tg != null) Telegram.destination(tg) else ""
             if (tg != null && tg.optBoolean("on") && tok.isNotBlank() && chat.isNotBlank()) {
-                val tgLog = SentLog(prefs, "tgSent:$chat", days = 90)
+                val tgLog = SentLog(prefs, "tgSent:$chat", days = 7)
                 val todo = batch.filter { !tgLog.has(it) }
                 status.put("tgNew", todo.size)
                 if (todo.isNotEmpty()) {
