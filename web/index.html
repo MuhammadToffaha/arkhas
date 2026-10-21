@@ -64,6 +64,8 @@ input:focus{outline:none;border-color:var(--accent)}
 .dref b{font-size:24px;line-height:1;display:inline-block}
 .dref:disabled b{animation:spin 1s linear infinite}.dref:disabled{opacity:.75}
 @keyframes spin{to{transform:rotate(360deg)}}
+.dref.wa{background:#25d366;color:#fff}
+.share{position:absolute;z-index:2;top:44px;inset-inline-end:6px;width:34px;height:34px;border-radius:50%;border:0;background:#25d366;color:#fff;font-size:15px;line-height:34px;padding:0;box-shadow:0 1px 4px #0002}
 .dd{position:relative;margin-top:10px}
 .dd-btn{width:100%;display:flex;justify-content:space-between;align-items:center;font:inherit;font-size:15px;font-weight:600;padding:12px 14px;border-radius:12px;border:1.5px solid var(--line);background:var(--card);color:var(--ink)}
 .dd-btn i{font-style:normal;color:var(--muted)}
@@ -103,6 +105,9 @@ input:focus{outline:none;border-color:var(--accent)}
 .sw input:checked+i{background:var(--accent)}
 .sw input:checked+i:before{transform:translateX(20px)}
 [dir=rtl] .sw input:checked+i:before{transform:translateX(-20px)}
+.tg-steps{padding-inline-start:18px;margin:6px 0;line-height:1.7}
+#tg_box input{margin-top:8px;font-size:14px;padding:10px 12px;width:100%}
+#tg_chats button{display:block;width:100%;text-align:start;margin-top:6px}
 .al-l{font-size:13px;font-weight:600;margin-top:10px}
 #al_min button.on,#al_st button.on,#al_h button.on{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
 .seg{display:flex;gap:0;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--card)}
@@ -161,7 +166,10 @@ table{border-collapse:collapse;width:100%;font-size:12.5px}td{padding:4px;border
   <section id="dealsView" hidden>
     <div class="dh">
       <h2 class="dt"><span class="bolt">⚡</span> <span id="d_title"></span></h2>
-      <button class="dref" id="d_refresh"><b>↻</b><span id="d_ref_l"></span></button>
+      <div style="display:flex;gap:8px">
+        <button class="dref wa" id="d_wa" aria-label="WhatsApp"><b>📤</b><span id="d_wa_l"></span></button>
+        <button class="dref" id="d_refresh"><b>↻</b><span id="d_ref_l"></span></button>
+      </div>
     </div>
     <div class="muted" id="d_sub"></div>
     <div class="bar" id="d_bar" hidden><i></i></div>
@@ -206,6 +214,18 @@ table{border-collapse:collapse;width:100%;font-size:12.5px}td{padding:4px;border
       <div class="al-l" id="al_st_l"></div><div class="chips" id="al_st"></div>
       <label class="dd-row"><input type="checkbox" id="al_mega"> <span id="al_mega_l"></span></label>
       <div class="al-l" id="al_h_l"></div><div class="chips" id="al_h"></div>
+      <div class="al-l" id="al_to_l"></div>
+      <label class="dd-row"><input type="checkbox" id="al_notify"> <span id="al_notify_l"></span></label>
+      <label class="dd-row"><input type="checkbox" id="tg_on"> <span id="tg_on_l"></span></label>
+      <div id="tg_box" hidden>
+        <ol class="muted tg-steps" id="tg_steps"></ol>
+        <input id="tg_token" placeholder="123456789:AA…  (bot token)" autocomplete="off" spellcheck="false" dir="ltr">
+        <div class="upd-b"><button class="ib2" id="tg_find"></button></div>
+        <div id="tg_chats"></div>
+        <input id="tg_chat" placeholder="chat id  (-100…)" autocomplete="off" dir="ltr">
+        <div class="upd-b"><button class="ib2" id="tg_test"></button></div>
+        <div class="muted" id="tg_msg"></div>
+      </div>
       <div class="upd-b"><button class="ib2" id="al_test"></button></div>
       <div class="muted" id="al_last"></div>
     </div>
@@ -248,7 +268,11 @@ const T = {
     noneDone: "مفيش نتائج مطابقة. جرّب اسم أدق.", src: "حالة المتاجر", langLbl: "🌐 اللغة", storesHint: "آخر بحث: عدد النتائج من كل متجر", navSearch: "بحث", navStatus: "المتاجر", navGear: "الإعدادات", acc: "إكسسوار؟", cheap: "سعر مريب", rMega: "🟡 ميجا ديلز نون", mega: "ميجا", rAll: "كل الخصومات", r30: "30%+", r5070: "🔥 50–70%", r70: "70%+", rNone: "مفيش عروض في النطاق ده — جرّب نطاق تاني", alTitle: "🔔 تنبيهات الخصومات الكبيرة", alDesc: "إشعار على الموبايل لما يظهر خصم كبير جديد — حتى والتطبيق مقفول",
     alMin: "أقل خصم", alStores: "المتاجر", alMega: "🟡 ميجا ديلز نون كمان", alEvery: "افحص كل", alHours: "{h} ساعة", alTest: "🔍 افحص دلوقتي",
     alTesting: "جاري الفحص في الخلفية… هيوصلك إشعار لو فيه جديد", alLast: "آخر فحص {t}: {f} عرض، {n} جديد", alErr: "آخر فحص {t}: فشل ({e})",
-    alNever: "لسه مفيش فحص", alPerm: "⚠️ اسمح بالإشعارات للتطبيق من إعدادات الموبايل", navFav: "المفضلة", favTitle: "المفضلة", favSub: "{n} منتج محفوظ — السعر وقت الحفظ", favEmpty: "اضغط ♥ على أي منتج عشان يتحفظ هنا", savedOn: "اتحفظ {d}", favAdded: "اتضاف للمفضلة ❤️", favRemoved: "اتشال من المفضلة", refresh: "تحديث", ddAll: "كل المتاجر", ddSome: "{n} متاجر مختارة", ddOne: "{s}", selAll: "تحديد الكل", selNone: "إلغاء الكل", navDeals: "عروض", dealsTitle: "عروض فلاش", dealsSub: "أكبر الخصومات من أشهر {n} مواقع في مصر — اتحدّثت {t}", dealsLoading: "جاري جلب العروض من {done}/{all} موقع…", dealsNone: "مفيش عروض دلوقتي — اضغط ↻", sortPct: "أكبر خصم", sortPrice: "الأرخص", sortSave: "أكبر توفير", allStores: "الكل", justNow: "الآن", minAgo: "من {m} دقيقة", banner: "🎉 نسخة جديدة {v} — اضغط للتحديث", openRel: "⬇️ تنزيل {v} من GitHub", relNote: "هتتفتح صفحة التنزيل — نزّل الملف وافتحه للتثبيت. بعد كده التحديث هيكون من جوه التطبيق", upd: "🔄 التحديثات", cur: "نسختك {v}", check: "تحقق من التحديث", checking: "جاري التحقق…", latest: "عندك أحدث نسخة ✓",
+    alNever: "لسه مفيش فحص", alTo: "ابعت العروض الجديدة على", alNotify: "🔔 إشعار على الموبايل", tgOn: "✈️ جروب تليجرام (تلقائي بالكامل)",
+    tgSteps: ["في تليجرام افتح @BotFather واكتب /newbot — هيديك Token", "ضيف البوت لجروبك (Add member) وخليه أدمن", "الصق الـ Token هنا واضغط «دوّر على جروبي»"],
+    tgFind: "🔎 دوّر على جروبي", tgTest: "✉️ ابعت رسالة تجربة", tgNoChats: "مش لاقي جروبات — ابعت أي رسالة في الجروب بعد إضافة البوت وحاول تاني",
+    tgPicked: "✓ هيبعت لـ «{t}»", tgOk: "✓ الرسالة وصلت للجروب", tgErr: "⚠️ تليجرام: {e}", tgTestText: "✅ أرخص متوصل — العروض الكبيرة هتوصل هنا تلقائي",
+    tgSent: " · تليجرام: {n} اتبعت", tgFail: " · تليجرام فشل: {e}", alNever: "لسه مفيش فحص", alPerm: "⚠️ اسمح بالإشعارات للتطبيق من إعدادات الموبايل", navFav: "المفضلة", favTitle: "المفضلة", favSub: "{n} منتج محفوظ — السعر وقت الحفظ", favEmpty: "اضغط ♥ على أي منتج عشان يتحفظ هنا", savedOn: "اتحفظ {d}", favAdded: "اتضاف للمفضلة ❤️", favRemoved: "اتشال من المفضلة", refresh: "تحديث", waBtn: "واتساب", waHead: "🔥 عروض أرخص — {d}", waInstead: "بدل", waMore: "📲 من تطبيق أرخص", refresh: "تحديث", ddAll: "كل المتاجر", ddSome: "{n} متاجر مختارة", ddOne: "{s}", selAll: "تحديد الكل", selNone: "إلغاء الكل", navDeals: "عروض", dealsTitle: "عروض فلاش", dealsSub: "أكبر الخصومات من أشهر {n} مواقع في مصر — اتحدّثت {t}", dealsLoading: "جاري جلب العروض من {done}/{all} موقع…", dealsNone: "مفيش عروض دلوقتي — اضغط ↻", sortPct: "أكبر خصم", sortPrice: "الأرخص", sortSave: "أكبر توفير", allStores: "الكل", justNow: "الآن", minAgo: "من {m} دقيقة", banner: "🎉 نسخة جديدة {v} — اضغط للتحديث", openRel: "⬇️ تنزيل {v} من GitHub", relNote: "هتتفتح صفحة التنزيل — نزّل الملف وافتحه للتثبيت. بعد كده التحديث هيكون من جوه التطبيق", upd: "🔄 التحديثات", cur: "نسختك {v}", check: "تحقق من التحديث", checking: "جاري التحقق…", latest: "عندك أحدث نسخة ✓",
     newVer: "نسخة جديدة {v} متاحة ({mb} ميجا)", install: "⬇️ تنزيل وتثبيت {v}", downloading: "جاري التنزيل… {p}%", installing: "افتح شاشة التثبيت واضغط تثبيت",
     perm: "اسمح لـ أرخص بتثبيت التحديثات (فتحنا لك الإعداد) ثم ارجع واضغط تثبيت تاني", webBtn: "تحديث قائمة المتاجر", webSame: "قائمة المتاجر محدّثة ✓",
     webChanged: "تم تحديث المتاجر — جاري إعادة التحميل…", updErr: "تعذّر: {e}", exact: "✓ مطابق", similar: "≈ مشابه", other: "موديل مختلف", fewExact: "لقينا {n} بس مطابقين تمامًا — الباقي مشابه", egp: "ج.م", save: "وفّر {n}",
@@ -259,7 +283,11 @@ const T = {
     noneDone: "No matching results. Try a more specific name.", src: "Store status", langLbl: "🌐 Language", storesHint: "Last search: results per store", navSearch: "Search", navStatus: "Stores", navGear: "Settings", acc: "accessory?", cheap: "suspicious price", rMega: "🟡 Noon Mega Deals", mega: "MEGA", rAll: "All discounts", r30: "30%+", r5070: "🔥 50–70%", r70: "70%+", rNone: "No deals in this range — try another one", alTitle: "🔔 Big discount alerts", alDesc: "Phone notification when a new big discount appears — even with the app closed",
     alMin: "Minimum discount", alStores: "Stores", alMega: "🟡 Noon Mega Deals too", alEvery: "Check every", alHours: "{h} h", alTest: "🔍 Check now",
     alTesting: "Checking in the background… you'll get a notification if there's something new", alLast: "Last check {t}: {f} deals, {n} new", alErr: "Last check {t}: failed ({e})",
-    alNever: "No check yet", alPerm: "⚠️ Allow notifications for the app in phone settings", navFav: "Favourites", favTitle: "Favourites", favSub: "{n} saved items — price when saved", favEmpty: "Tap ♥ on any product to save it here", savedOn: "saved {d}", favAdded: "Added to favourites ❤️", favRemoved: "Removed from favourites", refresh: "Refresh", ddAll: "All stores", ddSome: "{n} stores selected", ddOne: "{s}", selAll: "Select all", selNone: "Clear all", navDeals: "Deals", dealsTitle: "Flash deals", dealsSub: "Biggest discounts from {n} top Egyptian sites — updated {t}", dealsLoading: "Fetching deals from {done}/{all} sites…", dealsNone: "No deals right now — tap ↻", sortPct: "Biggest % off", sortPrice: "Cheapest", sortSave: "Most saved", allStores: "All", justNow: "just now", minAgo: "{m} min ago", banner: "🎉 New version {v} — tap to update", openRel: "⬇️ Download {v} from GitHub", relNote: "The download page opens — download the file and open it to install. After this, updates happen inside the app", upd: "🔄 Updates", cur: "You have {v}", check: "Check for update", checking: "Checking…", latest: "You have the latest version ✓",
+    alNever: "No check yet", alTo: "Send new deals to", alNotify: "🔔 Phone notification", tgOn: "✈️ Telegram group (fully automatic)",
+    tgSteps: ["In Telegram open @BotFather, send /newbot — you get a token", "Add the bot to your group and make it admin", "Paste the token here and tap “Find my group”"],
+    tgFind: "🔎 Find my group", tgTest: "✉️ Send test message", tgNoChats: "No groups found — send any message in the group after adding the bot, then try again",
+    tgPicked: "✓ Will post to “{t}”", tgOk: "✓ Message arrived in the group", tgErr: "⚠️ Telegram: {e}", tgTestText: "✅ Arkhas connected — big deals will be posted here automatically",
+    tgSent: " · Telegram: {n} sent", tgFail: " · Telegram failed: {e}", alNever: "No check yet", alPerm: "⚠️ Allow notifications for the app in phone settings", navFav: "Favourites", favTitle: "Favourites", favSub: "{n} saved items — price when saved", favEmpty: "Tap ♥ on any product to save it here", savedOn: "saved {d}", favAdded: "Added to favourites ❤️", favRemoved: "Removed from favourites", refresh: "Refresh", waBtn: "WhatsApp", waHead: "🔥 Arkhas deals — {d}", waInstead: "was", waMore: "📲 via Arkhas app", refresh: "Refresh", ddAll: "All stores", ddSome: "{n} stores selected", ddOne: "{s}", selAll: "Select all", selNone: "Clear all", navDeals: "Deals", dealsTitle: "Flash deals", dealsSub: "Biggest discounts from {n} top Egyptian sites — updated {t}", dealsLoading: "Fetching deals from {done}/{all} sites…", dealsNone: "No deals right now — tap ↻", sortPct: "Biggest % off", sortPrice: "Cheapest", sortSave: "Most saved", allStores: "All", justNow: "just now", minAgo: "{m} min ago", banner: "🎉 New version {v} — tap to update", openRel: "⬇️ Download {v} from GitHub", relNote: "The download page opens — download the file and open it to install. After this, updates happen inside the app", upd: "🔄 Updates", cur: "You have {v}", check: "Check for update", checking: "Checking…", latest: "You have the latest version ✓",
     newVer: "New version {v} available ({mb} MB)", install: "⬇️ Download & install {v}", downloading: "Downloading… {p}%", installing: "Tap Install on the Android screen",
     perm: "Allow Arkhas to install updates (settings opened), then come back and tap install again", webBtn: "Refresh store list", webSame: "Store list is up to date ✓",
     webChanged: "Stores updated — reloading…", updErr: "Failed: {e}", exact: "✓ exact", similar: "≈ similar", other: "other model", fewExact: "Only {n} exact match(es) — the rest are similar", egp: "EGP", save: "save {n}",
@@ -281,6 +309,7 @@ function applyLang() {
   for (const b of document.querySelectorAll("#langseg button")) b.classList.toggle("on", b.dataset.l === L);
   $("#l_fav").textContent = t.navFav; $("#f_title").textContent = t.favTitle;
   if (typeof renderFavs === "function" && !$("#favView").hidden) renderFavs();
+  $("#d_wa_l").textContent = t.waBtn;
   $("#l_deals").textContent = t.navDeals; $("#d_title").textContent = t.dealsTitle; $("#d_ref_l").textContent = t.refresh;
   if (typeof renderDeals === "function" && dealsData) renderDeals();
   $("#l_search").textContent = t.navSearch; $("#l_gear").textContent = t.navGear;
@@ -447,8 +476,35 @@ function renderFavs() {
 }
 $("#nav_fav").onclick = () => { showView("fav"); renderFavs(); };
 
+// ---------- 📤 WhatsApp (one tap: WhatsApp opens with the message ready, pick the group, press send) ----------
+function waText(list) {
+  const t = T[L];
+  const day = new Date().toLocaleDateString(L === "ar" ? "ar-EG" : "en-GB", { day: "numeric", month: "long" });
+  const lines = [fmt(t.waHead, { d: day }), ""];
+  list.slice(0, 10).forEach((o, i) => {
+    lines.push(`${list.length > 1 ? i + 1 + ") " : ""}${o.pct ? "🔥 -" + o.pct + "%" : "🟡 MEGA"} · ${o.source}`);
+    lines.push(o.title.slice(0, 90));
+    lines.push(`💰 ${money(o.price)}${o.old_price && o.old_price > o.price ? ` (${t.waInstead} ${money(o.old_price)})` : ""}`);
+    lines.push(o.url.split("?")[0].length > 25 ? o.url : o.url);
+    lines.push("");
+  });
+  lines.push(t.waMore);
+  return lines.join("\n");
+}
+function shareWa(list) {
+  if (!list.length) return;
+  const u = "https://wa.me/?text=" + encodeURIComponent(waText(list));   // app opens it in WhatsApp
+  if (window.__openExt) window.__openExt(u); else location.href = u;
+}
+document.addEventListener("click", (e) => {
+  const b = e.target.closest && e.target.closest(".share");
+  if (!b) return;
+  e.preventDefault(); e.stopPropagation();
+  const o = OFFERS.get(b.dataset.u); if (o) shareWa([o]);
+}, true);
+
 // ---------- ⚡ flash deals ----------
-let dealsData = null, dealsBusy = false, dealSort = "pct";
+let dealsData = null, dealsBusy = false, dealSort = "pct", shownDeals = [];
 let dealHide = null;   // stores unticked in the dropdown (remembered)
 const getHide = () => { if (!dealHide) { try { dealHide = new Set(JSON.parse(pref("dealHide", "[]"))); } catch (_) { dealHide = new Set(); } } return dealHide; };
 const saveHide = () => setPref("dealHide", JSON.stringify([...getHide()]));
@@ -494,8 +550,9 @@ function renderDeals(done = true) {
   let list = inRange.filter((o) => !hide.has(o.source));
   const by = { pct: (a, b) => b.pct - a.pct, save: (a, b) => (b.old_price - b.price) - (a.old_price - a.price), price: (a, b) => a.price - b.price };
   list = list.slice().sort(by[dealSort]).slice(0, 120);
+  shownDeals = list;
   if (!list.length) { $("#d_out").innerHTML = done ? `<div class="empty">${d.deals.length ? t.rNone : t.dealsNone}</div>` : ""; return; }
-  $("#d_out").innerHTML = `<div class="dg">${list.map((o) => `<a class="dc${o.tag === "mega" ? " is-mega" : ""}" href="${esc(o.url)}">${o.pct ? `<span class="off">-${o.pct}%</span>` : ""}${o.tag === "mega" ? `<span class="megab">🟡 ${t.mega}</span>` : ""}${heart(o)}${img(o)}
+  $("#d_out").innerHTML = `<div class="dg">${list.map((o) => `<a class="dc${o.tag === "mega" ? " is-mega" : ""}" href="${esc(o.url)}">${o.pct ? `<span class="off">-${o.pct}%</span>` : ""}${o.tag === "mega" ? `<span class="megab">🟡 ${t.mega}</span>` : ""}${heart(o)}<button type="button" class="share" data-u="${esc(o.url)}" aria-label="WhatsApp">📤</button>${img(o)}
     <div class="ttl">${esc(o.title)}</div><div class="p">${money(o.price)}</div>${o.old_price && o.old_price > o.price ? `<div class="old">${money(o.old_price)}</div>` : ""}
     <div class="src">${esc(o.source)}</div></a>`).join("")}</div>`;
 }
@@ -519,6 +576,7 @@ async function loadDeals(force) {
 
 $("#nav_deals").onclick = () => { showView("deals"); loadDeals(false); };
 $("#d_refresh").onclick = () => loadDeals(true);
+$("#d_wa").onclick = () => shareWa(shownDeals.slice(0, 10));
 $("#d_range").onclick = (e) => { const k = e.target.dataset && e.target.dataset.r; if (k) { dealRange = k; setPref("dealRange", k); renderDeals(); } };
 $("#d_sort").onclick = (e) => { const k = e.target.dataset && e.target.dataset.k; if (k) { dealSort = k; renderDeals(); } };
 $("#d_ddbtn").onclick = (e) => { e.stopPropagation(); $("#d_panel").hidden = !$("#d_panel").hidden; };
@@ -536,7 +594,9 @@ $("#d_none").onclick = () => { for (const x of STORES) if (x.deals) getHide().ad
 const canAlert = !!(N && N.setAlerts);
 const AL_STORES = ["Amazon.eg", "Noon", "Jumia"];
 const alCfg = () => { let c = {}; try { c = JSON.parse(pref("alerts", "{}")) || {}; } catch (_) {}
-  return Object.assign({ on: false, min: 60, stores: AL_STORES.slice(), mega: true, hours: 3 }, c); };
+  const r = Object.assign({ on: false, min: 60, stores: AL_STORES.slice(), mega: true, hours: 3, notify: true }, c);
+  r.tg = Object.assign({ on: false, token: "", chat: "", title: "" }, c.tg || {});
+  return r; };
 function saveAl(c) { setPref("alerts", JSON.stringify(c)); if (canAlert) N.setAlerts(JSON.stringify(c)); renderAl(); }
 function renderAl() {
   if (!canAlert) return;
@@ -549,10 +609,18 @@ function renderAl() {
   $("#al_min").innerHTML = [40, 50, 60, 70, 80].map((m) => `<button data-m="${m}" class="${c.min === m ? "on" : ""}">${m}%+</button>`).join("");
   $("#al_st").innerHTML = AL_STORES.map((n) => `<button data-s="${n}" class="${c.stores.includes(n) ? "on" : ""}">${n.replace(".eg", "")}</button>`).join("");
   $("#al_h").innerHTML = [1, 3, 6, 12].map((h) => `<button data-h="${h}" class="${c.hours === h ? "on" : ""}">${fmt(t.alHours, { h })}</button>`).join("");
+  $("#al_to_l").textContent = t.alTo; $("#al_notify_l").textContent = t.alNotify; $("#al_notify").checked = c.notify;
+  $("#tg_on_l").textContent = t.tgOn; $("#tg_on").checked = c.tg.on; $("#tg_box").hidden = !c.tg.on;
+  $("#tg_steps").innerHTML = t.tgSteps.map((x) => `<li>${esc(x)}</li>`).join("");
+  $("#tg_find").textContent = t.tgFind; $("#tg_test").textContent = t.tgTest;
+  if (document.activeElement !== $("#tg_token")) $("#tg_token").value = c.tg.token;
+  if (document.activeElement !== $("#tg_chat")) $("#tg_chat").value = c.tg.chat;
+  if (c.tg.chat && !$("#tg_msg").dataset.busy) $("#tg_msg").textContent = fmt(t.tgPicked, { t: c.tg.title || c.tg.chat });
   let last = null; try { last = JSON.parse(pref("alertLast", "null")); } catch (_) {}
   const when = last ? new Date(last.at).toLocaleString(L === "ar" ? "ar-EG" : "en-GB", { weekday: "short", hour: "2-digit", minute: "2-digit" }) : "";
   $("#al_last").textContent = (c.on && N.canNotify && !N.canNotify() ? t.alPerm + " · " : "") +
-    (!last ? t.alNever : last.error ? fmt(t.alErr, { t: when, e: last.error }) : fmt(t.alLast, { t: when, f: last.found || 0, n: last.new || 0 }));
+    (!last ? t.alNever : last.error ? fmt(t.alErr, { t: when, e: last.error }) : fmt(t.alLast, { t: when, f: last.found || 0, n: last.new || 0 })) +
+    (last && last.tgSent != null ? fmt(t.tgSent, { n: last.tgSent }) : "") + (last && last.tgError ? fmt(t.tgFail, { e: last.tgError }) : "");
 }
 if (canAlert) {
   $("#al_on").onchange = () => { const c = alCfg(); c.on = $("#al_on").checked; saveAl(c); };
@@ -563,6 +631,45 @@ if (canAlert) {
     c.stores = c.stores.includes(n) ? c.stores.filter((x) => x !== n) : c.stores.concat(n);
     if (!c.stores.length) c.stores = [n]; saveAl(c); };
   $("#al_test").onclick = () => { N.testAlerts(); $("#al_last").textContent = T[L].alTesting; };
+  $("#al_notify").onchange = () => { const c = alCfg(); c.notify = $("#al_notify").checked; saveAl(c); };
+  $("#tg_on").onchange = () => { const c = alCfg(); c.tg.on = $("#tg_on").checked; saveAl(c); };
+  $("#tg_token").onchange = () => { const c = alCfg(); c.tg.token = $("#tg_token").value.trim(); saveAl(c); };
+  $("#tg_chat").onchange = () => { const c = alCfg(); c.tg.chat = $("#tg_chat").value.trim(); c.tg.title = ""; saveAl(c); };
+  const tgApi = async (method, params) => {
+    const tok = alCfg().tg.token || $("#tg_token").value.trim();
+    const qs = new URLSearchParams(params || {}).toString();
+    let d;
+    try { d = JSON.parse(await fetcher(`https://api.telegram.org/bot${tok}/${method}${qs ? "?" + qs : ""}`, { json: true })); }
+    catch (e) { d = { ok: false, description: /401|404/.test(e.message) ? "bot token wrong" : e.message }; }
+    if (!d.ok) throw new Error(d.description || "error");
+    return d.result;
+  };
+  const tgMsg = (x) => { $("#tg_msg").textContent = x; $("#tg_msg").dataset.busy = "1"; };
+  $("#tg_find").onclick = async () => {
+    const c = alCfg(); c.tg.token = $("#tg_token").value.trim(); saveAl(c);
+    $("#tg_chats").innerHTML = ""; tgMsg("…");
+    try {
+      const ups = await tgApi("getUpdates", { allowed_updates: JSON.stringify(["message", "my_chat_member", "channel_post"]) });
+      const chats = new Map();
+      for (const u of ups) for (const x of [u.message, u.my_chat_member, u.channel_post]) {
+        const ch = x && x.chat; if (ch && ch.type !== "private") chats.set(String(ch.id), ch.title || String(ch.id));
+      }
+      if (!chats.size) return tgMsg(T[L].tgNoChats);
+      tgMsg("");
+      $("#tg_chats").innerHTML = [...chats].map(([id, title]) => `<button class="ib2" data-id="${esc(id)}" data-t="${esc(title)}">👥 ${esc(title)}</button>`).join("");
+    } catch (e) { tgMsg(fmt(T[L].tgErr, { e: e.message })); }
+  };
+  $("#tg_chats").onclick = (e) => {
+    const b = e.target.closest("button"); if (!b) return;
+    const c = alCfg(); c.tg.chat = b.dataset.id; c.tg.title = b.dataset.t; saveAl(c);
+    $("#tg_chats").innerHTML = ""; delete $("#tg_msg").dataset.busy; renderAl();
+  };
+  $("#tg_test").onclick = async () => {
+    const c = alCfg(); c.tg.chat = $("#tg_chat").value.trim() || c.tg.chat; saveAl(c);
+    tgMsg("…");
+    try { await tgApi("sendMessage", { chat_id: c.tg.chat, text: T[L].tgTestText }); tgMsg(T[L].tgOk); }
+    catch (e) { tgMsg(fmt(T[L].tgErr, { e: e.message })); }
+  };
 }
 
 /** Background mode: the phone runs this page invisibly every few hours to look for big new deals. */

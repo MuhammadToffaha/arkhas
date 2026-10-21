@@ -99,6 +99,27 @@ object DealAlerts {
 
     private fun money(v: Double) = "%,d ج.م".format(Math.round(v))
 
+    /** Same message format as the app's 📤 button. */
+    fun waText(deals: List<JSONObject>): String = buildString {
+        append("🔥 عروض أرخص\n\n")
+        deals.take(10).forEachIndexed { i, d ->
+            val pct = d.optInt("pct")
+            if (deals.size > 1) append("${i + 1}) ")
+            append(if (pct > 0) "🔥 -$pct%" else "🟡 MEGA").append(" · ").append(d.optString("source")).append("\n")
+            append(d.optString("title").take(90)).append("\n")
+            append("💰 ").append(money(d.optDouble("price")))
+            if (d.optDouble("old_price", 0.0) > d.optDouble("price")) append(" (بدل ${money(d.optDouble("old_price"))})")
+            append("\n").append(d.optString("url")).append("\n\n")
+        }
+        append("📲 من تطبيق أرخص")
+    }
+
+    /** Opens WhatsApp with the message filled in; the user picks the group and taps send. */
+    private fun waIntent(ctx: Context, deals: List<JSONObject>, code: Int): PendingIntent =
+        PendingIntent.getActivity(ctx, code,
+            Intent(Intent.ACTION_VIEW, Uri.parse("https://wa.me/?text=" + Uri.encode(waText(deals)))).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
+
     /** One notification per deal (max 6, biggest discount first) + a group summary. */
     @SuppressLint("MissingPermission")
     fun notify(ctx: Context, deals: List<JSONObject>) {
@@ -123,6 +144,7 @@ object DealAlerts {
                 .setContentText(body.lineSequence().first())
                 .setStyle(NotificationCompat.BigTextStyle().bigText(body))
                 .setContentIntent(open)
+                .addAction(0, "📤 واتساب", waIntent(ctx, listOf(d), url.hashCode() + 7))
                 .setAutoCancel(true)
                 .setGroup("deals")
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
@@ -138,6 +160,7 @@ object DealAlerts {
                 .setContentTitle("⚡ ${deals.size} عرض جديد · new deals")
                 .setContentText("أعلى خصم -${top.first().optInt("pct")}%")
                 .setContentIntent(app)
+                .addAction(0, "📤 ابعت الكل واتساب", waIntent(ctx, top, 2))
                 .setGroup("deals").setGroupSummary(true).setAutoCancel(true)
                 .build())
         }
@@ -171,7 +194,18 @@ class DealWatchWorker(ctx: Context, params: WorkerParameters) : CoroutineWorker(
             .putString("p_alertLast", status.put("found", deals.length()).put("new", fresh.size)
                 .put("sources", res.optJSONArray("sources") ?: JSONArray()).toString())
             .apply()
-        withContext(Dispatchers.IO) { DealAlerts.notify(ctx, fresh) }
+        val cfg = DealAlerts.config(ctx)
+        withContext(Dispatchers.IO) {
+            if (cfg.optBoolean("notify", true)) DealAlerts.notify(ctx, fresh)
+            // ✈️ Telegram group: post new deals automatically
+            val tg = cfg.optJSONObject("tg")
+            if (tg != null && tg.optBoolean("on") && tg.optString("token").isNotBlank() && tg.optString("chat").isNotBlank() && fresh.isNotEmpty()) {
+                val st = JSONObject(prefs.getString("p_alertLast", "{}") ?: "{}")
+                try { st.put("tgSent", Telegram.send(tg.optString("token"), tg.optString("chat"), fresh)) }
+                catch (e: Exception) { st.put("tgError", e.message ?: "error") }
+                prefs.edit().putString("p_alertLast", st.toString()).apply()
+            }
+        }
         return Result.success()
     }
 }

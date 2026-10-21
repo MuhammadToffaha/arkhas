@@ -18,7 +18,11 @@ function boot({ bg = false, prefs = {}, calls = [] } = {}) {
     win.Native = {
       fetch(id, url) {
         calls.push(["fetch", url]);
-        const body = url.includes("jumia.com.eg/flash-sales") ? JUMIA : url.includes("egmega") ? NOONMEGA : null;
+        const body = url.includes("jumia.com.eg/flash-sales") ? JUMIA : url.includes("egmega") ? NOONMEGA
+          : url.includes("/getUpdates") ? JSON.stringify({ ok: true, result: [
+              { update_id: 1, my_chat_member: { chat: { id: -1001234, title: "عروض العيلة", type: "supergroup" } } },
+              { update_id: 2, message: { chat: { id: 55, type: "private" } } }] })
+          : url.includes("/sendMessage") ? JSON.stringify({ ok: true, result: {} }) : null;
         setTimeout(() => win.__native(id, body !== null, body ?? "HTTP 404"), 3);
       },
       getPref: (k) => prefs[k] || "", setPref: (k, v) => { prefs[k] = v; }, readConfig: (n) => read(new URL(n, W)),
@@ -42,7 +46,8 @@ test("settings: alerts switch, min %, stores, frequency -> Native.setAlerts", as
   doc.querySelector('#al_st button[data-s="Jumia"]').click();    // untick Jumia
   doc.querySelector('#al_h button[data-h="6"]').click();
   const last = calls.filter((c) => c[0] === "setAlerts").at(-1)[1];
-  assert.deepEqual(last, { on: true, min: 70, stores: ["Amazon.eg", "Noon"], mega: true, hours: 6 });
+  assert.deepEqual(last, { on: true, min: 70, stores: ["Amazon.eg", "Noon"], mega: true, hours: 6, notify: true,
+    tg: { on: false, token: "", chat: "", title: "" } });
   assert.deepEqual(JSON.parse(prefs.alerts), last);
   doc.querySelector("#al_test").click();
   assert.ok(calls.some((c) => c[0] === "test"));
@@ -69,4 +74,43 @@ test("background mode: only alert stores are fetched, deals >= min + Noon mega h
   const fetched = calls.filter((c) => c[0] === "fetch").map((c) => c[1]);
   assert.ok(!fetched.some((u) => u.includes("amazon")), "Amazon not selected -> not fetched");
   assert.ok(!fetched.some((u) => u.includes("api.github.com")), "no update check in background");
+});
+
+test("telegram setup: token -> find group -> pick -> test message", async () => {
+  const calls = [];
+  const { win, doc, prefs } = boot({ calls });
+  await win.arkhasReady;
+  doc.querySelector("#gear").click();
+  const on = doc.querySelector("#al_on"); on.checked = true; on.dispatchEvent(new win.Event("change"));
+  const tg = doc.querySelector("#tg_on"); tg.checked = true; tg.dispatchEvent(new win.Event("change"));
+  assert.equal(doc.querySelector("#tg_box").hidden, false);
+  assert.equal(doc.querySelectorAll("#tg_steps li").length, 3);
+  doc.querySelector("#tg_token").value = "123:ABC";
+  doc.querySelector("#tg_find").click();
+  await until(() => doc.querySelectorAll("#tg_chats button").length === 1);
+  assert.match(doc.querySelector("#tg_chats button").textContent, /عروض العيلة/, "private chats ignored");
+  doc.querySelector("#tg_chats button").click();
+  const cfg = JSON.parse(prefs.alerts);
+  assert.deepEqual(cfg.tg, { on: true, token: "123:ABC", chat: "-1001234", title: "عروض العيلة" });
+  doc.querySelector("#tg_test").click();
+  await until(() => /✓/.test(doc.querySelector("#tg_msg").textContent));
+  const sent = calls.find((c) => c[0] === "fetch" && c[1].includes("/sendMessage"))[1];
+  assert.ok(sent.startsWith("https://api.telegram.org/bot123:ABC/sendMessage?chat_id=-1001234"));
+});
+
+test("whatsapp: big button shares the shown deals, 📤 on a card shares one, wa.me link with full message", async () => {
+  const { win, doc } = boot({ prefs: { dealRange: "all" } });
+  await win.arkhasReady;
+  let href = null;
+  win.__openExt = (u) => { href = u; };
+  doc.querySelector("#nav_deals").click();
+  await until(() => doc.querySelectorAll(".dc .share").length >= 1, 8000);
+  doc.querySelector(".dc .share").click();
+  assert.ok(href && href.startsWith("https://wa.me/?text="));
+  const one = decodeURIComponent(href.split("text=")[1]);
+  assert.match(one, /🔥 -\d+% · /);
+  assert.match(one, /https?:\/\//);
+  doc.querySelector("#d_wa").click();
+  const all = decodeURIComponent(href.split("text=")[1]);
+  assert.match(all, /^🔥 .*\n\n1\) /s, "numbered list of deals");
 });
