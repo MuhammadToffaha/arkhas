@@ -629,6 +629,14 @@
     html: { url: (s) => s.deals.url, urls: (s) => s.deals.urls || [s.deals.url], json: false, parse: null },
   };
 
+  /** Same product on different pages / with tracking parts -> one ID (Amazon ASIN, Noon SKU, else clean link). */
+  function productId(url) {
+    const u = String(url || "");
+    const a = u.match(/\/(?:dp|gp\/product|gp\/aw\/d)\/([A-Z0-9]{10})/); if (a) return "amz:" + a[1];
+    const n = u.match(/\/([A-Z0-9]{6,})\/p(?:\/|\?|$)/); if (n) return "noon:" + n[1];
+    return u.split("#")[0].split("?")[0].replace(/\/ref=[^/]*$/, "").replace(/\/$/, "").replace(/^https?:\/\/(www\.)?/, "").toLowerCase();
+  }
+
   /** Percent off, or 0 when there's no real old price. */
   const pctOff = (o) => (o.old_price && o.old_price > o.price ? Math.round((1 - o.price / o.old_price) * 100) : 0);
 
@@ -645,7 +653,7 @@
       const seen = new Set();
       // same product from several pages: keep the tagged (Mega Deals) copy
       const list = all.slice().sort((a, b) => !!b.tag - !!a.tag)
-        .filter((o) => { const k = o.source + "|" + o.url.split("?")[0]; if (seen.has(k)) return false; seen.add(k); return true; })
+        .filter((o) => { const k = o.source + "|" + productId(o.url); if (seen.has(k)) return false; seen.add(k); return true; })
         .sort((a, b) => b.pct - a.pct || a.price - b.price);
       return { deals: list, sources: sources.slice(), total: stores.length, at: Date.now() };
     };
@@ -751,7 +759,7 @@
     return r;
   }
 
-  const API = { normalize, tokens, isArabic, setSynonyms, equivalents, translateQuery, queryVariants, queryVariantsAsync, cleanQuery, parsePrice, ADAPTERS, DEAL_FEEDS, deals, pctOff,
+  const API = { normalize, tokens, isArabic, setSynonyms, equivalents, translateQuery, queryVariants, queryVariantsAsync, cleanQuery, parsePrice, ADAPTERS, DEAL_FEEDS, deals, pctOff, productId,
     relevance, matchInfo, specs, rank, top, parse, parseSerp, buildUrl, serpUrl, externalLinks, search };
   if (typeof module !== "undefined" && module.exports) module.exports = API;
   else root.Arkhas = API;

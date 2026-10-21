@@ -164,3 +164,15 @@ test("70%+ chip shows every deal from 70% up (70, 75, 77, 88), biggest first; Am
   await until(() => doc.querySelector("#d_bar").hidden && doc.querySelectorAll(".dc").length);
   assert.deepEqual([...doc.querySelectorAll(".dc .off")].map((x) => x.textContent), ["-88%", "-77%", "-75%", "-70%"]);
 });
+
+test("same product from two pages / with ?ref= tracking is listed once", async () => {
+  assert.equal(E.productId("https://www.amazon.eg/JBL-Flip/dp/B0ABCDEFGH/ref=sr_1_3?keywords=x"), "amz:B0ABCDEFGH");
+  assert.equal(E.productId("https://www.amazon.eg/dp/B0ABCDEFGH"), "amz:B0ABCDEFGH");
+  assert.equal(E.productId("https://www.noon.com/egypt-en/airpods/N53432/p/?o=1"), "noon:N53432");
+  const amazon = S["Amazon.eg"];
+  const card = (href) => `<div data-component-type="s-search-result"><a class="a-link-normal" href="${href}"><h2><span>JBL Flip 6 Speaker</span></h2></a>
+    <span class="a-price"><span class="a-offscreen">EGP 1,200</span></span><span class="a-price a-text-price"><span class="a-offscreen">EGP 4,000</span></span></div>`;
+  const fetcher = (url) => Promise.resolve(url.includes("70-") ? card("/JBL/dp/B0ABCDEFGH/ref=sr_1_1") : card("/dp/B0ABCDEFGH?th=1"));
+  const r = await E.deals({ stores: [amazon], fetcher, DOMParser, timeout: 500 });
+  assert.equal(r.deals.length, 1);
+});

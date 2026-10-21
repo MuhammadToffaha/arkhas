@@ -33,9 +33,10 @@ object Telegram {
     }
 
     /** Posts each deal (photo + caption when there is a picture). Returns how many were sent, or throws on a bad token/chat. */
-    fun send(token: String, chat: String, deals: List<JSONObject>): Int {
+    fun send(token: String, chat: String, deals: List<JSONObject>, onSent: (JSONObject) -> Unit = {}): Int {
         var sent = 0
-        for (d in deals.sortedByDescending { it.optInt("pct") }.take(10)) {
+        // up to 15 per run, biggest discount first; the rest stay "new" and go out next run
+        for (d in deals.sortedByDescending { it.optInt("pct") }.take(15)) {
             val img = d.optString("image")
             var r = if (img.startsWith("http"))
                 post(token, "sendPhoto", mapOf("chat_id" to chat, "photo" to img, "caption" to caption(d), "parse_mode" to "HTML"))
@@ -43,7 +44,7 @@ object Telegram {
             if (!r.optBoolean("ok"))   // no picture, or Telegram couldn't fetch it -> plain message
                 r = post(token, "sendMessage", mapOf("chat_id" to chat, "text" to caption(d), "parse_mode" to "HTML",
                     "disable_web_page_preview" to "false"))
-            if (r.optBoolean("ok")) sent++
+            if (r.optBoolean("ok")) { sent++; onSent(d) }
             else if (sent == 0) throw Exception(r.optString("description", "telegram error"))
             Thread.sleep(1200)   // stay well under Telegram's group rate limit
         }

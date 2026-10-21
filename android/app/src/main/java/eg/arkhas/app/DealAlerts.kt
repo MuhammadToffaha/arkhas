@@ -33,6 +33,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
+import kotlinx.coroutines.sync.withLock
 import org.json.JSONArray
 import org.json.JSONObject
 import java.net.HttpURLConnection
@@ -168,8 +169,50 @@ object DealAlerts {
 }
 
 /** Background job: run the engine headless, keep only deals not notified before, notify. */
+/**
+ * "Already sent" memory. A product is identified by its store product ID (Amazon ASIN, Noon SKU),
+ * else by its link without tracking parts, and also by store + normalised title, so the same item found on
+ * two pages, with a different ?ref= or a slightly different % is still recognised as the same item.
+ */
+class SentLog(private val prefs: android.content.SharedPreferences, private val name: String, private val days: Int = 45) {
+    private val log = runCatching { JSONObject(prefs.getString(name, "{}") ?: "{}") }.getOrDefault(JSONObject())
+    init {
+        val now = System.currentTimeMillis()
+        log.keys().asSequence().toList().forEach { if (now - log.optLong(it) > days * 86_400_000L) log.remove(it) }
+    }
+    fun has(d: JSONObject) = keys(d).any { log.has(it) }
+    fun add(d: JSONObject) { val now = System.currentTimeMillis(); keys(d).forEach { log.put(it, now) } }
+    fun save() {
+        if (log.length() > 4000) {   // keep the newest 4000 keys
+            val keep = log.keys().asSequence().sortedByDescending { log.optLong(it) }.take(4000).toSet()
+            log.keys().asSequence().toList().forEach { if (it !in keep) log.remove(it) }
+        }
+        prefs.edit().putString(name, log.toString()).apply()
+    }
+
+    companion object {
+        fun keys(d: JSONObject): List<String> {
+            val url = d.optString("url"); val src = d.optString("source").lowercase()
+            val out = mutableListOf<String>()
+            Regex("/(?:dp|gp/product|gp/aw/d)/([A-Z0-9]{10})").find(url)?.let { out += "amz:" + it.groupValues[1] }
+            Regex("/([A-Z0-9]{6,})/p(?:/|\\?|$)").find(url)?.let { out += "noon:" + it.groupValues[1] }
+            val clean = url.substringBefore("#").substringBefore("?").trimEnd('/').lowercase()
+                .replace(Regex("/ref=[^/]*$"), "").replace(Regex("^https?://(www\\.)?"), "")
+            if (clean.isNotBlank()) out += "url:" + clean
+            val t = d.optString("title").lowercase().replace(Regex("[^\\p{L}\\p{N}]+"), " ").trim().take(70)
+            if (t.length >= 8) out += "t:$src|$t"
+            return out
+        }
+    }
+}
+
+/** Background job: run the engine headless, keep only deals not sent before, notify / post to Telegram. */
 class DealWatchWorker(ctx: Context, params: WorkerParameters) : CoroutineWorker(ctx, params) {
-    override suspend fun doWork(): Result {
+    companion object { private val lock = kotlinx.coroutines.sync.Mutex() }   // periodic + "check now" never overlap
+
+    override suspend fun doWork(): Result = lock.withLock { work() }
+
+    private suspend fun work(): Result {
         val ctx = applicationContext
         val prefs = DealAlerts.prefs(ctx)
         val manual = inputData.getBoolean("manual", false)
@@ -180,33 +223,38 @@ class DealWatchWorker(ctx: Context, params: WorkerParameters) : CoroutineWorker(
             return if (manual) Result.success() else Result.retry()
         }
         val res = runCatching { JSONObject(raw) }.getOrDefault(JSONObject())
-        val deals = res.optJSONArray("deals") ?: JSONArray()
+        val arr = res.optJSONArray("deals") ?: JSONArray()
 
-        // remember what was already notified (7 days) so each deal alerts once
-        val seen = runCatching { JSONObject(prefs.getString("alertSeen", "{}") ?: "{}") }.getOrDefault(JSONObject())
-        val now = System.currentTimeMillis()
-        seen.keys().asSequence().toList().forEach { if (now - seen.optLong(it) > 7 * 86_400_000L) seen.remove(it) }
-        val fresh = (0 until deals.length()).map { deals.getJSONObject(it) }.filter { d ->
-            val key = d.optString("url").substringBefore("?") + "|" + d.optInt("pct")
-            if (seen.has(key)) false else { seen.put(key, now); true }
+        // same product twice in one batch (e.g. Amazon 70%+ and 50%+ pages) -> keep the bigger discount once
+        val batch = mutableListOf<JSONObject>()
+        for (d in (0 until arr.length()).map { arr.getJSONObject(it) }.sortedByDescending { it.optInt("pct") }) {
+            val k = SentLog.keys(d).toSet()
+            if (batch.none { b -> SentLog.keys(b).any { it in k } }) batch += d
         }
-        prefs.edit().putString("alertSeen", seen.toString())
-            .putString("p_alertLast", status.put("found", deals.length()).put("new", fresh.size)
-                .put("sources", res.optJSONArray("sources") ?: JSONArray()).toString())
-            .apply()
+
         val cfg = DealAlerts.config(ctx)
+        val notifLog = SentLog(prefs, "alertSeen2")
+        val newForPhone = batch.filter { !notifLog.has(it) }
+        newForPhone.forEach { notifLog.add(it) }; notifLog.save()
+        status.put("found", batch.size).put("new", newForPhone.size).put("sources", res.optJSONArray("sources") ?: JSONArray())
+
         withContext(Dispatchers.IO) {
-            if (cfg.optBoolean("notify", true)) DealAlerts.notify(ctx, fresh)
-            // ✈️ Telegram group: post new deals automatically
+            if (cfg.optBoolean("notify", true)) DealAlerts.notify(ctx, newForPhone)
+            // ✈️ Telegram: only items never posted to this group before; marked as posted only after Telegram accepts them
             val tg = cfg.optJSONObject("tg")
             val tok = tg?.optString("token").orEmpty().ifBlank { BuildConfig.TG_TOKEN }
-            if (tg != null && tg.optBoolean("on") && tok.isNotBlank() && tg.optString("chat").isNotBlank() && fresh.isNotEmpty()) {
-                val st = JSONObject(prefs.getString("p_alertLast", "{}") ?: "{}")
-                try { st.put("tgSent", Telegram.send(tok, tg.optString("chat"), fresh)) }
-                catch (e: Exception) { st.put("tgError", e.message ?: "error") }
-                prefs.edit().putString("p_alertLast", st.toString()).apply()
+            val chat = tg?.optString("chat").orEmpty()
+            if (tg != null && tg.optBoolean("on") && tok.isNotBlank() && chat.isNotBlank()) {
+                val tgLog = SentLog(prefs, "tgSent:$chat", days = 90)
+                val todo = batch.filter { !tgLog.has(it) }
+                status.put("tgNew", todo.size)
+                if (todo.isNotEmpty()) {
+                    try { status.put("tgSent", Telegram.send(tok, chat, todo) { d -> tgLog.add(d); tgLog.save() }) }
+                    catch (e: Exception) { status.put("tgError", e.message ?: "error") }
+                } else status.put("tgSent", 0)
             }
         }
+        prefs.edit().putString("p_alertLast", status.toString()).apply()
         return Result.success()
     }
 }
