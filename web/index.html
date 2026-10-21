@@ -271,7 +271,8 @@ const T = {
     alTesting: "جاري الفحص في الخلفية… هيوصلك إشعار لو فيه جديد", alLast: "آخر فحص {t}: {f} عرض، {n} جديد", alErr: "آخر فحص {t}: فشل ({e})",
     alNever: "لسه مفيش فحص", alTo: "ابعت العروض الجديدة على", alNotify: "🔔 إشعار على الموبايل", tgOn: "✈️ جروب تليجرام (تلقائي بالكامل)",
     tgSteps: ["في تليجرام افتح @BotFather واكتب /newbot — هيديك Token", "الصق الـ Token هنا", "اضغط «➕ ضيف البوت لجروبي» واختار الجروب — التطبيق هيلاقيه لوحده"],
-    tgAdd: "➕ ضيف البوت لجروبي", tgWaiting: "⏳ مستني… اختار الجروب في تليجرام وارجع هنا (أو اكتب /arkhas في الجروب)", tgBot: "🤖 البوت: @{u}",
+    tgAdd: "➕ ضيف البوت لجروبي", tgPrivate: "الشات الخاص",
+    tgStepsBuiltIn: ["البوت @ToffahaBot متركّب في التطبيق — مش محتاج Token", "اضغط «➕ ضيف البوت لجروبي» واختار الجروب", "أو اضغط «دوّر على جروبي» واختار الشات الخاص عشان توصلك العروض لوحدك"], tgWaiting: "⏳ مستني… اختار الجروب في تليجرام وارجع هنا (أو اكتب /arkhas في الجروب)", tgBot: "🤖 البوت: @{u}",
     tgBadTok: "⚠️ الـ Token غلط — انسخه تاني من @BotFather", tgTimeout: "لسه مش لاقي الجروب — اكتب /arkhas في الجروب واضغط «دوّر على جروبي»",
     tgFind: "🔎 دوّر على جروبي", tgTest: "✉️ ابعت رسالة تجربة", tgNoChats: "مش لاقي الجروب — اكتب /arkhas في الجروب (البوت مش بيشوف الرسايل العادية) وحاول تاني",
     tgPicked: "✓ هيبعت لـ «{t}»", tgOk: "✓ الرسالة وصلت للجروب", tgErr: "⚠️ تليجرام: {e}", tgTestText: "✅ أرخص متوصل — العروض الكبيرة هتوصل هنا تلقائي",
@@ -288,7 +289,8 @@ const T = {
     alTesting: "Checking in the background… you'll get a notification if there's something new", alLast: "Last check {t}: {f} deals, {n} new", alErr: "Last check {t}: failed ({e})",
     alNever: "No check yet", alTo: "Send new deals to", alNotify: "🔔 Phone notification", tgOn: "✈️ Telegram group (fully automatic)",
     tgSteps: ["In Telegram open @BotFather, send /newbot — you get a token", "Paste the token here", "Tap “➕ Add bot to my group” and pick the group — the app finds it by itself"],
-    tgAdd: "➕ Add bot to my group", tgWaiting: "⏳ Waiting… pick the group in Telegram and come back (or send /arkhas in the group)", tgBot: "🤖 Bot: @{u}",
+    tgAdd: "➕ Add bot to my group", tgPrivate: "private chat",
+    tgStepsBuiltIn: ["The bot @ToffahaBot is built into the app — no token needed", "Tap “➕ Add bot to my group” and pick the group", "Or tap “Find my group” and pick your private chat to get the deals just for you"], tgWaiting: "⏳ Waiting… pick the group in Telegram and come back (or send /arkhas in the group)", tgBot: "🤖 Bot: @{u}",
     tgBadTok: "⚠️ Token is wrong — copy it again from @BotFather", tgTimeout: "Group not found yet — send /arkhas in the group, then tap “Find my group”",
     tgFind: "🔎 Find my group", tgTest: "✉️ Send test message", tgNoChats: "Group not found — send /arkhas in the group (bots don't see normal messages) and try again",
     tgPicked: "✓ Will post to “{t}”", tgOk: "✓ Message arrived in the group", tgErr: "⚠️ Telegram: {e}", tgTestText: "✅ Arkhas connected — big deals will be posted here automatically",
@@ -601,6 +603,7 @@ const AL_STORES = ["Amazon.eg", "Noon", "Jumia"];
 const alCfg = () => { let c = {}; try { c = JSON.parse(pref("alerts", "{}")) || {}; } catch (_) {}
   const r = Object.assign({ on: false, min: 60, stores: AL_STORES.slice(), mega: true, hours: 3, notify: true }, c);
   r.tg = Object.assign({ on: false, token: "", chat: "", title: "" }, c.tg || {});
+  if (!r.tg.token && N && N.defaultTgToken) r.tg.token = N.defaultTgToken() || "";   // built-in bot
   return r; };
 function saveAl(c) { setPref("alerts", JSON.stringify(c)); if (canAlert) N.setAlerts(JSON.stringify(c)); renderAl(); }
 function renderAl() {
@@ -618,7 +621,10 @@ function renderAl() {
   $("#tg_on_l").textContent = t.tgOn; $("#tg_on").checked = c.tg.on; $("#tg_box").hidden = !c.tg.on;
   $("#tg_steps").innerHTML = t.tgSteps.map((x) => `<li>${esc(x)}</li>`).join("");
   $("#tg_find").textContent = t.tgFind; $("#tg_test").textContent = t.tgTest; $("#tg_add").textContent = t.tgAdd;
-  if (document.activeElement !== $("#tg_token")) $("#tg_token").value = c.tg.token;
+  const builtIn = !!(N && N.defaultTgToken && N.defaultTgToken());
+  $("#tg_token").hidden = builtIn;                 // built-in bot: nothing to paste
+  if (builtIn) $("#tg_steps").innerHTML = t.tgStepsBuiltIn.map((x) => `<li>${esc(x)}</li>`).join("");
+  if (document.activeElement !== $("#tg_token")) $("#tg_token").value = builtIn ? "" : c.tg.token;
   if (document.activeElement !== $("#tg_chat")) $("#tg_chat").value = c.tg.chat;
   if (c.tg.chat && !$("#tg_msg").dataset.busy) $("#tg_msg").textContent = fmt(t.tgPicked, { t: c.tg.title || c.tg.chat });
   let last = null; try { last = JSON.parse(pref("alertLast", "null")); } catch (_) {}
@@ -641,7 +647,7 @@ if (canAlert) {
   $("#tg_token").onchange = () => { const c = alCfg(); c.tg.token = $("#tg_token").value.trim(); saveAl(c); };
   $("#tg_chat").onchange = () => { const c = alCfg(); c.tg.chat = $("#tg_chat").value.trim(); c.tg.title = ""; saveAl(c); };
   const tgApi = async (method, params) => {
-    const tok = alCfg().tg.token || $("#tg_token").value.trim();
+    const tok = alCfg().tg.token || $("#tg_token").value.trim() || (N && N.defaultTgToken ? N.defaultTgToken() : "");
     const qs = new URLSearchParams(params || {}).toString();
     let d;
     try { d = JSON.parse(await fetcher(`https://api.telegram.org/bot${tok}/${method}${qs ? "?" + qs : ""}`, { json: true })); }
@@ -658,14 +664,15 @@ if (canAlert) {
     for (const u of ups) for (const x of [u.message, u.my_chat_member, u.channel_post, u.chat_member]) {
       const ch = x && x.chat;
       const left = x && x.new_chat_member && ["left", "kicked"].includes(x.new_chat_member.status);
-      if (ch && ch.type !== "private") { if (left) chats.delete(String(ch.id)); else chats.set(String(ch.id), ch.title || String(ch.id)); }
+      if (ch) { const name = ch.type === "private" ? "📩 " + (ch.first_name || "") + " (" + T[L].tgPrivate + ")" : ch.title || String(ch.id);
+        if (left) chats.delete(String(ch.id)); else if (!chats.has(String(ch.id)) || ch.type !== "private") chats.set(String(ch.id), name); }
       // group upgraded to supergroup -> new id
       if (x && x.migrate_to_chat_id) { chats.delete(String(ch.id)); chats.set(String(x.migrate_to_chat_id), ch.title || String(x.migrate_to_chat_id)); }
     }
     return chats;
   };
   const tgCheckToken = async () => {
-    const c = alCfg(); c.tg.token = $("#tg_token").value.trim(); saveAl(c);
+    const c = alCfg(); if (!$("#tg_token").hidden && $("#tg_token").value.trim()) { c.tg.token = $("#tg_token").value.trim(); saveAl(c); }
     try { const me = await tgApi("getMe"); $("#tg_bot").textContent = fmt(T[L].tgBot, { u: me.username }); return me; }
     catch (e) { $("#tg_bot").textContent = ""; tgMsg(T[L].tgBadTok); return null; }
   };
@@ -693,7 +700,7 @@ if (canAlert) {
       tries++;
       try {
         const chats = await tgChats();
-        const fresh = [...chats].filter(([id]) => !before.has(id));
+        const fresh = [...chats].filter(([id]) => !before.has(id) && !id.match(/^\d/));   // new groups only (group ids are negative)
         const pick = fresh.length === 1 ? fresh[0] : null;
         if (pick) {
           clearInterval(tgPoll);

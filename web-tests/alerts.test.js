@@ -90,8 +90,9 @@ test("telegram setup: token -> find group -> pick -> test message", async () => 
   assert.equal(doc.querySelectorAll("#tg_steps li").length, 3);
   doc.querySelector("#tg_token").value = "123:ABC";
   doc.querySelector("#tg_find").click();
-  await until(() => doc.querySelectorAll("#tg_chats button").length === 1);
-  assert.match(doc.querySelector("#tg_chats button").textContent, /عروض العيلة/, "private chats ignored");
+  await until(() => doc.querySelectorAll("#tg_chats button").length === 2);
+  assert.match(doc.querySelector("#tg_chats").textContent, /عروض العيلة/);
+  assert.match(doc.querySelector("#tg_chats").textContent, /📩/, "private chat offered too");
   doc.querySelector("#tg_chats button").click();
   const cfg = JSON.parse(prefs.alerts);
   assert.deepEqual(cfg.tg, { on: true, token: "123:ABC", chat: "-1001234", title: "عروض العيلة" });
@@ -147,4 +148,23 @@ test("telegram: wrong token is reported clearly", async () => {
   doc.querySelector("#tg_token").value = "BAD";
   doc.querySelector("#tg_find").click();
   await until(() => /Token|token/.test(doc.querySelector("#tg_msg").textContent));
+});
+
+test("telegram: built-in bot token (from the GitHub secret) -> no token field, works out of the box", async () => {
+  const calls = [];
+  const dom = new JSDOM(html(), { runScripts: "dangerously", url: "file:///x/index.html", beforeParse(win) {
+    win.Native = { fetch(id, url) { calls.push(url); setTimeout(() => win.__native(id, true, url.includes("getMe")
+        ? JSON.stringify({ ok: true, result: { username: "ToffahaBot" } }) : JSON.stringify({ ok: true, result: [] })), 3); },
+      getPref: () => "", setPref() {}, readConfig: (n) => read(new URL(n, W)), appVersion: () => "1.0.21", pendingQuery: () => "",
+      setAlerts() {}, testAlerts() {}, canNotify: () => true, defaultTgToken: () => "999:BUILTIN" };
+  } });
+  const { window: win } = dom, doc = win.document;
+  await win.arkhasReady;
+  doc.querySelector("#gear").click();
+  const on = doc.querySelector("#al_on"); on.checked = true; on.dispatchEvent(new win.Event("change"));
+  const tg = doc.querySelector("#tg_on"); tg.checked = true; tg.dispatchEvent(new win.Event("change"));
+  assert.equal(doc.querySelector("#tg_token").hidden, true);
+  assert.match(doc.querySelector("#tg_steps").textContent, /@ToffahaBot/);
+  doc.querySelector("#tg_find").click();
+  await until(() => calls.some((u) => u.includes("/bot999:BUILTIN/getMe")));
 });

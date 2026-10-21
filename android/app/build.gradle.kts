@@ -18,6 +18,8 @@ android {
         versionName = "1.0.$runNumber"
         // GitHub repo used for the in-app "new version" check
         buildConfigField("String", "UPDATE_REPO", "\"MuhammadToffaha/arkhas\"")
+        // Telegram bot token comes from the GitHub secret TELEGRAM_BOT_TOKEN at build time (never stored in the repo)
+        buildConfigField("String", "TG_TOKEN", "\"${(System.getenv("ARKHAS_TG_TOKEN") ?: "").replace("\"", "")}\"")
     }
 
     signingConfigs {

@@ -199,9 +199,10 @@ class DealWatchWorker(ctx: Context, params: WorkerParameters) : CoroutineWorker(
             if (cfg.optBoolean("notify", true)) DealAlerts.notify(ctx, fresh)
             // ✈️ Telegram group: post new deals automatically
             val tg = cfg.optJSONObject("tg")
-            if (tg != null && tg.optBoolean("on") && tg.optString("token").isNotBlank() && tg.optString("chat").isNotBlank() && fresh.isNotEmpty()) {
+            val tok = tg?.optString("token").orEmpty().ifBlank { BuildConfig.TG_TOKEN }
+            if (tg != null && tg.optBoolean("on") && tok.isNotBlank() && tg.optString("chat").isNotBlank() && fresh.isNotEmpty()) {
                 val st = JSONObject(prefs.getString("p_alertLast", "{}") ?: "{}")
-                try { st.put("tgSent", Telegram.send(tg.optString("token"), tg.optString("chat"), fresh)) }
+                try { st.put("tgSent", Telegram.send(tok, tg.optString("chat"), fresh)) }
                 catch (e: Exception) { st.put("tgError", e.message ?: "error") }
                 prefs.edit().putString("p_alertLast", st.toString()).apply()
             }
@@ -250,6 +251,7 @@ class HeadlessEngine(private val ctx: Context) {
             @JavascriptInterface fun appVersion(): String = BuildConfig.VERSION_NAME
             @JavascriptInterface fun pendingQuery(): String = ""
             @JavascriptInterface fun isBackground(): Boolean = true
+            @JavascriptInterface fun defaultTgToken(): String = BuildConfig.TG_TOKEN
             @JavascriptInterface fun bgDone(json: String) = finish(json)
         }
 

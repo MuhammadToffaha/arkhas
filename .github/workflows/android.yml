@@ -46,6 +46,8 @@ jobs:
           fi
 
       - name: Build APK
+        env:
+          ARKHAS_TG_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
         run: |
           set -o pipefail
           gradle --no-daemon assembleRelease 2>&1 | tee build.log || {

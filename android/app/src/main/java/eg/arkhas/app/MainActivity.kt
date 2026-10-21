@@ -145,6 +145,7 @@ class MainActivity : AppCompatActivity() {
         }
         @JavascriptInterface fun testAlerts() = DealAlerts.runNow(this@MainActivity)
         @JavascriptInterface fun canNotify(): Boolean = DealAlerts.canNotify(this@MainActivity)
+        @JavascriptInterface fun defaultTgToken(): String = BuildConfig.TG_TOKEN
 
         // ---- in-app update (Settings → Updates). Answers via window.__native(id, ok, text) like fetch. ----
         private fun answer(id: Int, ok: Boolean, text: String) =
