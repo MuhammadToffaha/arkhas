@@ -196,12 +196,12 @@ class HeadlessEngine(private val ctx: Context) {
         }
 
         class BgBridge {
-            private fun answer(id: Int, ok: Boolean, text: String) = main.post {
-                if (!done.get()) web.evaluateJavascript("window.__native($id,$ok,${JSONObject.quote(text)})", null)
+            private fun answer(id: Int, ok: Boolean, text: String) {
+                main.post { if (!done.get()) web.evaluateJavascript("window.__native($id,$ok,${JSONObject.quote(text)})", null) }
             }
             @JavascriptInterface fun fetch(id: Int, url: String, opts: String) {
                 val o = runCatching { JSONObject(opts) }.getOrDefault(JSONObject())
-                if (!url.startsWith("https://") && !url.startsWith("http://")) return answer(id, false, "bad url")
+                if (!url.startsWith("https://") && !url.startsWith("http://")) { answer(id, false, "bad url"); return }
                 if (o.optBoolean("render")) {
                     val wait = o.optString("wait").ifBlank { null }
                     main.post { renderer.render(url, wait) { ok, html -> answer(id, ok, html) } }
