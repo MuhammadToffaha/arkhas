@@ -19,6 +19,9 @@ function boot({ bg = false, prefs = {}, calls = [] } = {}) {
       fetch(id, url) {
         calls.push(["fetch", url]);
         const body = url.includes("jumia.com.eg/flash-sales") ? JUMIA : url.includes("egmega") ? NOONMEGA
+          : url.includes("/getMe") ? (url.includes("botBAD") ? null : JSON.stringify({ ok: true, result: { username: "arkhas_deals_bot" } }))
+          : url.includes("/deleteWebhook") ? JSON.stringify({ ok: true, result: true })
+          : url.includes("/getUpdates") && win.__tgEmpty ? JSON.stringify({ ok: true, result: [] })
           : url.includes("/getUpdates") ? JSON.stringify({ ok: true, result: [
               { update_id: 1, my_chat_member: { chat: { id: -1001234, title: "عروض العيلة", type: "supergroup" } } },
               { update_id: 2, message: { chat: { id: 55, type: "private" } } }] })
@@ -113,4 +116,35 @@ test("whatsapp: big button shares the shown deals, 📤 on a card shares one, wa
   doc.querySelector("#d_wa").click();
   const all = decodeURIComponent(href.split("text=")[1]);
   assert.match(all, /^🔥 .*\n\n1\) /s, "numbered list of deals");
+});
+
+test("telegram one-tap: '➕ add bot' opens Telegram's add-to-group screen, waits, picks the new group, sends hello", async () => {
+  const calls = [];
+  const { win, doc, prefs } = boot({ calls });
+  await win.arkhasReady;
+  let opened = null; win.__openExt = (u) => { opened = u; };
+  win.__tgEmpty = true;                       // group not added yet
+  doc.querySelector("#gear").click();
+  const on = doc.querySelector("#al_on"); on.checked = true; on.dispatchEvent(new win.Event("change"));
+  const tg = doc.querySelector("#tg_on"); tg.checked = true; tg.dispatchEvent(new win.Event("change"));
+  doc.querySelector("#tg_token").value = "123:ABC";
+  doc.querySelector("#tg_add").click();
+  await until(() => opened);
+  assert.equal(opened, "https://t.me/arkhas_deals_bot?startgroup=arkhas&admin=post_messages");
+  assert.match(doc.querySelector("#tg_bot").textContent, /@arkhas_deals_bot/);
+  win.__tgEmpty = false;                      // user picked the group in Telegram
+  await until(() => JSON.parse(prefs.alerts).tg.chat === "-1001234", 8000);
+  await until(() => calls.some((c) => c[0] === "fetch" && c[1].includes("/sendMessage")), 4000);
+  assert.equal(JSON.parse(prefs.alerts).tg.title, "عروض العيلة");
+});
+
+test("telegram: wrong token is reported clearly", async () => {
+  const { win, doc } = boot();
+  await win.arkhasReady;
+  doc.querySelector("#gear").click();
+  const on = doc.querySelector("#al_on"); on.checked = true; on.dispatchEvent(new win.Event("change"));
+  const tg = doc.querySelector("#tg_on"); tg.checked = true; tg.dispatchEvent(new win.Event("change"));
+  doc.querySelector("#tg_token").value = "BAD";
+  doc.querySelector("#tg_find").click();
+  await until(() => /Token|token/.test(doc.querySelector("#tg_msg").textContent));
 });

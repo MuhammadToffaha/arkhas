@@ -220,7 +220,8 @@ table{border-collapse:collapse;width:100%;font-size:12.5px}td{padding:4px;border
       <div id="tg_box" hidden>
         <ol class="muted tg-steps" id="tg_steps"></ol>
         <input id="tg_token" placeholder="123456789:AA…  (bot token)" autocomplete="off" spellcheck="false" dir="ltr">
-        <div class="upd-b"><button class="ib2" id="tg_find"></button></div>
+        <div class="muted" id="tg_bot"></div>
+        <div class="upd-b"><button class="go" id="tg_add"></button><button class="ib2" id="tg_find"></button></div>
         <div id="tg_chats"></div>
         <input id="tg_chat" placeholder="chat id  (-100…)" autocomplete="off" dir="ltr">
         <div class="upd-b"><button class="ib2" id="tg_test"></button></div>
@@ -269,8 +270,10 @@ const T = {
     alMin: "أقل خصم", alStores: "المتاجر", alMega: "🟡 ميجا ديلز نون كمان", alEvery: "افحص كل", alHours: "{h} ساعة", alTest: "🔍 افحص دلوقتي",
     alTesting: "جاري الفحص في الخلفية… هيوصلك إشعار لو فيه جديد", alLast: "آخر فحص {t}: {f} عرض، {n} جديد", alErr: "آخر فحص {t}: فشل ({e})",
     alNever: "لسه مفيش فحص", alTo: "ابعت العروض الجديدة على", alNotify: "🔔 إشعار على الموبايل", tgOn: "✈️ جروب تليجرام (تلقائي بالكامل)",
-    tgSteps: ["في تليجرام افتح @BotFather واكتب /newbot — هيديك Token", "ضيف البوت لجروبك (Add member) وخليه أدمن", "الصق الـ Token هنا واضغط «دوّر على جروبي»"],
-    tgFind: "🔎 دوّر على جروبي", tgTest: "✉️ ابعت رسالة تجربة", tgNoChats: "مش لاقي جروبات — ابعت أي رسالة في الجروب بعد إضافة البوت وحاول تاني",
+    tgSteps: ["في تليجرام افتح @BotFather واكتب /newbot — هيديك Token", "الصق الـ Token هنا", "اضغط «➕ ضيف البوت لجروبي» واختار الجروب — التطبيق هيلاقيه لوحده"],
+    tgAdd: "➕ ضيف البوت لجروبي", tgWaiting: "⏳ مستني… اختار الجروب في تليجرام وارجع هنا (أو اكتب /arkhas في الجروب)", tgBot: "🤖 البوت: @{u}",
+    tgBadTok: "⚠️ الـ Token غلط — انسخه تاني من @BotFather", tgTimeout: "لسه مش لاقي الجروب — اكتب /arkhas في الجروب واضغط «دوّر على جروبي»",
+    tgFind: "🔎 دوّر على جروبي", tgTest: "✉️ ابعت رسالة تجربة", tgNoChats: "مش لاقي الجروب — اكتب /arkhas في الجروب (البوت مش بيشوف الرسايل العادية) وحاول تاني",
     tgPicked: "✓ هيبعت لـ «{t}»", tgOk: "✓ الرسالة وصلت للجروب", tgErr: "⚠️ تليجرام: {e}", tgTestText: "✅ أرخص متوصل — العروض الكبيرة هتوصل هنا تلقائي",
     tgSent: " · تليجرام: {n} اتبعت", tgFail: " · تليجرام فشل: {e}", alNever: "لسه مفيش فحص", alPerm: "⚠️ اسمح بالإشعارات للتطبيق من إعدادات الموبايل", navFav: "المفضلة", favTitle: "المفضلة", favSub: "{n} منتج محفوظ — السعر وقت الحفظ", favEmpty: "اضغط ♥ على أي منتج عشان يتحفظ هنا", savedOn: "اتحفظ {d}", favAdded: "اتضاف للمفضلة ❤️", favRemoved: "اتشال من المفضلة", refresh: "تحديث", waBtn: "واتساب", waHead: "🔥 عروض أرخص — {d}", waInstead: "بدل", waMore: "📲 من تطبيق أرخص", refresh: "تحديث", ddAll: "كل المتاجر", ddSome: "{n} متاجر مختارة", ddOne: "{s}", selAll: "تحديد الكل", selNone: "إلغاء الكل", navDeals: "عروض", dealsTitle: "عروض فلاش", dealsSub: "أكبر الخصومات من أشهر {n} مواقع في مصر — اتحدّثت {t}", dealsLoading: "جاري جلب العروض من {done}/{all} موقع…", dealsNone: "مفيش عروض دلوقتي — اضغط ↻", sortPct: "أكبر خصم", sortPrice: "الأرخص", sortSave: "أكبر توفير", allStores: "الكل", justNow: "الآن", minAgo: "من {m} دقيقة", banner: "🎉 نسخة جديدة {v} — اضغط للتحديث", openRel: "⬇️ تنزيل {v} من GitHub", relNote: "هتتفتح صفحة التنزيل — نزّل الملف وافتحه للتثبيت. بعد كده التحديث هيكون من جوه التطبيق", upd: "🔄 التحديثات", cur: "نسختك {v}", check: "تحقق من التحديث", checking: "جاري التحقق…", latest: "عندك أحدث نسخة ✓",
     newVer: "نسخة جديدة {v} متاحة ({mb} ميجا)", install: "⬇️ تنزيل وتثبيت {v}", downloading: "جاري التنزيل… {p}%", installing: "افتح شاشة التثبيت واضغط تثبيت",
@@ -284,8 +287,10 @@ const T = {
     alMin: "Minimum discount", alStores: "Stores", alMega: "🟡 Noon Mega Deals too", alEvery: "Check every", alHours: "{h} h", alTest: "🔍 Check now",
     alTesting: "Checking in the background… you'll get a notification if there's something new", alLast: "Last check {t}: {f} deals, {n} new", alErr: "Last check {t}: failed ({e})",
     alNever: "No check yet", alTo: "Send new deals to", alNotify: "🔔 Phone notification", tgOn: "✈️ Telegram group (fully automatic)",
-    tgSteps: ["In Telegram open @BotFather, send /newbot — you get a token", "Add the bot to your group and make it admin", "Paste the token here and tap “Find my group”"],
-    tgFind: "🔎 Find my group", tgTest: "✉️ Send test message", tgNoChats: "No groups found — send any message in the group after adding the bot, then try again",
+    tgSteps: ["In Telegram open @BotFather, send /newbot — you get a token", "Paste the token here", "Tap “➕ Add bot to my group” and pick the group — the app finds it by itself"],
+    tgAdd: "➕ Add bot to my group", tgWaiting: "⏳ Waiting… pick the group in Telegram and come back (or send /arkhas in the group)", tgBot: "🤖 Bot: @{u}",
+    tgBadTok: "⚠️ Token is wrong — copy it again from @BotFather", tgTimeout: "Group not found yet — send /arkhas in the group, then tap “Find my group”",
+    tgFind: "🔎 Find my group", tgTest: "✉️ Send test message", tgNoChats: "Group not found — send /arkhas in the group (bots don't see normal messages) and try again",
     tgPicked: "✓ Will post to “{t}”", tgOk: "✓ Message arrived in the group", tgErr: "⚠️ Telegram: {e}", tgTestText: "✅ Arkhas connected — big deals will be posted here automatically",
     tgSent: " · Telegram: {n} sent", tgFail: " · Telegram failed: {e}", alNever: "No check yet", alPerm: "⚠️ Allow notifications for the app in phone settings", navFav: "Favourites", favTitle: "Favourites", favSub: "{n} saved items — price when saved", favEmpty: "Tap ♥ on any product to save it here", savedOn: "saved {d}", favAdded: "Added to favourites ❤️", favRemoved: "Removed from favourites", refresh: "Refresh", waBtn: "WhatsApp", waHead: "🔥 Arkhas deals — {d}", waInstead: "was", waMore: "📲 via Arkhas app", refresh: "Refresh", ddAll: "All stores", ddSome: "{n} stores selected", ddOne: "{s}", selAll: "Select all", selNone: "Clear all", navDeals: "Deals", dealsTitle: "Flash deals", dealsSub: "Biggest discounts from {n} top Egyptian sites — updated {t}", dealsLoading: "Fetching deals from {done}/{all} sites…", dealsNone: "No deals right now — tap ↻", sortPct: "Biggest % off", sortPrice: "Cheapest", sortSave: "Most saved", allStores: "All", justNow: "just now", minAgo: "{m} min ago", banner: "🎉 New version {v} — tap to update", openRel: "⬇️ Download {v} from GitHub", relNote: "The download page opens — download the file and open it to install. After this, updates happen inside the app", upd: "🔄 Updates", cur: "You have {v}", check: "Check for update", checking: "Checking…", latest: "You have the latest version ✓",
     newVer: "New version {v} available ({mb} MB)", install: "⬇️ Download & install {v}", downloading: "Downloading… {p}%", installing: "Tap Install on the Android screen",
@@ -612,7 +617,7 @@ function renderAl() {
   $("#al_to_l").textContent = t.alTo; $("#al_notify_l").textContent = t.alNotify; $("#al_notify").checked = c.notify;
   $("#tg_on_l").textContent = t.tgOn; $("#tg_on").checked = c.tg.on; $("#tg_box").hidden = !c.tg.on;
   $("#tg_steps").innerHTML = t.tgSteps.map((x) => `<li>${esc(x)}</li>`).join("");
-  $("#tg_find").textContent = t.tgFind; $("#tg_test").textContent = t.tgTest;
+  $("#tg_find").textContent = t.tgFind; $("#tg_test").textContent = t.tgTest; $("#tg_add").textContent = t.tgAdd;
   if (document.activeElement !== $("#tg_token")) $("#tg_token").value = c.tg.token;
   if (document.activeElement !== $("#tg_chat")) $("#tg_chat").value = c.tg.chat;
   if (c.tg.chat && !$("#tg_msg").dataset.busy) $("#tg_msg").textContent = fmt(t.tgPicked, { t: c.tg.title || c.tg.chat });
@@ -645,19 +650,60 @@ if (canAlert) {
     return d.result;
   };
   const tgMsg = (x) => { $("#tg_msg").textContent = x; $("#tg_msg").dataset.busy = "1"; };
-  $("#tg_find").onclick = async () => {
+  /** groups the bot has seen: added-to-group events, /commands, channel posts (deleteWebhook first: a webhook blocks getUpdates) */
+  const tgChats = async () => {
+    try { await tgApi("deleteWebhook"); } catch (_) {}
+    const ups = await tgApi("getUpdates", { limit: "100", allowed_updates: JSON.stringify(["message", "my_chat_member", "channel_post", "chat_member"]) });
+    const chats = new Map();
+    for (const u of ups) for (const x of [u.message, u.my_chat_member, u.channel_post, u.chat_member]) {
+      const ch = x && x.chat;
+      const left = x && x.new_chat_member && ["left", "kicked"].includes(x.new_chat_member.status);
+      if (ch && ch.type !== "private") { if (left) chats.delete(String(ch.id)); else chats.set(String(ch.id), ch.title || String(ch.id)); }
+      // group upgraded to supergroup -> new id
+      if (x && x.migrate_to_chat_id) { chats.delete(String(ch.id)); chats.set(String(x.migrate_to_chat_id), ch.title || String(x.migrate_to_chat_id)); }
+    }
+    return chats;
+  };
+  const tgCheckToken = async () => {
     const c = alCfg(); c.tg.token = $("#tg_token").value.trim(); saveAl(c);
+    try { const me = await tgApi("getMe"); $("#tg_bot").textContent = fmt(T[L].tgBot, { u: me.username }); return me; }
+    catch (e) { $("#tg_bot").textContent = ""; tgMsg(T[L].tgBadTok); return null; }
+  };
+  const showChats = (chats) => {
+    $("#tg_chats").innerHTML = [...chats].map(([id, title]) => `<button class="ib2" data-id="${esc(id)}" data-t="${esc(title)}">👥 ${esc(title)}</button>`).join("");
+  };
+  $("#tg_find").onclick = async () => {
     $("#tg_chats").innerHTML = ""; tgMsg("…");
-    try {
-      const ups = await tgApi("getUpdates", { allowed_updates: JSON.stringify(["message", "my_chat_member", "channel_post"]) });
-      const chats = new Map();
-      for (const u of ups) for (const x of [u.message, u.my_chat_member, u.channel_post]) {
-        const ch = x && x.chat; if (ch && ch.type !== "private") chats.set(String(ch.id), ch.title || String(ch.id));
-      }
-      if (!chats.size) return tgMsg(T[L].tgNoChats);
-      tgMsg("");
-      $("#tg_chats").innerHTML = [...chats].map(([id, title]) => `<button class="ib2" data-id="${esc(id)}" data-t="${esc(title)}">👥 ${esc(title)}</button>`).join("");
-    } catch (e) { tgMsg(fmt(T[L].tgErr, { e: e.message })); }
+    if (!(await tgCheckToken())) return;
+    try { const chats = await tgChats(); if (!chats.size) return tgMsg(T[L].tgNoChats); tgMsg(""); showChats(chats); }
+    catch (e) { tgMsg(fmt(T[L].tgErr, { e: e.message })); }
+  };
+  let tgPoll = null;
+  $("#tg_add").onclick = async () => {
+    $("#tg_chats").innerHTML = "";
+    const me = await tgCheckToken(); if (!me) return;
+    const before = new Set((await tgChats().catch(() => new Map())).keys());
+    // Telegram's own "add this bot to a group" screen; admin rights let it post
+    const link = `https://t.me/${me.username}?startgroup=arkhas&admin=post_messages`;
+    if (window.__openExt) window.__openExt(link); else location.href = link;
+    tgMsg(T[L].tgWaiting);
+    clearInterval(tgPoll);
+    let tries = 0;
+    tgPoll = setInterval(async () => {
+      tries++;
+      try {
+        const chats = await tgChats();
+        const fresh = [...chats].filter(([id]) => !before.has(id));
+        const pick = fresh.length === 1 ? fresh[0] : null;
+        if (pick) {
+          clearInterval(tgPoll);
+          const c = alCfg(); c.tg.chat = pick[0]; c.tg.title = pick[1]; c.tg.on = true; saveAl(c);
+          delete $("#tg_msg").dataset.busy; renderAl();
+          $("#tg_test").click();            // say hello in the group right away
+        } else if (fresh.length > 1 || (tries > 3 && chats.size)) { clearInterval(tgPoll); tgMsg(""); showChats(fresh.length ? new Map(fresh) : chats); }
+      } catch (_) {}
+      if (tries >= 40) { clearInterval(tgPoll); tgMsg(T[L].tgTimeout); }
+    }, 3000);
   };
   $("#tg_chats").onclick = (e) => {
     const b = e.target.closest("button"); if (!b) return;
