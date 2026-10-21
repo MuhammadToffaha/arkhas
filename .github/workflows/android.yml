@@ -50,7 +50,8 @@ jobs:
           set -o pipefail
           gradle --no-daemon assembleRelease 2>&1 | tee build.log || {
             # surface the real errors as annotations (visible in the run summary)
-            grep -E "^e: |error:|What went wrong|Could not|> " build.log | head -20 | while IFS= read -r l; do echo "::error::$l"; done
+            { grep -E "^e: |^w: .*error|error:|Unresolved reference|Could not (resolve|find)" build.log; grep -A6 "What went wrong" build.log; } \
+              | grep -v "^> Task" | head -30 | while IFS= read -r l; do echo "::error::$l"; done
             exit 1
           }
 
