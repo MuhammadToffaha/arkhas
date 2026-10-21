@@ -10,6 +10,15 @@ import java.net.URLEncoder
  * Config lives in the alerts settings: alerts.tg = {on, token, chat}.
  */
 object Telegram {
+    /** The "Arkhas😄" group (bot is admin there). Used unless the user explicitly picked their private chat. */
+    const val DEFAULT_GROUP = "-1004425380003"
+
+    /** Group/channel ids are negative; a positive id is a private chat with the bot. */
+    fun destination(tg: org.json.JSONObject): String {
+        val chat = tg.optString("chat").trim()
+        return if (chat.isBlank() || (!chat.startsWith("-") && !tg.optBoolean("private"))) DEFAULT_GROUP else chat
+    }
+
     private fun esc(s: String) = s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
     private fun money(v: Double) = "%,d ج.م".format(Math.round(v))
 

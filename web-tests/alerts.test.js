@@ -57,7 +57,7 @@ test("settings: alerts switch, min %, stores, frequency -> Native.setAlerts", as
   doc.querySelector('#al_h button[data-h="6"]').click();
   const last = calls.filter((c) => c[0] === "setAlerts").at(-1)[1];
   assert.deepEqual(last, { on: true, min: 70, stores: ["Amazon.eg", "Noon"], mega: true, hours: 6, notify: true,
-    tg: { on: false, token: "", chat: "", title: "" } });
+    tg: { on: false, token: "", chat: "-1004425380003", title: "Arkhas😄" } });
   assert.deepEqual(JSON.parse(prefs.alerts), last);
   doc.querySelector("#al_test").click();
   assert.ok(calls.some((c) => c[0] === "test"));
@@ -103,7 +103,7 @@ test("telegram setup: token -> find group -> pick -> test message", async () => 
   assert.match(doc.querySelector("#tg_chats").textContent, /📩/, "private chat offered too");
   doc.querySelector("#tg_chats button").click();
   const cfg = JSON.parse(prefs.alerts);
-  assert.deepEqual(cfg.tg, { on: true, token: "123:ABC", chat: "-1001234", title: "عروض العيلة" });
+  assert.deepEqual(cfg.tg, { on: true, token: "123:ABC", chat: "-1001234", title: "عروض العيلة", private: false });
   doc.querySelector("#tg_test").click();
   await until(() => /✓/.test(doc.querySelector("#tg_msg").textContent));
   const sent = calls.find((c) => c[0] === "fetch" && c[1].includes("/sendMessage"))[1];
@@ -209,4 +209,14 @@ test("🔒 telegram settings hidden until passcode: set (twice), wrong code reje
   doc.querySelector("#sheet").dispatchEvent(new win.MouseEvent("click", { bubbles: true }));
   doc.querySelector("#gear").click();
   assert.equal(doc.querySelector("#tg_sec").hidden, true);
+});
+
+test("telegram destination: a saved private chat is moved to the Arkhas group on start", async () => {
+  const prefs = { alerts: JSON.stringify({ on: true, tg: { on: true, token: "x", chat: "254537723", title: "📩 Toffaha" } }) };
+  const calls = [];
+  const { win } = boot({ prefs, calls });
+  await win.arkhasReady;
+  const saved = calls.filter((c) => c[0] === "setAlerts").at(-1);
+  assert.ok(saved, "config re-saved for the background job");
+  assert.equal(saved[1].tg.chat, "-1004425380003");
 });

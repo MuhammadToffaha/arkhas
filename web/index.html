@@ -654,11 +654,14 @@ $("#tg_relock").onclick = (e) => { e.preventDefault(); tgUnlocked = false; rende
 
 // ---------- 🔔 deal alerts (needs app with Native.setAlerts) ----------
 const canAlert = !!(N && N.setAlerts);
+const TG_GROUP = { id: "-1004425380003", title: "Arkhas😄" };
 const AL_STORES = ["Amazon.eg", "Noon", "Jumia"];
 const alCfg = () => { let c = {}; try { c = JSON.parse(pref("alerts", "{}")) || {}; } catch (_) {}
   const r = Object.assign({ on: false, min: 60, stores: AL_STORES.slice(), mega: true, hours: 3, notify: true }, c);
   r.tg = Object.assign({ on: false, token: "", chat: "", title: "" }, c.tg || {});
   if (!r.tg.token && N && N.defaultTgToken) r.tg.token = N.defaultTgToken() || "";   // built-in bot
+  // default destination = the Arkhas group; a private chat (positive id) only when picked on purpose
+  if (!r.tg.chat || (!String(r.tg.chat).startsWith("-") && !r.tg.private)) { r.tg.chat = TG_GROUP.id; r.tg.title = TG_GROUP.title; }
   return r; };
 function saveAl(c) { setPref("alerts", JSON.stringify(c)); if (canAlert) N.setAlerts(JSON.stringify(c)); renderAl(); }
 function renderAl() {
@@ -685,7 +688,7 @@ function renderAl() {
   if (builtIn) $("#tg_steps").innerHTML = t.tgStepsBuiltIn.map((x) => `<li>${esc(x)}</li>`).join("");
   if (document.activeElement !== $("#tg_token")) $("#tg_token").value = builtIn ? "" : c.tg.token;
   if (document.activeElement !== $("#tg_chat")) $("#tg_chat").value = c.tg.chat;
-  if (c.tg.chat && !$("#tg_msg").dataset.busy) $("#tg_msg").textContent = fmt(t.tgPicked, { t: c.tg.title || c.tg.chat });
+  if (c.tg.chat && !$("#tg_msg").dataset.busy) $("#tg_msg").textContent = fmt(t.tgPicked, { t: (String(c.tg.chat).startsWith("-") ? "👥 " : "📩 ") + (c.tg.title || c.tg.chat) });
   let last = null; try { last = JSON.parse(pref("alertLast", "null")); } catch (_) {}
   const when = last ? new Date(last.at).toLocaleString(L === "ar" ? "ar-EG" : "en-GB", { weekday: "short", hour: "2-digit", minute: "2-digit" }) : "";
   $("#al_last").textContent = (c.on && N.canNotify && !N.canNotify() ? t.alPerm + " · " : "") +
@@ -704,7 +707,7 @@ if (canAlert) {
   $("#al_notify").onchange = () => { const c = alCfg(); c.notify = $("#al_notify").checked; saveAl(c); };
   $("#tg_on").onchange = () => { const c = alCfg(); c.tg.on = $("#tg_on").checked; saveAl(c); };
   $("#tg_token").onchange = () => { const c = alCfg(); c.tg.token = $("#tg_token").value.trim(); saveAl(c); };
-  $("#tg_chat").onchange = () => { const c = alCfg(); c.tg.chat = $("#tg_chat").value.trim(); c.tg.title = ""; saveAl(c); };
+  $("#tg_chat").onchange = () => { const c = alCfg(); c.tg.chat = $("#tg_chat").value.trim(); c.tg.title = ""; c.tg.private = !c.tg.chat.startsWith("-"); saveAl(c); };
   const tgApi = async (method, params) => {
     const tok = alCfg().tg.token || $("#tg_token").value.trim() || (N && N.defaultTgToken ? N.defaultTgToken() : "");
     const qs = new URLSearchParams(params || {}).toString();
@@ -736,7 +739,7 @@ if (canAlert) {
     catch (e) { $("#tg_bot").textContent = ""; tgMsg(T[L].tgBadTok); return null; }
   };
   const showChats = (chats) => {
-    $("#tg_chats").innerHTML = [...chats].map(([id, title]) => `<button class="ib2" data-id="${esc(id)}" data-t="${esc(title)}">👥 ${esc(title)}</button>`).join("");
+    $("#tg_chats").innerHTML = [...chats].sort((a, b) => (a[0].startsWith("-") ? 0 : 1) - (b[0].startsWith("-") ? 0 : 1)).map(([id, title]) => `<button class="ib2" data-id="${esc(id)}" data-t="${esc(title)}">👥 ${esc(title)}</button>`).join("");
   };
   $("#tg_find").onclick = async () => {
     $("#tg_chats").innerHTML = ""; tgMsg("…");
@@ -763,7 +766,7 @@ if (canAlert) {
         const pick = fresh.length === 1 ? fresh[0] : null;
         if (pick) {
           clearInterval(tgPoll);
-          const c = alCfg(); c.tg.chat = pick[0]; c.tg.title = pick[1]; c.tg.on = true; saveAl(c);
+          const c = alCfg(); c.tg.chat = pick[0]; c.tg.title = pick[1]; c.tg.private = false; c.tg.on = true; saveAl(c);
           delete $("#tg_msg").dataset.busy; renderAl();
           $("#tg_test").click();            // say hello in the group right away
         } else if (fresh.length > 1 || (tries > 3 && chats.size)) { clearInterval(tgPoll); tgMsg(""); showChats(fresh.length ? new Map(fresh) : chats); }
@@ -773,7 +776,7 @@ if (canAlert) {
   };
   $("#tg_chats").onclick = (e) => {
     const b = e.target.closest("button"); if (!b) return;
-    const c = alCfg(); c.tg.chat = b.dataset.id; c.tg.title = b.dataset.t; saveAl(c);
+    const c = alCfg(); c.tg.chat = b.dataset.id; c.tg.title = b.dataset.t; c.tg.private = !b.dataset.id.startsWith("-"); saveAl(c);
     $("#tg_chats").innerHTML = ""; delete $("#tg_msg").dataset.busy; renderAl();
   };
   $("#tg_test").onclick = async () => {
@@ -878,6 +881,8 @@ window.arkhasReady = (async () => {
   if (N && N.pendingView && N.pendingView() === "deals") { window.arkhasOpen("deals"); return; }
   if (q) run(q); else $("#q").focus();
   syncFavCount();
+  if (canAlert) { try { const raw = JSON.parse(pref("alerts", "{}") || "{}"); const c = alCfg();
+    if (raw.tg && raw.tg.chat !== c.tg.chat) saveAl(c); } catch (_) {} }
   checkUpd(false);   // quiet check (cached 6 h) -> red dot on ⚙️ when a new version exists
 })();
 </script>

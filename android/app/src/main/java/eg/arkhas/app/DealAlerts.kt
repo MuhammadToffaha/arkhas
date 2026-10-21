@@ -243,7 +243,7 @@ class DealWatchWorker(ctx: Context, params: WorkerParameters) : CoroutineWorker(
             // ✈️ Telegram: only items never posted to this group before; marked as posted only after Telegram accepts them
             val tg = cfg.optJSONObject("tg")
             val tok = tg?.optString("token").orEmpty().ifBlank { BuildConfig.TG_TOKEN }
-            val chat = tg?.optString("chat").orEmpty()
+            val chat = if (tg != null) Telegram.destination(tg) else ""
             if (tg != null && tg.optBoolean("on") && tok.isNotBlank() && chat.isNotBlank()) {
                 val tgLog = SentLog(prefs, "tgSent:$chat", days = 90)
                 val todo = batch.filter { !tgLog.has(it) }
