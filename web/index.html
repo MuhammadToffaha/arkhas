@@ -96,6 +96,15 @@ input:focus{outline:none;border-color:var(--accent)}
 .dc .p{font-size:16px;margin-top:4px}
 .dc .src{margin-top:2px}
 .newver{display:block;width:100%;margin:10px 0 4px;padding:11px 14px;border:0;border-radius:12px;background:var(--accent);color:var(--accent-ink);font:inherit;font-weight:700;font-size:15px;text-align:start}
+.sw{position:relative;display:inline-block;width:46px;height:26px;flex:none}
+.sw input{opacity:0;width:0;height:0}
+.sw i{position:absolute;inset:0;border-radius:13px;background:var(--line);transition:.2s}
+.sw i:before{content:"";position:absolute;width:20px;height:20px;top:3px;inset-inline-start:3px;border-radius:50%;background:#fff;transition:.2s;box-shadow:0 1px 3px #0003}
+.sw input:checked+i{background:var(--accent)}
+.sw input:checked+i:before{transform:translateX(20px)}
+[dir=rtl] .sw input:checked+i:before{transform:translateX(-20px)}
+.al-l{font-size:13px;font-weight:600;margin-top:10px}
+#al_min button.on,#al_st button.on,#al_h button.on{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
 .seg{display:flex;gap:0;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--card)}
 .seg button{flex:1;font:inherit;font-size:15px;padding:10px;border:0;background:none;color:var(--ink)}
 .seg button.on{background:var(--accent);color:var(--accent-ink);font-weight:700}
@@ -188,6 +197,19 @@ table{border-collapse:collapse;width:100%;font-size:12.5px}td{padding:4px;border
       <button class="ib2" id="u_web"></button>
     </div>
   </div>
+  <div class="upd" id="al" hidden>
+    <div class="upd-h"><b id="al_title"></b>
+      <label class="sw"><input type="checkbox" id="al_on"><i></i></label></div>
+    <div class="muted" id="al_desc"></div>
+    <div id="al_body">
+      <div class="al-l" id="al_min_l"></div><div class="chips" id="al_min"></div>
+      <div class="al-l" id="al_st_l"></div><div class="chips" id="al_st"></div>
+      <label class="dd-row"><input type="checkbox" id="al_mega"> <span id="al_mega_l"></span></label>
+      <div class="al-l" id="al_h_l"></div><div class="chips" id="al_h"></div>
+      <div class="upd-b"><button class="ib2" id="al_test"></button></div>
+      <div class="muted" id="al_last"></div>
+    </div>
+  </div>
   <label id="s_lang"></label>
   <div class="seg" id="langseg"><button id="lang_ar" data-l="ar">عربي</button><button id="lang_en" data-l="en">English</button></div>
   <label for="serp">SerpAPI key</label>
@@ -223,7 +245,10 @@ const readConfig = async (name) => (N ? N.readConfig(name) : (await fetch(name))
 const T = {
   ar: { tag: "أرخص سعر في مصر", go: "ابحث", ph: "اكتب المنتج… مثال: ايفون 15 برو", hint: "نبحث في المتاجر المصرية بالعربي والإنجليزي ونجيب لك أرخص 3",
     top: "🏆 أرخص 3 أسعار", all: "كل العروض ({n})", fb: "📘 فيسبوك والمستعمل", searched: "بحثنا عن:", none: "مفيش نتائج مطابقة لسه…",
-    noneDone: "مفيش نتائج مطابقة. جرّب اسم أدق.", src: "حالة المتاجر", langLbl: "🌐 اللغة", storesHint: "آخر بحث: عدد النتائج من كل متجر", navSearch: "بحث", navStatus: "المتاجر", navGear: "الإعدادات", acc: "إكسسوار؟", cheap: "سعر مريب", rMega: "🟡 ميجا ديلز نون", mega: "ميجا", rAll: "كل الخصومات", r30: "30%+", r5070: "🔥 50–70%", r70: "70%+", rNone: "مفيش عروض في النطاق ده — جرّب نطاق تاني", navFav: "المفضلة", favTitle: "المفضلة", favSub: "{n} منتج محفوظ — السعر وقت الحفظ", favEmpty: "اضغط ♥ على أي منتج عشان يتحفظ هنا", savedOn: "اتحفظ {d}", favAdded: "اتضاف للمفضلة ❤️", favRemoved: "اتشال من المفضلة", refresh: "تحديث", ddAll: "كل المتاجر", ddSome: "{n} متاجر مختارة", ddOne: "{s}", selAll: "تحديد الكل", selNone: "إلغاء الكل", navDeals: "عروض", dealsTitle: "عروض فلاش", dealsSub: "أكبر الخصومات من أشهر {n} مواقع في مصر — اتحدّثت {t}", dealsLoading: "جاري جلب العروض من {done}/{all} موقع…", dealsNone: "مفيش عروض دلوقتي — اضغط ↻", sortPct: "أكبر خصم", sortPrice: "الأرخص", sortSave: "أكبر توفير", allStores: "الكل", justNow: "الآن", minAgo: "من {m} دقيقة", banner: "🎉 نسخة جديدة {v} — اضغط للتحديث", openRel: "⬇️ تنزيل {v} من GitHub", relNote: "هتتفتح صفحة التنزيل — نزّل الملف وافتحه للتثبيت. بعد كده التحديث هيكون من جوه التطبيق", upd: "🔄 التحديثات", cur: "نسختك {v}", check: "تحقق من التحديث", checking: "جاري التحقق…", latest: "عندك أحدث نسخة ✓",
+    noneDone: "مفيش نتائج مطابقة. جرّب اسم أدق.", src: "حالة المتاجر", langLbl: "🌐 اللغة", storesHint: "آخر بحث: عدد النتائج من كل متجر", navSearch: "بحث", navStatus: "المتاجر", navGear: "الإعدادات", acc: "إكسسوار؟", cheap: "سعر مريب", rMega: "🟡 ميجا ديلز نون", mega: "ميجا", rAll: "كل الخصومات", r30: "30%+", r5070: "🔥 50–70%", r70: "70%+", rNone: "مفيش عروض في النطاق ده — جرّب نطاق تاني", alTitle: "🔔 تنبيهات الخصومات الكبيرة", alDesc: "إشعار على الموبايل لما يظهر خصم كبير جديد — حتى والتطبيق مقفول",
+    alMin: "أقل خصم", alStores: "المتاجر", alMega: "🟡 ميجا ديلز نون كمان", alEvery: "افحص كل", alHours: "{h} ساعة", alTest: "🔍 افحص دلوقتي",
+    alTesting: "جاري الفحص في الخلفية… هيوصلك إشعار لو فيه جديد", alLast: "آخر فحص {t}: {f} عرض، {n} جديد", alErr: "آخر فحص {t}: فشل ({e})",
+    alNever: "لسه مفيش فحص", alPerm: "⚠️ اسمح بالإشعارات للتطبيق من إعدادات الموبايل", navFav: "المفضلة", favTitle: "المفضلة", favSub: "{n} منتج محفوظ — السعر وقت الحفظ", favEmpty: "اضغط ♥ على أي منتج عشان يتحفظ هنا", savedOn: "اتحفظ {d}", favAdded: "اتضاف للمفضلة ❤️", favRemoved: "اتشال من المفضلة", refresh: "تحديث", ddAll: "كل المتاجر", ddSome: "{n} متاجر مختارة", ddOne: "{s}", selAll: "تحديد الكل", selNone: "إلغاء الكل", navDeals: "عروض", dealsTitle: "عروض فلاش", dealsSub: "أكبر الخصومات من أشهر {n} مواقع في مصر — اتحدّثت {t}", dealsLoading: "جاري جلب العروض من {done}/{all} موقع…", dealsNone: "مفيش عروض دلوقتي — اضغط ↻", sortPct: "أكبر خصم", sortPrice: "الأرخص", sortSave: "أكبر توفير", allStores: "الكل", justNow: "الآن", minAgo: "من {m} دقيقة", banner: "🎉 نسخة جديدة {v} — اضغط للتحديث", openRel: "⬇️ تنزيل {v} من GitHub", relNote: "هتتفتح صفحة التنزيل — نزّل الملف وافتحه للتثبيت. بعد كده التحديث هيكون من جوه التطبيق", upd: "🔄 التحديثات", cur: "نسختك {v}", check: "تحقق من التحديث", checking: "جاري التحقق…", latest: "عندك أحدث نسخة ✓",
     newVer: "نسخة جديدة {v} متاحة ({mb} ميجا)", install: "⬇️ تنزيل وتثبيت {v}", downloading: "جاري التنزيل… {p}%", installing: "افتح شاشة التثبيت واضغط تثبيت",
     perm: "اسمح لـ أرخص بتثبيت التحديثات (فتحنا لك الإعداد) ثم ارجع واضغط تثبيت تاني", webBtn: "تحديث قائمة المتاجر", webSame: "قائمة المتاجر محدّثة ✓",
     webChanged: "تم تحديث المتاجر — جاري إعادة التحميل…", updErr: "تعذّر: {e}", exact: "✓ مطابق", similar: "≈ مشابه", other: "موديل مختلف", fewExact: "لقينا {n} بس مطابقين تمامًا — الباقي مشابه", egp: "ج.م", save: "وفّر {n}",
@@ -231,7 +256,10 @@ const T = {
     city: "مدينة فيسبوك ماركت بليس", stores: "المتاجر", saveBtn: "حفظ", ver: "نسخة", hidden: "تم إخفاء {n} نتيجة غير مطابقة" },
   en: { tag: "Best price in Egypt", go: "Search", ph: "Product… e.g. iphone 15 pro", hint: "Searching Egyptian stores in Arabic & English — top 3 cheapest",
     top: "🏆 Top 3 prices", all: "All offers ({n})", fb: "📘 Facebook & used", searched: "Searched:", none: "No matches yet…",
-    noneDone: "No matching results. Try a more specific name.", src: "Store status", langLbl: "🌐 Language", storesHint: "Last search: results per store", navSearch: "Search", navStatus: "Stores", navGear: "Settings", acc: "accessory?", cheap: "suspicious price", rMega: "🟡 Noon Mega Deals", mega: "MEGA", rAll: "All discounts", r30: "30%+", r5070: "🔥 50–70%", r70: "70%+", rNone: "No deals in this range — try another one", navFav: "Favourites", favTitle: "Favourites", favSub: "{n} saved items — price when saved", favEmpty: "Tap ♥ on any product to save it here", savedOn: "saved {d}", favAdded: "Added to favourites ❤️", favRemoved: "Removed from favourites", refresh: "Refresh", ddAll: "All stores", ddSome: "{n} stores selected", ddOne: "{s}", selAll: "Select all", selNone: "Clear all", navDeals: "Deals", dealsTitle: "Flash deals", dealsSub: "Biggest discounts from {n} top Egyptian sites — updated {t}", dealsLoading: "Fetching deals from {done}/{all} sites…", dealsNone: "No deals right now — tap ↻", sortPct: "Biggest % off", sortPrice: "Cheapest", sortSave: "Most saved", allStores: "All", justNow: "just now", minAgo: "{m} min ago", banner: "🎉 New version {v} — tap to update", openRel: "⬇️ Download {v} from GitHub", relNote: "The download page opens — download the file and open it to install. After this, updates happen inside the app", upd: "🔄 Updates", cur: "You have {v}", check: "Check for update", checking: "Checking…", latest: "You have the latest version ✓",
+    noneDone: "No matching results. Try a more specific name.", src: "Store status", langLbl: "🌐 Language", storesHint: "Last search: results per store", navSearch: "Search", navStatus: "Stores", navGear: "Settings", acc: "accessory?", cheap: "suspicious price", rMega: "🟡 Noon Mega Deals", mega: "MEGA", rAll: "All discounts", r30: "30%+", r5070: "🔥 50–70%", r70: "70%+", rNone: "No deals in this range — try another one", alTitle: "🔔 Big discount alerts", alDesc: "Phone notification when a new big discount appears — even with the app closed",
+    alMin: "Minimum discount", alStores: "Stores", alMega: "🟡 Noon Mega Deals too", alEvery: "Check every", alHours: "{h} h", alTest: "🔍 Check now",
+    alTesting: "Checking in the background… you'll get a notification if there's something new", alLast: "Last check {t}: {f} deals, {n} new", alErr: "Last check {t}: failed ({e})",
+    alNever: "No check yet", alPerm: "⚠️ Allow notifications for the app in phone settings", navFav: "Favourites", favTitle: "Favourites", favSub: "{n} saved items — price when saved", favEmpty: "Tap ♥ on any product to save it here", savedOn: "saved {d}", favAdded: "Added to favourites ❤️", favRemoved: "Removed from favourites", refresh: "Refresh", ddAll: "All stores", ddSome: "{n} stores selected", ddOne: "{s}", selAll: "Select all", selNone: "Clear all", navDeals: "Deals", dealsTitle: "Flash deals", dealsSub: "Biggest discounts from {n} top Egyptian sites — updated {t}", dealsLoading: "Fetching deals from {done}/{all} sites…", dealsNone: "No deals right now — tap ↻", sortPct: "Biggest % off", sortPrice: "Cheapest", sortSave: "Most saved", allStores: "All", justNow: "just now", minAgo: "{m} min ago", banner: "🎉 New version {v} — tap to update", openRel: "⬇️ Download {v} from GitHub", relNote: "The download page opens — download the file and open it to install. After this, updates happen inside the app", upd: "🔄 Updates", cur: "You have {v}", check: "Check for update", checking: "Checking…", latest: "You have the latest version ✓",
     newVer: "New version {v} available ({mb} MB)", install: "⬇️ Download & install {v}", downloading: "Downloading… {p}%", installing: "Tap Install on the Android screen",
     perm: "Allow Arkhas to install updates (settings opened), then come back and tap install again", webBtn: "Refresh store list", webSame: "Store list is up to date ✓",
     webChanged: "Stores updated — reloading…", updErr: "Failed: {e}", exact: "✓ exact", similar: "≈ similar", other: "other model", fewExact: "Only {n} exact match(es) — the rest are similar", egp: "EGP", save: "save {n}",
@@ -260,6 +288,7 @@ function applyLang() {
   $("#s_stores").textContent = t.stores; $("#s_save").textContent = t.saveBtn;
   $("#s_ver").textContent = t.ver + " " + (N && N.appVersion ? N.appVersion() : "web");
   if (typeof canUpdate !== "undefined" && (canUpdate || canLink)) showUpd();
+  if (typeof renderAl === "function" && $("#sheet").classList.contains("on")) renderAl();
   if (last) render(last, !busy);
 }
 $("#langseg").onclick = (e) => { const l = e.target.dataset && e.target.dataset.l; if (l && l !== L) { L = l; setPref("lang", L); applyLang(); if ($("#sheet").classList.contains("on")) $("#gear").click(); } };
@@ -343,6 +372,7 @@ $("#f").onsubmit = (e) => { e.preventDefault(); run($("#q").value); };
 
 // ---------- settings ----------
 $("#gear").onclick = () => {
+  renderAl();
   if (canUpdate || canLink) { showUpd(); checkUpd(false); }
   $("#serp").value = pref("serp"); $("#city").value = pref("city", "cairo");
   // store status from the last search sits next to each store
@@ -502,6 +532,54 @@ $("#d_stores").onchange = (e) => {
 $("#d_all").onclick = () => { getHide().clear(); saveHide(); renderDeals(); };
 $("#d_none").onclick = () => { for (const x of STORES) if (x.deals) getHide().add(x.name); saveHide(); renderDeals(); };
 
+// ---------- 🔔 deal alerts (needs app with Native.setAlerts) ----------
+const canAlert = !!(N && N.setAlerts);
+const AL_STORES = ["Amazon.eg", "Noon", "Jumia"];
+const alCfg = () => { let c = {}; try { c = JSON.parse(pref("alerts", "{}")) || {}; } catch (_) {}
+  return Object.assign({ on: false, min: 60, stores: AL_STORES.slice(), mega: true, hours: 3 }, c); };
+function saveAl(c) { setPref("alerts", JSON.stringify(c)); if (canAlert) N.setAlerts(JSON.stringify(c)); renderAl(); }
+function renderAl() {
+  if (!canAlert) return;
+  const t = T[L], c = alCfg();
+  $("#al").hidden = false;
+  $("#al_title").textContent = t.alTitle; $("#al_desc").textContent = t.alDesc;
+  $("#al_on").checked = c.on; $("#al_body").hidden = !c.on;
+  $("#al_min_l").textContent = t.alMin; $("#al_st_l").textContent = t.alStores; $("#al_h_l").textContent = t.alEvery;
+  $("#al_mega_l").textContent = t.alMega; $("#al_mega").checked = c.mega; $("#al_test").textContent = t.alTest;
+  $("#al_min").innerHTML = [40, 50, 60, 70, 80].map((m) => `<button data-m="${m}" class="${c.min === m ? "on" : ""}">${m}%+</button>`).join("");
+  $("#al_st").innerHTML = AL_STORES.map((n) => `<button data-s="${n}" class="${c.stores.includes(n) ? "on" : ""}">${n.replace(".eg", "")}</button>`).join("");
+  $("#al_h").innerHTML = [1, 3, 6, 12].map((h) => `<button data-h="${h}" class="${c.hours === h ? "on" : ""}">${fmt(t.alHours, { h })}</button>`).join("");
+  let last = null; try { last = JSON.parse(pref("alertLast", "null")); } catch (_) {}
+  const when = last ? new Date(last.at).toLocaleString(L === "ar" ? "ar-EG" : "en-GB", { weekday: "short", hour: "2-digit", minute: "2-digit" }) : "";
+  $("#al_last").textContent = (c.on && N.canNotify && !N.canNotify() ? t.alPerm + " · " : "") +
+    (!last ? t.alNever : last.error ? fmt(t.alErr, { t: when, e: last.error }) : fmt(t.alLast, { t: when, f: last.found || 0, n: last.new || 0 }));
+}
+if (canAlert) {
+  $("#al_on").onchange = () => { const c = alCfg(); c.on = $("#al_on").checked; saveAl(c); };
+  $("#al_mega").onchange = () => { const c = alCfg(); c.mega = $("#al_mega").checked; saveAl(c); };
+  $("#al_min").onclick = (e) => { const m = +((e.target.dataset || {}).m || 0); if (m) { const c = alCfg(); c.min = m; saveAl(c); } };
+  $("#al_h").onclick = (e) => { const h = +((e.target.dataset || {}).h || 0); if (h) { const c = alCfg(); c.hours = h; saveAl(c); } };
+  $("#al_st").onclick = (e) => { const n = (e.target.dataset || {}).s; if (!n) return; const c = alCfg();
+    c.stores = c.stores.includes(n) ? c.stores.filter((x) => x !== n) : c.stores.concat(n);
+    if (!c.stores.length) c.stores = [n]; saveAl(c); };
+  $("#al_test").onclick = () => { N.testAlerts(); $("#al_last").textContent = T[L].alTesting; };
+}
+
+/** Background mode: the phone runs this page invisibly every few hours to look for big new deals. */
+async function runBackgroundWatch() {
+  const c = alCfg();
+  let r = { deals: [], sources: [] };
+  try {
+    r = await Arkhas.deals({ stores: STORES.filter((s) => s.deals && c.stores.includes(s.name)), fetcher,
+      minPct: Math.min(c.min, 40), perStore: 60 });
+  } catch (e) { r.error = String(e && e.message || e); }
+  const pick = r.deals.filter((o) => o.pct >= c.min || (c.mega && o.tag === "mega"));
+  N.bgDone(JSON.stringify({ deals: pick.map((o) => ({ title: o.title, price: o.price, old_price: o.old_price || null, url: o.url,
+    image: o.image || null, source: o.source, pct: o.pct || 0, tag: o.tag || null })),
+    sources: r.sources.map((s) => ({ source: s.source, count: s.count, error: s.error })) }));
+}
+window.arkhasOpen = (v) => { if (v === "deals") { showView("deals"); loadDeals(false); } };
+
 // ---------- in-app update (needs app 1.0.6+; hidden on older apps) ----------
 const canUpdate = !!(N && N.checkUpdate && N.installUpdate);   // 1.0.6+: download + install inside the app
 const canLink = !!(N && N.appVersion) && !canUpdate;             // older apps: check GitHub, open download page
@@ -576,7 +654,9 @@ window.arkhasReady = (async () => {
     Arkhas.setSynonyms(JSON.parse(await readConfig("synonyms.json")));
     STORES = JSON.parse(await readConfig("stores.json"));
   } catch (e) { $("#out").innerHTML = `<div class="empty">⚠️ config: ${esc(e.message)}</div>`; }
+  if (N && N.isBackground && N.isBackground()) return runBackgroundWatch();   // invisible run from the alert job
   const q = new URLSearchParams(location.search).get("q") || (N && N.pendingQuery ? N.pendingQuery() : "");
+  if (N && N.pendingView && N.pendingView() === "deals") { window.arkhasOpen("deals"); return; }
   if (q) run(q); else $("#q").focus();
   syncFavCount();
   checkUpd(false);   // quiet check (cached 6 h) -> red dot on ⚙️ when a new version exists

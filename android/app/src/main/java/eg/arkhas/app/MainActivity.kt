@@ -2,7 +2,9 @@ package eg.arkhas.app
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.Manifest
 import android.content.Intent
+import android.os.Build
 import android.content.res.Configuration
 import android.os.Bundle
 import android.view.View
@@ -31,6 +33,7 @@ class MainActivity : AppCompatActivity() {
     private val renderers = mutableListOf<Renderer>()  // 3 hidden browsers -> JS stores load in parallel
     private val prefs by lazy { getSharedPreferences("arkhas", Context.MODE_PRIVATE) }
     @Volatile private var pendingQuery: String = ""
+    @Volatile private var openDeals = false
 
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -59,6 +62,8 @@ class MainActivity : AppCompatActivity() {
         })
 
         pendingQuery = sharedText(intent) ?: ""
+        openDeals = intent?.getBooleanExtra("openDeals", false) == true
+        DealAlerts.schedule(this)   // keep the background check alive after updates
         web.loadUrl(WebFiles.indexUrl(this))
 
         // newest UI / store rules from GitHub -> used from next start
@@ -87,6 +92,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
+        if (intent.getBooleanExtra("openDeals", false)) web.evaluateJavascript("window.arkhasOpen&&window.arkhasOpen('deals')", null)
         sharedText(intent)?.let { q -> web.evaluateJavascript("window.arkhasSearch(${JSONObject.quote(q)})", null) }
     }
 
@@ -124,6 +130,21 @@ class MainActivity : AppCompatActivity() {
         @JavascriptInterface fun readConfig(name: String): String = WebFiles.read(this@MainActivity, name)
         @JavascriptInterface fun appVersion(): String = BuildConfig.VERSION_NAME
         @JavascriptInterface fun pendingQuery(): String = pendingQuery.also { pendingQuery = "" }
+
+        // ---- 🔔 deal alerts (Settings). Config is saved by the page in pref "alerts". ----
+        @JavascriptInterface fun isBackground(): Boolean = false
+        @JavascriptInterface fun pendingView(): String = (if (openDeals) "deals" else "").also { openDeals = false }
+        @JavascriptInterface fun setAlerts(json: String) {
+            prefs.edit().putString("p_alerts", json).apply()
+            val on = runCatching { JSONObject(json).optBoolean("on") }.getOrDefault(false)
+            runOnUiThread {
+                if (on && !DealAlerts.canNotify(this@MainActivity) && Build.VERSION.SDK_INT >= 33)
+                    requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), 41)
+                DealAlerts.schedule(this@MainActivity)
+            }
+        }
+        @JavascriptInterface fun testAlerts() = DealAlerts.runNow(this@MainActivity)
+        @JavascriptInterface fun canNotify(): Boolean = DealAlerts.canNotify(this@MainActivity)
 
         // ---- in-app update (Settings → Updates). Answers via window.__native(id, ok, text) like fetch. ----
         private fun answer(id: Int, ok: Boolean, text: String) =

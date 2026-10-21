@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Status-bar icon: white price tag with a down arrow (status icons must be single-colour) -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp" android:height="24dp"
+    android:viewportWidth="24" android:viewportHeight="24">
+    <path android:fillColor="#FFFFFFFF"
+        android:fillType="evenOdd"
+        android:pathData="M3,9.5 L8,5 L20,5 Q21,5 21,6 L21,18 Q21,19 20,19 L8,19 L3,14.5 Q2.5,14 2.5,13.3 L2.5,10.7 Q2.5,10 3,9.5 Z M7,11 a1,1 0 1,0 2,0 a1,1 0 1,0 -2,0 Z M13.5,7.5 L15.5,7.5 L15.5,12 L17.5,12 L14.5,16 L11.5,12 L13.5,12 Z" />
+</vector>
