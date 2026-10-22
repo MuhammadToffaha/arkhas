@@ -198,6 +198,14 @@ input:focus{border-color:var(--accent);box-shadow:0 0 0 4px var(--glow)}
 .sw input:checked+i{background:var(--grad)}
 .sheet>div{border-radius:26px 26px 0 0}
 [hidden]{display:none!important}
+.cart{position:absolute;z-index:2;width:34px;height:34px;border-radius:50%;border:0;padding:0;font-size:16px;line-height:34px;
+  background:var(--grad,#ff2d63);color:#fff;box-shadow:0 2px 8px #0000002a}
+.dc .cart{top:82px;inset-inline-end:6px}
+.pc .cart{bottom:-10px;inset-inline-end:-6px}
+.row .cart{top:50%;transform:translateY(-50%);inset-inline-end:40px;width:30px;height:30px;line-height:30px;font-size:14px}
+.row:has(.cart){padding-inline-end:78px}
+.fr .cart{position:static;flex:none}
+
 .dc .off,.megab{z-index:2}
 .dt{font-size:21px;line-height:1.2;min-width:0}
 .dh .dref{padding:8px 12px;font-size:14px;min-height:42px;flex:none}
@@ -450,7 +458,7 @@ function render(r, done) {
     h += `<div class="podium">`;
     r.top3.forEach((o, i) => {
       const off = o.old_price && o.old_price > o.price ? `<div class="old">${money(o.old_price)}</div><div class="save">${fmt(t.save, { n: money(o.old_price - o.price) })}</div>` : "";
-      h += `<a class="pc r${i + 1}" href="${esc(o.url)}">${heart(o)}<div class="medal">${["🥇", "🥈", "🥉"][i]}</div>${img(o)}
+      h += `<a class="pc r${i + 1}" href="${esc(o.url)}">${heart(o)}${cartBtn(o)}<div class="medal">${["🥇", "🥈", "🥉"][i]}</div>${img(o)}
         <div class="t"><div class="ttl">${esc(o.title)}</div><div class="src">${badge(o)} ${esc(o.source)}${flags(o)}</div></div>
         <div style="text-align:end"><div class="p">${money(o.price)}</div>${off}</div></a>`;
     });
@@ -460,7 +468,7 @@ function render(r, done) {
   const rest = r.offers.filter((o) => !r.top3.includes(o));
   if (rest.length) {
     h += `<details><summary>${fmt(t.all, { n: r.offers.length })}</summary>`;
-    for (const o of rest) h += `<a class="row" href="${esc(o.url)}">${heart(o)}${img(o)}<div class="t"><div class="ttl">${esc(o.title)}</div>
+    for (const o of rest) h += `<a class="row" href="${esc(o.url)}">${heart(o)}${cartBtn(o)}${img(o)}<div class="t"><div class="ttl">${esc(o.title)}</div>
       <div class="src">${badge(o)} ${esc(o.source)}${flags(o)}</div></div><div class="p">${money(o.price)}</div></a>`;
     h += `</details>`;
   }
@@ -549,6 +557,33 @@ const favs = () => { if (!FAVS) { try { FAVS = JSON.parse(pref("favs", "[]")) ||
 const isFav = (url) => favs().some((f) => f.url === url);
 function saveFavs() { setPref("favs", JSON.stringify(favs())); syncFavCount(); }
 function syncFavCount() { const n = favs().length; $("#favcnt").hidden = !n; $("#favcnt").textContent = n; }
+// 🛒 open the item straight in the store's own app (Amazon: adds it to the cart)
+const CART_APPS = [
+  { re: /(^|\.)amazon\.eg$/, pkgs: "com.amazon.mShop.android.shopping,in.amazon.mShop.android.shopping", name: "Amazon",
+    link: (u) => { const m = u.match(/\/(?:dp|gp\/product)\/([A-Z0-9]{10})/i); return m ? "https://www.amazon.eg/gp/aws/cart/add.html?ASIN.1=" + m[1].toUpperCase() + "&Quantity.1=1" : u; } },
+  { re: /(^|\.)noon\.com$/, pkgs: "com.noon.buyerapp", name: "noon", link: (u) => u },
+  { re: /(^|\.)jumia\.com\.eg$/, pkgs: "com.jumia.android", name: "Jumia", link: (u) => u },
+];
+const appCache = {};
+function cartApp(url) {
+  let h = ""; try { h = new URL(url).hostname; } catch (_) { return null; }
+  const a = CART_APPS.find((x) => x.re.test(h));
+  if (!a) return null;
+  if (!(a.pkgs in appCache)) { try { appCache[a.pkgs] = window.Native && Native.hasApp ? Native.hasApp(a.pkgs) : ""; } catch (_) { appCache[a.pkgs] = ""; } }
+  return appCache[a.pkgs] ? Object.assign({ pkg: appCache[a.pkgs] }, a) : null;   // only when the app is installed
+}
+function cartBtn(o) {
+  const a = cartApp(o.url);
+  return a ? `<button type="button" class="cart" data-u="${esc(o.url)}" aria-label="${a.name}" title="${a.name}">🛒</button>` : "";
+}
+document.addEventListener("click", (e) => {
+  const b = e.target.closest && e.target.closest(".cart");
+  if (!b) return;
+  e.preventDefault(); e.stopPropagation();
+  const a = cartApp(b.dataset.u); if (!a) return;
+  const link = a.link(b.dataset.u);
+  try { Native.openApp(link, a.pkg); } catch (_) { location.href = link; }
+}, true);
 function heart(o) {
   OFFERS.set(o.url, o);
   const on = isFav(o.url);
@@ -582,7 +617,7 @@ function renderFavs() {
   $("#f_out").innerHTML = list.map((o) => { OFFERS.set(o.url, o); return `<a class="fr" href="${esc(o.url)}">${img(o)}
     <div class="t"><div class="ttl">${esc(o.title)}</div><div class="src">${esc(o.source)} · ${fmt(t.savedOn, { d: day(o.savedAt) })}</div></div>
     <div style="text-align:end"><div class="p">${money(o.price)}</div>${o.old_price && o.old_price > o.price ? `<div class="old">${money(o.old_price)}</div>` : ""}</div>
-    <button type="button" class="fav on rm" data-u="${esc(o.url)}" aria-label="remove">✕</button></a>`; }).join("");
+    ${cartBtn(o)}<button type="button" class="fav on rm" data-u="${esc(o.url)}" aria-label="remove">✕</button></a>`; }).join("");
 }
 $("#nav_fav").onclick = () => { showView("fav"); renderFavs(); };
 
@@ -663,7 +698,7 @@ function renderDeals(done = true) {
   list = list.slice().sort(by[dealSort]).slice(0, 120);
   shownDeals = list;
   if (!list.length) { $("#d_out").innerHTML = done ? `<div class="empty">${d.deals.length ? t.rNone : t.dealsNone}</div>` : ""; return; }
-  $("#d_out").innerHTML = `<div class="dg">${list.map((o) => `<a class="dc${o.tag === "mega" ? " is-mega" : ""}" href="${esc(o.url)}">${o.pct ? `<span class="off">-${o.pct}%</span>` : ""}${o.tag === "mega" ? `<span class="megab">🟡 ${t.mega}</span>` : ""}${heart(o)}<button type="button" class="share" data-u="${esc(o.url)}" aria-label="WhatsApp">📤</button>${img(o)}
+  $("#d_out").innerHTML = `<div class="dg">${list.map((o) => `<a class="dc${o.tag === "mega" ? " is-mega" : ""}" href="${esc(o.url)}">${o.pct ? `<span class="off">-${o.pct}%</span>` : ""}${o.tag === "mega" ? `<span class="megab">🟡 ${t.mega}</span>` : ""}${heart(o)}<button type="button" class="share" data-u="${esc(o.url)}" aria-label="WhatsApp">📤</button>${cartBtn(o)}${img(o)}
     <div class="ttl">${esc(o.title)}</div><div class="p">${money(o.price)}</div>${o.old_price && o.old_price > o.price ? `<div class="old">${money(o.old_price)}</div>` : ""}
     <div class="src">${esc(o.source)}</div></a>`).join("")}</div>`;
 }

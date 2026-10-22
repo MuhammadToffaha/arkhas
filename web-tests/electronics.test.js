@@ -49,3 +49,22 @@ test("prices always shown in English digits (EGP 1,499), also in Arabic mode", (
     assert.match(k, /Locale\.US, "EGP %,d"/, f);
   }
 });
+
+test("🛒 store-app button: shown only when the app is installed; Amazon opens add-to-cart in the app", async () => {
+  const W = new URL("../web/", import.meta.url);
+  const html = readFileSync(new URL("index.html", W), "utf8").replace('<script src="engine.js"></script>', () => `<script>${readFileSync(new URL("engine.js", W), "utf8")}</script>`);
+  const opened = [];
+  const dom = new JSDOM(html, { runScripts: "dangerously", url: "https://app.local/", beforeParse(w) {
+    w.Native = { hasApp: (p) => (p.includes("amazon") ? "com.amazon.mShop.android.shopping" : p === "com.noon.buyerapp" ? "com.noon.buyerapp" : ""),
+      openApp: (u, p) => opened.push([u, p]), getPref: () => "", setPref() {}, readConfig: () => "", appVersion: () => "1", isBackground: () => false };
+  } });
+  const w = dom.window; await new Promise((r) => setTimeout(r, 50));
+  const mk = (url) => w.eval(`cartBtn({ url: ${JSON.stringify(url)} })`);
+  assert.match(mk("https://www.amazon.eg/Some-Phone/dp/B0ABCDEF12?ref=x"), /class="cart"/);
+  assert.match(mk("https://www.noon.com/egypt-en/x/N123/p/"), /class="cart"/);
+  assert.equal(mk("https://www.jumia.com.eg/x.html"), "");      // Jumia app not installed -> no button
+  assert.equal(mk("https://btech.com/x"), "");                   // not a store with an app
+  const d = w.document.createElement("div"); d.innerHTML = mk("https://www.amazon.eg/Some-Phone/dp/B0ABCDEF12?ref=x"); w.document.body.append(d);
+  d.querySelector(".cart").click();
+  assert.deepEqual(opened[0], ["https://www.amazon.eg/gp/aws/cart/add.html?ASIN.1=B0ABCDEF12&Quantity.1=1", "com.amazon.mShop.android.shopping"]);
+});

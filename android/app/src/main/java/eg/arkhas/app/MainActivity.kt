@@ -132,6 +132,19 @@ class MainActivity : AppCompatActivity() {
         @JavascriptInterface fun setPref(k: String, v: String) = prefs.edit().putString("p_$k", v).apply()
         @JavascriptInterface fun readConfig(name: String): String = WebFiles.read(this@MainActivity, name)
         @JavascriptInterface fun appVersion(): String = BuildConfig.VERSION_NAME
+        /** 🛒 first installed package from a comma list, or "" */
+        @JavascriptInterface fun hasApp(pkgs: String): String = pkgs.split(",").map { it.trim() }.firstOrNull { p ->
+            p.isNotEmpty() && runCatching { packageManager.getPackageInfo(p, 0); true }.getOrDefault(false) } ?: ""
+        /** 🛒 open a product/cart link inside that store's app; falls back to the normal chooser/browser */
+        @JavascriptInterface fun openApp(url: String, pkg: String) {
+            runOnUiThread {
+                val u = android.net.Uri.parse(url)
+                val ok = pkg.isNotBlank() && runCatching {
+                    startActivity(Intent(Intent.ACTION_VIEW, u).setPackage(pkg).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)); true
+                }.getOrDefault(false)
+                if (!ok) runCatching { startActivity(Intent(Intent.ACTION_VIEW, u)) }
+            }
+        }
         /** 🎨 status/nav bar colour follows the page theme (header gradient start). */
         @JavascriptInterface fun setBars(color: String, lightBars: Boolean) {
             val c = runCatching { android.graphics.Color.parseColor(color) }.getOrNull() ?: return

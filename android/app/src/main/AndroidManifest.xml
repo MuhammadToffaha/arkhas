@@ -54,5 +54,10 @@
             <action android:name="android.intent.action.VIEW" />
             <data android:scheme="https" />
         </intent>
+        <!-- 🛒 "open in the store app" buttons: Amazon, Noon, Jumia -->
+        <package android:name="com.amazon.mShop.android.shopping" />
+        <package android:name="in.amazon.mShop.android.shopping" />
+        <package android:name="com.noon.buyerapp" />
+        <package android:name="com.jumia.android" />
     </queries>
 </manifest>
