@@ -396,7 +396,8 @@ const T = {
 let L = pref("lang", "ar");
 const $ = (s) => document.querySelector(s);
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-const money = (v) => Math.round(v).toLocaleString(L === "ar" ? "ar-EG" : "en-US") + " " + T[L].egp;
+// prices always in English digits ("EGP 1,499"): Arabic digits/separators were sometimes shown wrong
+const money = (v) => "EGP " + Math.round(v).toLocaleString("en-US");
 const fmt = (s, o) => s.replace(/\{(\w+)\}/g, (_, k) => o[k]);
 let STORES = [], last = null, total = 0, busy = false;
 

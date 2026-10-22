@@ -20,7 +20,7 @@ object Telegram {
     }
 
     private fun esc(s: String) = s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
-    private fun money(v: Double) = "%,d ج.م".format(Math.round(v))
+    private fun money(v: Double) = String.format(java.util.Locale.US, "EGP %,d", Math.round(v))
 
     fun caption(d: JSONObject): String {
         val pct = d.optInt("pct")

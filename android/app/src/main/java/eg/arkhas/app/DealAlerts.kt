@@ -98,7 +98,7 @@ object DealAlerts {
         c.inputStream.use { BitmapFactory.decodeStream(it) }
     }.getOrNull()
 
-    private fun money(v: Double) = "%,d ج.م".format(Math.round(v))
+    private fun money(v: Double) = String.format(java.util.Locale.US, "EGP %,d", Math.round(v))
 
     /** Same message format as the app's 📤 button. */
     fun waText(deals: List<JSONObject>): String = buildString {

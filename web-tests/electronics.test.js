@@ -40,3 +40,12 @@ test("UI has the electronics chip", () => {
   assert.match(html, /\["elec", t\.rElec\]/);
   assert.match(html, /o\.cat === "electronics"/);
 });
+
+test("prices always shown in English digits (EGP 1,499), also in Arabic mode", () => {
+  const html = readFileSync(new URL("../web/index.html", import.meta.url), "utf8");
+  assert.match(html, /const money = \(v\) => "EGP " \+ Math\.round\(v\)\.toLocaleString\("en-US"\)/);
+  for (const f of ["DealAlerts.kt", "Telegram.kt"]) {
+    const k = readFileSync(new URL("../android/app/src/main/java/eg/arkhas/app/" + f, import.meta.url), "utf8");
+    assert.match(k, /Locale\.US, "EGP %,d"/, f);
+  }
+});
