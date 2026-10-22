@@ -34,6 +34,7 @@ class MainActivity : AppCompatActivity() {
     private val prefs by lazy { getSharedPreferences("arkhas", Context.MODE_PRIVATE) }
     @Volatile private var pendingQuery: String = ""
     @Volatile private var openDeals = false
+    private lateinit var cart: CartBot
 
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -54,11 +55,14 @@ class MainActivity : AppCompatActivity() {
             webViewClient = ShellClient()
         }
         root.addView(web, FrameLayout.LayoutParams(-1, -1))
+        cart = CartBot(this, root) { id, st, msg ->
+            web.evaluateJavascript("window.__cartDone&&window.__cartDone($id,${JSONObject.quote(st)},${JSONObject.quote(msg)})", null)
+        }
         setContentView(root)
         keepClearOfNotch(root)
 
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
-            override fun handleOnBackPressed() { if (web.canGoBack()) web.goBack() else finish() }
+            override fun handleOnBackPressed() { if (cart.back()) return; if (web.canGoBack()) web.goBack() else finish() }
         })
 
         pendingQuery = sharedText(intent) ?: ""
@@ -75,6 +79,8 @@ class MainActivity : AppCompatActivity() {
      * Pad the content by the system bars, the display cutout and the keyboard.
      */
     private var rootView: View? = null
+
+    fun cartSheetClosed() { web.evaluateJavascript("window.__cartClosed&&window.__cartClosed()", null) }
 
     private fun keepClearOfNotch(root: View) {
         rootView = root
@@ -132,6 +138,9 @@ class MainActivity : AppCompatActivity() {
         @JavascriptInterface fun setPref(k: String, v: String) = prefs.edit().putString("p_$k", v).apply()
         @JavascriptInterface fun readConfig(name: String): String = WebFiles.read(this@MainActivity, name)
         @JavascriptInterface fun appVersion(): String = BuildConfig.VERSION_NAME
+        /** 🛒 add to the user's real store cart (signed in once via cartLogin) */
+        @JavascriptInterface fun cartAdd(id: Int, url: String) { runOnUiThread { cart.add(id, url) } }
+        @JavascriptInterface fun cartLogin(store: String) { runOnUiThread { cart.login(store) } }
         /** 🛒 first installed package from a comma list, or "" */
         @JavascriptInterface fun hasApp(pkgs: String): String = pkgs.split(",").map { it.trim() }.firstOrNull { p ->
             p.isNotEmpty() && runCatching { packageManager.getPackageInfo(p, 0); true }.getOrDefault(false) } ?: ""
