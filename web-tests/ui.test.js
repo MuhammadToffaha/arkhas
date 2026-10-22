@@ -41,7 +41,7 @@ test("search shows top 3 with medals, links and store status", async () => {
   await until(() => doc.querySelectorAll(".pc").length === 3 && doc.querySelector("#bar").hidden);
   const cards = [...doc.querySelectorAll(".pc")];
   assert.deepEqual(cards.map((c) => c.querySelector(".medal").textContent), ["🥇", "🥈", "🥉"]);
-  assert.match(cards[0].textContent, /٣٩٬٥٠٠/);  // 39,500 EGP in Arabic digits
+  assert.match(cards[0].textContent, /EGP 39,500/);  // prices always in English digits
   assert.ok(cards[2].getAttribute("href").includes("amazon.eg"));  // 40,750 beats Jumia 41,999
   assert.ok([...doc.querySelectorAll(".links a")].some((a) => a.href.includes("facebook.com/marketplace")));
   assert.ok(fetched.some(([u]) => u.includes("serpapi.com") && u.includes("api_key=KEY")));
