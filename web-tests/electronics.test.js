@@ -118,3 +118,10 @@ test("🎁 update pop-up on start when a new version exists", async () => {
   w.document.querySelector("#up_later").click();
   assert.equal(w.document.querySelector("#updpop").hidden, true);
 });
+
+test("price box with price + old price + % off reads the first number (Noon 550, not 55,079,530)", () => {
+  assert.equal(E.parsePrice("EGP 550 795 30% off"), 550);
+  assert.equal(E.parsePrice("550\n795\n30%"), 550);
+  assert.equal(E.parsePrice("EGP 12,999 15,999"), 12999);
+  assert.equal(E.parsePrice("1 299 EGP"), 1299);
+});

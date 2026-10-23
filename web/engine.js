@@ -121,9 +121,11 @@
     if (raw === null || raw === undefined) return null;
     if (typeof raw === "number") return raw > 0 ? raw : null;
     let s = String(raw).replace(/[٠-٩]/g, (c) => DIGITS[c]).replace(/٬/g, ",").replace(/٫/g, ".").replace(/ /g, " ");
-    const m = s.match(/\d[\d.,\s]*/);
+    // first number only: "550 795 30% off" (price, old price, discount in one box) is 550, not 55079530.
+    // A space counts as a thousands separator only inside one amount like "1 299" (thin/no-break space).
+    const m = s.match(/\d+(?:[.,]\d+|[\u202f\u2009]\d{3}(?!\d))*/);
     if (!m) return null;
-    let num = m[0].replace(/\s/g, "").replace(/[.,]+$/, "");
+    let num = m[0].replace(/[\u202f\u2009]/g, "").replace(/[.,]+$/, "");
     if (num.includes(",") && num.includes(".")) {
       num = num.lastIndexOf(",") > num.lastIndexOf(".") ? num.replace(/\./g, "").replace(",", ".") : num.replace(/,/g, "");
     } else if (num.includes(",")) {
