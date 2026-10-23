@@ -63,17 +63,17 @@ class UpdateReceiver : BroadcastReceiver() {
     }
 }
 
-/** 🤫 Background auto-update: every 6 h, if a newer GitHub release exists, download + install it silently. */
+/** 🤫 Background auto-update: once a day, if a newer GitHub release exists, download + install it silently. */
 object AutoUpdate {
     private const val WORK = "arkhas-auto-update"
     fun enabled(ctx: Context) = ctx.getSharedPreferences("arkhas", Context.MODE_PRIVATE).getString("p_autoUpd", "1") != "0"
     fun schedule(ctx: Context) {
         val wm = WorkManager.getInstance(ctx)
         if (!enabled(ctx)) { wm.cancelUniqueWork(WORK); return }
-        val req = PeriodicWorkRequestBuilder<AutoUpdateWorker>(6, TimeUnit.HOURS)
+        val req = PeriodicWorkRequestBuilder<AutoUpdateWorker>(24, TimeUnit.HOURS)
             .setConstraints(Constraints.Builder().setRequiredNetworkType(NetworkType.UNMETERED).setRequiresBatteryNotLow(true).build())
             .build()
-        wm.enqueueUniquePeriodicWork(WORK, ExistingPeriodicWorkPolicy.KEEP, req)
+        wm.enqueueUniquePeriodicWork(WORK, ExistingPeriodicWorkPolicy.UPDATE, req)   // UPDATE: an old 6 h schedule becomes daily
     }
 }
 
