@@ -50,7 +50,7 @@ test("prices always shown in English digits (EGP 1,499), also in Arabic mode", (
   }
 });
 
-test("🛒 store-app button: shown only when the app is installed; Amazon opens add-to-cart in the app", async () => {
+test("🛒 store-app button: shown only when the app is installed; Amazon opens the product in the app", async () => {
   const W = new URL("../web/", import.meta.url);
   const html = readFileSync(new URL("index.html", W), "utf8").replace('<script src="engine.js"></script>', () => `<script>${readFileSync(new URL("engine.js", W), "utf8")}</script>`);
   const opened = [];
@@ -66,5 +66,23 @@ test("🛒 store-app button: shown only when the app is installed; Amazon opens 
   assert.equal(mk("https://btech.com/x"), "");                   // not a store with an app
   const d = w.document.createElement("div"); d.innerHTML = mk("https://www.amazon.eg/Some-Phone/dp/B0ABCDEF12?ref=x"); w.document.body.append(d);
   d.querySelector(".cart").click();
-  assert.deepEqual(opened[0], ["https://www.amazon.eg/gp/aws/cart/add.html?ASIN.1=B0ABCDEF12&Quantity.1=1", "com.amazon.mShop.android.shopping"]);
+  assert.deepEqual(opened[0], ["https://www.amazon.eg/Some-Phone/dp/B0ABCDEF12?ref=x", "com.amazon.mShop.android.shopping"]);
+});
+
+test("offers tab: quick Amazon / noon / Jumia filter chips", async () => {
+  const W = new URL("../web/", import.meta.url);
+  const html = readFileSync(new URL("index.html", W), "utf8").replace('<script src="engine.js"></script>', () => `<script>${readFileSync(new URL("engine.js", W), "utf8")}</script>`);
+  const dom = new JSDOM(html, { runScripts: "dangerously", url: "https://app.local/" });
+  const w = dom.window; await new Promise((r) => setTimeout(r, 50));
+  w.eval(`STORES = ${readFileSync(new URL("stores.json", W), "utf8")};
+    const mk = (i, s) => ({ title: "x" + i, price: 400, old_price: 1000, pct: 60, url: "https://x/" + i, source: s });
+    dealsData = { deals: [mk(1, "Amazon.eg"), mk(2, "Noon"), mk(3, "Jumia"), mk(4, "Jumia")], sources: [], total: 3, at: Date.now() };
+    dealRange = "r5070"; renderDeals(true);`);
+  const chips = () => [...w.document.querySelectorAll("#d_quick button")];
+  assert.deepEqual(chips().map((b) => b.dataset.q), ["", "Amazon.eg", "Noon", "Jumia"]);
+  chips()[3].click();
+  assert.equal(w.document.querySelectorAll("#d_out .dc").length, 2);
+  assert.ok(chips()[3].classList.contains("on"));
+  chips()[0].click();
+  assert.equal(w.document.querySelectorAll("#d_out .dc").length, 4);
 });
