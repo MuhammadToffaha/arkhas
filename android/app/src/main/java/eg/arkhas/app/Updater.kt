@@ -92,6 +92,27 @@ object Updater {
         return false
     }
 
+    /**
+     * 🤫 Install through Android's PackageInstaller. On Android 12+ no prompt is shown when Arkhas is the app that
+     * installed itself last time ("installer of record"); the very first in-app update asks once, after that it's silent.
+     * Older Android / first time: Android shows its normal confirm screen (from the background: a notification).
+     */
+    fun installSilent(ctx: Context, apk: File, fromBackground: Boolean) {
+        val pi = ctx.packageManager.packageInstaller
+        val params = android.content.pm.PackageInstaller.SessionParams(android.content.pm.PackageInstaller.SessionParams.MODE_FULL_INSTALL)
+        params.setAppPackageName(ctx.packageName)
+        if (Build.VERSION.SDK_INT >= 31) params.setRequireUserAction(android.content.pm.PackageInstaller.SessionParams.USER_ACTION_NOT_REQUIRED)
+        if (Build.VERSION.SDK_INT >= 34) params.setRequestUpdateOwnership(true)
+        params.setSize(apk.length())
+        val id = pi.createSession(params)
+        pi.openSession(id).use { session ->
+            apk.inputStream().use { inp -> session.openWrite("arkhas.apk", 0, apk.length()).use { out -> inp.copyTo(out); session.fsync(out) } }
+            val i = Intent(ctx, UpdateReceiver::class.java).setAction(UpdateReceiver.STATUS).putExtra("bg", fromBackground)
+            val flags = android.app.PendingIntent.FLAG_UPDATE_CURRENT or (if (Build.VERSION.SDK_INT >= 31) android.app.PendingIntent.FLAG_MUTABLE else 0)
+            session.commit(android.app.PendingIntent.getBroadcast(ctx, id, i, flags).intentSender)
+        }
+    }
+
     fun install(ctx: Context, apk: File) {
         val uri = FileProvider.getUriForFile(ctx, "${ctx.packageName}.files", apk)
         ctx.startActivity(Intent(Intent.ACTION_VIEW)

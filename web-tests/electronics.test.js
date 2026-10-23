@@ -86,3 +86,21 @@ test("offers tab: quick Amazon / noon / Jumia filter chips", async () => {
   chips()[0].click();
   assert.equal(w.document.querySelectorAll("#d_out .dc").length, 4);
 });
+
+test("🤫 silent auto-update switch (on by default) talks to the app", async () => {
+  const W = new URL("../web/", import.meta.url);
+  const html = readFileSync(new URL("index.html", W), "utf8").replace('<script src="engine.js"></script>', () => `<script>${readFileSync(new URL("engine.js", W), "utf8")}</script>`);
+  const calls = [];
+  const dom = new JSDOM(html, { runScripts: "dangerously", url: "https://app.local/", beforeParse(w) {
+    w.Native = { setAutoUpdate: (v) => calls.push(v), checkUpdate() {}, installUpdate() {}, getPref: () => "", setPref() {}, readConfig: () => "", appVersion: () => "1.0.30", isBackground: () => false };
+  } });
+  const w = dom.window; await new Promise((r) => setTimeout(r, 50));
+  w.eval("showUpd()");
+  const box = w.document.querySelector("#u_auto");
+  assert.equal(w.document.querySelector("#u_auto_row").hidden, false);
+  assert.equal(box.checked, true);
+  box.checked = false; box.dispatchEvent(new w.Event("change"));
+  assert.deepEqual(calls, [false]);
+  const kt = readFileSync(new URL("../android/app/src/main/java/eg/arkhas/app/Updater.kt", import.meta.url), "utf8");
+  assert.match(kt, /USER_ACTION_NOT_REQUIRED/);
+});

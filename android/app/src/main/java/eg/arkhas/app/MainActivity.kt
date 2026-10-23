@@ -64,6 +64,7 @@ class MainActivity : AppCompatActivity() {
         pendingQuery = sharedText(intent) ?: ""
         openDeals = intent?.getBooleanExtra("openDeals", false) == true
         DealAlerts.schedule(this)   // keep the background check alive after updates
+        AutoUpdate.schedule(this)   // 🤫 silent auto-update (Settings switch)
         web.loadUrl(WebFiles.indexUrl(this))
 
         // newest UI / store rules from GitHub -> used from next start
@@ -132,6 +133,12 @@ class MainActivity : AppCompatActivity() {
         @JavascriptInterface fun setPref(k: String, v: String) = prefs.edit().putString("p_$k", v).apply()
         @JavascriptInterface fun readConfig(name: String): String = WebFiles.read(this@MainActivity, name)
         @JavascriptInterface fun appVersion(): String = BuildConfig.VERSION_NAME
+        /** 🤫 Settings switch for silent auto-update */
+        @JavascriptInterface fun setAutoUpdate(on: Boolean) {
+            prefs.edit().putString("p_autoUpd", if (on) "1" else "0").apply()
+            AutoUpdate.schedule(this@MainActivity)
+        }
+        @JavascriptInterface fun lastUpdateError(): String = prefs.getString("updErr", "") ?: ""
         /** 🛒 first installed package from a comma list, or "" */
         @JavascriptInterface fun hasApp(pkgs: String): String = pkgs.split(",").map { it.trim() }.firstOrNull { p ->
             p.isNotEmpty() && runCatching { packageManager.getPackageInfo(p, 0); true }.getOrDefault(false) } ?: ""
@@ -194,7 +201,12 @@ class MainActivity : AppCompatActivity() {
                     runOnUiThread { web.evaluateJavascript("window.__updProgress&&window.__updProgress($pct)", null) }
                 }
                 runOnUiThread {
-                    if (Updater.canInstall(this@MainActivity)) { Updater.install(this@MainActivity, apk); answer(id, true, "installing") }
+                    if (Updater.canInstall(this@MainActivity)) {
+                        // 🤫 PackageInstaller: silent on Android 12+ once Arkhas installed itself; old way if that fails
+                        val ok = runCatching { Updater.installSilent(this@MainActivity, apk, fromBackground = false) }.isSuccess
+                        if (!ok) Updater.install(this@MainActivity, apk)
+                        answer(id, true, "installing")
+                    }
                     else answer(id, true, "need-permission")   // user flips the switch, comes back, taps again
                 }
             } catch (e: Exception) { answer(id, false, e.message ?: "error") }
