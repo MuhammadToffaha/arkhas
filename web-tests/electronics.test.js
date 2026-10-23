@@ -104,3 +104,17 @@ test("🤫 silent auto-update switch (on by default) talks to the app", async ()
   const kt = readFileSync(new URL("../android/app/src/main/java/eg/arkhas/app/Updater.kt", import.meta.url), "utf8");
   assert.match(kt, /USER_ACTION_NOT_REQUIRED/);
 });
+
+test("🎁 update pop-up on start when a new version exists", async () => {
+  const W = new URL("../web/", import.meta.url);
+  const html = readFileSync(new URL("index.html", W), "utf8").replace('<script src="engine.js"></script>', () => `<script>${readFileSync(new URL("engine.js", W), "utf8")}</script>`);
+  const dom = new JSDOM(html, { runScripts: "dangerously", url: "https://app.local/", beforeParse(w) {
+    w.Native = { checkUpdate: (id) => setTimeout(() => w.__native(id, true, JSON.stringify({ available: true, latestName: "1.0.99", latest: 99, url: "u", size: 1 })), 5),
+      installUpdate() {}, getPref: () => "", setPref() {}, readConfig: () => "", appVersion: () => "1.0.33", isBackground: () => false };
+  } });
+  const w = dom.window; await new Promise((r) => setTimeout(r, 150));
+  assert.equal(w.document.querySelector("#updpop").hidden, false);
+  assert.match(w.document.querySelector("#up_t").textContent, /1\.0\.99/);
+  w.document.querySelector("#up_later").click();
+  assert.equal(w.document.querySelector("#updpop").hidden, true);
+});

@@ -198,6 +198,13 @@ input:focus{border-color:var(--accent);box-shadow:0 0 0 4px var(--glow)}
 .sw input:checked+i{background:var(--grad)}
 .sheet>div{border-radius:26px 26px 0 0}
 [hidden]{display:none!important}
+.pop{position:fixed;inset:0;z-index:20;background:#0006;display:flex;align-items:center;justify-content:center;padding:24px;animation:popfade .2s}
+.popbox{background:var(--card);color:var(--ink);border-radius:22px;padding:20px 18px 16px;max-width:340px;width:100%;text-align:center;box-shadow:0 18px 50px #0005;animation:popin .25s cubic-bezier(.2,1.4,.4,1)}
+.popic{font-size:40px;line-height:1.1;margin-bottom:6px}
+.popbox b{display:block;font-size:18px;margin-bottom:4px}
+.popb{display:flex;gap:8px;margin-top:14px}.popb button{flex:1;padding:11px 10px}
+@keyframes popin{from{transform:scale(.85);opacity:0}}@keyframes popfade{from{opacity:0}}
+
 .cart{position:absolute;z-index:2;width:34px;height:34px;border-radius:50%;border:0;padding:0;font-size:16px;line-height:34px;
   background:var(--grad,#ff2d63);color:#fff;box-shadow:0 2px 8px #0000002a}
 .dc .cart{top:82px;inset-inline-end:6px}
@@ -267,6 +274,10 @@ html,body{overflow-x:hidden}
   </section>
 </div>
 
+<div class="pop" id="updpop" hidden><div class="popbox">
+  <div class="popic">🎁</div><b id="up_t"></b><div class="muted" id="up_d"></div>
+  <div class="popb"><button class="go" id="up_go"></button><button class="ib2" id="up_later"></button></div>
+</div></div>
 <nav class="nav">
   <button id="nav_search" class="on"><b>🔍</b><span id="l_search"></span></button>
   <button id="nav_deals" class="flash"><b>⚡</b><span id="l_deals"></span></button>
@@ -379,7 +390,7 @@ const T = {
     tgFind: "🔎 دوّر على جروبي", tgTest: "✉️ ابعت رسالة تجربة", tgNoChats: "مش لاقي الجروب — اكتب /arkhas في الجروب (البوت مش بيشوف الرسايل العادية) وحاول تاني",
     tgPicked: "✓ هيبعت لـ «{t}»", tgOk: "✓ الرسالة وصلت للجروب", tgErr: "⚠️ تليجرام: {e}", tgTestText: "✅ أرخص متوصل — العروض الكبيرة هتوصل هنا تلقائي",
     tgSent: " · تليجرام: {n} اتبعت", tgFail: " · تليجرام فشل: {e}", alNever: "لسه مفيش فحص", alPerm: "⚠️ اسمح بالإشعارات للتطبيق من إعدادات الموبايل", navFav: "المفضلة", favTitle: "المفضلة", favSub: "{n} منتج محفوظ — السعر وقت الحفظ", favEmpty: "اضغط ♥ على أي منتج عشان يتحفظ هنا", savedOn: "اتحفظ {d}", favAdded: "اتضاف للمفضلة ❤️", favRemoved: "اتشال من المفضلة", refresh: "تحديث", waBtn: "واتساب", waHead: "🔥 عروض أرخص — {d}", waInstead: "بدل", waMore: "📲 من تطبيق أرخص", refresh: "تحديث", ddAll: "كل المتاجر", ddSome: "{n} متاجر مختارة", ddOne: "{s}", selAll: "تحديد الكل", selNone: "إلغاء الكل", navDeals: "عروض", dealsTitle: "عروض فلاش", dealsSub: "أكبر الخصومات من أشهر {n} مواقع في مصر — اتحدّثت {t}", dealsLoading: "جاري جلب العروض من {done}/{all} موقع…", dealsNone: "مفيش عروض دلوقتي — اضغط ↻", sortPct: "أكبر خصم", sortPrice: "الأرخص", sortSave: "أكبر توفير", allStores: "الكل", justNow: "الآن", minAgo: "من {m} دقيقة", banner: "🎉 نسخة جديدة {v} — اضغط للتحديث", openRel: "⬇️ تنزيل {v} من GitHub", relNote: "هتتفتح صفحة التنزيل — نزّل الملف وافتحه للتثبيت. بعد كده التحديث هيكون من جوه التطبيق", upd: "🔄 التحديثات", cur: "نسختك {v}", check: "تحقق من التحديث", checking: "جاري التحقق…", latest: "عندك أحدث نسخة ✓",
-    newVer: "نسخة جديدة {v} متاحة ({mb} ميجا)", install: "⬇️ تنزيل وتثبيت {v}", downloading: "جاري التنزيل… {p}%", installing: "افتح شاشة التثبيت واضغط تثبيت",
+    newVer: "نسخة جديدة {v} متاحة ({mb} ميجا)", popT: "تحديث جديد {v} 🎉", popD: "نسخة أحدث من أرخص جاهزة — حدّث دلوقتي عشان تاخد آخر المميزات.", popGo: "⬇️ حدّث الآن", popLater: "بعدين", install: "⬇️ تنزيل وتثبيت {v}", downloading: "جاري التنزيل… {p}%", installing: "افتح شاشة التثبيت واضغط تثبيت",
     perm: "اسمح لـ أرخص بتثبيت التحديثات (فتحنا لك الإعداد) ثم ارجع واضغط تثبيت تاني", webBtn: "تحديث قائمة المتاجر", webSame: "قائمة المتاجر محدّثة ✓",
     webChanged: "تم تحديث المتاجر — جاري إعادة التحميل…", updErr: "تعذّر: {e}", exact: "✓ مطابق", similar: "≈ مشابه", other: "موديل مختلف", fewExact: "لقينا {n} بس مطابقين تمامًا — الباقي مشابه", egp: "ج.م", save: "وفّر {n}",
     searching: "جاري البحث في {done}/{all} متجر…", settings: "الإعدادات", serpNote: "اختياري: يضيف جوجل شوبينج (مئات المتاجر). مفتاح مجاني من serpapi.com",
@@ -399,7 +410,7 @@ const T = {
     tgFind: "🔎 Find my group", tgTest: "✉️ Send test message", tgNoChats: "Group not found — send /arkhas in the group (bots don't see normal messages) and try again",
     tgPicked: "✓ Will post to “{t}”", tgOk: "✓ Message arrived in the group", tgErr: "⚠️ Telegram: {e}", tgTestText: "✅ Arkhas connected — big deals will be posted here automatically",
     tgSent: " · Telegram: {n} sent", tgFail: " · Telegram failed: {e}", alNever: "No check yet", alPerm: "⚠️ Allow notifications for the app in phone settings", navFav: "Favourites", favTitle: "Favourites", favSub: "{n} saved items — price when saved", favEmpty: "Tap ♥ on any product to save it here", savedOn: "saved {d}", favAdded: "Added to favourites ❤️", favRemoved: "Removed from favourites", refresh: "Refresh", waBtn: "WhatsApp", waHead: "🔥 Arkhas deals — {d}", waInstead: "was", waMore: "📲 via Arkhas app", refresh: "Refresh", ddAll: "All stores", ddSome: "{n} stores selected", ddOne: "{s}", selAll: "Select all", selNone: "Clear all", navDeals: "Deals", dealsTitle: "Flash deals", dealsSub: "Biggest discounts from {n} top Egyptian sites — updated {t}", dealsLoading: "Fetching deals from {done}/{all} sites…", dealsNone: "No deals right now — tap ↻", sortPct: "Biggest % off", sortPrice: "Cheapest", sortSave: "Most saved", allStores: "All", justNow: "just now", minAgo: "{m} min ago", banner: "🎉 New version {v} — tap to update", openRel: "⬇️ Download {v} from GitHub", relNote: "The download page opens — download the file and open it to install. After this, updates happen inside the app", upd: "🔄 Updates", cur: "You have {v}", check: "Check for update", checking: "Checking…", latest: "You have the latest version ✓",
-    newVer: "New version {v} available ({mb} MB)", install: "⬇️ Download & install {v}", downloading: "Downloading… {p}%", installing: "Tap Install on the Android screen",
+    newVer: "New version {v} available ({mb} MB)", popT: "New update {v} 🎉", popD: "A newer Arkhas is ready — update now to get the latest features.", popGo: "⬇️ Update now", popLater: "Later", install: "⬇️ Download & install {v}", downloading: "Downloading… {p}%", installing: "Tap Install on the Android screen",
     perm: "Allow Arkhas to install updates (settings opened), then come back and tap install again", webBtn: "Refresh store list", webSame: "Store list is up to date ✓",
     webChanged: "Stores updated — reloading…", updErr: "Failed: {e}", exact: "✓ exact", similar: "≈ similar", other: "other model", fewExact: "Only {n} exact match(es) — the rest are similar", egp: "EGP", save: "save {n}",
     searching: "Searching {done}/{all} stores…", settings: "Settings", serpNote: "Optional: adds Google Shopping (hundreds of stores). Free key at serpapi.com",
@@ -974,10 +985,24 @@ async function linkCheck() {
 async function checkUpd(force) {
   if (!canUpdate && !canLink) return;
   if (force) { $("#u_check").disabled = true; showUpd("checking"); }
-  try { updInfo = canUpdate ? JSON.parse(await call("checkUpdate", !!force)) : await linkCheck(); showUpd(); }
+  try { updInfo = canUpdate ? JSON.parse(await call("checkUpdate", !!force)) : await linkCheck(); showUpd(); if (!force) updPopup(); }
   catch (e) { if (force) showUpd("updErr", { e: e.message }); }
   finally { $("#u_check").disabled = false; }
 }
+// 🎁 small pop-up on app start when a new version exists (once per app start)
+let popShown = false;
+function updPopup() {
+  if (popShown || !updInfo || !updInfo.available) return;
+  popShown = true;
+  const t = T[L];
+  $("#up_t").textContent = fmt(t.popT, { v: updInfo.latestName });
+  $("#up_d").textContent = t.popD;
+  $("#up_go").textContent = t.popGo; $("#up_later").textContent = t.popLater;
+  $("#updpop").hidden = false;
+}
+$("#up_later").onclick = () => { $("#updpop").hidden = true; };
+$("#updpop").onclick = (e) => { if (e.target.id === "updpop") $("#updpop").hidden = true; };
+$("#up_go").onclick = () => { $("#updpop").hidden = true; $("#gear").click(); setTimeout(() => $("#u_install").click(), 300); };
 window.__updProgress = (p) => {
   $("#u_bar").hidden = false;
   $("#u_bar i").style.width = (p < 0 ? 50 : p) + "%";
