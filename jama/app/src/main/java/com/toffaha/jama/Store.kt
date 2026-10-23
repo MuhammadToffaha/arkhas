@@ -85,7 +85,7 @@ object Store {
             try {
                 val rel = if (a.tagPrefix == null) toRelease(JSONObject(text("https://api.github.com/repos/$OWNER/${a.repo}/releases/latest")))
                 else {
-                    val arr = JSONArray(text("https://api.github.com/repos/$OWNER/${a.repo}/releases?per_page=40"))
+                    val arr = JSONArray(text("https://api.github.com/repos/$OWNER/${a.repo}/releases?per_page=100"))
                     (0 until arr.length()).map { arr.getJSONObject(it) }
                         .filter { it.optString("tag_name").startsWith(a.tagPrefix) && !it.optBoolean("draft") }
                         .mapNotNull { toRelease(it) }.maxByOrNull { it.code }
