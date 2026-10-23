@@ -50,46 +50,21 @@ test("prices always shown in English digits (EGP 1,499), also in Arabic mode", (
   }
 });
 
-test("🛒 next to the price for Amazon/noon/Jumia; tap = automatic add to cart via the app", async () => {
+test("🛒 store-app button: shown only when the app is installed; Amazon opens add-to-cart in the app", async () => {
   const W = new URL("../web/", import.meta.url);
   const html = readFileSync(new URL("index.html", W), "utf8").replace('<script src="engine.js"></script>', () => `<script>${readFileSync(new URL("engine.js", W), "utf8")}</script>`);
-  const added = [];
+  const opened = [];
   const dom = new JSDOM(html, { runScripts: "dangerously", url: "https://app.local/", beforeParse(w) {
-    w.Native = { cartAdd: (id, u) => added.push([id, u]), cartLogin() {}, getPref: () => "", setPref() {}, readConfig: () => "", appVersion: () => "1", isBackground: () => false };
+    w.Native = { hasApp: (p) => (p.includes("amazon") ? "com.amazon.mShop.android.shopping" : p === "com.noon.buyerapp" ? "com.noon.buyerapp" : ""),
+      openApp: (u, p) => opened.push([u, p]), getPref: () => "", setPref() {}, readConfig: () => "", appVersion: () => "1", isBackground: () => false };
   } });
   const w = dom.window; await new Promise((r) => setTimeout(r, 50));
-  const mk = (url) => w.eval(`priceRow({ url: ${JSON.stringify(url)} }, '<div class="p">EGP 1</div>')`);
-  for (const u of ["https://www.amazon.eg/x/dp/B0ABCDEF12", "https://www.noon.com/egypt-en/x/N1/p/", "https://www.jumia.com.eg/x.html"])
-    assert.match(mk(u), /class="prow"><div class="p">EGP 1<\/div><button type="button" class="cart"/);
-  assert.doesNotMatch(mk("https://btech.com/x"), /class="cart"/);
-  const d = w.document.createElement("div"); d.innerHTML = mk("https://www.amazon.eg/x/dp/B0ABCDEF12"); w.document.body.append(d);
-  const b = d.querySelector(".cart"); b.click();
-  assert.deepEqual(added[0], [1, "https://www.amazon.eg/x/dp/B0ABCDEF12"]);
-  assert.ok(b.classList.contains("busy"));
-  w.__cartDone(1, "ok");
-  assert.equal(b.textContent, "✅");
-});
-
-test("cart bot: finds the store button, clicks once, reports ok when the cart count goes up", async () => {
-  const src = readFileSync(new URL("../web/cartbot.js", import.meta.url), "utf8");
-  const run = async (body, store, after) => {
-    const dom = new JSDOM(`<body>${body}</body>`, { runScripts: "outside-only", url: "https://www.amazon.eg/dp/B0ABCDEF12" });
-    const w = dom.window, out = [];
-    w.HTMLElement.prototype.getBoundingClientRect = () => ({ width: 10, height: 10 });
-    w.HTMLElement.prototype.scrollIntoView = () => {};
-    w.ArkCart = { clicked() {}, result: (j) => out.push(JSON.parse(j)) };
-    w.__ARK_STORE = store;
-    if (after) w.document.addEventListener("click", (e) => after(w, e));
-    w.eval(src);
-    for (let i = 0; i < 30 && !out.length; i++) await new Promise((r) => setTimeout(r, 100));
-    return out[0];
-  };
-  const amz = await run('<span id="nav-cart-count">0</span><input id="add-to-cart-button" type="submit" value="Add to Cart">', "amazon",
-    (w) => { w.document.querySelector("#nav-cart-count").textContent = "1"; });
-  assert.equal(amz.status, "ok");
-  const jum = await run('<div>Hello</div><button class="x">أضف إلى العربة</button>', "jumia",
-    (w) => { w.document.body.insertAdjacentHTML("beforeend", "<div>Product added successfully</div>"); });
-  assert.equal(jum.status, "ok");
-  const out = await run('<a id="nav-logobar-greeting">Sign in ›</a><input id="add-to-cart-button" type="submit">', "amazon");
-  assert.equal(out.status, "signin");
+  const mk = (url) => w.eval(`cartBtn({ url: ${JSON.stringify(url)} })`);
+  assert.match(mk("https://www.amazon.eg/Some-Phone/dp/B0ABCDEF12?ref=x"), /class="cart"/);
+  assert.match(mk("https://www.noon.com/egypt-en/x/N123/p/"), /class="cart"/);
+  assert.equal(mk("https://www.jumia.com.eg/x.html"), "");      // Jumia app not installed -> no button
+  assert.equal(mk("https://btech.com/x"), "");                   // not a store with an app
+  const d = w.document.createElement("div"); d.innerHTML = mk("https://www.amazon.eg/Some-Phone/dp/B0ABCDEF12?ref=x"); w.document.body.append(d);
+  d.querySelector(".cart").click();
+  assert.deepEqual(opened[0], ["https://www.amazon.eg/gp/aws/cart/add.html?ASIN.1=B0ABCDEF12&Quantity.1=1", "com.amazon.mShop.android.shopping"]);
 });

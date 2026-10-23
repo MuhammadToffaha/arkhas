@@ -198,15 +198,13 @@ input:focus{border-color:var(--accent);box-shadow:0 0 0 4px var(--glow)}
 .sw input:checked+i{background:var(--grad)}
 .sheet>div{border-radius:26px 26px 0 0}
 [hidden]{display:none!important}
-.prow{display:flex;align-items:center;justify-content:space-between;gap:8px}
-.cart{flex:none;position:relative;width:42px;height:42px;border-radius:14px;border:0;padding:0;font-size:19px;line-height:42px;
-  background:var(--grad,#ff2d63);color:#fff;box-shadow:0 4px 12px var(--glow,#ff2d6340)}
-.cart small{position:absolute;top:2px;inset-inline-end:5px;font-size:12px;font-weight:900;line-height:1}
-.cart.busy{opacity:.7;animation:pulse 1s ease-in-out infinite}.cart.done{background:#16a34a}
-@keyframes pulse{50%{transform:scale(.92)}}
-.dc .prow{margin-top:4px}.dc .prow .p{margin-top:0}
-.pend{text-align:end}.pend .prow{justify-content:flex-end}
-.row .prow{flex:none}.row .cart{width:36px;height:36px;line-height:36px;font-size:16px;border-radius:12px}
+.cart{position:absolute;z-index:2;width:34px;height:34px;border-radius:50%;border:0;padding:0;font-size:16px;line-height:34px;
+  background:var(--grad,#ff2d63);color:#fff;box-shadow:0 2px 8px #0000002a}
+.dc .cart{top:82px;inset-inline-end:6px}
+.pc .cart{bottom:-10px;inset-inline-end:-6px}
+.row .cart{top:50%;transform:translateY(-50%);inset-inline-end:40px;width:30px;height:30px;line-height:30px;font-size:14px}
+.row:has(.cart){padding-inline-end:78px}
+.fr .cart{position:static;flex:none}
 
 .dc .off,.megab{z-index:2}
 .dt{font-size:21px;line-height:1.2;min-width:0}
@@ -324,15 +322,6 @@ html,body{overflow-x:hidden}
   </div>
   <label id="s_lang"></label>
   <div class="seg" id="langseg"><button id="lang_ar" data-l="ar">عربي</button><button id="lang_en" data-l="en">English</button></div>
-  <label id="s_cart"></label>
-  <div class="upd">
-    <div class="muted" id="cart_desc"></div>
-    <div class="upd-b">
-      <button type="button" class="ib2" data-login="amazon">🅰️ Amazon</button>
-      <button type="button" class="ib2" data-login="noon">🟡 noon</button>
-      <button type="button" class="ib2" data-login="jumia">🟠 Jumia</button>
-    </div>
-  </div>
   <label id="s_theme"></label>
   <div class="themes" id="themes">
     <button data-th="hot"><i style="background:linear-gradient(120deg,#ff6a2b,#ff2d75)"></i><span>🔥 Hot</span></button>
@@ -373,7 +362,7 @@ const readConfig = async (name) => (N ? N.readConfig(name) : (await fetch(name))
 const T = {
   ar: { tag: "أرخص سعر في مصر", go: "ابحث", ph: "اكتب المنتج… مثال: ايفون 15 برو", hint: "نبحث في المتاجر المصرية بالعربي والإنجليزي ونجيب لك أرخص 3",
     top: "🏆 أرخص 3 أسعار", all: "كل العروض ({n})", fb: "📘 فيسبوك والمستعمل", searched: "بحثنا عن:", none: "مفيش نتائج مطابقة لسه…",
-    noneDone: "مفيش نتائج مطابقة. جرّب اسم أدق.", src: "حالة المتاجر", langLbl: "🌐 اللغة", themeLbl: "🎨 شكل التطبيق", cartLbl: "🛒 حسابات المتاجر (إضافة للعربة)", cartDesc: "سجّل دخولك مرة واحدة في كل متجر بالإيميل أو الموبايل والباسورد (تسجيل جوجل مش بيشتغل جوه التطبيقات). بعدها زرار 🛒 جنب السعر بيضيف المنتج لعربتك على طول — وهتلاقيه في عربة تطبيق المتجر.", storesHint: "آخر بحث: عدد النتائج من كل متجر", navSearch: "بحث", navStatus: "المتاجر", navGear: "الإعدادات", acc: "إكسسوار؟", cheap: "سعر مريب", rMega: "🟡 ميجا ديلز نون", rElec: "📱 عروض الإلكترونيات", mega: "ميجا", rAll: "كل الخصومات", r30: "30%+", r5070: "🔥 50–70%", r70: "70%+", rNone: "مفيش عروض في النطاق ده — جرّب نطاق تاني", alTitle: "🔔 تنبيهات الخصومات الكبيرة", alDesc: "إشعار على الموبايل لما يظهر خصم كبير جديد — حتى والتطبيق مقفول",
+    noneDone: "مفيش نتائج مطابقة. جرّب اسم أدق.", src: "حالة المتاجر", langLbl: "🌐 اللغة", themeLbl: "🎨 شكل التطبيق", storesHint: "آخر بحث: عدد النتائج من كل متجر", navSearch: "بحث", navStatus: "المتاجر", navGear: "الإعدادات", acc: "إكسسوار؟", cheap: "سعر مريب", rMega: "🟡 ميجا ديلز نون", rElec: "📱 عروض الإلكترونيات", mega: "ميجا", rAll: "كل الخصومات", r30: "30%+", r5070: "🔥 50–70%", r70: "70%+", rNone: "مفيش عروض في النطاق ده — جرّب نطاق تاني", alTitle: "🔔 تنبيهات الخصومات الكبيرة", alDesc: "إشعار على الموبايل لما يظهر خصم كبير جديد — حتى والتطبيق مقفول",
     alMin: "أقل خصم", alStores: "المتاجر", alMega: "🟡 ميجا ديلز نون كمان", alEvery: "افحص كل", alHours: "{h} ساعة", alTest: "🔍 افحص دلوقتي",
     alTesting: "جاري الفحص في الخلفية… هيوصلك إشعار لو فيه جديد", alLast: "آخر فحص {t}: {f} عرض، {n} جديد", alErr: "آخر فحص {t}: فشل ({e})",
     alNever: "لسه مفيش فحص", alTo: "ابعت العروض الجديدة على", alNotify: "🔔 إشعار على الموبايل", tgOn: "✈️ جروب تليجرام (تلقائي بالكامل)",
@@ -393,7 +382,7 @@ const T = {
     city: "مدينة فيسبوك ماركت بليس", stores: "المتاجر", saveBtn: "حفظ", ver: "نسخة", hidden: "تم إخفاء {n} نتيجة غير مطابقة" },
   en: { tag: "Best price in Egypt", go: "Search", ph: "Product… e.g. iphone 15 pro", hint: "Searching Egyptian stores in Arabic & English — top 3 cheapest",
     top: "🏆 Top 3 prices", all: "All offers ({n})", fb: "📘 Facebook & used", searched: "Searched:", none: "No matches yet…",
-    noneDone: "No matching results. Try a more specific name.", src: "Store status", langLbl: "🌐 Language", themeLbl: "🎨 App theme", cartLbl: "🛒 Store accounts (add to cart)", cartDesc: "Sign in once to each store with email/phone + password (Google sign-in doesn't work inside apps). Then the 🛒 next to the price adds the item to your cart automatically — it shows up in the store app's cart too.", storesHint: "Last search: results per store", navSearch: "Search", navStatus: "Stores", navGear: "Settings", acc: "accessory?", cheap: "suspicious price", rMega: "🟡 Noon Mega Deals", rElec: "📱 Electronics offers", mega: "MEGA", rAll: "All discounts", r30: "30%+", r5070: "🔥 50–70%", r70: "70%+", rNone: "No deals in this range — try another one", alTitle: "🔔 Big discount alerts", alDesc: "Phone notification when a new big discount appears — even with the app closed",
+    noneDone: "No matching results. Try a more specific name.", src: "Store status", langLbl: "🌐 Language", themeLbl: "🎨 App theme", storesHint: "Last search: results per store", navSearch: "Search", navStatus: "Stores", navGear: "Settings", acc: "accessory?", cheap: "suspicious price", rMega: "🟡 Noon Mega Deals", rElec: "📱 Electronics offers", mega: "MEGA", rAll: "All discounts", r30: "30%+", r5070: "🔥 50–70%", r70: "70%+", rNone: "No deals in this range — try another one", alTitle: "🔔 Big discount alerts", alDesc: "Phone notification when a new big discount appears — even with the app closed",
     alMin: "Minimum discount", alStores: "Stores", alMega: "🟡 Noon Mega Deals too", alEvery: "Check every", alHours: "{h} h", alTest: "🔍 Check now",
     alTesting: "Checking in the background… you'll get a notification if there's something new", alLast: "Last check {t}: {f} deals, {n} new", alErr: "Last check {t}: failed ({e})",
     alNever: "No check yet", alTo: "Send new deals to", alNotify: "🔔 Phone notification", tgOn: "✈️ Telegram group (fully automatic)",
@@ -424,7 +413,7 @@ function applyLang() {
   const t = T[L];
   document.documentElement.lang = L; document.documentElement.dir = L === "ar" ? "rtl" : "ltr";
   $("#tag").textContent = t.tag; $("#go").textContent = t.go; $("#q").placeholder = t.ph; $("#hint").textContent = t.hint;
-  $("#s_lang").textContent = t.langLbl; $("#s_theme").textContent = t.themeLbl; $("#s_cart").textContent = t.cartLbl; $("#cart_desc").textContent = t.cartDesc;
+  $("#s_lang").textContent = t.langLbl; $("#s_theme").textContent = t.themeLbl;
   for (const b of document.querySelectorAll("#langseg button")) b.classList.toggle("on", b.dataset.l === L);
   $("#l_fav").textContent = t.navFav; $("#f_title").textContent = t.favTitle;
   if (typeof renderFavs === "function" && !$("#favView").hidden) renderFavs();
@@ -447,11 +436,6 @@ function applyTheme(th) {
   for (const b of document.querySelectorAll("#themes button")) b.classList.toggle("on", b.dataset.th === th);
   try { if (window.Native && Native.setBars) Native.setBars(THEMES[th][0], THEMES[th][1]); } catch (e) {}
 }
-document.addEventListener("click", (e) => {
-  const b = e.target.closest && e.target.closest("[data-login]");
-  if (!b) return;
-  try { Native.cartLogin(b.dataset.login); } catch (_) { location.href = { amazon: "https://www.amazon.eg/", noon: "https://www.noon.com/egypt-en/", jumia: "https://www.jumia.com.eg/" }[b.dataset.login]; }
-});
 $("#themes").onclick = (e) => { const b = e.target.closest("button[data-th]"); if (b) { setPref("theme", b.dataset.th); applyTheme(b.dataset.th); } };
 applyTheme(pref("theme"));
 $("#langseg").onclick = (e) => { const l = e.target.dataset && e.target.dataset.l; if (l && l !== L) { L = l; setPref("lang", L); applyLang(); if ($("#sheet").classList.contains("on")) $("#gear").click(); } };
@@ -474,9 +458,9 @@ function render(r, done) {
     h += `<div class="podium">`;
     r.top3.forEach((o, i) => {
       const off = o.old_price && o.old_price > o.price ? `<div class="old">${money(o.old_price)}</div><div class="save">${fmt(t.save, { n: money(o.old_price - o.price) })}</div>` : "";
-      h += `<a class="pc r${i + 1}" href="${esc(o.url)}">${heart(o)}<div class="medal">${["🥇", "🥈", "🥉"][i]}</div>${img(o)}
+      h += `<a class="pc r${i + 1}" href="${esc(o.url)}">${heart(o)}${cartBtn(o)}<div class="medal">${["🥇", "🥈", "🥉"][i]}</div>${img(o)}
         <div class="t"><div class="ttl">${esc(o.title)}</div><div class="src">${badge(o)} ${esc(o.source)}${flags(o)}</div></div>
-        <div class="pend">${priceRow(o, `<div><div class="p">${money(o.price)}</div>${off}</div>`)}</div></a>`;
+        <div style="text-align:end"><div class="p">${money(o.price)}</div>${off}</div></a>`;
     });
     h += `</div>`;
   } else h += `<div class="empty">${done ? t.noneDone : t.none}</div>`;
@@ -484,8 +468,8 @@ function render(r, done) {
   const rest = r.offers.filter((o) => !r.top3.includes(o));
   if (rest.length) {
     h += `<details><summary>${fmt(t.all, { n: r.offers.length })}</summary>`;
-    for (const o of rest) h += `<a class="row" href="${esc(o.url)}">${heart(o)}${img(o)}<div class="t"><div class="ttl">${esc(o.title)}</div>
-      <div class="src">${badge(o)} ${esc(o.source)}${flags(o)}</div></div>${priceRow(o, `<div class="p">${money(o.price)}</div>`)}</a>`;
+    for (const o of rest) h += `<a class="row" href="${esc(o.url)}">${heart(o)}${cartBtn(o)}${img(o)}<div class="t"><div class="ttl">${esc(o.title)}</div>
+      <div class="src">${badge(o)} ${esc(o.source)}${flags(o)}</div></div><div class="p">${money(o.price)}</div></a>`;
     h += `</details>`;
   }
   if (done && r.hidden) h += `<div class="muted">${fmt(t.hidden, { n: r.hidden })}</div>`;
@@ -573,47 +557,32 @@ const favs = () => { if (!FAVS) { try { FAVS = JSON.parse(pref("favs", "[]")) ||
 const isFav = (url) => favs().some((f) => f.url === url);
 function saveFavs() { setPref("favs", JSON.stringify(favs())); syncFavCount(); }
 function syncFavCount() { const n = favs().length; $("#favcnt").hidden = !n; $("#favcnt").textContent = n; }
-// 🛒 add to cart: the app presses the store's own "Add to cart" in its signed-in browser (Settings → 🛒 Store accounts),
-// so the item lands in your real Amazon / noon / Jumia cart — the same cart the store app shows.
+// 🛒 open the item straight in the store's own app (Amazon: adds it to the cart)
 const CART_APPS = [
-  { re: /(^|\.)amazon\.eg$/, key: "amazon", pkgs: "com.amazon.mShop.android.shopping,in.amazon.mShop.android.shopping", name: "Amazon" },
-  { re: /(^|\.)noon\.com$/, key: "noon", pkgs: "com.noon.buyerapp", name: "noon" },
-  { re: /(^|\.)jumia\.com\.eg$/, key: "jumia", pkgs: "com.jumia.android", name: "Jumia" },
+  { re: /(^|\.)amazon\.eg$/, pkgs: "com.amazon.mShop.android.shopping,in.amazon.mShop.android.shopping", name: "Amazon",
+    link: (u) => { const m = u.match(/\/(?:dp|gp\/product)\/([A-Z0-9]{10})/i); return m ? "https://www.amazon.eg/gp/aws/cart/add.html?ASIN.1=" + m[1].toUpperCase() + "&Quantity.1=1" : u; } },
+  { re: /(^|\.)noon\.com$/, pkgs: "com.noon.buyerapp", name: "noon", link: (u) => u },
+  { re: /(^|\.)jumia\.com\.eg$/, pkgs: "com.jumia.android", name: "Jumia", link: (u) => u },
 ];
+const appCache = {};
 function cartApp(url) {
   let h = ""; try { h = new URL(url).hostname; } catch (_) { return null; }
-  return CART_APPS.find((x) => x.re.test(h)) || null;
+  const a = CART_APPS.find((x) => x.re.test(h));
+  if (!a) return null;
+  if (!(a.pkgs in appCache)) { try { appCache[a.pkgs] = window.Native && Native.hasApp ? Native.hasApp(a.pkgs) : ""; } catch (_) { appCache[a.pkgs] = ""; } }
+  return appCache[a.pkgs] ? Object.assign({ pkg: appCache[a.pkgs] }, a) : null;   // only when the app is installed
 }
 function cartBtn(o) {
   const a = cartApp(o.url);
-  return a ? `<button type="button" class="cart" data-u="${esc(o.url)}" aria-label="Add to ${a.name} cart" title="${a.name}">🛒<small>+</small></button>` : "";
+  return a ? `<button type="button" class="cart" data-u="${esc(o.url)}" aria-label="${a.name}" title="${a.name}">🛒</button>` : "";
 }
-// price on one side, 🛒 on the other
-const priceRow = (o, inner) => `<div class="prow">${inner}${cartBtn(o)}</div>`;
-let cartSeq = 0;
-const cartWait = new Map();
-window.__cartDone = (id, st) => {
-  const b = cartWait.get(id); cartWait.delete(id);
-  if (!b) return;
-  b.classList.remove("busy");
-  b.classList.toggle("done", st === "ok");
-  b.innerHTML = st === "ok" ? "✅" : "🛒<small>+</small>";
-  if (st === "ok") setTimeout(() => { b.classList.remove("done"); b.innerHTML = "✅"; }, 1500);
-};
 document.addEventListener("click", (e) => {
   const b = e.target.closest && e.target.closest(".cart");
   if (!b) return;
   e.preventDefault(); e.stopPropagation();
-  const a = cartApp(b.dataset.u); if (!a || b.classList.contains("busy")) return;
-  if (window.Native && Native.cartAdd) {
-    const id = ++cartSeq; cartWait.set(id, b);
-    b.classList.add("busy"); b.innerHTML = "⏳";
-    Native.cartAdd(id, b.dataset.u);
-    return;
-  }
-  // older app shell: open the product in the store app
-  let pkg = ""; try { pkg = Native.hasApp ? Native.hasApp(a.pkgs) : ""; } catch (_) {}
-  try { Native.openApp(b.dataset.u, pkg); } catch (_) { location.href = b.dataset.u; }
+  const a = cartApp(b.dataset.u); if (!a) return;
+  const link = a.link(b.dataset.u);
+  try { Native.openApp(link, a.pkg); } catch (_) { location.href = link; }
 }, true);
 function heart(o) {
   OFFERS.set(o.url, o);
@@ -647,8 +616,8 @@ function renderFavs() {
   const day = (ms) => new Date(ms).toLocaleDateString(L === "ar" ? "ar-EG" : "en-GB", { day: "numeric", month: "short" });
   $("#f_out").innerHTML = list.map((o) => { OFFERS.set(o.url, o); return `<a class="fr" href="${esc(o.url)}">${img(o)}
     <div class="t"><div class="ttl">${esc(o.title)}</div><div class="src">${esc(o.source)} · ${fmt(t.savedOn, { d: day(o.savedAt) })}</div></div>
-    <div style="text-align:end">${priceRow(o, `<div><div class="p">${money(o.price)}</div>${o.old_price && o.old_price > o.price ? `<div class="old">${money(o.old_price)}</div>` : ""}</div>`)}</div>
-    <button type="button" class="fav on rm" data-u="${esc(o.url)}" aria-label="remove">✕</button></a>`; }).join("");
+    <div style="text-align:end"><div class="p">${money(o.price)}</div>${o.old_price && o.old_price > o.price ? `<div class="old">${money(o.old_price)}</div>` : ""}</div>
+    ${cartBtn(o)}<button type="button" class="fav on rm" data-u="${esc(o.url)}" aria-label="remove">✕</button></a>`; }).join("");
 }
 $("#nav_fav").onclick = () => { showView("fav"); renderFavs(); };
 
@@ -729,8 +698,8 @@ function renderDeals(done = true) {
   list = list.slice().sort(by[dealSort]).slice(0, 120);
   shownDeals = list;
   if (!list.length) { $("#d_out").innerHTML = done ? `<div class="empty">${d.deals.length ? t.rNone : t.dealsNone}</div>` : ""; return; }
-  $("#d_out").innerHTML = `<div class="dg">${list.map((o) => `<a class="dc${o.tag === "mega" ? " is-mega" : ""}" href="${esc(o.url)}">${o.pct ? `<span class="off">-${o.pct}%</span>` : ""}${o.tag === "mega" ? `<span class="megab">🟡 ${t.mega}</span>` : ""}${heart(o)}<button type="button" class="share" data-u="${esc(o.url)}" aria-label="WhatsApp">📤</button>${img(o)}
-    <div class="ttl">${esc(o.title)}</div>${priceRow(o, `<div><div class="p">${money(o.price)}</div>${o.old_price && o.old_price > o.price ? `<div class="old">${money(o.old_price)}</div>` : ""}</div>`)}
+  $("#d_out").innerHTML = `<div class="dg">${list.map((o) => `<a class="dc${o.tag === "mega" ? " is-mega" : ""}" href="${esc(o.url)}">${o.pct ? `<span class="off">-${o.pct}%</span>` : ""}${o.tag === "mega" ? `<span class="megab">🟡 ${t.mega}</span>` : ""}${heart(o)}<button type="button" class="share" data-u="${esc(o.url)}" aria-label="WhatsApp">📤</button>${cartBtn(o)}${img(o)}
+    <div class="ttl">${esc(o.title)}</div><div class="p">${money(o.price)}</div>${o.old_price && o.old_price > o.price ? `<div class="old">${money(o.old_price)}</div>` : ""}
     <div class="src">${esc(o.source)}</div></a>`).join("")}</div>`;
 }
 

@@ -12,7 +12,7 @@ import java.net.URL
  */
 object WebFiles {
     const val BRIDGE_VERSION = 1
-    val FILES = listOf("index.html", "engine.js", "stores.json", "synonyms.json", "icon.svg", "cartbot.js")
+    val FILES = listOf("index.html", "engine.js", "stores.json", "synonyms.json", "icon.svg")
     private const val RAW = "https://raw.githubusercontent.com/${BuildConfig.UPDATE_REPO}/main/web/"
 
     fun dir(ctx: Context) = File(ctx.filesDir, "web")
