@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- JAMA: four app tiles (Arkhas, Halal, English, Quran Garden) with a download arrow. 108dp canvas, art inside the safe zone. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp" android:height="108dp"
+    android:viewportWidth="108" android:viewportHeight="108">
+    <path android:fillColor="#FF6A2B" android:pathData="M32,30 h18 a4,4 0 0 1 4,4 v0 h0 v14 a4,4 0 0 1 -4,4 h-18 a4,4 0 0 1 -4,-4 v-14 a4,4 0 0 1 4,-4 z" />
+    <path android:fillColor="#10B981" android:pathData="M60,30 h16 a4,4 0 0 1 4,4 v14 a4,4 0 0 1 -4,4 h-16 a4,4 0 0 1 -4,-4 v-14 a4,4 0 0 1 4,-4 z" />
+    <path android:fillColor="#38BDF8" android:pathData="M32,56 h18 a4,4 0 0 1 4,4 v14 a4,4 0 0 1 -4,4 h-18 a4,4 0 0 1 -4,-4 v-14 a4,4 0 0 1 4,-4 z" />
+    <path android:fillColor="#FFFFFF" android:pathData="M60,56 h16 a4,4 0 0 1 4,4 v14 a4,4 0 0 1 -4,4 h-16 a4,4 0 0 1 -4,-4 v-14 a4,4 0 0 1 4,-4 z" />
+    <path android:fillColor="#6C3BFF" android:pathData="M66,60 h4 v8 h4 l-6,7 l-6,-7 h4 z" />
+</vector>

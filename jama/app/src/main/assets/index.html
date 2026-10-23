@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>JAMA</title>
+<style>
+:root{--bg:#f5f3ff;--card:#fff;--ink:#17122b;--muted:#6f6a8a;--line:#e6e1fb;--g1:#6c3bff;--g2:#00b4ff;--grad:linear-gradient(120deg,var(--g1),var(--g2));--glow:#6c3bff40;--ok:#10b981;--hot:#ff2d63}
+@media (prefers-color-scheme:dark){:root{--bg:#0f0b1e;--card:#1a1530;--ink:#efeaff;--muted:#a39dc6;--line:#2e2850;--glow:#6c3bff66}}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Cairo",system-ui,"Noto Sans Arabic",sans-serif;line-height:1.5}
+[hidden]{display:none!important}
+header{background:var(--grad);color:#fff;padding:18px 18px 26px;border-radius:0 0 28px 28px;box-shadow:0 10px 28px var(--glow);position:relative;overflow:hidden}
+header:after{content:"";position:absolute;width:190px;height:190px;border-radius:50%;background:#ffffff22;top:-80px;inset-inline-end:-50px}
+.top{display:flex;align-items:center;justify-content:space-between;position:relative;z-index:1}
+.logo{font-size:30px;font-weight:900;letter-spacing:1px}
+.logo small{display:block;font-size:13px;font-weight:500;opacity:.9;letter-spacing:0}
+.lang{border:0;background:#ffffff2e;color:#fff;font:inherit;font-weight:700;border-radius:12px;padding:6px 12px}
+.wrap{max-width:640px;margin:0 auto;padding:0 16px 30px}
+.actions{display:flex;gap:8px;margin:-18px 0 12px;position:relative;z-index:2}
+.btn{font:inherit;font-weight:800;font-size:15px;border:0;border-radius:16px;padding:12px 14px;background:var(--grad);color:#fff;box-shadow:0 6px 18px var(--glow)}
+.btn.alt{background:var(--card);color:var(--ink);box-shadow:0 2px 10px #0000001a}
+.btn:disabled{opacity:.55}
+.actions .btn{flex:1}
+.sub{color:var(--muted);font-size:13px;text-align:center;margin:4px 0 10px}
+.card{background:var(--card);border-radius:20px;padding:14px;margin-bottom:12px;box-shadow:0 4px 16px #0000000f;display:flex;gap:12px;align-items:center;position:relative}
+.ic{width:58px;height:58px;flex:none;border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:30px;background:var(--bg)}
+.t{flex:1;min-width:0}
+.t b{display:block;font-size:16px}
+.t .d{font-size:12.5px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.v{font-size:12px;margin-top:3px;display:flex;flex-wrap:wrap;gap:4px}
+.pill{border-radius:999px;padding:0 8px;font-weight:700;background:var(--bg);color:var(--muted)}
+.pill.new{background:#ff2d6318;color:var(--hot)}.pill.ok{background:#10b98118;color:var(--ok)}
+.go{flex:none;font:inherit;font-weight:800;font-size:13.5px;border:0;border-radius:14px;padding:9px 12px;background:var(--grad);color:#fff;min-width:86px}
+.go.open{background:var(--bg);color:var(--ink)}
+.go.upd{background:linear-gradient(120deg,#ff6a2b,#ff2d75)}
+.bar{position:absolute;inset-inline:14px;bottom:6px;height:4px;border-radius:4px;background:var(--line);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--grad);width:0;transition:width .3s}
+.err{font-size:11.5px;color:var(--hot)}
+.box{background:var(--card);border-radius:20px;padding:14px;margin-top:16px;box-shadow:0 4px 16px #0000000f}
+.row{display:flex;align-items:center;gap:10px}
+.row .t{font-size:14px}
+.sw{position:relative;display:inline-block;width:48px;height:28px;flex:none}
+.sw input{opacity:0;width:0;height:0}
+.sw i{position:absolute;inset:0;border-radius:14px;background:var(--line);transition:.2s}
+.sw i:before{content:"";position:absolute;width:22px;height:22px;top:3px;inset-inline-start:3px;border-radius:50%;background:#fff;transition:.2s;box-shadow:0 1px 3px #0003}
+.sw input:checked+i{background:var(--grad)}
+.sw input:checked+i:before{transform:translateX(20px)}
+[dir=rtl] .sw input:checked+i:before{transform:translateX(-20px)}
+.warn{background:#ff2d6312;border-radius:14px;padding:10px 12px;margin-bottom:12px;font-size:13.5px;display:flex;gap:10px;align-items:center}
+.warn .go{min-width:0}
+.credit{text-align:center;color:var(--muted);font-size:12.5px;margin-top:18px;opacity:.85}
+.pop{position:fixed;inset:0;z-index:20;background:#0007;display:flex;align-items:center;justify-content:center;padding:24px}
+.popbox{background:var(--card);border-radius:24px;padding:20px 18px 16px;max-width:340px;width:100%;text-align:center;box-shadow:0 18px 50px #0006;animation:pin .25s cubic-bezier(.2,1.4,.4,1)}
+.popbox .e{font-size:44px;line-height:1.1}
+.popbox b{display:block;font-size:18px;margin:6px 0 4px}
+.popb{display:flex;gap:8px;margin-top:14px}.popb .btn{flex:1}
+@keyframes pin{from{transform:scale(.85);opacity:0}}
+</style>
+</head>
+<body>
+<header>
+  <div class="top">
+    <div class="logo">🧩 JAMA<small id="tagline"></small></div>
+    <button class="lang" id="lang">EN</button>
+  </div>
+</header>
+<div class="wrap">
+  <div class="actions">
+    <button class="btn" id="all"></button>
+    <button class="btn alt" id="check"></button>
+  </div>
+  <div class="sub" id="sub"></div>
+  <div class="warn" id="perm" hidden><span id="permT" style="flex:1"></span><button class="go" id="permB"></button></div>
+  <div id="list"></div>
+
+  <div class="box">
+    <div class="row">
+      <div class="t"><b id="autoT"></b><div class="d" id="autoD" style="white-space:normal;font-size:12.5px;color:var(--muted)"></div></div>
+      <label class="sw"><input type="checkbox" id="auto"><i></i></label>
+    </div>
+  </div>
+  <div class="credit" dir="ltr"><span id="ver"></span><br>Designed by Muhammad Toffaha</div>
+</div>
+
+<div class="pop" id="pop" hidden><div class="popbox">
+  <div class="e">🎁</div><b id="popT"></b><div class="sub" id="popD" style="margin:0"></div>
+  <div class="popb"><button class="btn" id="popGo"></button><button class="btn alt" id="popLater"></button></div>
+</div></div>
+
+<script>
+const N = window.Jama || null;
+const $ = (s) => document.querySelector(s);
+const T = {
+  ar: { tag: "كل تطبيقاتك في مكان واحد", all: "🔄 حدّث الكل", check: "🔍 دوّر على تحديثات", checking: "⏳ بندوّر…",
+    sub: "آخر فحص: {t}", never: "لسه", allGood: "✅ كل التطبيقات محدّثة", nUpd: "🎁 {n} تحديث جديد",
+    install: "⬇️ ثبّت", update: "🔄 حدّث", open: "▶️ افتح", queued: "⏳ في الدور", downloading: "⬇️ {p}%", installing: "📦 بيثبّت…", confirm: "👆 وافق",
+    notInst: "مش متثبّت", cur: "عندك {v}", latest: "الجديد {v}", upToDate: "✓ أحدث نسخة", err: "⚠️ {e}",
+    autoT: "🤫 تحديث تلقائي صامت للكل", autoD: "مرة كل يوم على الواي فاي: JAMA بيحدّث كل التطبيقات ونفسه لوحده. أول مرة لكل تطبيق أندرويد ممكن يطلب موافقة واحدة.",
+    perm: "🔓 اسمح لـ JAMA بتثبيت التطبيقات مرة واحدة", permB: "اسمح",
+    popT: "{n} تحديث جديد 🎉", popD: "في نسخ أحدث من: {names}", popGo: "🔄 حدّث الكل", later: "بعدين", ver: "JAMA {v}", browser: "افتح JAMA على أندرويد عشان تثبّت التطبيقات." },
+  en: { tag: "All your apps in one place", all: "🔄 Update all", check: "🔍 Check for updates", checking: "⏳ Checking…",
+    sub: "Last check: {t}", never: "never", allGood: "✅ All apps are up to date", nUpd: "🎁 {n} new update(s)",
+    install: "⬇️ Install", update: "🔄 Update", open: "▶️ Open", queued: "⏳ Queued", downloading: "⬇️ {p}%", installing: "📦 Installing…", confirm: "👆 Confirm",
+    notInst: "Not installed", cur: "You have {v}", latest: "New {v}", upToDate: "✓ Up to date", err: "⚠️ {e}",
+    autoT: "🤫 Silent auto-update for all", autoD: "Once a day on Wi-Fi: JAMA updates every app and itself. The first time per app Android may ask once.",
+    perm: "🔓 Allow JAMA to install apps (once)", permB: "Allow",
+    popT: "{n} new update(s) 🎉", popD: "Newer versions of: {names}", popGo: "🔄 Update all", later: "Later", ver: "JAMA {v}", browser: "Open JAMA on Android to install the apps." },
+};
+let L = "ar", S = null, popShown = false;
+try { L = localStorage.getItem("lang") || "ar"; } catch (e) {}
+const fmt = (s, v) => s.replace(/\{(\w+)\}/g, (_, k) => (v[k] ?? ""));
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const nm = (a) => L === "ar" ? a.nameAr : a.nameEn;
+
+function btn(a, t) {
+  const busy = { queued: t.queued, downloading: fmt(t.downloading, { p: a.pct < 0 ? "…" : a.pct }), installing: t.installing, confirm: t.confirm }[a.status];
+  if (busy) return `<button class="go" disabled>${busy}</button>`;
+  if (!a.installed) return a.latest ? `<button class="go" data-i="${a.id}">${t.install}</button>` : "";
+  if (a.update) return `<button class="go upd" data-i="${a.id}">${t.update}</button>`;
+  return a.id === "jama" ? "" : `<button class="go open" data-o="${a.id}">${t.open}</button>`;
+}
+
+function render() {
+  const t = T[L];
+  document.documentElement.lang = L; document.documentElement.dir = L === "ar" ? "rtl" : "ltr";
+  $("#lang").textContent = L === "ar" ? "EN" : "ع";
+  $("#tagline").textContent = t.tag; $("#all").textContent = t.all;
+  $("#check").textContent = S && S.checking ? t.checking : t.check;
+  $("#autoT").textContent = t.autoT; $("#autoD").textContent = t.autoD;
+  $("#permT").textContent = t.perm; $("#permB").textContent = t.permB;
+  if (!S) { $("#sub").textContent = N ? "" : t.browser; return; }
+  $("#ver").textContent = fmt(t.ver, { v: S.version });
+  $("#auto").checked = !!S.auto;
+  $("#perm").hidden = !!S.canInstall;
+  const upd = S.apps.filter((a) => a.update);
+  $("#all").disabled = !upd.length;
+  const when = S.checkedAt ? new Date(S.checkedAt).toLocaleTimeString(L === "ar" ? "ar-EG-u-nu-latn" : "en-GB", { hour: "2-digit", minute: "2-digit" }) : t.never;
+  $("#sub").textContent = (upd.length ? fmt(t.nUpd, { n: upd.length }) : S.checkedAt ? t.allGood : "") + " · " + fmt(t.sub, { t: when });
+  $("#list").innerHTML = S.apps.map((a) => {
+    const v = a.installed ? `<span class="pill ${a.update ? "" : "ok"}">${fmt(t.cur, { v: esc(a.curName) })}</span>` : `<span class="pill">${t.notInst}</span>`;
+    const n = a.latest ? (a.update || !a.installed ? `<span class="pill new">${fmt(t.latest, { v: a.latestName })}</span>` : `<span class="pill ok">${t.upToDate}</span>`) : "";
+    const bar = a.status === "downloading" ? `<div class="bar"><i style="width:${Math.max(3, a.pct)}%"></i></div>` : "";
+    return `<div class="card"><div class="ic">${a.emoji}</div><div class="t"><b>${esc(nm(a))}</b><div class="d">${esc(L === "ar" ? a.descAr : a.descEn)}</div>
+      <div class="v">${v}${n}</div>${a.status === "error" && a.error ? `<div class="err">${esc(fmt(t.err, { e: a.error }))}</div>` : ""}</div>${btn(a, t)}${bar}</div>`;
+  }).join("");
+  // 🎁 pop-up once per app start when updates exist
+  if (!popShown && upd.length && S.checkedAt) {
+    popShown = true;
+    $("#popT").textContent = fmt(t.popT, { n: upd.length });
+    $("#popD").textContent = fmt(t.popD, { names: upd.map(nm).join("، ") });
+    $("#popGo").textContent = t.popGo; $("#popLater").textContent = t.later;
+    $("#pop").hidden = false;
+  }
+}
+
+window.onJama = (s) => { const was = S && S.checking; S = s; if (was && !s.checkedAt) S.checking = true; render(); };
+$("#list").onclick = (e) => {
+  const i = e.target.closest("[data-i]"), o = e.target.closest("[data-o]");
+  if (i && N) N.install(i.dataset.i);
+  if (o && N) N.open(o.dataset.o);
+};
+$("#all").onclick = () => N && N.updateAll();
+$("#check").onclick = () => { if (!N) return; S && (S.checking = true); render(); N.refresh(); };
+$("#auto").onchange = () => N && N.setAuto($("#auto").checked);
+$("#permB").onclick = () => N && N.allowInstalls();
+$("#lang").onclick = () => { L = L === "ar" ? "en" : "ar"; try { localStorage.setItem("lang", L); } catch (e) {} render(); };
+$("#popLater").onclick = () => { $("#pop").hidden = true; };
+$("#popGo").onclick = () => { $("#pop").hidden = true; N && N.updateAll(); };
+window.jamaBack = () => { if (!$("#pop").hidden) { $("#pop").hidden = true; return true; } return false; };
+
+if (N) { try { S = JSON.parse(N.state()); } catch (e) {} S && (S.checking = true); N.refresh(); }
+render();
+</script>
+</body>
+</html>

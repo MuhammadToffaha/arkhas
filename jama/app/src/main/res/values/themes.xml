@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="brand">#6C3BFF</color>
+    <color name="brand_dark">#4B1FD1</color>
+    <color name="bg">#F5F3FF</color>
+    <style name="Theme.Jama" parent="Theme.AppCompat.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/brand</item>
+        <item name="colorPrimaryDark">@color/brand_dark</item>
+        <item name="colorAccent">@color/brand</item>
+        <item name="android:windowBackground">@color/bg</item>
+    </style>
+</resources>
