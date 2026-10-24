@@ -5,7 +5,7 @@ The app shows that file in its "أكواد" tab; nothing runs on a server.
 Source: yajny.com Egypt (ar-eg) — every store page lists its coupon codes in the HTML
 (<a class="show-code-btn" data-id=CODE data-name=STORE data-logo=… data-link=… data-date=…>).
 """
-import datetime, html, json, re, sys, urllib.request
+import datetime, html, json, re, sys, urllib.parse, urllib.request
 
 BASE = "https://yajny.com"
 UA = {"User-Agent": "Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 Chrome/126 Mobile Safari/537.36",
@@ -67,7 +67,7 @@ def main(path):
     found, ok = [], 0
     found += parse(home, pages[1], today)
     for s in slugs:
-        url = f"{BASE}/ar-eg/store/{urllib.request.quote(s.strip(), safe='-_')}"
+        url = f"{BASE}/ar-eg/store/{urllib.request.quote(urllib.parse.unquote(s).strip(), safe='-_')}"
         try:
             found += parse(get(url), url, today); ok += 1
         except Exception as e:
@@ -77,10 +77,16 @@ def main(path):
     for c in found:
         if c["expires"] and c["expires"] < today.isoformat():
             continue
+        if not c.get("store"):
+            continue
+        # Egypt only: drop codes for Saudi / UAE / global sites listed on the same pages
+        blob = (c.get("link", "") + " " + c.get("title", "")).lower()
+        if re.search(r"\.sa\b|\.sa/|//ae\.|//uae\.|\.ae/|/world/|السعودية|الإمارات|ريال|درهم|\bsar\b|\baed\b", blob):
+            continue
         k = (c["store"], c["code"].upper())
         if k not in best or len(c["title"]) > len(best[k]["title"]) or (c["expires"] and not best[k]["expires"]):
             best[k] = {**best.get(k, {}), **{x: y for x, y in c.items() if y}}
-    codes = sorted(best.values(), key=lambda c: (c["store"], -c.get("used", 0)))
+    codes = sorted(best.values(), key=lambda c: (c.get("store", ""), -c.get("used", 0)))
     if not codes:
         print(f"::error::no codes found ({len(found)} raw, {ok}/{len(slugs)} pages) — keeping the old file"); return 1
     json.dump({"updated": datetime.datetime.utcnow().replace(microsecond=0).isoformat() + "Z", "country": "eg",
