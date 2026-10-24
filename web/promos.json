@@ -1,1 +1,178 @@
-{"updated":"","codes":[]}
+{
+ "updated": "2026-10-24T10:46:23Z",
+ "country": "eg",
+ "sources": [
+  "yajny.com/ar-eg"
+ ],
+ "codes": [
+  {
+   "store": "تو بي",
+   "logo": "https://yajny.nyc3.digitaloceanspaces.com/public/2b-website-english-logo-3bd98246-af39-4916-85e1-88579f780cfb.webp",
+   "link": "https://2b.com.eg/ar/",
+   "code": "DD55",
+   "title": "احصل على خصم 10% على طلبك (حتى 100 جنيه) - 2B",
+   "expires": "2027-12-31",
+   "page": "https://yajny.com/ar-eg/coupons",
+   "source": "yajny"
+  },
+  {
+   "store": "تو بي",
+   "logo": "https://yajny.nyc3.digitaloceanspaces.com/public/2b-website-english-logo-3bd98246-af39-4916-85e1-88579f780cfb.webp",
+   "link": "https://2b.com.eg/ar/offers/valu-12-installment.html",
+   "code": "DD56",
+   "title": "2B | تقسيط حتى 12 شهر بدون فوائد مع ڤاليو",
+   "expires": "2026-12-31",
+   "page": "https://yajny.com/ar-eg/store/2b",
+   "source": "yajny"
+  },
+  {
+   "store": "جوميا",
+   "logo": "https://yajny.nyc3.digitaloceanspaces.com/public/store/jumia-6bf1ba21-7600-4ad1-bda4-772a273376c4.png",
+   "link": "https://yajny.com/ar-eg/store/jumia-egypt",
+   "code": "AYJNN6",
+   "title": "خصم %10",
+   "expires": "2026-12-31",
+   "used": 3,
+   "page": "https://yajny.com/ar-eg/store/jumia-egypt",
+   "source": "yajny"
+  },
+  {
+   "store": "جيت باك جلوبال",
+   "logo": "https://yajny.nyc3.digitaloceanspaces.com/public/jetpac-global-website-english-logo-c4e9706b-60ff-4b8c-bed2-3bf554af78b7.webp",
+   "link": "https://www.jetpacglobal.com/",
+   "code": "JP96",
+   "title": "كود خصم %10",
+   "page": "https://yajny.com/ar-eg/coupons",
+   "source": "yajny"
+  },
+  {
+   "store": "ديفاكتو مصر",
+   "logo": "https://yajny.nyc3.digitaloceanspaces.com/public/defacto-egypt-website-english-logo-e4c70813-259c-480c-bca3-6f34bb468850.webp",
+   "link": "https://www.defacto.com.eg/ar-eg",
+   "code": "DEFA30",
+   "title": "كود ديفاكتو لفترة محدودة: خصم 10% على الطلبات اليوم",
+   "expires": "2026-12-31",
+   "used": 1,
+   "page": "https://yajny.com/ar-eg/store/defacto",
+   "source": "yajny"
+  },
+  {
+   "store": "ديكاتلون مصر",
+   "logo": "https://yajny.nyc3.digitaloceanspaces.com/public/decathlon-egypt-website-english-logo-138c7d44-b4c5-4f56-a936-a63f92ad15c7.webp",
+   "link": "https://www.decathlon.eg/ar/",
+   "code": "YJ2",
+   "title": "خصم %10",
+   "expires": "2027-12-31",
+   "page": "https://yajny.com/ar-eg/store/Decathlon",
+   "source": "yajny"
+  },
+  {
+   "store": "راية شوب",
+   "logo": "https://yajny.nyc3.digitaloceanspaces.com/public/store/raya-shop-492d9886-7070-4516-8c6e-c58e6c480999.png",
+   "link": "https://www.rayashop.com/ar",
+   "code": "YJ1",
+   "title": "كوبون لخصم %10 على جميع الطلبات حتى 200جنية",
+   "expires": "2026-12-31",
+   "used": 2,
+   "page": "https://yajny.com/ar-eg/store/rayashop",
+   "source": "yajny"
+  },
+  {
+   "store": "سارة ميك أب",
+   "logo": "https://yajny.nyc3.digitaloceanspaces.com/public/download-66-8ede625b-a1b7-4b2e-8ee0-b4c1bf542ba9.png",
+   "link": "https://sara-makeup.com/ar/",
+   "code": "YJ",
+   "title": "كود خصم %10",
+   "page": "https://yajny.com/ar-eg/coupons",
+   "source": "yajny"
+  },
+  {
+   "store": "ستيفانو",
+   "logo": "https://yajny.nyc3.digitaloceanspaces.com/public/download-64-45fc3f03-85c4-490f-9d83-e4dd00273e35.png",
+   "link": "https://stevanosa.com/ar",
+   "code": "YJ",
+   "title": "كود خصم %10",
+   "page": "https://yajny.com/ar-eg/coupons",
+   "source": "yajny"
+  },
+  {
+   "store": "سيلين",
+   "logo": "https://yajny.nyc3.digitaloceanspaces.com/public/download-65-2a693ec7-6a2d-416e-8083-bf31722a467c.png",
+   "link": "https://selene-official.com/en\\ar",
+   "code": "AA62",
+   "title": "كود خصم %10",
+   "page": "https://yajny.com/ar-eg/coupons",
+   "source": "yajny"
+  },
+  {
+   "store": "طيران الجزيرة",
+   "logo": "https://yajny.nyc3.digitaloceanspaces.com/public/jazeera-airways-website-english-logo-8db4ee54-f941-447e-af28-76654335e218.webp",
+   "link": "https://www.jazeeraairways.com/ar-kw/flights",
+   "code": "ARBYJ910",
+   "title": "احصل على رحلات طيران اقتصادية وصفقات على طيران الجزيرة",
+   "expires": "2028-01-07",
+   "used": 1,
+   "page": "https://yajny.com/ar-eg/store/jazeeraairways",
+   "source": "yajny"
+  },
+  {
+   "store": "كنز",
+   "logo": "https://yajny.nyc3.digitaloceanspaces.com/public/download-72-fb9cff35-a710-4791-ae66-93b55b6ab62b.png",
+   "link": "https://kenzz.com/",
+   "code": "AAB101",
+   "title": "كود خصم يصل إلي %10",
+   "expires": "2027-12-31",
+   "page": "https://yajny.com/ar-eg/store/Kenzz-eg",
+   "source": "yajny"
+  },
+  {
+   "store": "ماجستيك فارما",
+   "logo": "https://yajny.nyc3.digitaloceanspaces.com/public/download-73-378780b0-7e2b-4253-8631-4aca43d36465.png",
+   "link": "https://e-majestic.com/ar",
+   "code": "A98",
+   "title": "كود خصم يصل إلي %10",
+   "expires": "2027-12-31",
+   "page": "https://yajny.com/ar-eg/store/Majestic%20Pharma-eg",
+   "source": "yajny"
+  },
+  {
+   "store": "مشاعر",
+   "logo": "https://yajny.nyc3.digitaloceanspaces.com/public/download-74-d7108c8a-af34-4748-bbf9-b6e5771e9691.png",
+   "link": "https://mashaer.store/ar",
+   "code": "SS37",
+   "title": "كود خصم يصل إلي %10",
+   "page": "https://yajny.com/ar-eg/coupons",
+   "source": "yajny"
+  },
+  {
+   "store": "نون مصر",
+   "logo": "https://yajny.nyc3.digitaloceanspaces.com/public/store/noon-53b95f5d-5591-43eb-a3cf-ac40abdca61c.png",
+   "link": "https://www.noon.com/egypt-ar/",
+   "code": "B65",
+   "title": "كود خصم يصل إلى %10",
+   "expires": "2026-12-31",
+   "page": "https://yajny.com/ar-eg/coupons",
+   "source": "yajny"
+  },
+  {
+   "store": "واي اب سبورت",
+   "logo": "https://yajny.nyc3.digitaloceanspaces.com/public/wayup-sports-eg-website-english-logo-00f540cd-e77b-4082-ac8c-64c5ac7ffdc0.webp",
+   "link": "https://wayupsports.com/ar",
+   "code": "ARABY67",
+   "title": "كود خصم يصل إلي %10",
+   "expires": "2026-12-31",
+   "page": "https://yajny.com/ar-eg/store/WayUp%20sports",
+   "source": "yajny"
+  },
+  {
+   "store": "وفرها",
+   "logo": "https://yajny.nyc3.digitaloceanspaces.com/public/store/waffarha-0b142f6d-377d-4fd4-8ae1-091e4e39c701.png",
+   "link": "https://waffarha.com/ar",
+   "code": "WF23",
+   "title": "كود وفرها مصر | كاش باك 10% حتى 25 جنيه",
+   "expires": "2026-12-26",
+   "page": "https://yajny.com/ar-eg/coupons",
+   "source": "yajny"
+  }
+ ]
+}
