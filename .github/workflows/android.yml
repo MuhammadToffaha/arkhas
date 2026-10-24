@@ -5,7 +5,7 @@ name: android-apk
 on:
   push:
     branches: [main]
-    paths: ["android/**", "web/**", ".github/workflows/android.yml"]
+    paths: ["android/**", "web/**", "!web/promos.json", ".github/workflows/android.yml"]
   workflow_dispatch:
 
 permissions:
