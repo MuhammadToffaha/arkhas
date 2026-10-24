@@ -198,6 +198,15 @@ input:focus{border-color:var(--accent);box-shadow:0 0 0 4px var(--glow)}
 .sw input:checked+i{background:var(--grad)}
 .sheet>div{border-radius:26px 26px 0 0}
 [hidden]{display:none!important}
+.promo{display:flex;gap:10px;align-items:center;background:var(--card);border-radius:18px;padding:10px;margin-top:10px;box-shadow:0 2px 12px #0000000c}
+.promo .pl{width:52px;height:52px;flex:none;border-radius:14px;background:#fff;display:flex;align-items:center;justify-content:center;overflow:hidden;font-size:24px}
+.promo .pl img{width:100%;height:100%;object-fit:contain}
+.promo .pt{flex:1;min-width:0}.promo .pt b{font-size:15px}
+.promo .pb{display:flex;flex-direction:column;gap:6px;align-items:stretch;flex:none}
+.pcode{font:inherit;font-weight:900;font-size:15px;letter-spacing:1px;border:2px dashed var(--accent);color:var(--accent);background:color-mix(in srgb,var(--accent) 8%,transparent);border-radius:12px;padding:6px 10px;min-width:88px}
+.pcode.ok{border-style:solid;background:#16a34a;border-color:#16a34a;color:#fff;letter-spacing:0}
+.popen{font-size:12.5px;text-align:center;text-decoration:none;color:var(--muted);font-weight:700}
+
 .qbox input{padding-left:14px;padding-right:14px}
 [dir=rtl] .qbox:not(.ltr) input{padding-left:44px}
 .qbox.ltr input,[dir=ltr] .qbox input{padding-right:44px}
@@ -255,6 +264,16 @@ html,body{overflow-x:hidden}
     <div id="f_out"></div>
   </section>
 
+  <section id="promoView" hidden>
+    <div class="dh"><h2 class="dt">🎟️ <span id="p_title"></span></h2>
+      <button class="dref" id="p_refresh"><b>↻</b></button></div>
+    <div class="muted" id="p_sub"></div>
+    <div class="chips" id="p_stores"></div>
+    <input id="p_q" type="search" dir="auto" autocomplete="off" style="width:100%;margin-top:8px">
+    <div id="p_out"></div>
+    <div class="muted" id="p_note" style="margin-top:10px;text-align:center"></div>
+  </section>
+
   <section id="dealsView" hidden>
     <div class="dh">
       <h2 class="dt"><span class="bolt">⚡</span> <span id="d_title"></span></h2>
@@ -286,6 +305,7 @@ html,body{overflow-x:hidden}
 <nav class="nav">
   <button id="nav_search" class="on"><b>🔍</b><span id="l_search"></span></button>
   <button id="nav_deals" class="flash"><b>⚡</b><span id="l_deals"></span></button>
+  <button id="nav_promo"><b>🎟️</b><span id="l_promo"></span></button>
   <button id="nav_fav"><b>❤️<i class="cnt" id="favcnt" hidden></i></b><span id="l_fav"></span></button>
   <button id="gear" aria-label="settings"><b>⚙️<i class="dot" id="dot" hidden></i></b><span id="l_gear"></span></button>
 </nav>
@@ -394,7 +414,7 @@ const T = {
     tgBadTok: "⚠️ الـ Token غلط — انسخه تاني من @BotFather", tgTimeout: "لسه مش لاقي الجروب — اكتب /arkhas في الجروب واضغط «دوّر على جروبي»",
     tgFind: "🔎 دوّر على جروبي", tgTest: "✉️ ابعت رسالة تجربة", tgNoChats: "مش لاقي الجروب — اكتب /arkhas في الجروب (البوت مش بيشوف الرسايل العادية) وحاول تاني",
     tgPicked: "✓ هيبعت لـ «{t}»", tgOk: "✓ الرسالة وصلت للجروب", tgErr: "⚠️ تليجرام: {e}", tgTestText: "✅ أرخص متوصل — العروض الكبيرة هتوصل هنا تلقائي",
-    tgSent: " · تليجرام: {n} اتبعت", tgFail: " · تليجرام فشل: {e}", alNever: "لسه مفيش فحص", alPerm: "⚠️ اسمح بالإشعارات للتطبيق من إعدادات الموبايل", navFav: "المفضلة", favTitle: "المفضلة", favSub: "{n} منتج محفوظ — السعر وقت الحفظ", favEmpty: "اضغط ♥ على أي منتج عشان يتحفظ هنا", savedOn: "اتحفظ {d}", favAdded: "اتضاف للمفضلة ❤️", favRemoved: "اتشال من المفضلة", refresh: "تحديث", waBtn: "واتساب", waHead: "🔥 عروض أرخص — {d}", waInstead: "بدل", waMore: "📲 من تطبيق أرخص", refresh: "تحديث", ddAll: "كل المتاجر", ddSome: "{n} متاجر مختارة", ddOne: "{s}", selAll: "تحديد الكل", selNone: "إلغاء الكل", navDeals: "عروض", dealsTitle: "عروض فلاش", dealsSub: "أكبر الخصومات من أشهر {n} مواقع في مصر — اتحدّثت {t}", dealsLoading: "جاري جلب العروض من {done}/{all} موقع…", dealsNone: "مفيش عروض دلوقتي — اضغط ↻", sortPct: "أكبر خصم", sortPrice: "الأرخص", sortSave: "أكبر توفير", allStores: "الكل", justNow: "الآن", minAgo: "من {m} دقيقة", banner: "🎉 نسخة جديدة {v} — اضغط للتحديث", openRel: "⬇️ تنزيل {v} من GitHub", relNote: "هتتفتح صفحة التنزيل — نزّل الملف وافتحه للتثبيت. بعد كده التحديث هيكون من جوه التطبيق", upd: "🔄 التحديثات", cur: "نسختك {v}", check: "تحقق من التحديث", checking: "جاري التحقق…", latest: "عندك أحدث نسخة ✓",
+    tgSent: " · تليجرام: {n} اتبعت", tgFail: " · تليجرام فشل: {e}", alNever: "لسه مفيش فحص", alPerm: "⚠️ اسمح بالإشعارات للتطبيق من إعدادات الموبايل", navFav: "المفضلة", navPromo: "أكواد", promoTitle: "أكواد الخصم", promoQ: "🔎 دوّر على متجر…", promoSub: "{n} كود من {s} متجر — اتحدّثت {t}", promoNone: "مفيش أكواد دلوقتي — اضغط ↻", promoCopy: "📋 انسخ", promoCopied: "✅ اتنسخ", promoOpen: "🛒 المتجر", promoExp: "ينتهي {d}", promoUsed: "استُخدم {n} مرة", promoAll: "الكل", promoNote: "الأكواد بتتجمّع كل يوم من مواقع الكوبونات المصرية (يجني). جرّب الكود عند الدفع — بعض الأكواد للعملاء الجدد بس.", promoErr: "تعذّر تحميل الأكواد", favTitle: "المفضلة", favSub: "{n} منتج محفوظ — السعر وقت الحفظ", favEmpty: "اضغط ♥ على أي منتج عشان يتحفظ هنا", savedOn: "اتحفظ {d}", favAdded: "اتضاف للمفضلة ❤️", favRemoved: "اتشال من المفضلة", refresh: "تحديث", waBtn: "واتساب", waHead: "🔥 عروض أرخص — {d}", waInstead: "بدل", waMore: "📲 من تطبيق أرخص", refresh: "تحديث", ddAll: "كل المتاجر", ddSome: "{n} متاجر مختارة", ddOne: "{s}", selAll: "تحديد الكل", selNone: "إلغاء الكل", navDeals: "عروض", dealsTitle: "عروض فلاش", dealsSub: "أكبر الخصومات من أشهر {n} مواقع في مصر — اتحدّثت {t}", dealsLoading: "جاري جلب العروض من {done}/{all} موقع…", dealsNone: "مفيش عروض دلوقتي — اضغط ↻", sortPct: "أكبر خصم", sortPrice: "الأرخص", sortSave: "أكبر توفير", allStores: "الكل", justNow: "الآن", minAgo: "من {m} دقيقة", banner: "🎉 نسخة جديدة {v} — اضغط للتحديث", openRel: "⬇️ تنزيل {v} من GitHub", relNote: "هتتفتح صفحة التنزيل — نزّل الملف وافتحه للتثبيت. بعد كده التحديث هيكون من جوه التطبيق", upd: "🔄 التحديثات", cur: "نسختك {v}", check: "تحقق من التحديث", checking: "جاري التحقق…", latest: "عندك أحدث نسخة ✓",
     newVer: "نسخة جديدة {v} متاحة ({mb} ميجا)", popT: "تحديث جديد {v} 🎉", popD: "نسخة أحدث من أرخص جاهزة — حدّث دلوقتي عشان تاخد آخر المميزات.", popGo: "⬇️ حدّث الآن", popLater: "بعدين", install: "⬇️ تنزيل وتثبيت {v}", downloading: "جاري التنزيل… {p}%", installing: "افتح شاشة التثبيت واضغط تثبيت",
     perm: "اسمح لـ أرخص بتثبيت التحديثات (فتحنا لك الإعداد) ثم ارجع واضغط تثبيت تاني", webBtn: "تحديث قائمة المتاجر", webSame: "قائمة المتاجر محدّثة ✓",
     webChanged: "تم تحديث المتاجر — جاري إعادة التحميل…", updErr: "تعذّر: {e}", exact: "✓ مطابق", similar: "≈ مشابه", other: "موديل مختلف", fewExact: "لقينا {n} بس مطابقين تمامًا — الباقي مشابه", egp: "ج.م", save: "وفّر {n}",
@@ -414,7 +434,7 @@ const T = {
     tgBadTok: "⚠️ Token is wrong — copy it again from @BotFather", tgTimeout: "Group not found yet — send /arkhas in the group, then tap “Find my group”",
     tgFind: "🔎 Find my group", tgTest: "✉️ Send test message", tgNoChats: "Group not found — send /arkhas in the group (bots don't see normal messages) and try again",
     tgPicked: "✓ Will post to “{t}”", tgOk: "✓ Message arrived in the group", tgErr: "⚠️ Telegram: {e}", tgTestText: "✅ Arkhas connected — big deals will be posted here automatically",
-    tgSent: " · Telegram: {n} sent", tgFail: " · Telegram failed: {e}", alNever: "No check yet", alPerm: "⚠️ Allow notifications for the app in phone settings", navFav: "Favourites", favTitle: "Favourites", favSub: "{n} saved items — price when saved", favEmpty: "Tap ♥ on any product to save it here", savedOn: "saved {d}", favAdded: "Added to favourites ❤️", favRemoved: "Removed from favourites", refresh: "Refresh", waBtn: "WhatsApp", waHead: "🔥 Arkhas deals — {d}", waInstead: "was", waMore: "📲 via Arkhas app", refresh: "Refresh", ddAll: "All stores", ddSome: "{n} stores selected", ddOne: "{s}", selAll: "Select all", selNone: "Clear all", navDeals: "Deals", dealsTitle: "Flash deals", dealsSub: "Biggest discounts from {n} top Egyptian sites — updated {t}", dealsLoading: "Fetching deals from {done}/{all} sites…", dealsNone: "No deals right now — tap ↻", sortPct: "Biggest % off", sortPrice: "Cheapest", sortSave: "Most saved", allStores: "All", justNow: "just now", minAgo: "{m} min ago", banner: "🎉 New version {v} — tap to update", openRel: "⬇️ Download {v} from GitHub", relNote: "The download page opens — download the file and open it to install. After this, updates happen inside the app", upd: "🔄 Updates", cur: "You have {v}", check: "Check for update", checking: "Checking…", latest: "You have the latest version ✓",
+    tgSent: " · Telegram: {n} sent", tgFail: " · Telegram failed: {e}", alNever: "No check yet", alPerm: "⚠️ Allow notifications for the app in phone settings", navFav: "Favourites", navPromo: "Codes", promoTitle: "Promo codes", promoQ: "🔎 Search a store…", promoSub: "{n} codes from {s} stores — updated {t}", promoNone: "No codes right now — tap ↻", promoCopy: "📋 Copy", promoCopied: "✅ Copied", promoOpen: "🛒 Store", promoExp: "Expires {d}", promoUsed: "Used {n} times", promoAll: "All", promoNote: "Codes are collected daily from Egyptian coupon sites (Yajny). Try the code at checkout — some are for new customers only.", promoErr: "Could not load codes", favTitle: "Favourites", favSub: "{n} saved items — price when saved", favEmpty: "Tap ♥ on any product to save it here", savedOn: "saved {d}", favAdded: "Added to favourites ❤️", favRemoved: "Removed from favourites", refresh: "Refresh", waBtn: "WhatsApp", waHead: "🔥 Arkhas deals — {d}", waInstead: "was", waMore: "📲 via Arkhas app", refresh: "Refresh", ddAll: "All stores", ddSome: "{n} stores selected", ddOne: "{s}", selAll: "Select all", selNone: "Clear all", navDeals: "Deals", dealsTitle: "Flash deals", dealsSub: "Biggest discounts from {n} top Egyptian sites — updated {t}", dealsLoading: "Fetching deals from {done}/{all} sites…", dealsNone: "No deals right now — tap ↻", sortPct: "Biggest % off", sortPrice: "Cheapest", sortSave: "Most saved", allStores: "All", justNow: "just now", minAgo: "{m} min ago", banner: "🎉 New version {v} — tap to update", openRel: "⬇️ Download {v} from GitHub", relNote: "The download page opens — download the file and open it to install. After this, updates happen inside the app", upd: "🔄 Updates", cur: "You have {v}", check: "Check for update", checking: "Checking…", latest: "You have the latest version ✓",
     newVer: "New version {v} available ({mb} MB)", popT: "New update {v} 🎉", popD: "A newer Arkhas is ready — update now to get the latest features.", popGo: "⬇️ Update now", popLater: "Later", install: "⬇️ Download & install {v}", downloading: "Downloading… {p}%", installing: "Tap Install on the Android screen",
     perm: "Allow Arkhas to install updates (settings opened), then come back and tap install again", webBtn: "Refresh store list", webSame: "Store list is up to date ✓",
     webChanged: "Stores updated — reloading…", updErr: "Failed: {e}", exact: "✓ exact", similar: "≈ similar", other: "other model", fewExact: "Only {n} exact match(es) — the rest are similar", egp: "EGP", save: "save {n}",
@@ -435,6 +455,7 @@ function applyLang() {
   $("#tag").textContent = t.tag; $("#go").textContent = t.go; $("#q").placeholder = t.ph; $("#hint").textContent = t.hint;
   $("#s_lang").textContent = t.langLbl; $("#s_theme").textContent = t.themeLbl;
   for (const b of document.querySelectorAll("#langseg button")) b.classList.toggle("on", b.dataset.l === L);
+  $("#l_promo").textContent = t.navPromo; $("#p_title").textContent = t.promoTitle; $("#p_q").placeholder = t.promoQ;
   $("#l_fav").textContent = t.navFav; $("#f_title").textContent = t.favTitle;
   if (typeof renderFavs === "function" && !$("#favView").hidden) renderFavs();
   $("#d_wa_l").textContent = t.waBtn;
@@ -647,6 +668,61 @@ function renderFavs() {
 }
 $("#nav_fav").onclick = () => { showView("fav"); renderFavs(); };
 
+// ---------- 🎟️ promo codes (web/promos.json, refreshed daily by a GitHub Action) ----------
+const PROMO_URL = "https://raw.githubusercontent.com/MuhammadToffaha/arkhas/main/web/promos.json";
+let promoData = null, promoStore = "", promoBusy = false;
+async function loadPromos(force) {
+  if (promoBusy) return; promoBusy = true;
+  $("#p_refresh").disabled = true;
+  try {
+    let txt = null;
+    try { txt = await fetcher(PROMO_URL + (force ? "?t=" + Date.now() : ""), { json: true }); } catch (_) {}
+    if (!txt) { try { txt = await readConfig("promos.json"); } catch (_) {} }
+    promoData = txt ? JSON.parse(txt) : { codes: [] };
+  } catch (e) { promoData = { codes: [], error: e.message }; }
+  finally { promoBusy = false; $("#p_refresh").disabled = false; }
+  renderPromos();
+}
+function copyText(txt) {
+  try { if (N && N.copy) { N.copy(txt); return true; } } catch (_) {}
+  try { navigator.clipboard.writeText(txt); return true; } catch (_) {}
+  try { const ta = document.createElement("textarea"); ta.value = txt; document.body.append(ta); ta.select(); document.execCommand("copy"); ta.remove(); return true; } catch (_) { return false; }
+}
+function renderPromos() {
+  const t = T[L], d = promoData;
+  if (!d) return;
+  const q = normalizeQ($("#p_q").value);
+  const all = (d.codes || []).filter((c) => !c.expires || c.expires >= new Date().toISOString().slice(0, 10));
+  const stores = [...new Set(all.map((c) => c.store))];
+  const counts = {}; for (const c of all) counts[c.store] = (counts[c.store] || 0) + 1;
+  stores.sort((a, b) => counts[b] - counts[a] || a.localeCompare(b));
+  if (promoStore && !stores.includes(promoStore)) promoStore = "";
+  $("#p_stores").innerHTML = [["", t.promoAll + " · " + all.length], ...stores.map((x) => [x, x + " · " + counts[x]])]
+    .map(([k, n]) => `<button data-ps="${esc(k)}" class="${promoStore === k ? "on" : ""}">${esc(n)}</button>`).join("");
+  const list = all.filter((c) => (!promoStore || c.store === promoStore) && (!q || normalizeQ(c.store + " " + c.title).includes(q)));
+  const when = d.updated ? new Date(d.updated).toLocaleDateString(L === "ar" ? "ar-EG-u-nu-latn" : "en-GB", { day: "numeric", month: "short" }) : "—";
+  $("#p_sub").textContent = d.error && !all.length ? t.promoErr : fmt(t.promoSub, { n: all.length, s: stores.length, t: when });
+  $("#p_note").textContent = t.promoNote;
+  if (!list.length) { $("#p_out").innerHTML = `<div class="empty">${t.promoNone}</div>`; return; }
+  $("#p_out").innerHTML = list.map((c) => `<div class="promo">
+      <div class="pl">${c.logo ? `<img src="${esc(c.logo)}" alt="" loading="lazy" onerror="this.remove()">` : "🎟️"}</div>
+      <div class="pt"><b>${esc(c.store)}</b><div class="ttl">${esc(c.title || "")}</div>
+        <div class="src">${c.expires ? fmt(t.promoExp, { d: c.expires }) : ""}${c.used ? " · " + fmt(t.promoUsed, { n: c.used }) : ""}</div></div>
+      <div class="pb"><button type="button" class="pcode" data-code="${esc(c.code)}" dir="ltr">${esc(c.code)}</button>
+        ${c.link && !/yajny\.com/.test(c.link) ? `<a class="popen" href="${esc(c.link)}">${t.promoOpen}</a>` : ""}</div>
+    </div>`).join("");
+}
+const normalizeQ = (s) => (window.Arkhas && Arkhas.normalize ? Arkhas.normalize(s) : String(s).toLowerCase()).trim();
+$("#nav_promo").onclick = () => { showView("promo"); if (!promoData) loadPromos(false); else renderPromos(); };
+$("#p_refresh").onclick = () => loadPromos(true);
+$("#p_q").addEventListener("input", renderPromos);
+$("#p_stores").onclick = (e) => { const b = e.target.closest("[data-ps]"); if (b) { promoStore = b.dataset.ps; renderPromos(); } };
+$("#p_out").onclick = (e) => {
+  const b = e.target.closest(".pcode"); if (!b) return;
+  const code = b.dataset.code;
+  if (copyText(code)) { b.textContent = T[L].promoCopied; b.classList.add("ok"); setTimeout(() => { b.textContent = code; b.classList.remove("ok"); }, 1500); }
+};
+
 // ---------- 📤 WhatsApp (one tap: WhatsApp opens with the message ready, pick the group, press send) ----------
 function waText(list) {
   const t = T[L];
@@ -688,6 +764,8 @@ function showView(v) {
   $("#searchView").hidden = v !== "search";
   $("#dealsView").hidden = v !== "deals";
   $("#favView").hidden = v !== "fav";
+  $("#promoView").hidden = v !== "promo";
+  $("#nav_promo").classList.toggle("on", v === "promo");
   $("#nav_search").classList.toggle("on", v === "search");
   $("#nav_deals").classList.toggle("on", v === "deals");
   $("#nav_fav").classList.toggle("on", v === "fav");

@@ -125,3 +125,26 @@ test("price box with price + old price + % off reads the first number (Noon 550,
   assert.equal(E.parsePrice("EGP 12,999 15,999"), 12999);
   assert.equal(E.parsePrice("1 299 EGP"), 1299);
 });
+
+test("🎟️ promo codes tab lists codes by store, filters and copies", async () => {
+  const W = new URL("../web/", import.meta.url);
+  const html = readFileSync(new URL("index.html", W), "utf8").replace('<script src="engine.js"></script>', () => `<script>${readFileSync(new URL("engine.js", W), "utf8")}</script>`);
+  const copied = [];
+  const data = { updated: "2026-10-24T03:17:00Z", codes: [
+    { store: "نون مصر", code: "B65", title: "كود خصم يصل إلى %10", expires: "2099-12-31", link: "https://www.noon.com/egypt-ar/" },
+    { store: "وفرها", code: "WF23", title: "كاش باك 10%", expires: "2099-12-26", link: "https://waffarha.com/ar" },
+    { store: "قديم", code: "OLD1", title: "x", expires: "2000-01-01" }] };
+  const dom = new JSDOM(html, { runScripts: "dangerously", url: "https://app.local/", beforeParse(w) {
+    w.Native = { fetch: (id) => setTimeout(() => w.__native(id, true, JSON.stringify(data)), 5), copy: (t) => copied.push(t),
+      getPref: () => "", setPref() {}, readConfig: () => "{}", appVersion: () => "1", isBackground: () => false };
+  } });
+  const w = dom.window; await new Promise((r) => setTimeout(r, 50));
+  w.document.querySelector("#nav_promo").click();
+  await new Promise((r) => setTimeout(r, 80));
+  assert.equal(w.document.querySelector("#promoView").hidden, false);
+  assert.equal(w.document.querySelectorAll("#p_out .promo").length, 2);      // expired one hidden
+  w.document.querySelector('#p_stores [data-ps="وفرها"]').click();
+  assert.equal(w.document.querySelectorAll("#p_out .promo").length, 1);
+  w.document.querySelector("#p_out .pcode").click();
+  assert.deepEqual(copied, ["WF23"]);
+});

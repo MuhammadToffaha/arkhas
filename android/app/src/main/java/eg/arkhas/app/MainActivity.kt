@@ -133,6 +133,13 @@ class MainActivity : AppCompatActivity() {
         @JavascriptInterface fun setPref(k: String, v: String) = prefs.edit().putString("p_$k", v).apply()
         @JavascriptInterface fun readConfig(name: String): String = WebFiles.read(this@MainActivity, name)
         @JavascriptInterface fun appVersion(): String = BuildConfig.VERSION_NAME
+        /** 🎟️ copy a promo code */
+        @JavascriptInterface fun copy(text: String) {
+            runOnUiThread {
+                val cm = getSystemService(android.content.ClipboardManager::class.java)
+                cm?.setPrimaryClip(android.content.ClipData.newPlainText("code", text))
+            }
+        }
         /** 🤫 Settings switch for silent auto-update */
         @JavascriptInterface fun setAutoUpdate(on: Boolean) {
             prefs.edit().putString("p_autoUpd", if (on) "1" else "0").apply()

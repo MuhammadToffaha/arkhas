@@ -69,7 +69,7 @@ test("bottom nav holds the buttons; slow stores start switched off", async () =>
   const { win, doc, prefs } = boot();
   await win.arkhasReady;
   const nav = doc.querySelector("nav.nav");
-  assert.deepEqual([...nav.querySelectorAll("button")].map((b) => b.id), ["nav_search", "nav_deals", "nav_fav", "gear"], "bottom bar = search, deals, favourites, settings");
+  assert.deepEqual([...nav.querySelectorAll("button")].map((b) => b.id), ["nav_search", "nav_deals", "nav_promo", "nav_fav", "gear"], "bottom bar = search, deals, promo codes, favourites, settings");
   assert.equal(doc.querySelector("#nav_status"), null);
   assert.ok(doc.querySelector(".sheet #langseg"), "language switch is inside settings");
   assert.equal(doc.querySelector("header #gear"), null, "nothing clickable left in the top area");
