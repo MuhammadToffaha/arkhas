@@ -59,7 +59,8 @@ def main(path):
     try:
         home = get(pages[0]) + get(pages[1])
     except Exception as e:
-        print("home failed", e); home = ""
+        print(f"::warning::home failed {e}"); home = ""
+    print(f"::notice::home bytes {len(home)}")
     slugs = set(EXTRA_STORES)
     slugs |= {html.unescape(s) for s in re.findall(r'https://yajny\.com/ar-eg/store/([^"\'#?]+)', home)}
     slugs = sorted(s for s in slugs if "+" not in s)[:80]
@@ -70,7 +71,7 @@ def main(path):
         try:
             found += parse(get(url), url, today); ok += 1
         except Exception as e:
-            print("skip", url, e)
+            print(f"::warning::skip {url} {e}")
     # one row per store+code, keep the richest
     best = {}
     for c in found:
@@ -81,10 +82,10 @@ def main(path):
             best[k] = {**best.get(k, {}), **{x: y for x, y in c.items() if y}}
     codes = sorted(best.values(), key=lambda c: (c["store"], -c.get("used", 0)))
     if not codes:
-        print("no codes found — keeping the old file"); return 1
+        print(f"::error::no codes found ({len(found)} raw, {ok}/{len(slugs)} pages) — keeping the old file"); return 1
     json.dump({"updated": datetime.datetime.utcnow().replace(microsecond=0).isoformat() + "Z", "country": "eg",
                "sources": ["yajny.com/ar-eg"], "codes": codes}, open(path, "w"), ensure_ascii=False, indent=1)
-    print(f"{len(codes)} codes from {len({c['store'] for c in codes})} stores ({ok}/{len(slugs)} pages)")
+    print(f"::notice::{len(codes)} codes from {len({c['store'] for c in codes})} stores ({ok}/{len(slugs)} pages)")
     return 0
 
 
