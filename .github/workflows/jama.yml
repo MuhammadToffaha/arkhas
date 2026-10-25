@@ -20,6 +20,15 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
+      # every app in Store.APPS must be in the manifest <queries>, or Android hides it from JAMA (Android 11+)
+      - name: 🔍 Package visibility check
+        run: |
+          miss=0
+          for p in $(grep -oE 'ManagedApp\("[a-z]+", "[a-z.]+"' app/src/main/java/com/toffaha/jama/Store.kt | sed -E 's/.*, "//; s/"$//'); do
+            grep -q "package android:name=\"$p\"" app/src/main/AndroidManifest.xml || { echo "::error::$p missing from <queries> in AndroidManifest.xml"; miss=1; }
+          done
+          exit $miss
+
       - uses: actions/setup-java@v5
         with:
           distribution: temurin

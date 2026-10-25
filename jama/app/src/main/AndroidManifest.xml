@@ -14,6 +14,7 @@
         <package android:name="com.toffaha.halal" />
         <package android:name="com.toffaha.kalimat" />
         <package android:name="com.toffaha.qurangarden" />
+        <package android:name="com.toffaha.bonian" />
     </queries>
 
     <application
