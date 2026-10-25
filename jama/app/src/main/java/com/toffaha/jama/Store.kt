@@ -32,6 +32,8 @@ object Store {
             "كلمات كتاب المعاصر صفحة بصفحة", "El-Moasser vocabulary, page by page"),
         ManagedApp("quran", "com.toffaha.qurangarden", "Quran-Garden", "🌱", "حديقة القرآن", "Quran Garden",
             "حفظ القرآن للأطفال حتى سورة يس", "Kids' Quran memorization up to Yasin"),
+        ManagedApp("bonian", "com.toffaha.bonian", "bonian", "🏢", "بُنيان", "Bonian",
+            "حسابات العمارة: الشهرية والمصروفات والمتأخرات", "Building fees, expenses & overdue units"),
         ManagedApp("jama", BuildConfig.APPLICATION_ID, "arkhas", "🧩", "جاما", "JAMA",
             "مدير التطبيقات — بيثبّت ويحدّث الكل", "App manager — installs and updates everything", tagPrefix = "jama-v"),
     )
