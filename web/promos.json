@@ -1,5 +1,5 @@
 {
- "updated": "2026-10-26T09:07:20Z",
+ "updated": "2026-10-27T09:09:21Z",
  "country": "eg",
  "sources": [
   "yajny.com/ar-eg"
@@ -52,7 +52,7 @@
    "code": "DEFA30",
    "title": "كود ديفاكتو لفترة محدودة: خصم 10% على الطلبات اليوم",
    "expires": "2026-12-31",
-   "used": 1,
+   "used": 2,
    "page": "https://yajny.com/ar-eg/store/defacto",
    "source": "yajny"
   },
