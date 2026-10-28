@@ -40,6 +40,8 @@
                 <data android:mimeType="text/plain" />
             </intent-filter>
         </activity>
+        <!-- 📷 ML Kit models come from Google Play services (small APK), downloaded on install -->
+        <meta-data android:name="com.google.mlkit.vision.DEPENDENCIES" android:value="barcode,ocr,ica" />
         <receiver android:name=".UpdateReceiver" android:exported="false">
             <intent-filter>
                 <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />

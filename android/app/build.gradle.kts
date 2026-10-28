@@ -67,4 +67,8 @@ dependencies {
     implementation("androidx.core:core-ktx:1.13.1")
     implementation("androidx.work:work-runtime-ktx:2.9.1")
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
+    // 📷 search by photo (on-device, models via Play services)
+    implementation("com.google.android.gms:play-services-mlkit-barcode-scanning:18.3.0")
+    implementation("com.google.android.gms:play-services-mlkit-text-recognition:19.0.0")
+    implementation("com.google.android.gms:play-services-mlkit-image-labeling:16.0.8")
 }

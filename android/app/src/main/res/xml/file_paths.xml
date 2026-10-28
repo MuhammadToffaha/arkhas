@@ -2,4 +2,6 @@
 <paths>
     <!-- downloaded update APK, handed to the Android installer -->
     <cache-path name="updates" path="updates/" />
+    <!-- 📷 photo taken for "search by photo" -->
+    <cache-path name="photos" path="photos/" />
 </paths>

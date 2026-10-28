@@ -34,10 +34,12 @@ class MainActivity : AppCompatActivity() {
     private val prefs by lazy { getSharedPreferences("arkhas", Context.MODE_PRIVATE) }
     @Volatile private var pendingQuery: String = ""
     @Volatile private var openDeals = false
+    private lateinit var photoSearch: PhotoSearch
 
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        photoSearch = PhotoSearch(this) { r -> runOnUiThread { web.evaluateJavascript("window.__photo&&window.__photo(${r})", null) } }
 
         val root = FrameLayout(this)
         // invisible browsers for rendering JS stores; still laid out so pages run normally
@@ -133,6 +135,9 @@ class MainActivity : AppCompatActivity() {
         @JavascriptInterface fun setPref(k: String, v: String) = prefs.edit().putString("p_$k", v).apply()
         @JavascriptInterface fun readConfig(name: String): String = WebFiles.read(this@MainActivity, name)
         @JavascriptInterface fun appVersion(): String = BuildConfig.VERSION_NAME
+        /** 📷 search by photo: "camera" or "gallery" -> window.__photo(result) */
+        @JavascriptInterface fun photo(mode: String) { runOnUiThread { if (mode == "camera") photoSearch.camera() else photoSearch.gallery() } }
+        @JavascriptInterface fun lens(): Boolean = photoSearch.lens()
         /** 🎟️ copy a promo code */
         @JavascriptInterface fun copy(text: String) {
             runOnUiThread {

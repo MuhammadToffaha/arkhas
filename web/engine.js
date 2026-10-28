@@ -776,7 +776,57 @@
     return r;
   }
 
-  const API = { normalize, tokens, isArabic, setSynonyms, equivalents, translateQuery, queryVariants, queryVariantsAsync, cleanQuery, parsePrice, ADAPTERS, DEAL_FEEDS, deals, pctOff, productId,
+
+  // ---------------- 📷 search by photo ----------------
+  const BRANDS = ["samsung", "apple", "iphone", "ipad", "macbook", "xiaomi", "redmi", "poco", "oppo", "realme", "vivo", "huawei", "honor",
+    "infinix", "tecno", "nokia", "motorola", "oneplus", "google", "pixel", "sony", "lg", "toshiba", "sharp", "beko", "bosch", "siemens",
+    "tefal", "moulinex", "braun", "philips", "panasonic", "kenwood", "black+decker", "black & decker", "delonghi", "dyson", "hp", "dell",
+    "lenovo", "asus", "acer", "msi", "canon", "nikon", "fujifilm", "gopro", "jbl", "anker", "baseus", "ugreen", "logitech", "razer",
+    "playstation", "xbox", "nintendo", "garmin", "fitbit", "amazfit", "fresh", "tornado", "zanussi", "white point", "unionaire", "kiriazi",
+    "ariston", "hisense", "tcl", "haier", "midea", "carrier", "sharp", "olsenmark", "sokany", "nike", "adidas", "puma", "reebok", "skechers",
+    "loreal", "l'oreal", "nivea", "garnier", "maybelline", "dove", "pampers", "huggies", "nescafe", "lipton", "ikea", "zara", "lego"];
+  const GENERIC = /^(product|font|rectangle|material property|electronic device|gadget|technology|circle|pattern|brand|logo|text|label|darkness|room|table|wood|metal|plastic|paper|close-up|still life|design|art|font family)$/i;
+  /** Turns what ML Kit saw (barcode product names, printed lines, labels) into a few search phrases, best first. */
+  function photoQueries(r, names) {
+    const out = [], add = (q) => { q = String(q || "").replace(/[|•·_*]+/g, " ").replace(/\s+/g, " ").trim().slice(0, 70); if (q.length >= 2 && !out.some((x) => x.toLowerCase() === q.toLowerCase())) out.push(q); };
+    (names || []).forEach(add);                                    // barcode lookup: the real product name
+    const lines = (r && r.lines || []).filter((l) => /[A-Za-z\u0600-\u06FF]/.test(l));
+    const low = lines.map((l) => l.toLowerCase());
+    const brand = BRANDS.find((b) => low.some((l) => new RegExp("(^|[^a-z])" + b.replace(/[+.&']/g, "\\$&") + "([^a-z]|$)").test(l)));
+    const MODEL = /\b(?=[A-Za-z0-9-]*\d)(?=[A-Za-z0-9-]*[A-Za-z])[A-Za-z0-9][A-Za-z0-9-]{1,14}\b/g;
+    const models = [];
+    for (const l of lines) for (const m of l.match(MODEL) || []) if (!/^\d+(mah|gb|tb|mm|cm|ml|w|v|hz|kg|g|l)$/i.test(m) && !models.includes(m)) models.push(m);
+    const unit = (lines.join(" ").match(/\b\d+(?:\.\d+)?\s?(?:gb|tb|mah|inch|"|l|liter|litre|kg|w)\b/gi) || [])[0];
+    const B = brand ? (brand.length <= 3 ? brand.toUpperCase() : brand.replace(/^\w/, (c) => c.toUpperCase())) : "";
+    // "SAMSUNG" + "Galaxy A55 5G" -> "Samsung Galaxy A55 5G" (the line that carries the model number)
+    const ml = models.length && lines.find((l) => l.includes(models[0]) && l.split(/\s+/).length <= 6);
+    if (B && ml) add(ml.toLowerCase().includes(brand) ? ml : B + " " + ml);
+    if (B && models.length) add(B + " " + models[0] + (unit ? " " + unit : ""));
+    if (B) { const bl = lines.find((l) => l.toLowerCase().includes(brand) && l.split(/\s+/).length >= 2); if (bl) add(bl); }
+    if (!B && models.length) add(models.slice(0, 2).join(" "));
+    // labels: what the picture shows ("Shoe", "Headphones")
+    const labels = (r && r.labels || []).filter((x) => x.conf >= 0.6 && !GENERIC.test(x.text)).map((x) => x.text.toLowerCase());
+    if (B && labels[0]) add(B + " " + labels[0]);
+    lines.slice(0, 3).filter((l) => l.length >= 4 && l.split(/\s+/).length <= 7 && l.toLowerCase() !== brand).forEach(add);
+    labels.slice(0, 2).forEach(add);
+    return out.slice(0, 6);
+  }
+  /** Product name for a barcode from free public databases (food: Open Food Facts; other: UPCitemdb trial). */
+  async function barcodeNames(code, fetcher) {
+    const names = [];
+    const tries = [
+      ["https://world.openfoodfacts.org/api/v2/product/" + encodeURIComponent(code) + ".json?fields=product_name,brands",
+        (j) => j.product && [j.product.brands && j.product.brands.split(",")[0], j.product.product_name].filter(Boolean).join(" ")],
+      ["https://api.upcitemdb.com/prod/trial/lookup?upc=" + encodeURIComponent(code), (j) => j.items && j.items[0] && j.items[0].title],
+    ];
+    for (const [u, pick] of tries) {
+      try { const n = pick(JSON.parse(await fetcher(u, { json: true }))); if (n) names.push(n); } catch (_) {}
+      if (names.length) break;
+    }
+    return names;
+  }
+
+  const API = { photoQueries, barcodeNames, normalize, tokens, isArabic, setSynonyms, equivalents, translateQuery, queryVariants, queryVariantsAsync, cleanQuery, parsePrice, ADAPTERS, DEAL_FEEDS, deals, pctOff, productId,
     relevance, matchInfo, specs, rank, top, parse, parseSerp, buildUrl, serpUrl, externalLinks, search };
   if (typeof module !== "undefined" && module.exports) module.exports = API;
   else root.Arkhas = API;

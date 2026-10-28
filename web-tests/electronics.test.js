@@ -148,3 +148,30 @@ test("🎟️ promo codes tab lists codes by store, filters and copies", async (
   w.document.querySelector("#p_out .pcode").click();
   assert.deepEqual(copied, ["WF23"]);
 });
+
+test("📷 photo → search words: brand + model from printed text, barcode name first", async () => {
+  const q = E.photoQueries({ lines: ["Galaxy A55 5G", "SAMSUNG", "SM-A556E 256GB"], labels: [{ text: "Mobile phone", conf: 0.9 }, { text: "Product", conf: 0.99 }] });
+  assert.equal(q[0], "Samsung Galaxy A55 5G");
+  assert.ok(!q.includes("Product"));
+  assert.deepEqual(E.photoQueries({ lines: [], labels: [] }, ["Nutella 400g"]), ["Nutella 400g"]);
+  const names = await E.barcodeNames("3017620422003", async (u) => u.includes("openfoodfacts")
+    ? JSON.stringify({ product: { brands: "Ferrero", product_name: "Nutella" } }) : "{}");
+  assert.deepEqual(names, ["Ferrero Nutella"]);
+});
+
+test("📷 photo button opens camera/gallery and the result runs a search", async () => {
+  const W = new URL("../web/", import.meta.url);
+  const html = readFileSync(new URL("index.html", W), "utf8").replace('<script src="engine.js"></script>', () => `<script>${readFileSync(new URL("engine.js", W), "utf8")}</script>`);
+  const calls = [];
+  const dom = new JSDOM(html, { runScripts: "dangerously", url: "https://app.local/", beforeParse(w) {
+    w.Native = { photo: (m) => calls.push(m), lens: () => true, fetch() {}, getPref: () => "", setPref() {}, readConfig: () => "[]", appVersion: () => "1", isBackground: () => false };
+  } });
+  const w = dom.window; await new Promise((r) => setTimeout(r, 50));
+  assert.equal(w.document.querySelector("#cam").hidden, false);
+  w.document.querySelector("#cam").click();
+  w.document.querySelector("#cs_gal").click();
+  assert.deepEqual(calls, ["gallery"]);
+  await w.__photo({ ok: true, barcodes: [], lines: ["JBL", "TUNE 520BT"], labels: [{ text: "Headphones", conf: 0.9 }], thumb: "" });
+  assert.equal(w.document.querySelector("#q").value, "JBL TUNE 520BT");
+  assert.ok(w.document.querySelectorAll("#ph_q button").length >= 2);
+});

@@ -198,6 +198,13 @@ input:focus{border-color:var(--accent);box-shadow:0 0 0 4px var(--glow)}
 .sw input:checked+i{background:var(--grad)}
 .sheet>div{border-radius:26px 26px 0 0}
 [hidden]{display:none!important}
+.cam{flex:none;width:50px;border:0;border-radius:16px;background:var(--card);font-size:22px;box-shadow:0 2px 10px #0000001a}
+.photo{display:flex;gap:12px;background:var(--card);border-radius:18px;padding:10px;margin:8px 0;box-shadow:0 2px 12px #0000000c}
+.photo img{width:84px;height:84px;object-fit:cover;border-radius:14px;flex:none;background:var(--line)}
+.ph_t{flex:1;min-width:0}.ph_chips{padding-top:6px;flex-wrap:wrap}
+.ph_b{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}.ph_b .ib2{padding:6px 10px;font-size:13px}
+#camsheet .popb{display:flex;gap:8px;margin-top:14px}#camsheet .popb button{flex:1;padding:12px}
+
 .promo{display:flex;gap:10px;align-items:center;background:var(--card);border-radius:18px;padding:10px;margin-top:10px;box-shadow:0 2px 12px #0000000c}
 .promo .pl{width:52px;height:52px;flex:none;border-radius:14px;background:#fff;display:flex;align-items:center;justify-content:center;overflow:hidden;font-size:24px}
 .promo .pl img{width:100%;height:100%;object-fit:contain}
@@ -250,8 +257,18 @@ html,body{overflow-x:hidden}
       <input id="q" type="search" dir="auto" autocomplete="off" autocorrect="off" spellcheck="false" enterkeyhint="search">
       <button type="button" class="qx" id="qx" aria-label="clear" hidden>✕</button>
     </div>
+    <button type="button" class="cam" id="cam" aria-label="photo" hidden>📷</button>
     <button class="go" id="go"></button>
   </form>
+  <div class="photo" id="photo" hidden>
+    <img id="ph_img" alt="">
+    <div class="ph_t"><b id="ph_title"></b><div class="muted" id="ph_msg"></div><div class="chips ph_chips" id="ph_q"></div>
+      <div class="ph_b"><button type="button" class="ib2" id="ph_lens"></button><button type="button" class="ib2" id="ph_again"></button><button type="button" class="ib2" id="ph_x">✕</button></div></div>
+  </div>
+  <div class="sheet" id="camsheet"><div>
+    <b id="cs_t" style="font-size:17px"></b><div class="muted" id="cs_d"></div>
+    <div class="popb"><button type="button" class="go" id="cs_cam"></button><button type="button" class="ib2" id="cs_gal"></button></div>
+  </div></div>
   <div class="muted" id="hint"></div>
   <button class="newver" id="newver" hidden></button>
   <div class="bar" id="bar" hidden><i></i></div>
@@ -414,7 +431,7 @@ const T = {
     tgBadTok: "⚠️ الـ Token غلط — انسخه تاني من @BotFather", tgTimeout: "لسه مش لاقي الجروب — اكتب /arkhas في الجروب واضغط «دوّر على جروبي»",
     tgFind: "🔎 دوّر على جروبي", tgTest: "✉️ ابعت رسالة تجربة", tgNoChats: "مش لاقي الجروب — اكتب /arkhas في الجروب (البوت مش بيشوف الرسايل العادية) وحاول تاني",
     tgPicked: "✓ هيبعت لـ «{t}»", tgOk: "✓ الرسالة وصلت للجروب", tgErr: "⚠️ تليجرام: {e}", tgTestText: "✅ أرخص متوصل — العروض الكبيرة هتوصل هنا تلقائي",
-    tgSent: " · تليجرام: {n} اتبعت", tgFail: " · تليجرام فشل: {e}", alNever: "لسه مفيش فحص", alPerm: "⚠️ اسمح بالإشعارات للتطبيق من إعدادات الموبايل", navFav: "المفضلة", navPromo: "أكواد", promoTitle: "أكواد الخصم", promoQ: "🔎 دوّر على متجر…", promoSub: "{n} كود من {s} متجر — اتحدّثت {t}", promoNone: "مفيش أكواد دلوقتي — اضغط ↻", promoCopy: "📋 انسخ", promoCopied: "✅ اتنسخ", promoOpen: "🛒 المتجر", promoExp: "ينتهي {d}", promoUsed: "استُخدم {n} مرة", promoAll: "الكل", promoNote: "الأكواد بتتجمّع كل يوم من مواقع الكوبونات المصرية (يجني). جرّب الكود عند الدفع — بعض الأكواد للعملاء الجدد بس.", promoErr: "تعذّر تحميل الأكواد", favTitle: "المفضلة", favSub: "{n} منتج محفوظ — السعر وقت الحفظ", favEmpty: "اضغط ♥ على أي منتج عشان يتحفظ هنا", savedOn: "اتحفظ {d}", favAdded: "اتضاف للمفضلة ❤️", favRemoved: "اتشال من المفضلة", refresh: "تحديث", waBtn: "واتساب", waHead: "🔥 عروض أرخص — {d}", waInstead: "بدل", waMore: "📲 من تطبيق أرخص", refresh: "تحديث", ddAll: "كل المتاجر", ddSome: "{n} متاجر مختارة", ddOne: "{s}", selAll: "تحديد الكل", selNone: "إلغاء الكل", navDeals: "عروض", dealsTitle: "عروض فلاش", dealsSub: "أكبر الخصومات من أشهر {n} مواقع في مصر — اتحدّثت {t}", dealsLoading: "جاري جلب العروض من {done}/{all} موقع…", dealsNone: "مفيش عروض دلوقتي — اضغط ↻", sortPct: "أكبر خصم", sortPrice: "الأرخص", sortSave: "أكبر توفير", allStores: "الكل", justNow: "الآن", minAgo: "من {m} دقيقة", banner: "🎉 نسخة جديدة {v} — اضغط للتحديث", openRel: "⬇️ تنزيل {v} من GitHub", relNote: "هتتفتح صفحة التنزيل — نزّل الملف وافتحه للتثبيت. بعد كده التحديث هيكون من جوه التطبيق", upd: "🔄 التحديثات", cur: "نسختك {v}", check: "تحقق من التحديث", checking: "جاري التحقق…", latest: "عندك أحدث نسخة ✓",
+    tgSent: " · تليجرام: {n} اتبعت", tgFail: " · تليجرام فشل: {e}", alNever: "لسه مفيش فحص", alPerm: "⚠️ اسمح بالإشعارات للتطبيق من إعدادات الموبايل", navFav: "المفضلة", navPromo: "أكواد", phCam: "📸 صوّر", phGal: "🖼️ من المعرض", phSheetT: "📷 دوّر بالصورة", phSheetD: "صوّر المنتج أو الباركود أو العلبة — التطبيق بيقرا الاسم والموديل ويدوّر على أرخص سعر.", phReading: "⏳ بنقرا الصورة…", phTitle: "📷 دوّرنا بالصورة", phPick: "مش هو؟ اختار كلمة تانية أو عدّل البحث:", phNone: "معرفناش المنتج من الصورة 😕 — جرّب صورة أوضح للاسم/الموديل أو الباركود، أو افتحها في Google Lens.", phLens: "🔎 Google Lens", phAgain: "📷 صورة تانية", phBarcode: "🏷️ باركود {c}", phErr: "تعذّر قراءة الصورة: {e}", promoTitle: "أكواد الخصم", promoQ: "🔎 دوّر على متجر…", promoSub: "{n} كود من {s} متجر — اتحدّثت {t}", promoNone: "مفيش أكواد دلوقتي — اضغط ↻", promoCopy: "📋 انسخ", promoCopied: "✅ اتنسخ", promoOpen: "🛒 المتجر", promoExp: "ينتهي {d}", promoUsed: "استُخدم {n} مرة", promoAll: "الكل", promoNote: "الأكواد بتتجمّع كل يوم من مواقع الكوبونات المصرية (يجني). جرّب الكود عند الدفع — بعض الأكواد للعملاء الجدد بس.", promoErr: "تعذّر تحميل الأكواد", favTitle: "المفضلة", favSub: "{n} منتج محفوظ — السعر وقت الحفظ", favEmpty: "اضغط ♥ على أي منتج عشان يتحفظ هنا", savedOn: "اتحفظ {d}", favAdded: "اتضاف للمفضلة ❤️", favRemoved: "اتشال من المفضلة", refresh: "تحديث", waBtn: "واتساب", waHead: "🔥 عروض أرخص — {d}", waInstead: "بدل", waMore: "📲 من تطبيق أرخص", refresh: "تحديث", ddAll: "كل المتاجر", ddSome: "{n} متاجر مختارة", ddOne: "{s}", selAll: "تحديد الكل", selNone: "إلغاء الكل", navDeals: "عروض", dealsTitle: "عروض فلاش", dealsSub: "أكبر الخصومات من أشهر {n} مواقع في مصر — اتحدّثت {t}", dealsLoading: "جاري جلب العروض من {done}/{all} موقع…", dealsNone: "مفيش عروض دلوقتي — اضغط ↻", sortPct: "أكبر خصم", sortPrice: "الأرخص", sortSave: "أكبر توفير", allStores: "الكل", justNow: "الآن", minAgo: "من {m} دقيقة", banner: "🎉 نسخة جديدة {v} — اضغط للتحديث", openRel: "⬇️ تنزيل {v} من GitHub", relNote: "هتتفتح صفحة التنزيل — نزّل الملف وافتحه للتثبيت. بعد كده التحديث هيكون من جوه التطبيق", upd: "🔄 التحديثات", cur: "نسختك {v}", check: "تحقق من التحديث", checking: "جاري التحقق…", latest: "عندك أحدث نسخة ✓",
     newVer: "نسخة جديدة {v} متاحة ({mb} ميجا)", popT: "تحديث جديد {v} 🎉", popD: "نسخة أحدث من أرخص جاهزة — حدّث دلوقتي عشان تاخد آخر المميزات.", popGo: "⬇️ حدّث الآن", popLater: "بعدين", install: "⬇️ تنزيل وتثبيت {v}", downloading: "جاري التنزيل… {p}%", installing: "افتح شاشة التثبيت واضغط تثبيت",
     perm: "اسمح لـ أرخص بتثبيت التحديثات (فتحنا لك الإعداد) ثم ارجع واضغط تثبيت تاني", webBtn: "تحديث قائمة المتاجر", webSame: "قائمة المتاجر محدّثة ✓",
     webChanged: "تم تحديث المتاجر — جاري إعادة التحميل…", updErr: "تعذّر: {e}", exact: "✓ مطابق", similar: "≈ مشابه", other: "موديل مختلف", fewExact: "لقينا {n} بس مطابقين تمامًا — الباقي مشابه", egp: "ج.م", save: "وفّر {n}",
@@ -434,7 +451,7 @@ const T = {
     tgBadTok: "⚠️ Token is wrong — copy it again from @BotFather", tgTimeout: "Group not found yet — send /arkhas in the group, then tap “Find my group”",
     tgFind: "🔎 Find my group", tgTest: "✉️ Send test message", tgNoChats: "Group not found — send /arkhas in the group (bots don't see normal messages) and try again",
     tgPicked: "✓ Will post to “{t}”", tgOk: "✓ Message arrived in the group", tgErr: "⚠️ Telegram: {e}", tgTestText: "✅ Arkhas connected — big deals will be posted here automatically",
-    tgSent: " · Telegram: {n} sent", tgFail: " · Telegram failed: {e}", alNever: "No check yet", alPerm: "⚠️ Allow notifications for the app in phone settings", navFav: "Favourites", navPromo: "Codes", promoTitle: "Promo codes", promoQ: "🔎 Search a store…", promoSub: "{n} codes from {s} stores — updated {t}", promoNone: "No codes right now — tap ↻", promoCopy: "📋 Copy", promoCopied: "✅ Copied", promoOpen: "🛒 Store", promoExp: "Expires {d}", promoUsed: "Used {n} times", promoAll: "All", promoNote: "Codes are collected daily from Egyptian coupon sites (Yajny). Try the code at checkout — some are for new customers only.", promoErr: "Could not load codes", favTitle: "Favourites", favSub: "{n} saved items — price when saved", favEmpty: "Tap ♥ on any product to save it here", savedOn: "saved {d}", favAdded: "Added to favourites ❤️", favRemoved: "Removed from favourites", refresh: "Refresh", waBtn: "WhatsApp", waHead: "🔥 Arkhas deals — {d}", waInstead: "was", waMore: "📲 via Arkhas app", refresh: "Refresh", ddAll: "All stores", ddSome: "{n} stores selected", ddOne: "{s}", selAll: "Select all", selNone: "Clear all", navDeals: "Deals", dealsTitle: "Flash deals", dealsSub: "Biggest discounts from {n} top Egyptian sites — updated {t}", dealsLoading: "Fetching deals from {done}/{all} sites…", dealsNone: "No deals right now — tap ↻", sortPct: "Biggest % off", sortPrice: "Cheapest", sortSave: "Most saved", allStores: "All", justNow: "just now", minAgo: "{m} min ago", banner: "🎉 New version {v} — tap to update", openRel: "⬇️ Download {v} from GitHub", relNote: "The download page opens — download the file and open it to install. After this, updates happen inside the app", upd: "🔄 Updates", cur: "You have {v}", check: "Check for update", checking: "Checking…", latest: "You have the latest version ✓",
+    tgSent: " · Telegram: {n} sent", tgFail: " · Telegram failed: {e}", alNever: "No check yet", alPerm: "⚠️ Allow notifications for the app in phone settings", navFav: "Favourites", navPromo: "Codes", phCam: "📸 Camera", phGal: "🖼️ Gallery", phSheetT: "📷 Search by photo", phSheetD: "Snap the product, its barcode or box — the app reads the name and model and finds the cheapest price.", phReading: "⏳ Reading the photo…", phTitle: "📷 Searched by photo", phPick: "Not it? Pick another phrase or edit the search:", phNone: "Could not recognise the product 😕 — try a clearer shot of the name/model or barcode, or open it in Google Lens.", phLens: "🔎 Google Lens", phAgain: "📷 Another photo", phBarcode: "🏷️ Barcode {c}", phErr: "Could not read the photo: {e}", promoTitle: "Promo codes", promoQ: "🔎 Search a store…", promoSub: "{n} codes from {s} stores — updated {t}", promoNone: "No codes right now — tap ↻", promoCopy: "📋 Copy", promoCopied: "✅ Copied", promoOpen: "🛒 Store", promoExp: "Expires {d}", promoUsed: "Used {n} times", promoAll: "All", promoNote: "Codes are collected daily from Egyptian coupon sites (Yajny). Try the code at checkout — some are for new customers only.", promoErr: "Could not load codes", favTitle: "Favourites", favSub: "{n} saved items — price when saved", favEmpty: "Tap ♥ on any product to save it here", savedOn: "saved {d}", favAdded: "Added to favourites ❤️", favRemoved: "Removed from favourites", refresh: "Refresh", waBtn: "WhatsApp", waHead: "🔥 Arkhas deals — {d}", waInstead: "was", waMore: "📲 via Arkhas app", refresh: "Refresh", ddAll: "All stores", ddSome: "{n} stores selected", ddOne: "{s}", selAll: "Select all", selNone: "Clear all", navDeals: "Deals", dealsTitle: "Flash deals", dealsSub: "Biggest discounts from {n} top Egyptian sites — updated {t}", dealsLoading: "Fetching deals from {done}/{all} sites…", dealsNone: "No deals right now — tap ↻", sortPct: "Biggest % off", sortPrice: "Cheapest", sortSave: "Most saved", allStores: "All", justNow: "just now", minAgo: "{m} min ago", banner: "🎉 New version {v} — tap to update", openRel: "⬇️ Download {v} from GitHub", relNote: "The download page opens — download the file and open it to install. After this, updates happen inside the app", upd: "🔄 Updates", cur: "You have {v}", check: "Check for update", checking: "Checking…", latest: "You have the latest version ✓",
     newVer: "New version {v} available ({mb} MB)", popT: "New update {v} 🎉", popD: "A newer Arkhas is ready — update now to get the latest features.", popGo: "⬇️ Update now", popLater: "Later", install: "⬇️ Download & install {v}", downloading: "Downloading… {p}%", installing: "Tap Install on the Android screen",
     perm: "Allow Arkhas to install updates (settings opened), then come back and tap install again", webBtn: "Refresh store list", webSame: "Store list is up to date ✓",
     webChanged: "Stores updated — reloading…", updErr: "Failed: {e}", exact: "✓ exact", similar: "≈ similar", other: "other model", fewExact: "Only {n} exact match(es) — the rest are similar", egp: "EGP", save: "save {n}",
@@ -557,6 +574,45 @@ async function run(q) {
 }
 window.arkhasSearch = (q) => { showView("search"); return run(q); };  // called by the app for Share / text-selection searches
 $("#f").onsubmit = (e) => { e.preventDefault(); run($("#q").value); };
+
+// ---------- 📷 search by photo (on-device ML Kit: barcode + printed text + what the picture shows) ----------
+const canPhoto = !!(N && N.photo);
+$("#cam").hidden = !canPhoto;
+function photoTexts() {
+  const t = T[L];
+  $("#cs_t").textContent = t.phSheetT; $("#cs_d").textContent = t.phSheetD;
+  $("#cs_cam").textContent = t.phCam; $("#cs_gal").textContent = t.phGal;
+  $("#ph_lens").textContent = t.phLens; $("#ph_again").textContent = t.phAgain;
+}
+$("#cam").onclick = () => { photoTexts(); $("#camsheet").classList.add("on"); };
+$("#camsheet").onclick = (e) => { if (e.target.id === "camsheet") $("#camsheet").classList.remove("on"); };
+const startPhoto = (mode) => { $("#camsheet").classList.remove("on"); try { N.photo(mode); } catch (_) {} };
+$("#cs_cam").onclick = () => startPhoto("camera");
+$("#cs_gal").onclick = () => startPhoto("gallery");
+$("#ph_again").onclick = () => $("#cam").click();
+$("#ph_x").onclick = () => { $("#photo").hidden = true; };
+$("#ph_lens").onclick = () => { try { N.lens(); } catch (_) {} };
+$("#ph_q").onclick = (e) => {
+  const b = e.target.closest("[data-pq]"); if (!b) return;
+  $("#q").value = b.dataset.pq; syncX(); run(b.dataset.pq);
+  for (const x of $("#ph_q").querySelectorAll("button")) x.classList.toggle("on", x === b);
+};
+window.__photo = async (r) => {
+  const t = T[L];
+  if (!r || r.cancel) return;
+  photoTexts(); showView("search");
+  $("#photo").hidden = false; $("#ph_title").textContent = t.phTitle; $("#ph_q").innerHTML = "";
+  if (r.thumb) $("#ph_img").src = r.thumb;
+  if (!r.ok) { $("#ph_msg").textContent = fmt(t.phErr, { e: r.error || "" }); return; }
+  $("#ph_msg").textContent = t.phReading;
+  let names = [];
+  for (const c of (r.barcodes || []).slice(0, 2)) names = names.concat(await Arkhas.barcodeNames(c, fetcher));
+  const qs = Arkhas.photoQueries(r, names);
+  if (!qs.length) { $("#ph_msg").textContent = ((r.barcodes || []).length ? fmt(t.phBarcode, { c: r.barcodes[0] }) + " — " : "") + t.phNone; return; }
+  $("#ph_msg").textContent = t.phPick;
+  $("#ph_q").innerHTML = qs.slice(0, 4).map((q, i) => `<button type="button" data-pq="${esc(q)}" class="${i ? "" : "on"}">${esc(q)}</button>`).join("");
+  $("#q").value = qs[0]; syncX(); run(qs[0]);
+};
 
 // ---------- settings ----------
 $("#gear").onclick = () => {
