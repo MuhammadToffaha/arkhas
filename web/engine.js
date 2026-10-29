@@ -368,6 +368,13 @@
     return (node.textContent || "").replace(/\s+/g, " ").trim() || null;
   }
 
+  /** 🏬 sold / shipped by the big store itself (Amazon Prime, noon Express, Jumia Express / Official Store)? Rule in stores.json "big_seller". */
+  function bigSeller(el, store) {
+    if (!store.big_seller || !el) return false;
+    try { return new RegExp(store.big_seller, "i").test((el.outerHTML || "").slice(0, 30000)); } catch (_) { return false; }
+  }
+  const BIG_JSON = /"(is_?fbn|isFbn|is_?express|isExpress|fulfilled_?by_?(noon|amazon|jumia)|is_?prime|isPrime|jumia_?express)"\s*:\s*(true|1|"1"|"true")|"(fbn|express|prime)"\s*[,\]]/i;
+
   function parseCss(doc, store) {
     const out = [];
     if (!store.item) return out;
@@ -384,7 +391,7 @@
         title, price, url: absUrl(link, store.base_url),
         old_price: parsePrice(sel(card, store.old_price)),
         image: img ? absUrl(img, store.base_url) : null,
-        source: store.name, via: "scraper",
+        source: store.name, via: "scraper", big: bigSeller(card, store),
       });
     }
     return out;
@@ -426,7 +433,8 @@
       let img = d.image;
       if (Array.isArray(img)) img = img[0] || null;
       if (img && typeof img === "object") img = img.url;
-      out.push({ title, price, old_price: old, url: absUrl(String(url), store.base_url), image: img || null, source: store.name, via: "scraper" });
+      let big = false; try { big = !!store.big_seller && BIG_JSON.test(JSON.stringify(d).slice(0, 20000)); } catch (_) {}
+      out.push({ title, price, old_price: old, url: absUrl(String(url), store.base_url), image: img || null, source: store.name, via: "scraper", big });
     }
     return out;
   }
@@ -451,7 +459,7 @@
       seen.add(href.split("?")[0]);
       const img = sel(el, store.image);
       out.push({ title, price, old_price: parsePrice(sel(el, store.old_price)), url: absUrl(href, store.base_url),
-        image: img ? absUrl(img, store.base_url) : null, source: store.name, via: "scraper" });
+        image: img ? absUrl(img, store.base_url) : null, source: store.name, via: "scraper", big: bigSeller(el, store) });
     }
     return out;
   }
@@ -679,11 +687,11 @@
             while (next < list.length) {
               const i = next++, p = list[i];
               const u = typeof p === "string" ? p : p.url, tag = typeof p === "string" ? null : p.tag || null,
-                cat = typeof p === "string" ? null : p.cat || null;
+                cat = typeof p === "string" ? null : p.cat || null, bigPage = typeof p === "object" && p.big;
               try {
                 const html = await withTimeout(opt.fetcher(u, opts), s.deals.render ? opt.renderTimeout : opt.timeout);
                 pages[i] = { status: "fulfilled", value: parse(html, sel, opt.DOMParser, 80)
-                  .map((o) => Object.assign(o, tag ? { tag } : {}, cat ? { cat } : {})) };
+                  .map((o) => Object.assign(o, tag ? { tag } : {}, cat ? { cat } : {}, bigPage ? { big: true } : {})) };
               } catch (e) { pages[i] = { status: "rejected", reason: e }; }
             }
           };
@@ -698,7 +706,7 @@
           .filter((o) => (o.pct >= opt.minPct || o.tag) && o.pct < 95)   // 95%+ off is almost always a data error
           .sort((a, b) => !!b.tag - !!a.tag || b.pct - a.pct);
         // tagged (Mega) all stay; general deals capped by perStore; the electronics deep search gets its own bigger cap
-        const first = new Map(), uniq = keep.filter((o) => { const k = productId(o.url), f = first.get(k); if (f) { if (o.cat && !f.cat) f.cat = o.cat; return false; } first.set(k, o); return true; });
+        const first = new Map(), uniq = keep.filter((o) => { const k = productId(o.url), f = first.get(k); if (f) { if (o.cat && !f.cat) f.cat = o.cat; if (o.big) f.big = true; return false; } first.set(k, o); return true; });
         const tagged = uniq.filter((o) => o.tag), rest = uniq.filter((o) => !o.tag);
         const plain = rest.filter((o) => !o.cat).slice(0, opt.perStore), byCat = rest.filter((o) => o.cat).slice(0, opt.perCat);
         all.push(...tagged, ...plain, ...byCat);

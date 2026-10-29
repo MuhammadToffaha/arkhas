@@ -341,7 +341,8 @@
         "https://www.amazon.eg/s?k=toys&rh=p_8%3A50-&language=en_AE",
         "https://www.amazon.eg/s?k=sports&rh=p_8%3A50-&language=en_AE"
       ]
-    }
+    },
+    "big_seller": "a-icon-prime|amazon prime|aria-label=\"prime|fulfilled by amazon|ships from amazon|sold by amazon|amazon\\.eg</|شحن من أمازون|أمازون برايم|برايم"
   },
   {
     "name": "Jumia",
@@ -469,7 +470,8 @@
         "https://www.jumia.com.eg/catalog/?q=offers&sort=discount",
         "https://www.jumia.com.eg/mlp-deals/?sort=discount"
       ]
-    }
+    },
+    "big_seller": "jumia[-_ ]?express|xprss|_express|\\bexpress\\b|_mall|jmall|jumia[-_ ]?mall|official store|المتجر الرسمي|جوميا اكسبريس|جوميا إكسبريس"
   },
   {
     "name": "Noon",
@@ -549,6 +551,19 @@
         {
           "url": "https://www.noon.com/egypt-en/electronics-and-mobiles/camera-and-photo-16165/?f%5Bdeal_tag%5D%5B%5D=deals-generic&sort%5Bby%5D=popularity&sort%5Bdir%5D=desc",
           "cat": "electronics"
+        },
+        {
+          "url": "https://www.noon.com/egypt-en/electronics-and-mobiles/?f%5Bis_fbn%5D%5B%5D=1&f%5Bdeal_tag%5D%5B%5D=deals-generic&sort%5Bby%5D=popularity&sort%5Bdir%5D=desc",
+          "cat": "electronics",
+          "big": true
+        },
+        {
+          "url": "https://www.noon.com/egypt-en/home-and-kitchen/?f%5Bis_fbn%5D%5B%5D=1&f%5Bdeal_tag%5D%5B%5D=deals-generic&sort%5Bby%5D=popularity&sort%5Bdir%5D=desc",
+          "big": true
+        },
+        {
+          "url": "https://www.noon.com/egypt-en/fashion/?f%5Bis_fbn%5D%5B%5D=1&f%5Bdeal_tag%5D%5B%5D=deals-generic&sort%5Bby%5D=popularity&sort%5Bdir%5D=desc",
+          "big": true
         }
       ],
       "wait": "a[href*=\"/p/\"]"
@@ -556,7 +571,8 @@
     "wait": "a[href*=\"/p/\"]",
     "url_template": "https://www.noon.com/egypt-en/{url}/{sku}/p/",
     "image_template": "https://f.nooncdn.com/p/{image_key}.jpg",
-    "link_cards": true
+    "link_cards": true,
+    "big_seller": "noon[-_ ]?express|express-en|express-ar|fulfilled by noon|fbn|\\bexpress\\b|اكسبرس|إكسبريس|supermall|سوبر مول"
   },
   {
     "name": "B.TECH",

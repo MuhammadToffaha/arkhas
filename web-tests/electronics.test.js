@@ -78,7 +78,7 @@ test("offers tab: quick Amazon / noon / Jumia filter chips", async () => {
     const mk = (i, s) => ({ title: "x" + i, price: 400, old_price: 1000, pct: 60, url: "https://x/" + i, source: s });
     dealsData = { deals: [mk(1, "Amazon.eg"), mk(2, "Noon"), mk(3, "Jumia"), mk(4, "Jumia")], sources: [], total: 3, at: Date.now() };
     dealRange = "r5070"; renderDeals(true);`);
-  const chips = () => [...w.document.querySelectorAll("#d_quick button")];
+  const chips = () => [...w.document.querySelectorAll("#d_quick button[data-q]")];
   assert.deepEqual(chips().map((b) => b.dataset.q), ["", "Amazon.eg", "Noon", "Jumia"]);
   chips()[3].click();
   assert.equal(w.document.querySelectorAll("#d_out .dc").length, 2);
@@ -174,4 +174,37 @@ test("📷 photo button opens camera/gallery and the result runs a search", asyn
   await w.__photo({ ok: true, barcodes: [], lines: ["JBL", "TUNE 520BT"], labels: [{ text: "Headphones", conf: 0.9 }], thumb: "" });
   assert.equal(w.document.querySelector("#q").value, "JBL TUNE 520BT");
   assert.ok(w.document.querySelectorAll("#ph_q button").length >= 2);
+});
+
+test("🏬 sold / shipped by the store itself: Amazon Prime, noon Express, Jumia Express cards are marked", () => {
+  const amz = S["Amazon.eg"], jum = S["Jumia"];
+  const a = `<div data-component-type="s-search-result"><a class="a-link-normal" href="/dp/B0AAAAAAA1"><h2><span>JBL Tune 520BT</span></h2></a>
+    <span class="a-price"><span class="a-offscreen">EGP 1,499</span></span><i class="a-icon a-icon-prime" aria-label="Amazon Prime"></i></div>
+    <div data-component-type="s-search-result"><a class="a-link-normal" href="/dp/B0AAAAAAA2"><h2><span>Generic earbuds</span></h2></a>
+    <span class="a-price"><span class="a-offscreen">EGP 299</span></span></div>`;
+  const r = E.parse(a, amz, DOMParser, 10);
+  assert.deepEqual(r.map((o) => o.big), [true, false]);
+  const j = `<article class="prd"><a class="core" href="/x.html"><h3 class="name">Phone</h3><div class="prc">EGP 4,999</div>
+    <svg aria-label="Jumia Express" class="ic xprss"></svg></a></article>
+    <article class="prd"><a class="core" href="/y.html"><h3 class="name">Case</h3><div class="prc">EGP 99</div></a></article>`;
+  assert.deepEqual(E.parse(j, jum, DOMParser, 10).map((o) => o.big), [true, false]);
+  assert.ok(S["Noon"].deals.urls.some((u) => u.big && /is_fbn/.test(u.url)));
+});
+
+test("🏬 offers tab chip shows only items sold by the big stores", async () => {
+  const W = new URL("../web/", import.meta.url);
+  const html = readFileSync(new URL("index.html", W), "utf8").replace('<script src="engine.js"></script>', () => `<script>${readFileSync(new URL("engine.js", W), "utf8")}</script>`);
+  const dom = new JSDOM(html, { runScripts: "dangerously", url: "https://app.local/" });
+  const w = dom.window; await new Promise((r) => setTimeout(r, 50));
+  w.eval(`STORES = ${readFileSync(new URL("stores.json", W), "utf8")};
+    const mk = (i, s, big) => ({ title: "x" + i, price: 400, old_price: 1000, pct: 60, url: "https://x/" + i, source: s, big });
+    dealsData = { deals: [mk(1, "Amazon.eg", true), mk(2, "Noon", false), mk(3, "Jumia", true), mk(4, "Noon", true)], sources: [], total: 3, at: Date.now() };
+    dealRange = "r5070"; renderDeals(true);`);
+  const big = w.document.querySelector("#d_quick button[data-big]");
+  assert.match(big.textContent, /· 3$/);
+  big.click();
+  assert.equal(w.document.querySelectorAll("#d_out .dc").length, 3);
+  assert.equal(w.document.querySelectorAll("#d_out .bigb").length, 3);
+  w.document.querySelector("#d_quick button[data-big]").click();
+  assert.equal(w.document.querySelectorAll("#d_out .dc").length, 4);
 });
