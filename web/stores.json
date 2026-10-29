@@ -342,7 +342,20 @@
         "https://www.amazon.eg/s?k=sports&rh=p_8%3A50-&language=en_AE"
       ]
     },
-    "big_seller": "a-icon-prime|amazon prime|aria-label=\"prime|fulfilled by amazon|ships from amazon|sold by amazon|amazon\\.eg</|شحن من أمازون|أمازون برايم|برايم"
+    "sold_by_store": {
+      "probe": "https://www.amazon.eg/s?k=headphones&language=en_AE",
+      "link_text": [
+        "^amazon\\.eg$",
+        "^amazon\\.eg\\b",
+        "^amazon$"
+      ],
+      "keep": "^rh$",
+      "rh_keep": "^p_6:",
+      "raw": "p_6%3A([A-Z0-9]{8,20})[^\"]{0,400}\"[^>]*>(?:\\s|<[^>]*>){0,8}Amazon\\.eg",
+      "raw_param": "rh",
+      "raw_value": "p_6:$1",
+      "label": "Sold by Amazon.eg"
+    }
   },
   {
     "name": "Jumia",
@@ -471,7 +484,19 @@
         "https://www.jumia.com.eg/mlp-deals/?sort=discount"
       ]
     },
-    "big_seller": "jumia[-_ ]?express|xprss|_express|\\bexpress\\b|_mall|jmall|jumia[-_ ]?mall|official store|المتجر الرسمي|جوميا اكسبريس|جوميا إكسبريس"
+    "sold_by_store": {
+      "probe": "https://www.jumia.com.eg/mobile-phones/",
+      "link_text": [
+        "^jumia mall$",
+        "^official stores?$",
+        "jumia mall",
+        "official store",
+        "^jumia express$",
+        "^express( delivery)?$"
+      ],
+      "allow_path": true,
+      "label": "Jumia Mall / official stores (fallback: Jumia Express)"
+    }
   },
   {
     "name": "Noon",
@@ -572,7 +597,21 @@
     "url_template": "https://www.noon.com/egypt-en/{url}/{sku}/p/",
     "image_template": "https://f.nooncdn.com/p/{image_key}.jpg",
     "link_cards": true,
-    "big_seller": "noon[-_ ]?express|express-en|express-ar|fulfilled by noon|fbn|\\bexpress\\b|اكسبرس|إكسبريس|supermall|سوبر مول"
+    "sold_by_store": {
+      "probe": "https://www.noon.com/egypt-en/electronics-and-mobiles/",
+      "render": true,
+      "wait": "a[href*=\"/p/\"]",
+      "link_text": [
+        "^sold by noon$",
+        "^noon$",
+        "^noon retail$",
+        "fulfilled by noon",
+        "^noon express$",
+        "^express$"
+      ],
+      "keep": "^f\\[",
+      "label": "Sold by noon (fallback: fulfilled by noon)"
+    }
   },
   {
     "name": "B.TECH",

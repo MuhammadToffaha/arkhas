@@ -655,9 +655,73 @@
    * opts: { stores, fetcher, DOMParser, minPct (default 10), perStore (default 60), perCat (150), pool (6), renderPool (3), timeout, renderTimeout, onProgress }
    * Returns { deals: [...offer, pct], sources: [...] } sorted by biggest discount.
    */
+  // ---------------- 🏬 "sold by the store itself" ----------------
+  // Every store has its own filter for that (Amazon: seller "Amazon.eg", noon / Jumia: their own facet). Its exact
+  // id is not public, so the phone opens one listing page, finds the filter link by its visible text and copies the
+  // parameters it adds. Rules live in stores.json "sold_by_store" (fixable with a git push, no new APK).
+  function mergeFilter(url, f) {
+    if (!f) return url;
+    if (f.href && !(f.params && f.params.length)) {
+      const u = new URL(f.href), src = new URL(url);
+      for (const [k, v] of src.searchParams) if (/discount|p_8|deal|sort/i.test(k + "=" + v) && !u.searchParams.has(k)) u.searchParams.set(k, v);
+      return u.toString();
+    }
+    const u = new URL(url);
+    for (const [k, v] of f.params) {
+      if (k === "rh") {
+        const cur = (u.searchParams.get("rh") || "").split(",").filter(Boolean);
+        for (const part of v.split(",")) { const key = part.split(":")[0]; const i = cur.findIndex((c) => c.split(":")[0] === key); if (i >= 0) cur[i] = part; else cur.push(part); }
+        u.searchParams.set("rh", cur.join(","));
+      } else if (!u.searchParams.getAll(k).includes(v)) u.searchParams.append(k, v);
+    }
+    return u.toString();
+  }
+
+  async function findStoreFilter(store, fetcher, DOMParserImpl) {
+    const cfg = store.sold_by_store;
+    if (!cfg) return null;
+    const o = cfg.render ? { render: true, wait: cfg.wait || null, lang: "en" } : { lang: "en" };
+    const html = await withTimeout(fetcher(cfg.probe, o), cfg.render ? 30000 : 15000);
+    const P = DOMParserImpl || root.DOMParser;
+    const doc = new P().parseFromString(html, "text/html");
+    const base = new URL(cfg.probe);
+    const links = [...doc.querySelectorAll("a[href]")];
+    for (let level = 0; level < cfg.link_text.length; level++) {
+      const re = new RegExp(cfg.link_text[level], "i");
+      for (const a of links) {
+        const txt = ((a.textContent || "").replace(/\s+/g, " ").trim() || a.getAttribute("aria-label") || a.getAttribute("title") || "")
+          .replace(/\(\d[\d,]*\)|\d[\d,]*\s*(results?|items?|منتج)?$/i, "").trim();
+        if (!txt || txt.length > 60 || !re.test(txt)) continue;
+        let got; try { got = new URL(a.getAttribute("href"), store.base_url || cfg.probe); } catch (_) { continue; }
+        const params = [];
+        for (const [k, v] of got.searchParams) {
+          if (cfg.keep && !new RegExp(cfg.keep).test(k)) continue;
+          if (k === "rh") {
+            const old = (base.searchParams.get("rh") || "").split(",");
+            const add = v.split(",").filter((x) => !old.includes(x) && (!cfg.rh_keep || new RegExp(cfg.rh_keep).test(x)));
+            if (add.length) params.push(["rh", add.join(",")]);
+            continue;
+          }
+          if (base.searchParams.getAll(k).includes(v)) continue;
+          params.push([k, v]);
+        }
+        if (params.length) return { params, text: txt, level, how: "link" };
+        if (cfg.allow_path && got.pathname !== base.pathname) return { href: got.toString(), params: [], text: txt, level, how: "page" };
+      }
+    }
+    if (cfg.raw) {
+      const m = html.match(new RegExp(cfg.raw, "i"));
+      if (m) return { params: [[cfg.raw_param, cfg.raw_value.replace("$1", m[1])]], text: "raw", level: 0, how: "raw" };
+    }
+    return null;
+  }
+
   async function deals(opts) {
     const opt = Object.assign({ minPct: 10, perStore: 60, perCat: 150, pool: 6, renderPool: 3, timeout: 12000, renderTimeout: 20000 }, opts);
-    const stores = (opt.stores || []).filter((s) => s.enabled !== false && s.deals);
+    let stores = (opt.stores || []).filter((s) => s.enabled !== false && s.deals);
+    if (opt.filters) stores = stores.filter((s) => opt.filters[s.name]).map((s) => Object.assign({}, s, { deals: Object.assign({}, s.deals, {
+      urls: (s.deals.urls || [s.deals.url]).map((p) => typeof p === "string" ? { url: mergeFilter(p, opt.filters[s.name]), big: true }
+        : Object.assign({}, p, { url: mergeFilter(p.url, opt.filters[s.name]), big: true })) }) }));
     const all = [], sources = [];
     const snap = () => {
       const seen = new Set();
@@ -834,7 +898,7 @@
     return names;
   }
 
-  const API = { photoQueries, barcodeNames, normalize, tokens, isArabic, setSynonyms, equivalents, translateQuery, queryVariants, queryVariantsAsync, cleanQuery, parsePrice, ADAPTERS, DEAL_FEEDS, deals, pctOff, productId,
+  const API = { photoQueries, barcodeNames, findStoreFilter, mergeFilter, normalize, tokens, isArabic, setSynonyms, equivalents, translateQuery, queryVariants, queryVariantsAsync, cleanQuery, parsePrice, ADAPTERS, DEAL_FEEDS, deals, pctOff, productId,
     relevance, matchInfo, specs, rank, top, parse, parseSerp, buildUrl, serpUrl, externalLinks, search };
   if (typeof module !== "undefined" && module.exports) module.exports = API;
   else root.Arkhas = API;

@@ -307,6 +307,7 @@ html,body{overflow-x:hidden}
     <div class="chips" id="d_range"></div>
     <div class="chips" id="d_sort"></div>
     <div class="chips" id="d_quick"></div>
+    <div class="muted" id="d_big" hidden style="font-size:12px"></div>
     <div class="dd" id="d_dd">
       <button class="dd-btn" id="d_ddbtn"><span id="d_ddlbl"></span><i>▾</i></button>
       <div class="dd-panel" id="d_panel" hidden>
@@ -434,7 +435,7 @@ const T = {
     tgBadTok: "⚠️ الـ Token غلط — انسخه تاني من @BotFather", tgTimeout: "لسه مش لاقي الجروب — اكتب /arkhas في الجروب واضغط «دوّر على جروبي»",
     tgFind: "🔎 دوّر على جروبي", tgTest: "✉️ ابعت رسالة تجربة", tgNoChats: "مش لاقي الجروب — اكتب /arkhas في الجروب (البوت مش بيشوف الرسايل العادية) وحاول تاني",
     tgPicked: "✓ هيبعت لـ «{t}»", tgOk: "✓ الرسالة وصلت للجروب", tgErr: "⚠️ تليجرام: {e}", tgTestText: "✅ أرخص متوصل — العروض الكبيرة هتوصل هنا تلقائي",
-    tgSent: " · تليجرام: {n} اتبعت", tgFail: " · تليجرام فشل: {e}", alNever: "لسه مفيش فحص", alPerm: "⚠️ اسمح بالإشعارات للتطبيق من إعدادات الموبايل", navFav: "المفضلة", navPromo: "أكواد", bigOnly: "🏬 بيع وشحن المتجر نفسه", bigBadge: "🏬 من المتجر", phCam: "📸 صوّر", phGal: "🖼️ من المعرض", phSheetT: "📷 دوّر بالصورة", phSheetD: "صوّر المنتج أو الباركود أو العلبة — التطبيق بيقرا الاسم والموديل ويدوّر على أرخص سعر.", phReading: "⏳ بنقرا الصورة…", phTitle: "📷 دوّرنا بالصورة", phPick: "مش هو؟ اختار كلمة تانية أو عدّل البحث:", phNone: "معرفناش المنتج من الصورة 😕 — جرّب صورة أوضح للاسم/الموديل أو الباركود، أو افتحها في Google Lens.", phLens: "🔎 Google Lens", phAgain: "📷 صورة تانية", phBarcode: "🏷️ باركود {c}", phErr: "تعذّر قراءة الصورة: {e}", promoTitle: "أكواد الخصم", promoQ: "🔎 دوّر على متجر…", promoSub: "{n} كود من {s} متجر — اتحدّثت {t}", promoNone: "مفيش أكواد دلوقتي — اضغط ↻", promoCopy: "📋 انسخ", promoCopied: "✅ اتنسخ", promoOpen: "🛒 المتجر", promoExp: "ينتهي {d}", promoUsed: "استُخدم {n} مرة", promoAll: "الكل", promoNote: "الأكواد بتتجمّع كل يوم من مواقع الكوبونات المصرية (يجني). جرّب الكود عند الدفع — بعض الأكواد للعملاء الجدد بس.", promoErr: "تعذّر تحميل الأكواد", favTitle: "المفضلة", favSub: "{n} منتج محفوظ — السعر وقت الحفظ", favEmpty: "اضغط ♥ على أي منتج عشان يتحفظ هنا", savedOn: "اتحفظ {d}", favAdded: "اتضاف للمفضلة ❤️", favRemoved: "اتشال من المفضلة", refresh: "تحديث", waBtn: "واتساب", waHead: "🔥 عروض أرخص — {d}", waInstead: "بدل", waMore: "📲 من تطبيق أرخص", refresh: "تحديث", ddAll: "كل المتاجر", ddSome: "{n} متاجر مختارة", ddOne: "{s}", selAll: "تحديد الكل", selNone: "إلغاء الكل", navDeals: "عروض", dealsTitle: "عروض فلاش", dealsSub: "أكبر الخصومات من أشهر {n} مواقع في مصر — اتحدّثت {t}", dealsLoading: "جاري جلب العروض من {done}/{all} موقع…", dealsNone: "مفيش عروض دلوقتي — اضغط ↻", sortPct: "أكبر خصم", sortPrice: "الأرخص", sortSave: "أكبر توفير", allStores: "الكل", justNow: "الآن", minAgo: "من {m} دقيقة", banner: "🎉 نسخة جديدة {v} — اضغط للتحديث", openRel: "⬇️ تنزيل {v} من GitHub", relNote: "هتتفتح صفحة التنزيل — نزّل الملف وافتحه للتثبيت. بعد كده التحديث هيكون من جوه التطبيق", upd: "🔄 التحديثات", cur: "نسختك {v}", check: "تحقق من التحديث", checking: "جاري التحقق…", latest: "عندك أحدث نسخة ✓",
+    tgSent: " · تليجرام: {n} اتبعت", tgFail: " · تليجرام فشل: {e}", alNever: "لسه مفيش فحص", alPerm: "⚠️ اسمح بالإشعارات للتطبيق من إعدادات الموبايل", navFav: "المفضلة", navPromo: "أكواد", bigOnly: "🏬 بيع المتجر نفسه بس", bigBadge: "🏬 بيع المتجر", bigFinding: "⏳ بندوّر على فلتر «بيع المتجر» في أمازون ونون وجوميا…", bigNote: "✅ = بيع المتجر نفسه · ⚠️ = شحن المتجر (مش لاقيين فلتر البيع) · ❌ = مش لاقيين", phCam: "📸 صوّر", phGal: "🖼️ من المعرض", phSheetT: "📷 دوّر بالصورة", phSheetD: "صوّر المنتج أو الباركود أو العلبة — التطبيق بيقرا الاسم والموديل ويدوّر على أرخص سعر.", phReading: "⏳ بنقرا الصورة…", phTitle: "📷 دوّرنا بالصورة", phPick: "مش هو؟ اختار كلمة تانية أو عدّل البحث:", phNone: "معرفناش المنتج من الصورة 😕 — جرّب صورة أوضح للاسم/الموديل أو الباركود، أو افتحها في Google Lens.", phLens: "🔎 Google Lens", phAgain: "📷 صورة تانية", phBarcode: "🏷️ باركود {c}", phErr: "تعذّر قراءة الصورة: {e}", promoTitle: "أكواد الخصم", promoQ: "🔎 دوّر على متجر…", promoSub: "{n} كود من {s} متجر — اتحدّثت {t}", promoNone: "مفيش أكواد دلوقتي — اضغط ↻", promoCopy: "📋 انسخ", promoCopied: "✅ اتنسخ", promoOpen: "🛒 المتجر", promoExp: "ينتهي {d}", promoUsed: "استُخدم {n} مرة", promoAll: "الكل", promoNote: "الأكواد بتتجمّع كل يوم من مواقع الكوبونات المصرية (يجني). جرّب الكود عند الدفع — بعض الأكواد للعملاء الجدد بس.", promoErr: "تعذّر تحميل الأكواد", favTitle: "المفضلة", favSub: "{n} منتج محفوظ — السعر وقت الحفظ", favEmpty: "اضغط ♥ على أي منتج عشان يتحفظ هنا", savedOn: "اتحفظ {d}", favAdded: "اتضاف للمفضلة ❤️", favRemoved: "اتشال من المفضلة", refresh: "تحديث", waBtn: "واتساب", waHead: "🔥 عروض أرخص — {d}", waInstead: "بدل", waMore: "📲 من تطبيق أرخص", refresh: "تحديث", ddAll: "كل المتاجر", ddSome: "{n} متاجر مختارة", ddOne: "{s}", selAll: "تحديد الكل", selNone: "إلغاء الكل", navDeals: "عروض", dealsTitle: "عروض فلاش", dealsSub: "أكبر الخصومات من أشهر {n} مواقع في مصر — اتحدّثت {t}", dealsLoading: "جاري جلب العروض من {done}/{all} موقع…", dealsNone: "مفيش عروض دلوقتي — اضغط ↻", sortPct: "أكبر خصم", sortPrice: "الأرخص", sortSave: "أكبر توفير", allStores: "الكل", justNow: "الآن", minAgo: "من {m} دقيقة", banner: "🎉 نسخة جديدة {v} — اضغط للتحديث", openRel: "⬇️ تنزيل {v} من GitHub", relNote: "هتتفتح صفحة التنزيل — نزّل الملف وافتحه للتثبيت. بعد كده التحديث هيكون من جوه التطبيق", upd: "🔄 التحديثات", cur: "نسختك {v}", check: "تحقق من التحديث", checking: "جاري التحقق…", latest: "عندك أحدث نسخة ✓",
     newVer: "نسخة جديدة {v} متاحة ({mb} ميجا)", popT: "تحديث جديد {v} 🎉", popD: "نسخة أحدث من أرخص جاهزة — حدّث دلوقتي عشان تاخد آخر المميزات.", popGo: "⬇️ حدّث الآن", popLater: "بعدين", install: "⬇️ تنزيل وتثبيت {v}", downloading: "جاري التنزيل… {p}%", installing: "افتح شاشة التثبيت واضغط تثبيت",
     perm: "اسمح لـ أرخص بتثبيت التحديثات (فتحنا لك الإعداد) ثم ارجع واضغط تثبيت تاني", webBtn: "تحديث قائمة المتاجر", webSame: "قائمة المتاجر محدّثة ✓",
     webChanged: "تم تحديث المتاجر — جاري إعادة التحميل…", updErr: "تعذّر: {e}", exact: "✓ مطابق", similar: "≈ مشابه", other: "موديل مختلف", fewExact: "لقينا {n} بس مطابقين تمامًا — الباقي مشابه", egp: "ج.م", save: "وفّر {n}",
@@ -454,7 +455,7 @@ const T = {
     tgBadTok: "⚠️ Token is wrong — copy it again from @BotFather", tgTimeout: "Group not found yet — send /arkhas in the group, then tap “Find my group”",
     tgFind: "🔎 Find my group", tgTest: "✉️ Send test message", tgNoChats: "Group not found — send /arkhas in the group (bots don't see normal messages) and try again",
     tgPicked: "✓ Will post to “{t}”", tgOk: "✓ Message arrived in the group", tgErr: "⚠️ Telegram: {e}", tgTestText: "✅ Arkhas connected — big deals will be posted here automatically",
-    tgSent: " · Telegram: {n} sent", tgFail: " · Telegram failed: {e}", alNever: "No check yet", alPerm: "⚠️ Allow notifications for the app in phone settings", navFav: "Favourites", navPromo: "Codes", bigOnly: "🏬 Sold & shipped by the store", bigBadge: "🏬 by store", phCam: "📸 Camera", phGal: "🖼️ Gallery", phSheetT: "📷 Search by photo", phSheetD: "Snap the product, its barcode or box — the app reads the name and model and finds the cheapest price.", phReading: "⏳ Reading the photo…", phTitle: "📷 Searched by photo", phPick: "Not it? Pick another phrase or edit the search:", phNone: "Could not recognise the product 😕 — try a clearer shot of the name/model or barcode, or open it in Google Lens.", phLens: "🔎 Google Lens", phAgain: "📷 Another photo", phBarcode: "🏷️ Barcode {c}", phErr: "Could not read the photo: {e}", promoTitle: "Promo codes", promoQ: "🔎 Search a store…", promoSub: "{n} codes from {s} stores — updated {t}", promoNone: "No codes right now — tap ↻", promoCopy: "📋 Copy", promoCopied: "✅ Copied", promoOpen: "🛒 Store", promoExp: "Expires {d}", promoUsed: "Used {n} times", promoAll: "All", promoNote: "Codes are collected daily from Egyptian coupon sites (Yajny). Try the code at checkout — some are for new customers only.", promoErr: "Could not load codes", favTitle: "Favourites", favSub: "{n} saved items — price when saved", favEmpty: "Tap ♥ on any product to save it here", savedOn: "saved {d}", favAdded: "Added to favourites ❤️", favRemoved: "Removed from favourites", refresh: "Refresh", waBtn: "WhatsApp", waHead: "🔥 Arkhas deals — {d}", waInstead: "was", waMore: "📲 via Arkhas app", refresh: "Refresh", ddAll: "All stores", ddSome: "{n} stores selected", ddOne: "{s}", selAll: "Select all", selNone: "Clear all", navDeals: "Deals", dealsTitle: "Flash deals", dealsSub: "Biggest discounts from {n} top Egyptian sites — updated {t}", dealsLoading: "Fetching deals from {done}/{all} sites…", dealsNone: "No deals right now — tap ↻", sortPct: "Biggest % off", sortPrice: "Cheapest", sortSave: "Most saved", allStores: "All", justNow: "just now", minAgo: "{m} min ago", banner: "🎉 New version {v} — tap to update", openRel: "⬇️ Download {v} from GitHub", relNote: "The download page opens — download the file and open it to install. After this, updates happen inside the app", upd: "🔄 Updates", cur: "You have {v}", check: "Check for update", checking: "Checking…", latest: "You have the latest version ✓",
+    tgSent: " · Telegram: {n} sent", tgFail: " · Telegram failed: {e}", alNever: "No check yet", alPerm: "⚠️ Allow notifications for the app in phone settings", navFav: "Favourites", navPromo: "Codes", bigOnly: "🏬 Sold by the store only", bigBadge: "🏬 sold by store", bigFinding: "⏳ Finding the \"sold by\" filter on Amazon, noon and Jumia…", bigNote: "✅ = sold by the store · ⚠️ = shipped by the store (no seller filter found) · ❌ = not found", phCam: "📸 Camera", phGal: "🖼️ Gallery", phSheetT: "📷 Search by photo", phSheetD: "Snap the product, its barcode or box — the app reads the name and model and finds the cheapest price.", phReading: "⏳ Reading the photo…", phTitle: "📷 Searched by photo", phPick: "Not it? Pick another phrase or edit the search:", phNone: "Could not recognise the product 😕 — try a clearer shot of the name/model or barcode, or open it in Google Lens.", phLens: "🔎 Google Lens", phAgain: "📷 Another photo", phBarcode: "🏷️ Barcode {c}", phErr: "Could not read the photo: {e}", promoTitle: "Promo codes", promoQ: "🔎 Search a store…", promoSub: "{n} codes from {s} stores — updated {t}", promoNone: "No codes right now — tap ↻", promoCopy: "📋 Copy", promoCopied: "✅ Copied", promoOpen: "🛒 Store", promoExp: "Expires {d}", promoUsed: "Used {n} times", promoAll: "All", promoNote: "Codes are collected daily from Egyptian coupon sites (Yajny). Try the code at checkout — some are for new customers only.", promoErr: "Could not load codes", favTitle: "Favourites", favSub: "{n} saved items — price when saved", favEmpty: "Tap ♥ on any product to save it here", savedOn: "saved {d}", favAdded: "Added to favourites ❤️", favRemoved: "Removed from favourites", refresh: "Refresh", waBtn: "WhatsApp", waHead: "🔥 Arkhas deals — {d}", waInstead: "was", waMore: "📲 via Arkhas app", refresh: "Refresh", ddAll: "All stores", ddSome: "{n} stores selected", ddOne: "{s}", selAll: "Select all", selNone: "Clear all", navDeals: "Deals", dealsTitle: "Flash deals", dealsSub: "Biggest discounts from {n} top Egyptian sites — updated {t}", dealsLoading: "Fetching deals from {done}/{all} sites…", dealsNone: "No deals right now — tap ↻", sortPct: "Biggest % off", sortPrice: "Cheapest", sortSave: "Most saved", allStores: "All", justNow: "just now", minAgo: "{m} min ago", banner: "🎉 New version {v} — tap to update", openRel: "⬇️ Download {v} from GitHub", relNote: "The download page opens — download the file and open it to install. After this, updates happen inside the app", upd: "🔄 Updates", cur: "You have {v}", check: "Check for update", checking: "Checking…", latest: "You have the latest version ✓",
     newVer: "New version {v} available ({mb} MB)", popT: "New update {v} 🎉", popD: "A newer Arkhas is ready — update now to get the latest features.", popGo: "⬇️ Update now", popLater: "Later", install: "⬇️ Download & install {v}", downloading: "Downloading… {p}%", installing: "Tap Install on the Android screen",
     perm: "Allow Arkhas to install updates (settings opened), then come back and tap install again", webBtn: "Refresh store list", webSame: "Store list is up to date ✓",
     webChanged: "Stores updated — reloading…", updErr: "Failed: {e}", exact: "✓ exact", similar: "≈ similar", other: "other model", fewExact: "Only {n} exact match(es) — the rest are similar", egp: "EGP", save: "save {n}",
@@ -833,12 +834,14 @@ function showView(v) {
 }
 
 function renderDeals(done = true) {
-  const t = T[L], d = dealsData;
+  if (dealBig === null) dealBig = pref("dealBig") === "1";
+  const t = T[L], d = dealBig ? dealsBigData : dealsData;
+  $("#d_big").hidden = !dealBig;
+  if (dealBig) renderBigStatus();
   if (!d) return;
   const mins = Math.round((Date.now() - d.at) / 60000);
   $("#d_sub").textContent = done ? fmt(t.dealsSub, { n: d.total, t: mins < 1 ? t.justNow : fmt(t.minAgo, { m: mins }) })
     : fmt(t.dealsLoading, { done: d.sources.length, all: d.total });
-  if (dealBig === null) dealBig = pref("dealBig") === "1";
   if (!dealRange) dealRange = RANGES[pref("dealRange")] ? pref("dealRange") : "r5070";
   $("#d_range").innerHTML = [["r5070", t.r5070], ["elec", t.rElec], ["mega", t.rMega], ["r70", t.r70], ["r30", t.r30], ["all", t.rAll]]
     .map(([k, n]) => `<button data-r="${k}" class="${dealRange === k ? "on" : ""}${k === "mega" ? " mega" : ""}">${n} · ${d.deals.filter((o) => inR(o, k)).length}</button>`).join("");
@@ -859,11 +862,10 @@ function renderDeals(done = true) {
   // 🏪 quick store filter: All · Amazon · noon · Jumia (same setting as the dropdown)
   const QUICK = [["", "🏪 " + t.ddAll], ["Amazon.eg", "🅰️ Amazon"], ["Noon", "🟡 noon"], ["Jumia", "🟠 Jumia"]].filter(([n]) => !n || names.includes(n));
   const one = shown.length === 1 ? shown[0] : null;
-  const bigN = inRange.filter((o) => o.big && !hide.has(o.source)).length;
-  $("#d_quick").innerHTML = `<button data-big="1" class="big${dealBig ? " on" : ""}">${t.bigOnly} · ${bigN}</button>` +
+  $("#d_quick").innerHTML = `<button data-big="1" class="big${dealBig ? " on" : ""}">${t.bigOnly}${dealBig ? " · " + inRange.filter((o) => !hide.has(o.source)).length : ""}</button>` +
     QUICK.map(([n, lbl]) => `<button data-q="${esc(n)}" class="${(n ? one === n : shown.length === names.length) ? "on" : ""}">${lbl} · ${n ? counts[n] || 0 : inRange.length}</button>`).join("");
   $("#d_all").textContent = t.selAll; $("#d_none").textContent = t.selNone;
-  let list = inRange.filter((o) => !hide.has(o.source) && (!dealBig || o.big));
+  let list = inRange.filter((o) => !hide.has(o.source));
   if ((dealRange === "r70" || dealRange === "elec") && dealSort === "pct") list = list.slice().sort((a, b) => b.pct - a.pct || a.price - b.price);
   const by = { pct: (a, b) => b.pct - a.pct, save: (a, b) => (b.old_price - b.price) - (a.old_price - a.price), price: (a, b) => a.price - b.price };
   list = list.slice().sort(by[dealSort]).slice(0, 120);
@@ -871,7 +873,7 @@ function renderDeals(done = true) {
   if (!list.length) { $("#d_out").innerHTML = done ? `<div class="empty">${d.deals.length ? t.rNone : t.dealsNone}</div>` : ""; return; }
   $("#d_out").innerHTML = `<div class="dg">${list.map((o) => `<a class="dc${o.tag === "mega" ? " is-mega" : ""}" href="${esc(o.url)}">${o.pct ? `<span class="off">-${o.pct}%</span>` : ""}${o.tag === "mega" ? `<span class="megab">🟡 ${t.mega}</span>` : ""}${heart(o)}<button type="button" class="share" data-u="${esc(o.url)}" aria-label="WhatsApp">📤</button>${cartBtn(o)}${img(o)}
     <div class="ttl">${esc(o.title)}</div><div class="p">${money(o.price)}</div>${o.old_price && o.old_price > o.price ? `<div class="old">${money(o.old_price)}</div>` : ""}
-    <div class="src">${esc(o.source)}${o.big ? ` <span class="bigb">${t.bigBadge}</span>` : ""}</div></a>`).join("")}</div>`;
+    <div class="src">${esc(o.source)}${dealBig ? ` <span class="bigb">${t.bigBadge}</span>` : ""}</div></a>`).join("")}</div>`;
 }
 
 async function loadDeals(force) {
@@ -891,13 +893,60 @@ async function loadDeals(force) {
   } finally { dealsBusy = false; $("#d_bar").hidden = true; $("#d_refresh").disabled = false; }
 }
 
-$("#nav_deals").onclick = () => { showView("deals"); loadDeals(false); };
-$("#d_refresh").onclick = () => loadDeals(true);
+// 🏬 deals sold by Amazon / noon / Jumia themselves (not third-party sellers): the store's own seller filter
+let dealsBigData = null, bigBusy = false, bigFilters = null;
+const BIG_STORES = ["Amazon.eg", "Noon", "Jumia"];
+const FILTER_TTL = 3 * 24 * 3600 * 1000;
+async function storeFilters(force) {
+  if (!force && !bigFilters) { try { const c = JSON.parse(pref("soldByFilters", "null")); if (c && Date.now() - c.at < FILTER_TTL) bigFilters = c; } catch (_) {} }
+  if (!force && bigFilters) return bigFilters;
+  const res = { at: Date.now(), stores: {} };
+  await Promise.all(STORES.filter((x) => BIG_STORES.includes(x.name) && x.sold_by_store && isOn(x)).map(async (x) => {
+    try { res.stores[x.name] = (await Arkhas.findStoreFilter(x, fetcher)) || { none: true }; }
+    catch (e) { res.stores[x.name] = { none: true, error: String(e.message || e).slice(0, 80) }; }
+  }));
+  bigFilters = res;
+  if (Object.values(res.stores).some((f) => !f.none)) try { setPref("soldByFilters", JSON.stringify(res)); } catch (_) {}
+  return res;
+}
+function renderBigStatus() {
+  const t = T[L], f = bigFilters && bigFilters.stores;
+  if (!f) { $("#d_big").textContent = t.bigFinding; return; }
+  $("#d_big").textContent = BIG_STORES.filter((n) => f[n]).map((n) => {
+    const x = f[n], nm = n.replace(".eg", "");
+    if (x.none) return "❌ " + nm;
+    return (x.level >= (n === "Noon" ? 3 : n === "Jumia" ? 4 : 9) ? "⚠️ " : "✅ ") + nm + " (" + x.text + ")";
+  }).join(" · ") + " — " + t.bigNote;
+}
+async function loadBigDeals(force) {
+  if (bigBusy) return;
+  if (!force && dealsBigData && Date.now() - dealsBigData.at < DEALS_TTL) return renderDeals();
+  bigBusy = true; $("#d_bar").hidden = false; $("#d_refresh").disabled = true;
+  dealsBigData = { deals: [], sources: [], total: 3, at: Date.now() };
+  renderDeals(false);
+  try {
+    const f = await storeFilters(force);
+    renderBigStatus();
+    const filters = {};
+    for (const [n, x] of Object.entries(f.stores)) if (!x.none) filters[n] = x;
+    dealsBigData = await Arkhas.deals({ stores: STORES.filter(isOn), fetcher, filters, onProgress: (r) => {
+      dealsBigData = r; renderDeals(false);
+      $("#d_bar i").style.width = Math.max(8, (100 * r.sources.length) / Math.max(1, r.total)) + "%";
+    } });
+    renderDeals(true);
+  } finally { bigBusy = false; $("#d_bar").hidden = true; $("#d_refresh").disabled = false; }
+}
+$("#nav_deals").onclick = () => { showView("deals"); if (dealBig === null) dealBig = pref("dealBig") === "1"; dealBig ? loadBigDeals(false) : loadDeals(false); };
+$("#d_refresh").onclick = () => (dealBig ? loadBigDeals(true) : loadDeals(true));
 $("#d_wa").onclick = () => shareWa(shownDeals.slice(0, 10));
 $("#d_range").onclick = (e) => { const k = e.target.dataset && e.target.dataset.r; if (k) { dealRange = k; setPref("dealRange", k); renderDeals(); } };
 $("#d_sort").onclick = (e) => { const k = e.target.dataset && e.target.dataset.k; if (k) { dealSort = k; renderDeals(); } };
 $("#d_quick").onclick = (e) => {
-  if (e.target.closest("button[data-big]")) { dealBig = !dealBig; setPref("dealBig", dealBig ? "1" : ""); renderDeals(); return; }
+  if (e.target.closest("button[data-big]")) {
+    dealBig = !dealBig; setPref("dealBig", dealBig ? "1" : "");
+    if (dealBig) loadBigDeals(false); else renderDeals();
+    return;
+  }
   const b = e.target.closest("button[data-q]"); if (!b) return;
   const h = getHide(); h.clear();
   if (b.dataset.q) for (const x of STORES) if (x.deals && x.name !== b.dataset.q) h.add(x.name);
