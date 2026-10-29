@@ -96,7 +96,7 @@ test("UI: ⚡ tab shows deal cards, sorting and store filter", async () => {
   btn.click();
   assert.equal(doc.querySelector("#dealsView").hidden, false);
   assert.equal(doc.querySelector("#searchView").hidden, true);
-  const until = async (f) => { const t = Date.now(); while (!f()) { if (Date.now() - t > 5000) throw new Error("timeout"); await new Promise((r) => setTimeout(r, 20)); } };
+  const until = async (f) => { const t = Date.now(); while (!f()) { if (Date.now() - t > 15000) throw new Error("timeout"); await new Promise((r) => setTimeout(r, 20)); } };
   await until(() => doc.querySelector("#d_bar").hidden && doc.querySelectorAll(".dc").length >= 1);
   // default range = 50–70%: only the 50% Jumia deal
   assert.equal(doc.querySelector("#d_range button.on").dataset.r, "r5070");

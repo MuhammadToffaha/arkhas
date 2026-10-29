@@ -835,7 +835,7 @@ function showView(v) {
 
 function renderDeals(done = true) {
   if (dealBig === null) dealBig = pref("dealBig") === "1";
-  const t = T[L], d = dealBig ? dealsBigData : dealsData;
+  const t = T[L], d = dealsData;
   $("#d_big").hidden = !dealBig;
   if (dealBig) renderBigStatus();
   if (!d) return;
@@ -862,10 +862,10 @@ function renderDeals(done = true) {
   // 🏪 quick store filter: All · Amazon · noon · Jumia (same setting as the dropdown)
   const QUICK = [["", "🏪 " + t.ddAll], ["Amazon.eg", "🅰️ Amazon"], ["Noon", "🟡 noon"], ["Jumia", "🟠 Jumia"]].filter(([n]) => !n || names.includes(n));
   const one = shown.length === 1 ? shown[0] : null;
-  $("#d_quick").innerHTML = `<button data-big="1" class="big${dealBig ? " on" : ""}">${t.bigOnly}${dealBig ? " · " + inRange.filter((o) => !hide.has(o.source)).length : ""}</button>` +
+  $("#d_quick").innerHTML = `<button data-big="1" class="big${dealBig ? " on" : ""}">${t.bigOnly} · ${inRange.filter((o) => o.big && !hide.has(o.source)).length}</button>` +
     QUICK.map(([n, lbl]) => `<button data-q="${esc(n)}" class="${(n ? one === n : shown.length === names.length) ? "on" : ""}">${lbl} · ${n ? counts[n] || 0 : inRange.length}</button>`).join("");
   $("#d_all").textContent = t.selAll; $("#d_none").textContent = t.selNone;
-  let list = inRange.filter((o) => !hide.has(o.source));
+  let list = inRange.filter((o) => !hide.has(o.source) && (!dealBig || o.big));
   if ((dealRange === "r70" || dealRange === "elec") && dealSort === "pct") list = list.slice().sort((a, b) => b.pct - a.pct || a.price - b.price);
   const by = { pct: (a, b) => b.pct - a.pct, save: (a, b) => (b.old_price - b.price) - (a.old_price - a.price), price: (a, b) => a.price - b.price };
   list = list.slice().sort(by[dealSort]).slice(0, 120);
@@ -873,7 +873,7 @@ function renderDeals(done = true) {
   if (!list.length) { $("#d_out").innerHTML = done ? `<div class="empty">${d.deals.length ? t.rNone : t.dealsNone}</div>` : ""; return; }
   $("#d_out").innerHTML = `<div class="dg">${list.map((o) => `<a class="dc${o.tag === "mega" ? " is-mega" : ""}" href="${esc(o.url)}">${o.pct ? `<span class="off">-${o.pct}%</span>` : ""}${o.tag === "mega" ? `<span class="megab">🟡 ${t.mega}</span>` : ""}${heart(o)}<button type="button" class="share" data-u="${esc(o.url)}" aria-label="WhatsApp">📤</button>${cartBtn(o)}${img(o)}
     <div class="ttl">${esc(o.title)}</div><div class="p">${money(o.price)}</div>${o.old_price && o.old_price > o.price ? `<div class="old">${money(o.old_price)}</div>` : ""}
-    <div class="src">${esc(o.source)}${dealBig ? ` <span class="bigb">${t.bigBadge}</span>` : ""}</div></a>`).join("")}</div>`;
+    <div class="src">${esc(o.source)}${o.big ? ` <span class="bigb">${t.bigBadge}</span>` : ""}</div></a>`).join("")}</div>`;
 }
 
 async function loadDeals(force) {
@@ -884,7 +884,12 @@ async function loadDeals(force) {
   }
   dealsBusy = true; $("#d_bar").hidden = false; $("#d_refresh").disabled = true;
   try {
-    dealsData = await Arkhas.deals({ stores: STORES.filter(isOn), fetcher, onProgress: (r) => {
+    let soldBy = {};
+    try {
+      const f = await storeFilters(force);
+      for (const [n, x] of Object.entries(f.stores)) if (!x.none) soldBy[n] = x;
+    } catch (_) {}
+    dealsData = await Arkhas.deals({ stores: STORES.filter(isOn), fetcher, soldBy, onProgress: (r) => {
       dealsData = r; renderDeals(false);
       $("#d_bar i").style.width = Math.max(8, (100 * r.sources.length) / r.total) + "%";
     } });
@@ -898,15 +903,19 @@ let dealsBigData = null, bigBusy = false, bigFilters = null;
 const BIG_STORES = ["Amazon.eg", "Noon", "Jumia"];
 const FILTER_TTL = 3 * 24 * 3600 * 1000;
 async function storeFilters(force) {
-  if (!force && !bigFilters) { try { const c = JSON.parse(pref("soldByFilters", "null")); if (c && Date.now() - c.at < FILTER_TTL) bigFilters = c; } catch (_) {} }
+  if (!force && !bigFilters) { try { const c = JSON.parse(pref("soldByFilters2", "null")); if (c && Date.now() - c.at < FILTER_TTL) bigFilters = c; } catch (_) {} }
   if (!force && bigFilters) return bigFilters;
   const res = { at: Date.now(), stores: {} };
   await Promise.all(STORES.filter((x) => BIG_STORES.includes(x.name) && x.sold_by_store && isOn(x)).map(async (x) => {
     try { res.stores[x.name] = (await Arkhas.findStoreFilter(x, fetcher)) || { none: true }; }
-    catch (e) { res.stores[x.name] = { none: true, error: String(e.message || e).slice(0, 80) }; }
+    catch (e) {
+      const c = x.sold_by_store;   // page did not load: still use the store's fixed filter (noon fbn, Jumia Express)
+      res.stores[x.name] = c.fallback_params ? { params: c.fallback_params, text: c.fallback_text || "fallback", level: 99, how: "fixed" }
+        : { none: true, error: String(e.message || e).slice(0, 80) };
+    }
   }));
   bigFilters = res;
-  if (Object.values(res.stores).some((f) => !f.none)) try { setPref("soldByFilters", JSON.stringify(res)); } catch (_) {}
+  if (Object.values(res.stores).some((f) => !f.none)) try { setPref("soldByFilters2", JSON.stringify(res)); } catch (_) {}
   return res;
 }
 function renderBigStatus() {
@@ -915,7 +924,8 @@ function renderBigStatus() {
   $("#d_big").textContent = BIG_STORES.filter((n) => f[n]).map((n) => {
     const x = f[n], nm = n.replace(".eg", "");
     if (x.none) return "❌ " + nm;
-    return (x.level >= (n === "Noon" ? 3 : n === "Jumia" ? 4 : 9) ? "⚠️ " : "✅ ") + nm + " (" + x.text + ")";
+    const sold = n === "Amazon.eg" ? true : n === "Noon" ? x.level <= 2 : x.level <= 1;
+    return (sold ? "✅ " : "⚠️ ") + nm + " (" + x.text + ")";
   }).join(" · ") + " — " + t.bigNote;
 }
 async function loadBigDeals(force) {
@@ -936,15 +946,15 @@ async function loadBigDeals(force) {
     renderDeals(true);
   } finally { bigBusy = false; $("#d_bar").hidden = true; $("#d_refresh").disabled = false; }
 }
-$("#nav_deals").onclick = () => { showView("deals"); if (dealBig === null) dealBig = pref("dealBig") === "1"; dealBig ? loadBigDeals(false) : loadDeals(false); };
-$("#d_refresh").onclick = () => (dealBig ? loadBigDeals(true) : loadDeals(true));
+$("#nav_deals").onclick = () => { showView("deals"); loadDeals(false); };
+$("#d_refresh").onclick = () => loadDeals(true);
 $("#d_wa").onclick = () => shareWa(shownDeals.slice(0, 10));
 $("#d_range").onclick = (e) => { const k = e.target.dataset && e.target.dataset.r; if (k) { dealRange = k; setPref("dealRange", k); renderDeals(); } };
 $("#d_sort").onclick = (e) => { const k = e.target.dataset && e.target.dataset.k; if (k) { dealSort = k; renderDeals(); } };
 $("#d_quick").onclick = (e) => {
   if (e.target.closest("button[data-big]")) {
     dealBig = !dealBig; setPref("dealBig", dealBig ? "1" : "");
-    if (dealBig) loadBigDeals(false); else renderDeals();
+    renderDeals();
     return;
   }
   const b = e.target.closest("button[data-q]"); if (!b) return;

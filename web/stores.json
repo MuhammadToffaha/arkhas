@@ -354,7 +354,8 @@
       "raw": "p_6%3A([A-Z0-9]{8,20})[^\"]{0,400}\"[^>]*>(?:\\s|<[^>]*>){0,8}Amazon\\.eg",
       "raw_param": "rh",
       "raw_value": "p_6:$1",
-      "label": "Sold by Amazon.eg"
+      "label": "Sold by Amazon.eg",
+      "max_pages": 30
     }
   },
   {
@@ -487,15 +488,25 @@
     "sold_by_store": {
       "probe": "https://www.jumia.com.eg/mobile-phones/",
       "link_text": [
+        "^sold by jumia$",
+        "^jumia$",
         "^jumia mall$",
         "^official stores?$",
         "jumia mall",
         "official store",
         "^jumia express$",
-        "^express( delivery)?$"
+        "^express( delivery)?$",
+        "express"
       ],
       "allow_path": true,
-      "label": "Jumia Mall / official stores (fallback: Jumia Express)"
+      "label": "Jumia Mall / official stores (fallback: Jumia Express)",
+      "fallback_params": [
+        [
+          "shop_premium_services",
+          "shop_express_delivery"
+        ]
+      ],
+      "fallback_text": "Jumia Express"
     }
   },
   {
@@ -607,10 +618,18 @@
         "^noon retail$",
         "fulfilled by noon",
         "^noon express$",
-        "^express$"
+        "^express$",
+        "^fbn$"
       ],
       "keep": "^f\\[",
-      "label": "Sold by noon (fallback: fulfilled by noon)"
+      "label": "Sold by noon (fallback: fulfilled by noon)",
+      "fallback_params": [
+        [
+          "f[is_fbn][]",
+          "1"
+        ]
+      ],
+      "fallback_text": "Fulfilled by noon"
     }
   },
   {

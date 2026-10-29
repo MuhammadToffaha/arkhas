@@ -709,6 +709,7 @@
         if (cfg.allow_path && got.pathname !== base.pathname) return { href: got.toString(), params: [], text: txt, level, how: "page" };
       }
     }
+    if (cfg.fallback_params) return { params: cfg.fallback_params, text: cfg.fallback_text || "fallback", level: 99, how: "fixed" };
     if (cfg.raw) {
       const m = html.match(new RegExp(cfg.raw, "i"));
       if (m) return { params: [[cfg.raw_param, cfg.raw_value.replace("$1", m[1])]], text: "raw", level: 0, how: "raw" };
@@ -719,15 +720,24 @@
   async function deals(opts) {
     const opt = Object.assign({ minPct: 10, perStore: 60, perCat: 150, pool: 6, renderPool: 3, timeout: 12000, renderTimeout: 20000 }, opts);
     let stores = (opt.stores || []).filter((s) => s.enabled !== false && s.deals);
-    if (opt.filters) stores = stores.filter((s) => opt.filters[s.name]).map((s) => Object.assign({}, s, { deals: Object.assign({}, s.deals, {
-      urls: (s.deals.urls || [s.deals.url]).map((p) => typeof p === "string" ? { url: mergeFilter(p, opt.filters[s.name]), big: true }
-        : Object.assign({}, p, { url: mergeFilter(p.url, opt.filters[s.name]), big: true })) }) }));
+    if (opt.filters) stores = stores.filter((s) => opt.filters[s.name]);
+    const soldBy = opt.filters || opt.soldBy || {};
+    stores = stores.map((s) => {
+      const f = soldBy[s.name];
+      if (!f || !s.deals.urls) return s;
+      const max = (s.sold_by_store && s.sold_by_store.max_pages) || 24;
+      const extra = s.deals.urls.filter((p) => !(typeof p === "object" && p.tag)).slice(0, max)
+        .map((p) => typeof p === "string" ? { url: mergeFilter(p, f), big: true } : Object.assign({}, p, { url: mergeFilter(p.url, f), big: true }));
+      const seenU = new Set(), urls = (opt.filters ? extra : [...s.deals.urls, ...extra])
+        .filter((p) => { const u = typeof p === "string" ? p : p.url; if (seenU.has(u)) return false; seenU.add(u); return true; });
+      return Object.assign({}, s, { deals: Object.assign({}, s.deals, { urls }) });
+    });
     const all = [], sources = [];
     const snap = () => {
-      const seen = new Set();
+      const seen = new Map();
       // same product from several pages: keep the tagged (Mega Deals) copy
       const list = all.slice().sort((a, b) => !!b.tag - !!a.tag)
-        .filter((o) => { const k = o.source + "|" + productId(o.url); if (seen.has(k)) return false; seen.add(k); return true; })
+        .filter((o) => { const k = o.source + "|" + productId(o.url); if (seen.has(k)) { if (o.big) seen.get(k).big = true; return false; } seen.set(k, o); return true; })
         .sort((a, b) => b.pct - a.pct || a.price - b.price);
       return { deals: list, sources: sources.slice(), total: stores.length, at: Date.now() };
     };
@@ -772,9 +782,10 @@
         // tagged (Mega) all stay; general deals capped by perStore; the electronics deep search gets its own bigger cap
         const first = new Map(), uniq = keep.filter((o) => { const k = productId(o.url), f = first.get(k); if (f) { if (o.cat && !f.cat) f.cat = o.cat; if (o.big) f.big = true; return false; } first.set(k, o); return true; });
         const tagged = uniq.filter((o) => o.tag), rest = uniq.filter((o) => !o.tag);
-        const plain = rest.filter((o) => !o.cat).slice(0, opt.perStore), byCat = rest.filter((o) => o.cat).slice(0, opt.perCat);
-        all.push(...tagged, ...plain, ...byCat);
-        sources.push({ source: s.name, ok: true, count: tagged.length + plain.length + byCat.length, ms: Date.now() - t0, error: null });
+        const plain = rest.filter((o) => !o.cat && !o.big).slice(0, opt.perStore), byCat = rest.filter((o) => o.cat && !o.big).slice(0, opt.perCat);
+        const bigs = rest.filter((o) => o.big).slice(0, opt.perBig || 200);
+        all.push(...tagged, ...plain, ...byCat, ...bigs);
+        sources.push({ source: s.name, ok: true, count: tagged.length + plain.length + byCat.length + bigs.length, ms: Date.now() - t0, error: null });
       } catch (e) {
         sources.push({ source: s.name, ok: false, count: 0, ms: Date.now() - t0, error: String((e && e.message) || e).slice(0, 160) });
       }
