@@ -225,3 +225,40 @@ test("🏬 offers tab: all stores' deals stay; the button filters to items sold 
   w.document.querySelector('#d_quick button[data-q="Amazon.eg"]').click();
   assert.equal(w.document.querySelectorAll("#d_out .dc").length, 1);
 });
+
+test("🖤 finds White / Yellow / Black Friday pages on a store's home page and tags their items", async () => {
+  const home = `<a href="/en/">Home</a><a href="/-/en/b?node=123"><img alt="White Friday deals"></a>
+    <a href="https://www.amazon.eg/s?k=x">x</a><a href="/egypt-en/yellow-friday/electronics/">Shop</a><a href="https://evil.com/black-friday">ad</a>
+    <a href="/ar/الجمعة-البيضاء">عروض</a>`;
+  const u = await E.findEventPages({ name: "Amazon.eg", base_url: "https://www.amazon.eg", events: {} }, async () => home, DOMParser);
+  assert.deepEqual(u, ["https://www.amazon.eg/-/en/b?node=123", "https://www.amazon.eg/egypt-en/yellow-friday/electronics/",
+    "https://www.amazon.eg/ar/%D8%A7%D9%84%D8%AC%D9%85%D8%B9%D8%A9-%D8%A7%D9%84%D8%A8%D9%8A%D8%B6%D8%A7%D8%A1"]);
+  const page = `<article class="prd"><a class="core" href="/tv.html"><h3 class="name">Samsung TV 55</h3><div class="prc">EGP 19,999</div></a></article>`;
+  const r = await E.deals({ stores: [S["Jumia"]], DOMParser, events: { Jumia: ["https://www.jumia.com.eg/mlp-black-friday/"] }, timeout: 100,
+    fetcher: async (x) => { if (x.includes("black-friday")) return page; throw new Error("x"); } });
+  const bf = r.deals.filter((o) => o.tag === "bf");
+  assert.equal(bf.length, 1);   // kept even without an old price
+  assert.equal(bf[0].title, "Samsung TV 55");
+});
+
+test("🔎 search results: filter (exact / discounted / Amazon-noon-Jumia) and sort by biggest discount", async () => {
+  const W = new URL("../web/", import.meta.url);
+  const html = readFileSync(new URL("index.html", W), "utf8").replace('<script src="engine.js"></script>', () => `<script>${readFileSync(new URL("engine.js", W), "utf8")}</script>`);
+  const dom = new JSDOM(html, { runScripts: "dangerously", url: "https://app.local/" });
+  const w = dom.window; await new Promise((r) => setTimeout(r, 50));
+  w.eval(`const offers = [
+      { title: "A", price: 100, url: "https://b.com/1", source: "B.TECH", match: 0, flags: [] },
+      { title: "B", price: 120, old_price: 240, url: "https://www.amazon.eg/dp/B1", source: "Amazon.eg", match: 0, flags: [] },
+      { title: "C", price: 90, url: "https://c.com/3", source: "2B", match: 1, flags: [] },
+      { title: "D", price: 150, old_price: 200, url: "https://www.noon.com/x/N1/p/", source: "Noon", match: 0, flags: [] }];
+    render({ query: "x", variants: ["x"], offers, top3: offers.slice(0, 3), links: [], sources: [], total: 1 }, true);`);
+  const chips = () => [...w.document.querySelectorAll("#sfil button")];
+  assert.ok(chips().length >= 6);
+  chips().find((b) => b.dataset.sf === "big").click();
+  assert.deepEqual([...w.document.querySelectorAll(".pc .ttl")].map((x) => x.textContent), ["B", "D"]);
+  chips().find((b) => b.dataset.ss === "pct").click();
+  assert.equal(w.document.querySelector(".pc .ttl").textContent, "B");      // -50% first
+  assert.match(w.document.querySelector(".pc .offb").textContent, /-50%/);
+  chips().find((b) => b.dataset.sf === "exact").click();
+  assert.equal(w.document.querySelectorAll(".pc").length, 3);
+});

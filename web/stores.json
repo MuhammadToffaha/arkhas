@@ -356,6 +356,12 @@
       "raw_value": "p_6:$1",
       "label": "Sold by Amazon.eg",
       "max_pages": 30
+    },
+    "events": {
+      "pages": [
+        "https://www.amazon.eg/-/en/white-friday",
+        "https://www.amazon.eg/deals?language=en_AE"
+      ]
     }
   },
   {
@@ -507,6 +513,12 @@
         ]
       ],
       "fallback_text": "Jumia Express"
+    },
+    "events": {
+      "pages": [
+        "https://www.jumia.com.eg/mlp-black-friday/",
+        "https://www.jumia.com.eg/black-friday/"
+      ]
     }
   },
   {
@@ -630,6 +642,13 @@
         ]
       ],
       "fallback_text": "Fulfilled by noon"
+    },
+    "events": {
+      "pages": [
+        "https://www.noon.com/egypt-en/yellow-friday/",
+        "https://www.noon.com/egypt-en/yellow-friday-deals/"
+      ],
+      "wait": "a[href*=\"/p/\"]"
     }
   },
   {
@@ -648,7 +667,12 @@
     "deals": {
       "kind": "magento"
     },
-    "product_base": "https://btech.com/en"
+    "product_base": "https://btech.com/en",
+    "events": {
+      "pages": [
+        "https://btech.com/en/black-friday"
+      ]
+    }
   },
   {
     "name": "2B",
@@ -666,6 +690,11 @@
     "deals": {
       "kind": "html",
       "url": "https://2b.com.eg/en/offer.html?product_list_limit=60"
+    },
+    "events": {
+      "pages": [
+        "https://2b.com.eg/en/black-friday"
+      ]
     }
   },
   {
@@ -683,6 +712,11 @@
     "image": "img.product-image-photo@src",
     "deals": {
       "kind": "magento"
+    },
+    "events": {
+      "pages": [
+        "https://www.rayashop.com/en/black-friday"
+      ]
     }
   },
   {
@@ -700,7 +734,8 @@
       "kind": "html",
       "render": true,
       "url": "https://www.carrefouregypt.com/mafegy/en/online-deals/c/deals"
-    }
+    },
+    "events": {}
   },
   {
     "name": "Dream 2000",
@@ -709,7 +744,8 @@
     "lang": "both",
     "deals": {
       "kind": "shopify"
-    }
+    },
+    "events": {}
   },
   {
     "name": "Compumarts",
@@ -718,7 +754,8 @@
     "lang": "en",
     "deals": {
       "kind": "shopify"
-    }
+    },
+    "events": {}
   },
   {
     "name": "Kimo Store",
@@ -727,7 +764,8 @@
     "lang": "en",
     "deals": {
       "kind": "shopify"
-    }
+    },
+    "events": {}
   },
   {
     "name": "Tradeline",
@@ -736,7 +774,8 @@
     "lang": "en",
     "deals": {
       "kind": "shopify"
-    }
+    },
+    "events": {}
   },
   {
     "name": "Raneen",
@@ -754,7 +793,8 @@
     "image": "img.product-image-photo@src",
     "deals": {
       "kind": "magento"
-    }
+    },
+    "events": {}
   },
   {
     "name": "Cairo Cart",
@@ -782,7 +822,8 @@
     "lang": "en",
     "deals": {
       "kind": "magento"
-    }
+    },
+    "events": {}
   },
   {
     "name": "Aman Stores",
@@ -810,7 +851,8 @@
     "image": "img.product-image-photo@src",
     "deals": {
       "kind": "magento"
-    }
+    },
+    "events": {}
   },
   {
     "name": "Cairo Sales",
@@ -827,7 +869,8 @@
     "image": "img@src",
     "deals": {
       "kind": "prestashop"
-    }
+    },
+    "events": {}
   },
   {
     "name": "Decathlon",
@@ -860,7 +903,8 @@
     "image": "img@src",
     "deals": {
       "kind": "woo"
-    }
+    },
+    "events": {}
   },
   {
     "name": "El Nekhely",

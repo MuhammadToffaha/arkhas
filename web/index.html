@@ -198,6 +198,15 @@ input:focus{border-color:var(--accent);box-shadow:0 0 0 4px var(--glow)}
 .sw input:checked+i{background:var(--grad)}
 .sheet>div{border-radius:26px 26px 0 0}
 [hidden]{display:none!important}
+#d_range button.bf{border-color:#111;font-weight:800}
+#d_range button.bf.on{background:#111!important;border-color:#111;color:#fff}
+.megab.bfb{background:#111;color:#fff;margin-top:26px}
+.sfil{display:flex;gap:6px;overflow-x:auto;padding:8px 0 2px;scrollbar-width:none}
+.sfil button{flex:none;font:inherit;font-size:13px;padding:6px 12px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--ink);font-weight:600}
+.sfil button.on{background:var(--grad,var(--accent));color:#fff;border-color:transparent}
+.offb{display:inline-block;font-size:11px;font-weight:800;color:#fff;background:var(--hot,#e0412f);border-radius:6px;padding:0 5px;margin-inline-start:4px}
+.bfx{display:inline-block;font-size:11px;font-weight:800;color:#fff;background:#111;border-radius:6px;padding:0 5px;margin-inline-start:4px}
+
 #d_quick button.big{border-color:var(--accent);font-weight:800}
 .bigb{display:inline-block;font-size:11px;font-weight:800;color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,transparent);border-radius:6px;padding:0 5px}
 
@@ -423,7 +432,7 @@ const readConfig = async (name) => (N ? N.readConfig(name) : (await fetch(name))
 const T = {
   ar: { tag: "أرخص سعر في مصر", go: "ابحث", ph: "اكتب المنتج… مثال: ايفون 15 برو", hint: "نبحث في المتاجر المصرية بالعربي والإنجليزي ونجيب لك أرخص 3",
     top: "🏆 أرخص 3 أسعار", all: "كل العروض ({n})", fb: "📘 فيسبوك والمستعمل", searched: "بحثنا عن:", none: "مفيش نتائج مطابقة لسه…",
-    noneDone: "مفيش نتائج مطابقة. جرّب اسم أدق.", src: "حالة المتاجر", langLbl: "🌐 اللغة", themeLbl: "🎨 شكل التطبيق", autoUpd: "🤫 تحديث تلقائي صامت", autoUpdD: "يدوّر على نسخة جديدة كل يوم وينزّلها ويثبّتها لوحده على الواي فاي. أول مرة أندرويد هيطلب موافقة واحدة، وبعدها من غير أسئلة (أندرويد 12+).", storesHint: "آخر بحث: عدد النتائج من كل متجر", navSearch: "بحث", navStatus: "المتاجر", navGear: "الإعدادات", acc: "إكسسوار؟", cheap: "سعر مريب", rMega: "🟡 ميجا ديلز نون", rElec: "📱 عروض الإلكترونيات", mega: "ميجا", rAll: "كل الخصومات", r30: "30%+", r5070: "🔥 50–70%", r70: "70%+", rNone: "مفيش عروض في النطاق ده — جرّب نطاق تاني", alTitle: "🔔 تنبيهات الخصومات الكبيرة", alDesc: "إشعار على الموبايل لما يظهر خصم كبير جديد — حتى والتطبيق مقفول",
+    noneDone: "مفيش نتائج مطابقة. جرّب اسم أدق.", src: "حالة المتاجر", langLbl: "🌐 اللغة", themeLbl: "🎨 شكل التطبيق", autoUpd: "🤫 تحديث تلقائي صامت", autoUpdD: "يدوّر على نسخة جديدة كل يوم وينزّلها ويثبّتها لوحده على الواي فاي. أول مرة أندرويد هيطلب موافقة واحدة، وبعدها من غير أسئلة (أندرويد 12+).", storesHint: "آخر بحث: عدد النتائج من كل متجر", navSearch: "بحث", navStatus: "المتاجر", navGear: "الإعدادات", acc: "إكسسوار؟", cheap: "سعر مريب", rMega: "🟡 ميجا ديلز نون", rBf: "🖤 بلاك فرايداي", bfShort: "الجمعة", bfNone: "🖤 عروض الجمعة البيضاء/الصفراء/السوداء لسه ما بدأتش في المتاجر — هتظهر هنا لوحدها أول ما تبدأ (عادةً من ~20 نوفمبر). اضغط ↻ للتحديث.", sAll: "الكل", sExact: "✓ مطابق بس", sDisc: "🏷️ عليه خصم", sBig: "🏪 أمازون/نون/جوميا", sCheap: "⬇️ الأرخص", sPct: "🔥 أكبر خصم", sNone: "مفيش نتايج بالفلتر ده — جرّب فلتر تاني", rElec: "📱 عروض الإلكترونيات", mega: "ميجا", rAll: "كل الخصومات", r30: "30%+", r5070: "🔥 50–70%", r70: "70%+", rNone: "مفيش عروض في النطاق ده — جرّب نطاق تاني", alTitle: "🔔 تنبيهات الخصومات الكبيرة", alDesc: "إشعار على الموبايل لما يظهر خصم كبير جديد — حتى والتطبيق مقفول",
     alMin: "أقل خصم", alStores: "المتاجر", alMega: "🟡 ميجا ديلز نون كمان", alEvery: "افحص كل", alHours: "{h} ساعة", alTest: "🔍 افحص دلوقتي",
     alTesting: "جاري الفحص في الخلفية… هيوصلك إشعار لو فيه جديد", alLast: "آخر فحص {t}: {f} عرض، {n} جديد", alErr: "آخر فحص {t}: فشل ({e})",
     alNever: "لسه مفيش فحص", alTo: "ابعت العروض الجديدة على", alNotify: "🔔 إشعار على الموبايل", tgOn: "✈️ جروب تليجرام (تلقائي بالكامل)",
@@ -443,7 +452,7 @@ const T = {
     city: "مدينة فيسبوك ماركت بليس", stores: "المتاجر", saveBtn: "حفظ", ver: "نسخة", hidden: "تم إخفاء {n} نتيجة غير مطابقة" },
   en: { tag: "Best price in Egypt", go: "Search", ph: "Product… e.g. iphone 15 pro", hint: "Searching Egyptian stores in Arabic & English — top 3 cheapest",
     top: "🏆 Top 3 prices", all: "All offers ({n})", fb: "📘 Facebook & used", searched: "Searched:", none: "No matches yet…",
-    noneDone: "No matching results. Try a more specific name.", src: "Store status", langLbl: "🌐 Language", themeLbl: "🎨 App theme", autoUpd: "🤫 Silent auto-update", autoUpdD: "Checks every day and installs new versions by itself on Wi-Fi. Android asks once the first time, then no more prompts (Android 12+).", storesHint: "Last search: results per store", navSearch: "Search", navStatus: "Stores", navGear: "Settings", acc: "accessory?", cheap: "suspicious price", rMega: "🟡 Noon Mega Deals", rElec: "📱 Electronics offers", mega: "MEGA", rAll: "All discounts", r30: "30%+", r5070: "🔥 50–70%", r70: "70%+", rNone: "No deals in this range — try another one", alTitle: "🔔 Big discount alerts", alDesc: "Phone notification when a new big discount appears — even with the app closed",
+    noneDone: "No matching results. Try a more specific name.", src: "Store status", langLbl: "🌐 Language", themeLbl: "🎨 App theme", autoUpd: "🤫 Silent auto-update", autoUpdD: "Checks every day and installs new versions by itself on Wi-Fi. Android asks once the first time, then no more prompts (Android 12+).", storesHint: "Last search: results per store", navSearch: "Search", navStatus: "Stores", navGear: "Settings", acc: "accessory?", cheap: "suspicious price", rMega: "🟡 Noon Mega Deals", rBf: "🖤 Black Friday", bfShort: "Friday", bfNone: "🖤 White / Yellow / Black Friday hasn't started in the stores yet — the deals appear here by themselves once it does (usually from ~20 Nov). Tap ↻ to refresh.", sAll: "All", sExact: "✓ Exact only", sDisc: "🏷️ Discounted", sBig: "🏪 Amazon/noon/Jumia", sCheap: "⬇️ Cheapest", sPct: "🔥 Biggest discount", sNone: "No results with this filter — try another", rElec: "📱 Electronics offers", mega: "MEGA", rAll: "All discounts", r30: "30%+", r5070: "🔥 50–70%", r70: "70%+", rNone: "No deals in this range — try another one", alTitle: "🔔 Big discount alerts", alDesc: "Phone notification when a new big discount appears — even with the app closed",
     alMin: "Minimum discount", alStores: "Stores", alMega: "🟡 Noon Mega Deals too", alEvery: "Check every", alHours: "{h} h", alTest: "🔍 Check now",
     alTesting: "Checking in the background… you'll get a notification if there's something new", alLast: "Last check {t}: {f} deals, {n} new", alErr: "Last check {t}: failed ({e})",
     alNever: "No check yet", alTo: "Send new deals to", alNotify: "🔔 Phone notification", tgOn: "✈️ Telegram group (fully automatic)",
@@ -510,9 +519,34 @@ const img = (o) => o.image
 const flags = (o) => o.flags.map((f) => `<span class="flag">${f === "possible-accessory" ? T[L].acc : f === "other-model" ? T[L].other : T[L].cheap}</span>`).join("");
 const badge = (o) => `<span class="mb ${o.match === 0 ? "ex" : "si"}">${o.match === 0 ? T[L].exact : T[L].similar}</span>`;
 
+let sFilter = "", sSort = "price", lastR = null, lastDone = false;
+const BIG3 = ["Amazon.eg", "Noon", "Jumia"];
+function bfSet() {
+  const s = new Set();
+  if (dealsData) for (const o of dealsData.deals) if (o.tag === "bf") s.add(o.source + "|" + Arkhas.productId(o.url));
+  return s;
+}
 function render(r, done) {
+  lastR = r; lastDone = done;
   const t = T[L]; let h = "";
   h += `<div class="muted">${t.searched} ${r.variants.map((v) => `<span class="chip">${esc(v)}</span>`).join("")}</div>`;
+  // 🔎 filters + sort for the whole result list (top 3 is picked again from what is left)
+  const bf = bfSet();
+  const pct = (o) => (o.old_price && o.old_price > o.price ? Math.round((1 - o.price / o.old_price) * 100) : 0);
+  const keep = { "": () => true, exact: (o) => o.match === 0, disc: (o) => pct(o) > 0, big: (o) => BIG3.includes(o.source) };
+  if (r.offers.length) {
+    const n = (k) => r.offers.filter(keep[k]).length;
+    h += `<div class="sfil" id="sfil">${[["", t.sAll], ["exact", t.sExact], ["disc", t.sDisc], ["big", t.sBig]]
+      .map(([k, l]) => `<button type="button" data-sf="${k}" class="${sFilter === k ? "on" : ""}">${l} · ${n(k)}</button>`).join("")}
+      ${[["price", t.sCheap], ["pct", t.sPct]].map(([k, l]) => `<button type="button" data-ss="${k}" class="${sSort === k ? "on" : ""}">${l}</button>`).join("")}</div>`;
+  }
+  if (sFilter || sSort !== "price") {
+    const list = r.offers.filter(keep[sFilter] || keep[""]).slice()
+      .sort(sSort === "pct" ? (a, b) => pct(b) - pct(a) || a.price - b.price : (a, b) => (a.match || 0) - (b.match || 0) || a.price - b.price);
+    r = Object.assign({}, r, { offers: list, top3: list.slice(0, 3) });
+    if (!list.length && done) h += `<div class="empty">${t.sNone}</div>`;
+  }
+  const extra = (o) => (pct(o) ? `<span class="offb">-${pct(o)}%</span>` : "") + (bf.has(o.source + "|" + Arkhas.productId(o.url)) ? `<span class="bfx">🖤</span>` : "");
   if (r.top3.length) {
     h += `<h3>${t.top}</h3>`;
     const nExact = r.top3.filter((o) => o.match === 0).length;
@@ -521,17 +555,17 @@ function render(r, done) {
     r.top3.forEach((o, i) => {
       const off = o.old_price && o.old_price > o.price ? `<div class="old">${money(o.old_price)}</div><div class="save">${fmt(t.save, { n: money(o.old_price - o.price) })}</div>` : "";
       h += `<a class="pc r${i + 1}" href="${esc(o.url)}">${heart(o)}${cartBtn(o)}<div class="medal">${["🥇", "🥈", "🥉"][i]}</div>${img(o)}
-        <div class="t"><div class="ttl">${esc(o.title)}</div><div class="src">${badge(o)} ${esc(o.source)}${flags(o)}</div></div>
+        <div class="t"><div class="ttl">${esc(o.title)}</div><div class="src">${badge(o)} ${esc(o.source)}${flags(o)}${extra(o)}</div></div>
         <div style="text-align:end"><div class="p">${money(o.price)}</div>${off}</div></a>`;
     });
     h += `</div>`;
-  } else h += `<div class="empty">${done ? t.noneDone : t.none}</div>`;
+  } else if (!sFilter) h += `<div class="empty">${done ? t.noneDone : t.none}</div>`;
 
   const rest = r.offers.filter((o) => !r.top3.includes(o));
   if (rest.length) {
-    h += `<details><summary>${fmt(t.all, { n: r.offers.length })}</summary>`;
+    h += `<details${sFilter || sSort !== "price" ? " open" : ""}><summary>${fmt(t.all, { n: r.offers.length })}</summary>`;
     for (const o of rest) h += `<a class="row" href="${esc(o.url)}">${heart(o)}${cartBtn(o)}${img(o)}<div class="t"><div class="ttl">${esc(o.title)}</div>
-      <div class="src">${badge(o)} ${esc(o.source)}${flags(o)}</div></div><div class="p">${money(o.price)}</div></a>`;
+      <div class="src">${badge(o)} ${esc(o.source)}${flags(o)}${extra(o)}</div></div><div class="p">${money(o.price)}</div></a>`;
     h += `</details>`;
   }
   if (done && r.hidden) h += `<div class="muted">${fmt(t.hidden, { n: r.hidden })}</div>`;
@@ -548,6 +582,12 @@ function render(r, done) {
   if (st2) st2.ontoggle = () => { statusOpen = st2.open; };
 }
 let statusOpen = false;
+document.addEventListener("click", (e) => {
+  const f = e.target.closest && e.target.closest("#sfil [data-sf], #sfil [data-ss]");
+  if (!f || !lastR) return;
+  if (f.dataset.sf !== undefined) sFilter = f.dataset.sf; else sSort = f.dataset.ss;
+  render(lastR, lastDone);
+});
 
 // stores marked default_off (slow, JS-only sites) stay off until switched on in ⚙️
 function isOn(s) {
@@ -564,7 +604,7 @@ function progress(r) {
 // ---------- search ----------
 async function run(q) {
   q = (q || "").trim(); if (q.length < 2 || busy) return;
-  $("#q").value = q; syncX(); $("#q").blur(); busy = true; $("#out").innerHTML = "";
+  $("#q").value = q; syncX(); $("#q").blur(); busy = true; $("#out").innerHTML = ""; sFilter = ""; sSort = "price";
   const stores = STORES.filter(isOn);
   const serpKey = pref("serp");
   total = stores.length + (serpKey ? 1 : 0);
@@ -817,8 +857,8 @@ let dealHide = null;   // stores unticked in the dropdown (remembered)
 const getHide = () => { if (!dealHide) { try { dealHide = new Set(JSON.parse(pref("dealHide", "[]"))); } catch (_) { dealHide = new Set(); } } return dealHide; };
 const saveHide = () => setPref("dealHide", JSON.stringify([...getHide()]));
 let dealRange = null;   // read from prefs on first use; default 50–70%
-const RANGES = { mega: [0, 100], elec: [10, 100], all: [10, 100], r30: [30, 100], r5070: [50, 70], r70: [70, 100] };
-const inR = (o, k) => k === "mega" ? o.tag === "mega" : k === "elec" ? o.cat === "electronics" && (o.pct >= 10 || o.tag === "mega") : o.pct >= RANGES[k][0] && o.pct <= RANGES[k][1];
+const RANGES = { bf: [0, 100], mega: [0, 100], elec: [10, 100], all: [10, 100], r30: [30, 100], r5070: [50, 70], r70: [70, 100] };
+const inR = (o, k) => k === "bf" ? o.tag === "bf" : k === "mega" ? o.tag === "mega" : k === "elec" ? o.cat === "electronics" && (o.pct >= 10 || o.tag === "mega") : o.pct >= RANGES[k][0] && o.pct <= RANGES[k][1];
 const DEALS_TTL = 60 * 60 * 1000;   // reuse fetched deals for 1 hour
 
 function showView(v) {
@@ -843,8 +883,9 @@ function renderDeals(done = true) {
   $("#d_sub").textContent = done ? fmt(t.dealsSub, { n: d.total, t: mins < 1 ? t.justNow : fmt(t.minAgo, { m: mins }) })
     : fmt(t.dealsLoading, { done: d.sources.length, all: d.total });
   if (!dealRange) dealRange = RANGES[pref("dealRange")] ? pref("dealRange") : "r5070";
-  $("#d_range").innerHTML = [["r5070", t.r5070], ["elec", t.rElec], ["mega", t.rMega], ["r70", t.r70], ["r30", t.r30], ["all", t.rAll]]
-    .map(([k, n]) => `<button data-r="${k}" class="${dealRange === k ? "on" : ""}${k === "mega" ? " mega" : ""}">${n} · ${d.deals.filter((o) => inR(o, k)).length}</button>`).join("");
+  const bfN = d.deals.filter((o) => o.tag === "bf").length;
+  $("#d_range").innerHTML = [...(bfN || new Date().getMonth() === 10 ? [["bf", t.rBf]] : []), ["r5070", t.r5070], ["elec", t.rElec], ["mega", t.rMega], ["r70", t.r70], ["r30", t.r30], ["all", t.rAll]]
+    .map(([k, n]) => `<button data-r="${k}" class="${dealRange === k ? "on" : ""}${k === "mega" ? " mega" : ""}${k === "bf" ? " bf" : ""}">${n} · ${d.deals.filter((o) => inR(o, k)).length}</button>`).join("");
   const inRange = d.deals.filter((o) => inR(o, dealRange));
   const sorts = [["pct", t.sortPct], ["save", t.sortSave], ["price", t.sortPrice]];
   $("#d_sort").innerHTML = sorts.map(([k, n]) => `<button data-k="${k}" class="${dealSort === k ? "on" : ""}">${n}</button>`).join("");
@@ -866,12 +907,12 @@ function renderDeals(done = true) {
     QUICK.map(([n, lbl]) => `<button data-q="${esc(n)}" class="${(n ? one === n : shown.length === names.length) ? "on" : ""}">${lbl} · ${n ? counts[n] || 0 : inRange.length}</button>`).join("");
   $("#d_all").textContent = t.selAll; $("#d_none").textContent = t.selNone;
   let list = inRange.filter((o) => !hide.has(o.source) && (!dealBig || o.big));
-  if ((dealRange === "r70" || dealRange === "elec") && dealSort === "pct") list = list.slice().sort((a, b) => b.pct - a.pct || a.price - b.price);
+  if ((dealRange === "r70" || dealRange === "elec" || dealRange === "bf") && dealSort === "pct") list = list.slice().sort((a, b) => b.pct - a.pct || a.price - b.price);
   const by = { pct: (a, b) => b.pct - a.pct, save: (a, b) => (b.old_price - b.price) - (a.old_price - a.price), price: (a, b) => a.price - b.price };
   list = list.slice().sort(by[dealSort]).slice(0, 120);
   shownDeals = list;
-  if (!list.length) { $("#d_out").innerHTML = done ? `<div class="empty">${d.deals.length ? t.rNone : t.dealsNone}</div>` : ""; return; }
-  $("#d_out").innerHTML = `<div class="dg">${list.map((o) => `<a class="dc${o.tag === "mega" ? " is-mega" : ""}" href="${esc(o.url)}">${o.pct ? `<span class="off">-${o.pct}%</span>` : ""}${o.tag === "mega" ? `<span class="megab">🟡 ${t.mega}</span>` : ""}${heart(o)}<button type="button" class="share" data-u="${esc(o.url)}" aria-label="WhatsApp">📤</button>${cartBtn(o)}${img(o)}
+  if (!list.length) { $("#d_out").innerHTML = done ? `<div class="empty">${dealRange === "bf" ? t.bfNone : d.deals.length ? t.rNone : t.dealsNone}</div>` : ""; return; }
+  $("#d_out").innerHTML = `<div class="dg">${list.map((o) => `<a class="dc${o.tag === "mega" ? " is-mega" : ""}" href="${esc(o.url)}">${o.pct ? `<span class="off">-${o.pct}%</span>` : ""}${o.tag === "mega" ? `<span class="megab">🟡 ${t.mega}</span>` : ""}${o.tag === "bf" ? `<span class="megab bfb">🖤 ${t.bfShort}</span>` : ""}${heart(o)}<button type="button" class="share" data-u="${esc(o.url)}" aria-label="WhatsApp">📤</button>${cartBtn(o)}${img(o)}
     <div class="ttl">${esc(o.title)}</div><div class="p">${money(o.price)}</div>${o.old_price && o.old_price > o.price ? `<div class="old">${money(o.old_price)}</div>` : ""}
     <div class="src">${esc(o.source)}${o.big ? ` <span class="bigb">${t.bigBadge}</span>` : ""}</div></a>`).join("")}</div>`;
 }
@@ -889,13 +930,30 @@ async function loadDeals(force) {
       const f = await storeFilters(force);
       for (const [n, x] of Object.entries(f.stores)) if (!x.none) soldBy[n] = x;
     } catch (_) {}
-    dealsData = await Arkhas.deals({ stores: STORES.filter(isOn), fetcher, soldBy, onProgress: (r) => {
+    let events = {};
+    try { events = await eventPages(force); } catch (_) {}
+    dealsData = await Arkhas.deals({ stores: STORES.filter(isOn), fetcher, soldBy, events, onProgress: (r) => {
       dealsData = r; renderDeals(false);
       $("#d_bar i").style.width = Math.max(8, (100 * r.sources.length) / r.total) + "%";
     } });
     renderDeals(true);
     try { setPref("dealsCache", JSON.stringify(dealsData)); } catch (_) {}
   } finally { dealsBusy = false; $("#d_bar").hidden = true; $("#d_refresh").disabled = false; }
+}
+
+// 🖤 Black / White / Yellow Friday campaign pages, found on each big store's home page (cached 6 h)
+let evCache = null;
+async function eventPages(force) {
+  if (!force && !evCache) { try { const c = JSON.parse(pref("eventPages", "null")); if (c && Date.now() - c.at < 6 * 3600 * 1000) evCache = c; } catch (_) {} }
+  if (!force && evCache) return evCache.pages;
+  const pages = {};
+  await Promise.all(STORES.filter((x) => x.events && isOn(x)).map(async (x) => {
+    const u = await Arkhas.findEventPages(x, fetcher);
+    if (u.length) pages[x.name] = u;
+  }));
+  evCache = { at: Date.now(), pages };
+  try { setPref("eventPages", JSON.stringify(evCache)); } catch (_) {}
+  return pages;
 }
 
 // 🏬 deals sold by Amazon / noon / Jumia themselves (not third-party sellers): the store's own seller filter

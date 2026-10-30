@@ -717,10 +717,45 @@
     return null;
   }
 
+  // ---------------- 🖤 Black Friday season ----------------
+  // Egypt names: Amazon "White Friday" (الجمعة البيضاء), noon "Yellow Friday", Jumia / B.TECH / others "Black Friday".
+  // The phone opens each big store's home page and follows the campaign links it finds, so it works every year
+  // as soon as a store starts its sale, without knowing the URLs in advance.
+  const EVENT_RE = /black[\s_-]?friday|white[\s_-]?friday|yellow[\s_-]?friday|blue[\s_-]?friday|cyber[\s_-]?monday|singles?[\s_-]?day|\b11[.\s_-]11\b|الجمع[ةه] (البيضاء|البيضا|الصفراء|السوداء)|بلاك ?فر[اي]?يداي|وايت ?فرايداي|يلو ?فرايداي|سايبر ?منداي/i;
+
+  async function findEventPages(store, fetcher, DOMParserImpl, max = 4) {
+    const cfg = store.events || {};
+    const home = cfg.home || store.base_url;
+    const out = [];
+    const add = (u) => { try { const x = new URL(u, home); if (x.hostname.replace(/^www\./, "") !== new URL(home).hostname.replace(/^www\./, "")) return; x.hash = "";
+      if (!out.includes(x.toString())) out.push(x.toString()); } catch (_) {} };
+    try {
+      const o = store.render || cfg.render ? { render: true, wait: cfg.wait || "a", lang: "en" } : { lang: "en" };
+      const html = await withTimeout(fetcher(home, o), store.render ? 25000 : 15000);
+      const P = DOMParserImpl || root.DOMParser;
+      const doc = new P().parseFromString(html, "text/html");
+      for (const a of doc.querySelectorAll("a[href]")) {
+        const txt = ((a.textContent || "") + " " + (a.getAttribute("aria-label") || "") + " " + (a.getAttribute("title") || "") + " " +
+          ((a.querySelector("img") || {}).alt || "")).replace(/\s+/g, " ");
+        const href = a.getAttribute("href") || "";
+        if (EVENT_RE.test(txt) || EVENT_RE.test(decodeURIComponent(href).replace(/[-_/]/g, " "))) add(href);
+        if (out.length >= max) break;
+      }
+    } catch (_) { /* home page did not load */ }
+    for (const u of cfg.pages || []) if (out.length < max + 2) add(u);   // known campaign URLs (tried, may 404 out of season)
+    return out;
+  }
+
   async function deals(opts) {
     const opt = Object.assign({ minPct: 10, perStore: 60, perCat: 150, pool: 6, renderPool: 3, timeout: 12000, renderTimeout: 20000 }, opts);
     let stores = (opt.stores || []).filter((s) => s.enabled !== false && s.deals);
     if (opt.filters) stores = stores.filter((s) => opt.filters[s.name]);
+    if (opt.events) for (const [name, urls] of Object.entries(opt.events)) {
+      const base = (opt.stores || []).find((x) => x.name === name);
+      if (!base || !urls || !urls.length) continue;
+      stores.push(Object.assign({}, base, { deals: { kind: "html", render: !!base.render || /noon|carrefour/i.test(name),
+        wait: base.wait || (base.deals && base.deals.wait) || null, urls: urls.map((url) => ({ url, tag: "bf" })) } }));
+    }
     const soldBy = opt.filters || opt.soldBy || {};
     stores = stores.map((s) => {
       const f = soldBy[s.name];
@@ -909,7 +944,7 @@
     return names;
   }
 
-  const API = { photoQueries, barcodeNames, findStoreFilter, mergeFilter, normalize, tokens, isArabic, setSynonyms, equivalents, translateQuery, queryVariants, queryVariantsAsync, cleanQuery, parsePrice, ADAPTERS, DEAL_FEEDS, deals, pctOff, productId,
+  const API = { photoQueries, barcodeNames, findStoreFilter, mergeFilter, findEventPages, EVENT_RE, normalize, tokens, isArabic, setSynonyms, equivalents, translateQuery, queryVariants, queryVariantsAsync, cleanQuery, parsePrice, ADAPTERS, DEAL_FEEDS, deals, pctOff, productId,
     relevance, matchInfo, specs, rank, top, parse, parseSerp, buildUrl, serpUrl, externalLinks, search };
   if (typeof module !== "undefined" && module.exports) module.exports = API;
   else root.Arkhas = API;
