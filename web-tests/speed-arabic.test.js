@@ -38,7 +38,7 @@ test("shopify adapter: decodes, skips sold-out, absolute url without tracking", 
 test("woo / magento / prestashop / ikea adapters", () => {
   const w = E.ADAPTERS.woo.parse(WOO, STORES["Dubai Phone"])[0];
   assert.deepEqual([w.title, w.price, w.old_price], ["iPhone 15 – 128GB", 41500, 43000]);
-  const m = E.ADAPTERS.magento.parse(MAGENTO, STORES["Raneen"])[0];
+  const m = E.ADAPTERS.magento.parse(MAGENTO, { name: "Raneen", base_url: "https://www.raneen.com", product_base: "https://www.raneen.com/en" })[0];
   assert.equal(m.url, "https://www.raneen.com/en/apple-iphone-15.html");
   assert.equal(m.price, 40500);
   assert.ok(decodeURIComponent(E.ADAPTERS.magento.url(STORES["Hyper One"], "tv")).startsWith('https://mcprod.hyperone.com.eg/graphql?query={products(search:"tv"'));

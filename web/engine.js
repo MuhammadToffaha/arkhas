@@ -550,6 +550,14 @@
           url: `${s.product_base || s.base_url}/${p.url_key}${p.url_suffix ?? ".html"}`, image: (p.small_image && p.small_image.url) || null });
       }),
     },
+    // Google Vertex AI Search behind the store's own endpoint (Raneen): /{en|ar}/vertex/search/query/?q=
+    vertex: {
+      url: (s, q) => `${s.base_url}/${isArabic(q) ? "ar" : "en"}${s.vertex_path || "/vertex/search/query/"}?q=${enc(q)}&sort=&visitorId=&page=0`,
+      parse: (d, s) => (d.products || []).filter((p) => p.availability !== "OUT_OF_STOCK" && !p.isSponsored).map((p) => offer(s, {
+        title: decode(p.title || p.variantName || ""), price: parsePrice(p.price),
+        old_price: parsePrice(p.originalPrice) > parsePrice(p.price) ? parsePrice(p.originalPrice) : null,
+        url: p.url, image: p.imageUrl || null })),
+    },
     // PrestaShop 1.7+ search controller in AJAX mode — Cairo Sales …
     prestashop: {
       url: (s, q) => `${s.base_url}${s.path ?? "/en"}/search?controller=search&s=${enc(q)}&ajax=1&resultsPerPage=20`,
@@ -602,6 +610,13 @@
 
   // ---------------- ⚡ flash deals (no query: each store's own sale feed) ----------------
   const DEAL_FEEDS = {
+    // Vertex search (Raneen): one query per category word; a deal = price below originalPrice
+    vertex: {
+      json: true,
+      urls: (s) => (s.deals.queries || ["tv", "refrigerator", "washing machine", "air conditioner", "mobile", "laptop"])
+        .map((q) => ADAPTERS.vertex.url(s, q)),
+      parse: (d, s) => ADAPTERS.vertex.parse(d, s),
+    },
     // Shopify: whole catalog JSON; a deal = variant with compare_at_price above price
     shopify: {
       url: (s) => `${s.base_url}/products.json?limit=250`,
@@ -783,7 +798,13 @@
         if (!feed) throw new Error("unknown deals kind " + s.deals.kind);
         let got;
         if (feed.json) {
-          got = feed.parse(JSON.parse(await withTimeout(opt.fetcher(feed.url(s), { json: true, lang: "en" }), opt.timeout)), s);
+          if (feed.urls) {   // several JSON pages (e.g. one per category word); keep whatever answers
+            const res = await Promise.allSettled(feed.urls(s).map((u) => withTimeout(opt.fetcher(u, { json: true, lang: "en" }), opt.timeout)
+              .then((t) => feed.parse(JSON.parse(t), s))));
+            const ok = res.filter((x) => x.status === "fulfilled");
+            if (!ok.length) throw res[0].reason;
+            got = ok.flatMap((x) => x.value);
+          } else got = feed.parse(JSON.parse(await withTimeout(opt.fetcher(feed.url(s), { json: true, lang: "en" }), opt.timeout)), s);
         } else {
           const sel = Object.assign({}, s, s.deals);   // deals page may need its own selectors
           const opts = s.deals.render ? { render: true, wait: sel.wait || (sel.item || "").split(",")[0] || null, lang: "en" } : { lang: "en" };

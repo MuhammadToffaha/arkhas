@@ -779,9 +779,8 @@
   },
   {
     "name": "Raneen",
-    "type": "magento",
+    "type": "vertex",
     "base_url": "https://www.raneen.com",
-    "product_base": "https://www.raneen.com/en",
     "search_url": "https://www.raneen.com/en/catalogsearch/result/?q={q}",
     "search_url_ar": "https://www.raneen.com/ar/catalogsearch/result/?q={q}",
     "lang": "both",
@@ -792,7 +791,25 @@
     "link": "a.product-item-link@href",
     "image": "img.product-image-photo@src",
     "deals": {
-      "kind": "magento"
+      "kind": "vertex",
+      "queries": [
+        "tv",
+        "refrigerator",
+        "washing machine",
+        "air conditioner",
+        "mobile",
+        "laptop",
+        "dishwasher",
+        "cooker",
+        "microwave",
+        "vacuum cleaner",
+        "heater",
+        "water heater",
+        "blender",
+        "air fryer",
+        "headphones",
+        "smart watch"
+      ]
     },
     "events": {}
   },

@@ -284,3 +284,14 @@ test("⏳ search shows a live box and results while stores are still answering",
   release(); await p;
   assert.equal(w.document.querySelector("#out .live"), null);
 });
+
+test("Raneen: search + deals through its Vertex search endpoint (real response)", async () => {
+  const s = S["Raneen"];
+  const fx = readFileSync(new URL("./fixtures/raneen-vertex.json", import.meta.url), "utf8");
+  const r = E.ADAPTERS.vertex.parse(JSON.parse(fx), s);
+  assert.ok(r.length >= 10);
+  assert.ok(r.every((o) => o.source === "Raneen" && o.price > 0 && o.url.startsWith("https://www.raneen.com/")));
+  assert.match(E.ADAPTERS.vertex.url(s, "ثلاجة"), /raneen\.com\/ar\/vertex\/search\/query\/\?q=/);
+  const d = await E.deals({ stores: [s], DOMParser, fetcher: async () => fx });
+  assert.ok(d.deals.length >= 5 && d.deals.every((o) => o.pct >= 10));
+});
