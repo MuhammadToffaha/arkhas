@@ -198,6 +198,14 @@ input:focus{border-color:var(--accent);box-shadow:0 0 0 4px var(--glow)}
 .sw input:checked+i{background:var(--grad)}
 .sheet>div{border-radius:26px 26px 0 0}
 [hidden]{display:none!important}
+.live{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:var(--accent);background:color-mix(in srgb,var(--accent) 8%,transparent);border-radius:12px;padding:8px 12px;margin:10px 0 4px}
+.dotlive{width:9px;height:9px;border-radius:50%;background:var(--accent);animation:pulse 1s ease-in-out infinite;flex:none}
+@keyframes pulse{50%{opacity:.25;transform:scale(.8)}}
+.pc.skel{pointer-events:none}
+.skel .sk1,.skel .sk2,.skel .sk3,.skel .sk4{border-radius:10px;background:linear-gradient(90deg,var(--line) 25%,color-mix(in srgb,var(--line) 40%,transparent) 50%,var(--line) 75%);background-size:200% 100%;animation:shim 1.2s linear infinite}
+.skel .sk1{width:64px;height:64px;flex:none}.skel .sk2{height:14px;width:85%}.skel .sk3{height:12px;width:45%;margin-top:8px}.skel .sk4{width:70px;height:20px;flex:none}
+@keyframes shim{to{background-position:-200% 0}}
+
 #d_range button.bf{border-color:#111;font-weight:800}
 #d_range button.bf.on{background:#111!important;border-color:#111;color:#fff}
 .megab.bfb{background:#111;color:#fff;margin-top:26px}
@@ -432,7 +440,7 @@ const readConfig = async (name) => (N ? N.readConfig(name) : (await fetch(name))
 const T = {
   ar: { tag: "أرخص سعر في مصر", go: "ابحث", ph: "اكتب المنتج… مثال: ايفون 15 برو", hint: "نبحث في المتاجر المصرية بالعربي والإنجليزي ونجيب لك أرخص 3",
     top: "🏆 أرخص 3 أسعار", all: "كل العروض ({n})", fb: "📘 فيسبوك والمستعمل", searched: "بحثنا عن:", none: "مفيش نتائج مطابقة لسه…",
-    noneDone: "مفيش نتائج مطابقة. جرّب اسم أدق.", src: "حالة المتاجر", langLbl: "🌐 اللغة", themeLbl: "🎨 شكل التطبيق", autoUpd: "🤫 تحديث تلقائي صامت", autoUpdD: "يدوّر على نسخة جديدة كل يوم وينزّلها ويثبّتها لوحده على الواي فاي. أول مرة أندرويد هيطلب موافقة واحدة، وبعدها من غير أسئلة (أندرويد 12+).", storesHint: "آخر بحث: عدد النتائج من كل متجر", navSearch: "بحث", navStatus: "المتاجر", navGear: "الإعدادات", acc: "إكسسوار؟", cheap: "سعر مريب", rMega: "🟡 ميجا ديلز نون", rBf: "🖤 بلاك فرايداي", bfShort: "الجمعة", bfNone: "🖤 عروض الجمعة البيضاء/الصفراء/السوداء لسه ما بدأتش في المتاجر — هتظهر هنا لوحدها أول ما تبدأ (عادةً من ~20 نوفمبر). اضغط ↻ للتحديث.", sAll: "الكل", sExact: "✓ مطابق بس", sDisc: "🏷️ عليه خصم", sBig: "🏪 أمازون/نون/جوميا", sCheap: "⬇️ الأرخص", sPct: "🔥 أكبر خصم", sNone: "مفيش نتايج بالفلتر ده — جرّب فلتر تاني", rElec: "📱 عروض الإلكترونيات", mega: "ميجا", rAll: "كل الخصومات", r30: "30%+", r5070: "🔥 50–70%", r70: "70%+", rNone: "مفيش عروض في النطاق ده — جرّب نطاق تاني", alTitle: "🔔 تنبيهات الخصومات الكبيرة", alDesc: "إشعار على الموبايل لما يظهر خصم كبير جديد — حتى والتطبيق مقفول",
+    noneDone: "مفيش نتائج مطابقة. جرّب اسم أدق.", src: "حالة المتاجر", langLbl: "🌐 اللغة", themeLbl: "🎨 شكل التطبيق", autoUpd: "🤫 تحديث تلقائي صامت", autoUpdD: "يدوّر على نسخة جديدة كل يوم وينزّلها ويثبّتها لوحده على الواي فاي. أول مرة أندرويد هيطلب موافقة واحدة، وبعدها من غير أسئلة (أندرويد 12+).", storesHint: "آخر بحث: عدد النتائج من كل متجر", navSearch: "بحث", navStatus: "المتاجر", navGear: "الإعدادات", acc: "إكسسوار؟", cheap: "سعر مريب", rMega: "🟡 ميجا ديلز نون", rBf: "🖤 بلاك فرايداي", bfShort: "الجمعة", bfNone: "🖤 عروض الجمعة البيضاء/الصفراء/السوداء لسه ما بدأتش في المتاجر — هتظهر هنا لوحدها أول ما تبدأ (عادةً من ~20 نوفمبر). اضغط ↻ للتحديث.", sAll: "الكل", liveHdr: "بندوّر… {done}/{all} متجر ردّ · لقينا {n} عرض من {s} متجر", liveMore: "⏳ بتتحدّث لحد ما الباقي يرد", sExact: "✓ مطابق بس", sDisc: "🏷️ عليه خصم", sBig: "🏪 أمازون/نون/جوميا", sCheap: "⬇️ الأرخص", sPct: "🔥 أكبر خصم", sNone: "مفيش نتايج بالفلتر ده — جرّب فلتر تاني", rElec: "📱 عروض الإلكترونيات", mega: "ميجا", rAll: "كل الخصومات", r30: "30%+", r5070: "🔥 50–70%", r70: "70%+", rNone: "مفيش عروض في النطاق ده — جرّب نطاق تاني", alTitle: "🔔 تنبيهات الخصومات الكبيرة", alDesc: "إشعار على الموبايل لما يظهر خصم كبير جديد — حتى والتطبيق مقفول",
     alMin: "أقل خصم", alStores: "المتاجر", alMega: "🟡 ميجا ديلز نون كمان", alEvery: "افحص كل", alHours: "{h} ساعة", alTest: "🔍 افحص دلوقتي",
     alTesting: "جاري الفحص في الخلفية… هيوصلك إشعار لو فيه جديد", alLast: "آخر فحص {t}: {f} عرض، {n} جديد", alErr: "آخر فحص {t}: فشل ({e})",
     alNever: "لسه مفيش فحص", alTo: "ابعت العروض الجديدة على", alNotify: "🔔 إشعار على الموبايل", tgOn: "✈️ جروب تليجرام (تلقائي بالكامل)",
@@ -452,7 +460,7 @@ const T = {
     city: "مدينة فيسبوك ماركت بليس", stores: "المتاجر", saveBtn: "حفظ", ver: "نسخة", hidden: "تم إخفاء {n} نتيجة غير مطابقة" },
   en: { tag: "Best price in Egypt", go: "Search", ph: "Product… e.g. iphone 15 pro", hint: "Searching Egyptian stores in Arabic & English — top 3 cheapest",
     top: "🏆 Top 3 prices", all: "All offers ({n})", fb: "📘 Facebook & used", searched: "Searched:", none: "No matches yet…",
-    noneDone: "No matching results. Try a more specific name.", src: "Store status", langLbl: "🌐 Language", themeLbl: "🎨 App theme", autoUpd: "🤫 Silent auto-update", autoUpdD: "Checks every day and installs new versions by itself on Wi-Fi. Android asks once the first time, then no more prompts (Android 12+).", storesHint: "Last search: results per store", navSearch: "Search", navStatus: "Stores", navGear: "Settings", acc: "accessory?", cheap: "suspicious price", rMega: "🟡 Noon Mega Deals", rBf: "🖤 Black Friday", bfShort: "Friday", bfNone: "🖤 White / Yellow / Black Friday hasn't started in the stores yet — the deals appear here by themselves once it does (usually from ~20 Nov). Tap ↻ to refresh.", sAll: "All", sExact: "✓ Exact only", sDisc: "🏷️ Discounted", sBig: "🏪 Amazon/noon/Jumia", sCheap: "⬇️ Cheapest", sPct: "🔥 Biggest discount", sNone: "No results with this filter — try another", rElec: "📱 Electronics offers", mega: "MEGA", rAll: "All discounts", r30: "30%+", r5070: "🔥 50–70%", r70: "70%+", rNone: "No deals in this range — try another one", alTitle: "🔔 Big discount alerts", alDesc: "Phone notification when a new big discount appears — even with the app closed",
+    noneDone: "No matching results. Try a more specific name.", src: "Store status", langLbl: "🌐 Language", themeLbl: "🎨 App theme", autoUpd: "🤫 Silent auto-update", autoUpdD: "Checks every day and installs new versions by itself on Wi-Fi. Android asks once the first time, then no more prompts (Android 12+).", storesHint: "Last search: results per store", navSearch: "Search", navStatus: "Stores", navGear: "Settings", acc: "accessory?", cheap: "suspicious price", rMega: "🟡 Noon Mega Deals", rBf: "🖤 Black Friday", bfShort: "Friday", bfNone: "🖤 White / Yellow / Black Friday hasn't started in the stores yet — the deals appear here by themselves once it does (usually from ~20 Nov). Tap ↻ to refresh.", sAll: "All", liveHdr: "Searching… {done}/{all} stores answered · {n} offers from {s} stores so far", liveMore: "⏳ updating as more stores answer", sExact: "✓ Exact only", sDisc: "🏷️ Discounted", sBig: "🏪 Amazon/noon/Jumia", sCheap: "⬇️ Cheapest", sPct: "🔥 Biggest discount", sNone: "No results with this filter — try another", rElec: "📱 Electronics offers", mega: "MEGA", rAll: "All discounts", r30: "30%+", r5070: "🔥 50–70%", r70: "70%+", rNone: "No deals in this range — try another one", alTitle: "🔔 Big discount alerts", alDesc: "Phone notification when a new big discount appears — even with the app closed",
     alMin: "Minimum discount", alStores: "Stores", alMega: "🟡 Noon Mega Deals too", alEvery: "Check every", alHours: "{h} h", alTest: "🔍 Check now",
     alTesting: "Checking in the background… you'll get a notification if there's something new", alLast: "Last check {t}: {f} deals, {n} new", alErr: "Last check {t}: failed ({e})",
     alNever: "No check yet", alTo: "Send new deals to", alNotify: "🔔 Phone notification", tgOn: "✈️ Telegram group (fully automatic)",
@@ -547,8 +555,13 @@ function render(r, done) {
     if (!list.length && done) h += `<div class="empty">${t.sNone}</div>`;
   }
   const extra = (o) => (pct(o) ? `<span class="offb">-${pct(o)}%</span>` : "") + (bf.has(o.source + "|" + Arkhas.productId(o.url)) ? `<span class="bfx">🖤</span>` : "");
+  if (!done) {
+    const okN = (r.sources || []).filter((x) => x.count).length;
+    h += `<div class="live"><span class="dotlive"></span>${fmt(t.liveHdr, { done: (r.sources || []).length, all: total || r.total || 0, n: (r.offers || []).length, s: okN })}</div>`;
+  }
+  if (!done && !r.top3.length) h += `<div class="podium">${[1, 2, 3].map(() => `<div class="pc skel"><div class="sk1"></div><div class="t"><div class="sk2"></div><div class="sk3"></div></div><div class="sk4"></div></div>`).join("")}</div>`;
   if (r.top3.length) {
-    h += `<h3>${t.top}</h3>`;
+    h += `<h3>${t.top}${done ? "" : ` <span class="muted" style="font-size:12px">${t.liveMore}</span>`}</h3>`;
     const nExact = r.top3.filter((o) => o.match === 0).length;
     if (done && nExact < r.top3.length && nExact < 3) h += `<div class="muted">${fmt(t.fewExact, { n: nExact })}</div>`;
     h += `<div class="podium">`;
@@ -559,11 +572,11 @@ function render(r, done) {
         <div style="text-align:end"><div class="p">${money(o.price)}</div>${off}</div></a>`;
     });
     h += `</div>`;
-  } else if (!sFilter) h += `<div class="empty">${done ? t.noneDone : t.none}</div>`;
+  } else if (!sFilter && done) h += `<div class="empty">${t.noneDone}</div>`;
 
   const rest = r.offers.filter((o) => !r.top3.includes(o));
   if (rest.length) {
-    h += `<details${sFilter || sSort !== "price" ? " open" : ""}><summary>${fmt(t.all, { n: r.offers.length })}</summary>`;
+    h += `<details id="allres"${sFilter || sSort !== "price" || allOpen ? " open" : ""}><summary>${fmt(t.all, { n: r.offers.length })}</summary>`;
     for (const o of rest) h += `<a class="row" href="${esc(o.url)}">${heart(o)}${cartBtn(o)}${img(o)}<div class="t"><div class="ttl">${esc(o.title)}</div>
       <div class="src">${badge(o)} ${esc(o.source)}${flags(o)}${extra(o)}</div></div><div class="p">${money(o.price)}</div></a>`;
     h += `</details>`;
@@ -577,11 +590,17 @@ function render(r, done) {
     `<td>${esc(s.error || (s.query && s.query !== r.query ? "→ " + s.query : ""))}</td></tr>`).join("")}</table></details>`;
   const st = document.getElementById("status");
   if (st) statusOpen = st.open;
+  const ar = document.getElementById("allres");
+  if (ar) allOpen = ar.open;
+  const y = window.scrollY;
   $("#out").innerHTML = h;
+  if (!done && y) window.scrollTo(0, y);
   const st2 = document.getElementById("status");
   if (st2) st2.ontoggle = () => { statusOpen = st2.open; };
+  const ar2 = document.getElementById("allres");
+  if (ar2) ar2.ontoggle = () => { allOpen = ar2.open; };
 }
-let statusOpen = false;
+let statusOpen = false, allOpen = false;
 document.addEventListener("click", (e) => {
   const f = e.target.closest && e.target.closest("#sfil [data-sf], #sfil [data-ss]");
   if (!f || !lastR) return;
@@ -609,9 +628,13 @@ async function run(q) {
   const serpKey = pref("serp");
   total = stores.length + (serpKey ? 1 : 0);
   progress({ sources: [] });
+  allOpen = false;
+  render({ query: q, variants: [q], offers: [], top3: [], links: [], sources: [], total }, false);
+  let pending = null;
+  const flush = () => { if (pending && busy) { render(pending, false); progress(pending); } pending = null; };
   try {
     last = await Arkhas.search(q, { stores, fetcher, serpKey, city: pref("city", "cairo"),
-      onProgress: (r) => { last = r; render(r, false); progress(r); } });
+      onProgress: (r) => { last = r; if (!pending) (window.requestAnimationFrame || setTimeout)(flush); pending = r; } });
     render(last, true);
   } catch (e) { $("#out").innerHTML = `<div class="empty">⚠️ ${esc(e.message)}</div>`; }
   finally { busy = false; $("#bar").hidden = true; $("#hint").textContent = T[L].hint; }

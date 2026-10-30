@@ -262,3 +262,25 @@ test("🔎 search results: filter (exact / discounted / Amazon-noon-Jumia) and s
   chips().find((b) => b.dataset.sf === "exact").click();
   assert.equal(w.document.querySelectorAll(".pc").length, 3);
 });
+
+test("⏳ search shows a live box and results while stores are still answering", async () => {
+  const W = new URL("../web/", import.meta.url);
+  const html = readFileSync(new URL("index.html", W), "utf8").replace('<script src="engine.js"></script>', () => `<script>${readFileSync(new URL("engine.js", W), "utf8")}</script>`);
+  const dom = new JSDOM(html, { runScripts: "dangerously", url: "https://app.local/", pretendToBeVisual: true });
+  const w = dom.window; await new Promise((r) => setTimeout(r, 50));
+  let release;
+  w.eval(`STORES = [{ name: "A" }, { name: "B" }]; isOn = () => true;`);
+  w.Arkhas.search = (q, o) => new Promise((res) => {
+    const off = { title: "JBL Tune 520BT", price: 1499, url: "https://a/1", source: "A", match: 0, flags: [] };
+    setTimeout(() => o.onProgress({ query: q, variants: [q], offers: [off], top3: [off], links: [], sources: [{ source: "A", ok: true, count: 1, ms: 5 }], total: 2 }), 10);
+    release = () => res({ query: q, variants: [q], offers: [off], top3: [off], links: [], sources: [{ source: "A", ok: true, count: 1, ms: 5 }, { source: "B", ok: true, count: 0, ms: 9 }], total: 2 });
+  });
+  const p = w.eval(`run("jbl 520")`);
+  assert.ok(w.document.querySelector("#out .live"), "live box right away");
+  assert.equal(w.document.querySelectorAll("#out .skel").length, 3, "placeholders before the first store answers");
+  await new Promise((r) => setTimeout(r, 80));
+  assert.equal(w.document.querySelectorAll("#out .pc:not(.skel)").length, 1, "first result shown while B is still loading");
+  assert.match(w.document.querySelector("#out .live").textContent, /1\/2/);
+  release(); await p;
+  assert.equal(w.document.querySelector("#out .live"), null);
+});
