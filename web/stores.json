@@ -342,21 +342,6 @@
         "https://www.amazon.eg/s?k=sports&rh=p_8%3A50-&language=en_AE"
       ]
     },
-    "sold_by_store": {
-      "probe": "https://www.amazon.eg/s?k=headphones&language=en_AE",
-      "link_text": [
-        "^amazon\\.eg$",
-        "^amazon\\.eg\\b",
-        "^amazon$"
-      ],
-      "keep": "^rh$",
-      "rh_keep": "^p_6:",
-      "raw": "p_6%3A([A-Z0-9]{8,20})[^\"]{0,400}\"[^>]*>(?:\\s|<[^>]*>){0,8}Amazon\\.eg",
-      "raw_param": "rh",
-      "raw_value": "p_6:$1",
-      "label": "Sold by Amazon.eg",
-      "max_pages": 30
-    },
     "events": {
       "pages": [
         "https://www.amazon.eg/-/en/white-friday",
@@ -491,29 +476,6 @@
         "https://www.jumia.com.eg/mlp-deals/?sort=discount"
       ]
     },
-    "sold_by_store": {
-      "probe": "https://www.jumia.com.eg/mobile-phones/",
-      "link_text": [
-        "^sold by jumia$",
-        "^jumia$",
-        "^jumia mall$",
-        "^official stores?$",
-        "jumia mall",
-        "official store",
-        "^jumia express$",
-        "^express( delivery)?$",
-        "express"
-      ],
-      "allow_path": true,
-      "label": "Jumia Mall / official stores (fallback: Jumia Express)",
-      "fallback_params": [
-        [
-          "shop_premium_services",
-          "shop_express_delivery"
-        ]
-      ],
-      "fallback_text": "Jumia Express"
-    },
     "events": {
       "pages": [
         "https://www.jumia.com.eg/mlp-black-friday/",
@@ -602,16 +564,13 @@
         },
         {
           "url": "https://www.noon.com/egypt-en/electronics-and-mobiles/?f%5Bis_fbn%5D%5B%5D=1&f%5Bdeal_tag%5D%5B%5D=deals-generic&sort%5Bby%5D=popularity&sort%5Bdir%5D=desc",
-          "cat": "electronics",
-          "big": true
+          "cat": "electronics"
         },
         {
-          "url": "https://www.noon.com/egypt-en/home-and-kitchen/?f%5Bis_fbn%5D%5B%5D=1&f%5Bdeal_tag%5D%5B%5D=deals-generic&sort%5Bby%5D=popularity&sort%5Bdir%5D=desc",
-          "big": true
+          "url": "https://www.noon.com/egypt-en/home-and-kitchen/?f%5Bis_fbn%5D%5B%5D=1&f%5Bdeal_tag%5D%5B%5D=deals-generic&sort%5Bby%5D=popularity&sort%5Bdir%5D=desc"
         },
         {
-          "url": "https://www.noon.com/egypt-en/fashion/?f%5Bis_fbn%5D%5B%5D=1&f%5Bdeal_tag%5D%5B%5D=deals-generic&sort%5Bby%5D=popularity&sort%5Bdir%5D=desc",
-          "big": true
+          "url": "https://www.noon.com/egypt-en/fashion/?f%5Bis_fbn%5D%5B%5D=1&f%5Bdeal_tag%5D%5B%5D=deals-generic&sort%5Bby%5D=popularity&sort%5Bdir%5D=desc"
         }
       ],
       "wait": "a[href*=\"/p/\"]"
@@ -620,29 +579,6 @@
     "url_template": "https://www.noon.com/egypt-en/{url}/{sku}/p/",
     "image_template": "https://f.nooncdn.com/p/{image_key}.jpg",
     "link_cards": true,
-    "sold_by_store": {
-      "probe": "https://www.noon.com/egypt-en/electronics-and-mobiles/",
-      "render": true,
-      "wait": "a[href*=\"/p/\"]",
-      "link_text": [
-        "^sold by noon$",
-        "^noon$",
-        "^noon retail$",
-        "fulfilled by noon",
-        "^noon express$",
-        "^express$",
-        "^fbn$"
-      ],
-      "keep": "^f\\[",
-      "label": "Sold by noon (fallback: fulfilled by noon)",
-      "fallback_params": [
-        [
-          "f[is_fbn][]",
-          "1"
-        ]
-      ],
-      "fallback_text": "Fulfilled by noon"
-    },
     "events": {
       "pages": [
         "https://www.noon.com/egypt-en/yellow-friday/",

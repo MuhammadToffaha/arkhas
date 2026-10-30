@@ -176,56 +176,6 @@ test("📷 photo button opens camera/gallery and the result runs a search", asyn
   assert.ok(w.document.querySelectorAll("#ph_q button").length >= 2);
 });
 
-test("🏬 finds each store's own 'sold by' filter from its listing page and applies it to every deal page", async () => {
-  const amz = S["Amazon.eg"], noon = S["Noon"], jum = S["Jumia"];
-  const amzHtml = `<div id="s-refinements"><div id="p_6-title">Seller</div><ul>
-    <li><a href="/s?k=headphones&rh=n%3A21832883031%2Cp_6%3AA1ZVRGNO5AYLOV&language=en_AE"><span>Amazon.eg</span></a></li>
-    <li><a href="/s?k=headphones&rh=p_6%3AA2ABCDEF&language=en_AE"><span>Cell Phone Shop</span></a></li></ul></div>`;
-  const f1 = await E.findStoreFilter(amz, async () => amzHtml, DOMParser);
-  assert.deepEqual(f1.params, [["rh", "p_6:A1ZVRGNO5AYLOV"]]);
-  assert.equal(E.mergeFilter("https://www.amazon.eg/s?k=laptop&rh=p_8%3A50-&language=en_AE", f1),
-    "https://www.amazon.eg/s?k=laptop&rh=p_8%3A50-%2Cp_6%3AA1ZVRGNO5AYLOV&language=en_AE");
-  const noonHtml = `<a href="/egypt-en/electronics-and-mobiles/?f%5Bseller%5D%5B%5D=noon">noon (1,234)</a>`;
-  const f2 = await E.findStoreFilter(noon, async () => noonHtml, DOMParser);
-  assert.deepEqual(f2.params, [["f[seller][]", "noon"]]);
-  const jumHtml = `<a href="/mobile-phones/?tag=JMALL">Jumia Mall</a><a href="/mobile-phones/?shop_premium_services=shop_express_delivery">Express Delivery</a>`;
-  const f3 = await E.findStoreFilter(jum, async () => jumHtml, DOMParser);
-  assert.deepEqual(f3.params, [["tag", "JMALL"]]);
-  assert.equal((await E.findStoreFilter(jum, async () => "<a href='/x'>nothing</a>", DOMParser)).text, "Jumia Express");   // fixed fallback
-  // normal deals + soldBy: every store stays, the store's own "sold by" pages are added and marked
-  const seen = [];
-  await E.deals({ stores: [amz, jum], DOMParser, soldBy: { "Amazon.eg": f1 }, timeout: 50, fetcher: async (u) => { seen.push(u); throw new Error("offline"); } });
-  assert.ok(seen.some((u) => u.includes("jumia")) && seen.some((u) => u.includes("p_6%3AA1ZVRGNO5AYLOV")) && seen.some((u) => u.includes("amazon") && !u.includes("p_6")));
-  // deals with filters: only those stores, URLs rewritten, everything marked as sold by the store
-  const urls = [];
-  const r = await E.deals({ stores: [amz, jum], DOMParser, filters: { "Amazon.eg": f1 }, timeout: 50,
-    fetcher: async (u) => { urls.push(u); throw new Error("offline"); } });
-  assert.ok(urls.length > 10 && urls.every((u) => u.includes("p_6%3AA1ZVRGNO5AYLOV")));
-  assert.equal(r.total, 1);
-});
-
-test("🏬 offers tab: all stores' deals stay; the button filters to items sold by the store itself", async () => {
-  const W = new URL("../web/", import.meta.url);
-  const html = readFileSync(new URL("index.html", W), "utf8").replace('<script src="engine.js"></script>', () => `<script>${readFileSync(new URL("engine.js", W), "utf8")}</script>`);
-  const dom = new JSDOM(html, { runScripts: "dangerously", url: "https://app.local/" });
-  const w = dom.window; await new Promise((r) => setTimeout(r, 50));
-  w.eval(`STORES = ${readFileSync(new URL("stores.json", W), "utf8")};
-    bigFilters = { at: Date.now(), stores: { "Amazon.eg": { params: [["rh", "p_6:AAA"]], text: "Amazon.eg", level: 0 }, "Noon": { params: [["f[is_fbn][]", "1"]], text: "Fulfilled by noon", level: 99 }, "Jumia": { none: true } } };
-    const mk = (i, s, big) => ({ title: "x" + i, price: 400, old_price: 1000, pct: 60, url: "https://x/" + i, source: s, big });
-    dealsData = { deals: [mk(1, "Amazon.eg", true), mk(2, "Amazon.eg", false), mk(3, "Noon", true), mk(4, "B.TECH", false)], sources: [], total: 3, at: Date.now() };
-    getHide().clear(); dealRange = "r5070"; dealBig = false; renderDeals(true);`);
-  assert.equal(w.document.querySelectorAll("#d_out .dc").length, 4);
-  const big = () => w.document.querySelector("#d_quick button[data-big]");
-  assert.match(big().textContent, /· 2$/);
-  big().click();
-  assert.equal(w.document.querySelectorAll("#d_out .dc").length, 2);
-  assert.match(w.document.querySelector("#d_big").textContent, /✅ Amazon/);
-  assert.match(w.document.querySelector("#d_big").textContent, /⚠️ Noon/);
-  assert.match(w.document.querySelector("#d_big").textContent, /❌ Jumia/);
-  w.document.querySelector('#d_quick button[data-q="Amazon.eg"]').click();
-  assert.equal(w.document.querySelectorAll("#d_out .dc").length, 1);
-});
-
 test("🖤 finds White / Yellow / Black Friday pages on a store's home page and tags their items", async () => {
   const home = `<a href="/en/">Home</a><a href="/-/en/b?node=123"><img alt="White Friday deals"></a>
     <a href="https://www.amazon.eg/s?k=x">x</a><a href="/egypt-en/yellow-friday/electronics/">Shop</a><a href="https://evil.com/black-friday">ad</a>

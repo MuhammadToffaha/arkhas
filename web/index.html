@@ -324,7 +324,6 @@ html,body{overflow-x:hidden}
     <div class="chips" id="d_range"></div>
     <div class="chips" id="d_sort"></div>
     <div class="chips" id="d_quick"></div>
-    <div class="muted" id="d_big" hidden style="font-size:12px"></div>
     <div class="dd" id="d_dd">
       <button class="dd-btn" id="d_ddbtn"><span id="d_ddlbl"></span><i>▾</i></button>
       <div class="dd-panel" id="d_panel" hidden>
@@ -875,7 +874,6 @@ document.addEventListener("click", (e) => {
 
 // ---------- ⚡ flash deals ----------
 let dealsData = null, dealsBusy = false, dealSort = "pct", shownDeals = [];
-let dealBig = null;   // 🏬 only items sold / shipped by Amazon, noon, Jumia themselves
 let dealHide = null;   // stores unticked in the dropdown (remembered)
 const getHide = () => { if (!dealHide) { try { dealHide = new Set(JSON.parse(pref("dealHide", "[]"))); } catch (_) { dealHide = new Set(); } } return dealHide; };
 const saveHide = () => setPref("dealHide", JSON.stringify([...getHide()]));
@@ -897,10 +895,7 @@ function showView(v) {
 }
 
 function renderDeals(done = true) {
-  if (dealBig === null) dealBig = pref("dealBig") === "1";
   const t = T[L], d = dealsData;
-  $("#d_big").hidden = !dealBig;
-  if (dealBig) renderBigStatus();
   if (!d) return;
   const mins = Math.round((Date.now() - d.at) / 60000);
   $("#d_sub").textContent = done ? fmt(t.dealsSub, { n: d.total, t: mins < 1 ? t.justNow : fmt(t.minAgo, { m: mins }) })
@@ -926,10 +921,10 @@ function renderDeals(done = true) {
   // 🏪 quick store filter: All · Amazon · noon · Jumia (same setting as the dropdown)
   const QUICK = [["", "🏪 " + t.ddAll], ["Amazon.eg", "🅰️ Amazon"], ["Noon", "🟡 noon"], ["Jumia", "🟠 Jumia"]].filter(([n]) => !n || names.includes(n));
   const one = shown.length === 1 ? shown[0] : null;
-  $("#d_quick").innerHTML = `<button data-big="1" class="big${dealBig ? " on" : ""}">${t.bigOnly} · ${inRange.filter((o) => o.big && !hide.has(o.source)).length}</button>` +
+  $("#d_quick").innerHTML = ""+
     QUICK.map(([n, lbl]) => `<button data-q="${esc(n)}" class="${(n ? one === n : shown.length === names.length) ? "on" : ""}">${lbl} · ${n ? counts[n] || 0 : inRange.length}</button>`).join("");
   $("#d_all").textContent = t.selAll; $("#d_none").textContent = t.selNone;
-  let list = inRange.filter((o) => !hide.has(o.source) && (!dealBig || o.big));
+  let list = inRange.filter((o) => !hide.has(o.source));
   if ((dealRange === "r70" || dealRange === "elec" || dealRange === "bf") && dealSort === "pct") list = list.slice().sort((a, b) => b.pct - a.pct || a.price - b.price);
   const by = { pct: (a, b) => b.pct - a.pct, save: (a, b) => (b.old_price - b.price) - (a.old_price - a.price), price: (a, b) => a.price - b.price };
   list = list.slice().sort(by[dealSort]).slice(0, 120);
@@ -937,7 +932,7 @@ function renderDeals(done = true) {
   if (!list.length) { $("#d_out").innerHTML = done ? `<div class="empty">${dealRange === "bf" ? t.bfNone : d.deals.length ? t.rNone : t.dealsNone}</div>` : ""; return; }
   $("#d_out").innerHTML = `<div class="dg">${list.map((o) => `<a class="dc${o.tag === "mega" ? " is-mega" : ""}" href="${esc(o.url)}">${o.pct ? `<span class="off">-${o.pct}%</span>` : ""}${o.tag === "mega" ? `<span class="megab">🟡 ${t.mega}</span>` : ""}${o.tag === "bf" ? `<span class="megab bfb">🖤 ${t.bfShort}</span>` : ""}${heart(o)}<button type="button" class="share" data-u="${esc(o.url)}" aria-label="WhatsApp">📤</button>${cartBtn(o)}${img(o)}
     <div class="ttl">${esc(o.title)}</div><div class="p">${money(o.price)}</div>${o.old_price && o.old_price > o.price ? `<div class="old">${money(o.old_price)}</div>` : ""}
-    <div class="src">${esc(o.source)}${o.big ? ` <span class="bigb">${t.bigBadge}</span>` : ""}</div></a>`).join("")}</div>`;
+    <div class="src">${esc(o.source)}</div></a>`).join("")}</div>`;
 }
 
 async function loadDeals(force) {
@@ -948,14 +943,9 @@ async function loadDeals(force) {
   }
   dealsBusy = true; $("#d_bar").hidden = false; $("#d_refresh").disabled = true;
   try {
-    let soldBy = {};
-    try {
-      const f = await storeFilters(force);
-      for (const [n, x] of Object.entries(f.stores)) if (!x.none) soldBy[n] = x;
-    } catch (_) {}
     let events = {};
     try { events = await eventPages(force); } catch (_) {}
-    dealsData = await Arkhas.deals({ stores: STORES.filter(isOn), fetcher, soldBy, events, onProgress: (r) => {
+    dealsData = await Arkhas.deals({ stores: STORES.filter(isOn), fetcher, events, onProgress: (r) => {
       dealsData = r; renderDeals(false);
       $("#d_bar i").style.width = Math.max(8, (100 * r.sources.length) / r.total) + "%";
     } });
@@ -979,65 +969,12 @@ async function eventPages(force) {
   return pages;
 }
 
-// 🏬 deals sold by Amazon / noon / Jumia themselves (not third-party sellers): the store's own seller filter
-let dealsBigData = null, bigBusy = false, bigFilters = null;
-const BIG_STORES = ["Amazon.eg", "Noon", "Jumia"];
-const FILTER_TTL = 3 * 24 * 3600 * 1000;
-async function storeFilters(force) {
-  if (!force && !bigFilters) { try { const c = JSON.parse(pref("soldByFilters2", "null")); if (c && Date.now() - c.at < FILTER_TTL) bigFilters = c; } catch (_) {} }
-  if (!force && bigFilters) return bigFilters;
-  const res = { at: Date.now(), stores: {} };
-  await Promise.all(STORES.filter((x) => BIG_STORES.includes(x.name) && x.sold_by_store && isOn(x)).map(async (x) => {
-    try { res.stores[x.name] = (await Arkhas.findStoreFilter(x, fetcher)) || { none: true }; }
-    catch (e) {
-      const c = x.sold_by_store;   // page did not load: still use the store's fixed filter (noon fbn, Jumia Express)
-      res.stores[x.name] = c.fallback_params ? { params: c.fallback_params, text: c.fallback_text || "fallback", level: 99, how: "fixed" }
-        : { none: true, error: String(e.message || e).slice(0, 80) };
-    }
-  }));
-  bigFilters = res;
-  if (Object.values(res.stores).some((f) => !f.none)) try { setPref("soldByFilters2", JSON.stringify(res)); } catch (_) {}
-  return res;
-}
-function renderBigStatus() {
-  const t = T[L], f = bigFilters && bigFilters.stores;
-  if (!f) { $("#d_big").textContent = t.bigFinding; return; }
-  $("#d_big").textContent = BIG_STORES.filter((n) => f[n]).map((n) => {
-    const x = f[n], nm = n.replace(".eg", "");
-    if (x.none) return "❌ " + nm;
-    const sold = n === "Amazon.eg" ? true : n === "Noon" ? x.level <= 2 : x.level <= 1;
-    return (sold ? "✅ " : "⚠️ ") + nm + " (" + x.text + ")";
-  }).join(" · ") + " — " + t.bigNote;
-}
-async function loadBigDeals(force) {
-  if (bigBusy) return;
-  if (!force && dealsBigData && Date.now() - dealsBigData.at < DEALS_TTL) return renderDeals();
-  bigBusy = true; $("#d_bar").hidden = false; $("#d_refresh").disabled = true;
-  dealsBigData = { deals: [], sources: [], total: 3, at: Date.now() };
-  renderDeals(false);
-  try {
-    const f = await storeFilters(force);
-    renderBigStatus();
-    const filters = {};
-    for (const [n, x] of Object.entries(f.stores)) if (!x.none) filters[n] = x;
-    dealsBigData = await Arkhas.deals({ stores: STORES.filter(isOn), fetcher, filters, onProgress: (r) => {
-      dealsBigData = r; renderDeals(false);
-      $("#d_bar i").style.width = Math.max(8, (100 * r.sources.length) / Math.max(1, r.total)) + "%";
-    } });
-    renderDeals(true);
-  } finally { bigBusy = false; $("#d_bar").hidden = true; $("#d_refresh").disabled = false; }
-}
 $("#nav_deals").onclick = () => { showView("deals"); loadDeals(false); };
 $("#d_refresh").onclick = () => loadDeals(true);
 $("#d_wa").onclick = () => shareWa(shownDeals.slice(0, 10));
 $("#d_range").onclick = (e) => { const k = e.target.dataset && e.target.dataset.r; if (k) { dealRange = k; setPref("dealRange", k); renderDeals(); } };
 $("#d_sort").onclick = (e) => { const k = e.target.dataset && e.target.dataset.k; if (k) { dealSort = k; renderDeals(); } };
 $("#d_quick").onclick = (e) => {
-  if (e.target.closest("button[data-big]")) {
-    dealBig = !dealBig; setPref("dealBig", dealBig ? "1" : "");
-    renderDeals();
-    return;
-  }
   const b = e.target.closest("button[data-q]"); if (!b) return;
   const h = getHide(); h.clear();
   if (b.dataset.q) for (const x of STORES) if (x.deals && x.name !== b.dataset.q) h.add(x.name);
