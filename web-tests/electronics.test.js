@@ -265,3 +265,25 @@ test("💄 cosmetics: 7 Egyptian beauty shops + Amazon/noon/Jumia beauty deals u
   assert.equal(w.document.querySelectorAll("#d_out .dc").length, 2);
   assert.ok(w.document.querySelector('#d_quick button[data-q="Source Beauty"]'));
 });
+
+test("🔎 Google Lens results → product names → search (photo without readable text)", async () => {
+  const lensHtml = `<a href="https://www.amazon.eg/x"><div>Amazon.eg</div><div>JBL Tune 520BT Wireless On-Ear Headphones, Black</div><div>EGP 1,999</div></a>
+    <a href="https://www.noon.com/y"><span>JBL Tune 520BT Bluetooth Headphones - Blue</span></a><a href="https://www.google.com/search?q=x">Visual matches</a>
+    <a href="https://ebay.com/q"><span>JBL TUNE 520BT Pure Bass Headphones Purple</span></a>`;
+  assert.equal(E.lensQueries(E.lensTitles(lensHtml, DOMParser))[0], "jbl tune 520bt headphones");
+  assert.ok(E.lensCaptcha("Our systems have detected unusual traffic"));
+  const W = new URL("../web/", import.meta.url);
+  const html = readFileSync(new URL("index.html", W), "utf8").replace('<script src="engine.js"></script>', () => `<script>${readFileSync(new URL("engine.js", W), "utf8")}</script>`);
+  const dom = new JSDOM(html, { runScripts: "dangerously", url: "https://app.local/", beforeParse(w) {
+    w.Native = { photo() {}, lens() {}, lensShow() {}, lensUpload: (id) => setTimeout(() => w.__lens(id, { ok: true, url: "https://www.google.com/search?vsrid=1" }), 5),
+      fetch: (id, url) => setTimeout(() => w.__native(id, true, url.includes("vsrid") ? lensHtml : "{}"), 5),
+      getPref: () => "", setPref() {}, readConfig: () => "[]", appVersion: () => "1", isBackground: () => false };
+  } });
+  const w = dom.window; await new Promise((r) => setTimeout(r, 50));
+  const searched = [];
+  w.eval("run = (q) => { window.__searched = (window.__searched || []).concat(q); }");
+  await w.__photo({ ok: true, barcodes: [], lines: [], labels: [{ text: "Headphones", conf: 0.9 }], thumb: "" });
+  await new Promise((r) => setTimeout(r, 120));
+  assert.equal(JSON.stringify(w.__searched), JSON.stringify(["jbl tune 520bt headphones"]));
+  assert.match(w.document.querySelector("#ph_q button").textContent, /🔎 jbl tune 520bt/);
+});

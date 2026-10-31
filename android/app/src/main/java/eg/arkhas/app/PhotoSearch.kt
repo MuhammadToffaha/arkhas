@@ -92,6 +92,61 @@ class PhotoSearch(private val act: MainActivity, private val done: (JSONObject) 
         }
     }
 
+    /**
+     * 🔎 Real visual search: upload the photo to Google Lens (same request the Lens website makes) and return the
+     * results URL. Its cookies go into the app's cookie jar so the hidden browser / the Lens sheet can open it.
+     */
+    fun lensUpload(): JSONObject {
+        val u = last ?: return JSONObject().put("ok", false).put("error", "no photo")
+        return try {
+            val jpg = jpeg(u, 1000) ?: throw Exception("image")
+            val b = "----arkhas" + System.currentTimeMillis()
+            val head = "--$b\r\nContent-Disposition: form-data; name=\"encoded_image\"; filename=\"photo.jpg\"\r\nContent-Type: image/jpeg\r\n\r\n"
+            val body = head.toByteArray() + jpg + "\r\n--$b--\r\n".toByteArray()
+            val c = java.net.URL("https://lens.google.com/v3/upload?hl=en&gl=EG&re=df&stcs=${System.currentTimeMillis()}&ep=gsbubb")
+                .openConnection() as java.net.HttpURLConnection
+            c.instanceFollowRedirects = false
+            c.requestMethod = "POST"; c.doOutput = true
+            c.connectTimeout = 15000; c.readTimeout = 30000
+            c.setRequestProperty("User-Agent", Net.DESKTOP_UA)
+            c.setRequestProperty("Accept-Language", "en-US,en;q=0.9,ar;q=0.8")
+            c.setRequestProperty("Referer", "https://lens.google.com/")
+            c.setRequestProperty("Origin", "https://lens.google.com")
+            c.setRequestProperty("Content-Type", "multipart/form-data; boundary=$b")
+            c.outputStream.use { it.write(body) }
+            val code = c.responseCode
+            val cm = android.webkit.CookieManager.getInstance()
+            c.headerFields.filterKeys { it != null && it.equals("Set-Cookie", true) }.values.flatten().forEach { ck ->
+                cm.setCookie("https://www.google.com", ck); cm.setCookie("https://lens.google.com", ck)
+            }
+            cm.flush()
+            var loc = c.getHeaderField("Location")
+            if (loc == null && code == 200) {
+                val html = c.inputStream.bufferedReader().use { it.readText() }
+                loc = Regex("https://www\\.google\\.com/search\\?[^\"'<> ]+").find(html)?.value?.replace("&amp;", "&")
+            }
+            c.disconnect()
+            if (loc.isNullOrBlank()) JSONObject().put("ok", false).put("error", "Lens HTTP $code")
+            else JSONObject().put("ok", true).put("url", java.net.URL(java.net.URL("https://lens.google.com/"), loc).toString())
+        } catch (e: Exception) { JSONObject().put("ok", false).put("error", e.message ?: "lens") }
+    }
+
+    private fun jpeg(uri: Uri, max: Int): ByteArray? = runCatching {
+        val bmp: Bitmap = if (Build.VERSION.SDK_INT >= 28) {
+            ImageDecoder.decodeBitmap(ImageDecoder.createSource(act.contentResolver, uri)) { d, info, _ ->
+                val sc = maxOf(info.size.width, info.size.height).toFloat() / max
+                if (sc > 1) d.setTargetSize((info.size.width / sc).toInt(), (info.size.height / sc).toInt())
+                d.allocator = ImageDecoder.ALLOCATOR_SOFTWARE
+            }
+        } else {
+            val o = BitmapFactory.Options().apply { inSampleSize = 4 }
+            act.contentResolver.openInputStream(uri)!!.use { BitmapFactory.decodeStream(it, null, o)!! }
+        }
+        val bo = ByteArrayOutputStream()
+        bmp.compress(Bitmap.CompressFormat.JPEG, 85, bo)
+        bo.toByteArray()
+    }.getOrNull()
+
     /** small JPEG preview for the page */
     private fun thumb(uri: Uri): String? = runCatching {
         val bmp: Bitmap = if (Build.VERSION.SDK_INT >= 28) {

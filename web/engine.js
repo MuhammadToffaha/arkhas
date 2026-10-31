@@ -950,6 +950,58 @@
     labels.slice(0, 2).forEach(add);
     return out.slice(0, 6);
   }
+  // ---------------- 🔎 Google Lens results -> product names ----------------
+  const LENS_SKIP = /^(google|images?|shopping|all|videos|news|maps|more|tools|search|sign in|feedback|privacy|terms|settings|about this result|visual matches|exact matches|products?|see more|show more|related searches?|people also|help|learn more|report|send feedback|about|translate|homework|text|select|search inside image)$/i;
+  /** product titles from a rendered Lens results page (links to shops / other sites, image alt texts) */
+  function lensTitles(html, DOMParserImpl) {
+    const P = DOMParserImpl || root.DOMParser;
+    const doc = new P().parseFromString(html || "", "text/html");
+    const out = [], seen = new Set();
+    const add = (t) => {
+      t = String(t || "").replace(/\s+/g, " ").replace(/\s*[|·•–—-]\s*(amazon|noon|jumia|ebay|aliexpress|walmart|etsy|temu|shein)[^|]*$/i, "").trim();
+      if (t.length < 10 || t.length > 160 || LENS_SKIP.test(t) || /^https?:/i.test(t) || /unusual traffic|not a robot|recaptcha/i.test(t)) return;
+      const k = t.toLowerCase();
+      if (!seen.has(k)) { seen.add(k); out.push(t); }
+    };
+    for (const a of doc.querySelectorAll("a[href]")) {
+      const href = a.getAttribute("href") || "";
+      let host = ""; try { host = new URL(href, "https://www.google.com").hostname; } catch (_) {}
+      if (!host || /(^|\.)(google|gstatic|googleusercontent|youtube)\./.test(host)) continue;
+      const lab = a.getAttribute("aria-label") || "";
+      // the title is usually the longest line inside the tile (the other lines are site name, price)
+      // one line per leaf element (site name, title, price are separate elements in the tile)
+      const leaves = [...a.querySelectorAll("*")].filter((e) => !e.children.length).map((e) => (e.textContent || "").trim()).filter(Boolean);
+      const lines = leaves.length ? leaves : (a.textContent || "").split(/\n+/).map((x) => x.trim()).filter(Boolean);
+      const best = [lab, ...lines].filter((x) => x.length >= 10 && !/^(EGP|USD|\$|€|£)?\s*[\d.,]+/.test(x)).sort((x, y) => y.length - x.length)[0];
+      if (best) add(best);
+    }
+    for (const im of doc.querySelectorAll("img[alt]")) add(im.getAttribute("alt"));
+    return out.slice(0, 40);
+  }
+  const captcha = (html) => /unusual traffic|not a robot|recaptcha|sorry\/index/i.test(html || "");
+  /** words that most result titles share = what the photo shows ("JBL Tune 520BT Wireless Headphones") */
+  function lensQueries(titles) {
+    if (!titles || !titles.length) return [];
+    const STOPW = new Set(["the", "and", "for", "with", "new", "original", "buy", "online", "best", "price", "in", "of", "a", "an", "to", "on", "by",
+      "from", "free", "shipping", "sale", "egypt", "uae", "ksa", "shop", "store", "official", "review", "vs", "amp", "–", "-", "|"]);
+    const tok = (t) => t.toLowerCase().replace(/[()\[\],.:;!?"'’/|]+/g, " ").split(/\s+/).filter((w) => w && !STOPW.has(w) && w.length > 1);
+    const df = new Map();
+    for (const t of titles) for (const w of new Set(tok(t))) df.set(w, (df.get(w) || 0) + 1);
+    const need = Math.max(2, Math.ceil(titles.length * 0.2));
+    const common = new Set([...df].filter(([, n]) => n >= need).map(([w]) => w));
+    const out = [];
+    const add = (q) => { q = q.replace(/\s+/g, " ").trim(); if (q.length >= 3 && !out.some((x) => x.toLowerCase() === q.toLowerCase())) out.push(q); };
+    if (common.size) {
+      // the title that carries most of the shared words, keeping its word order
+      const best = titles.map((t) => [t, tok(t).filter((w) => common.has(w)).length]).sort((a, b) => b[1] - a[1])[0][0];
+      const words = []; for (const w of tok(best)) if (common.has(w) && !words.includes(w)) words.push(w);
+      add(words.slice(0, 7).join(" "));
+      add(best.split(/\s+/).slice(0, 8).join(" "));
+    }
+    titles.slice(0, 3).forEach((t) => add(t.split(/\s+/).slice(0, 8).join(" ")));
+    return out.slice(0, 5);
+  }
+
   /** Product name for a barcode from free public databases (food: Open Food Facts; other: UPCitemdb trial). */
   async function barcodeNames(code, fetcher) {
     const names = [];
@@ -965,7 +1017,7 @@
     return names;
   }
 
-  const API = { photoQueries, barcodeNames, findStoreFilter, mergeFilter, findEventPages, EVENT_RE, normalize, tokens, isArabic, setSynonyms, equivalents, translateQuery, queryVariants, queryVariantsAsync, cleanQuery, parsePrice, ADAPTERS, DEAL_FEEDS, deals, pctOff, productId,
+  const API = { photoQueries, barcodeNames, lensTitles, lensQueries, lensCaptcha: captcha, findStoreFilter, mergeFilter, findEventPages, EVENT_RE, normalize, tokens, isArabic, setSynonyms, equivalents, translateQuery, queryVariants, queryVariantsAsync, cleanQuery, parsePrice, ADAPTERS, DEAL_FEEDS, deals, pctOff, productId,
     relevance, matchInfo, specs, rank, top, parse, parseSerp, buildUrl, serpUrl, externalLinks, search };
   if (typeof module !== "undefined" && module.exports) module.exports = API;
   else root.Arkhas = API;

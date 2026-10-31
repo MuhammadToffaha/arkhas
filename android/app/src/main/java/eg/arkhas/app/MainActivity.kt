@@ -35,6 +35,7 @@ class MainActivity : AppCompatActivity() {
     @Volatile private var pendingQuery: String = ""
     @Volatile private var openDeals = false
     private lateinit var photoSearch: PhotoSearch
+    private lateinit var lensSheet: LensSheet
 
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -56,11 +57,12 @@ class MainActivity : AppCompatActivity() {
             webViewClient = ShellClient()
         }
         root.addView(web, FrameLayout.LayoutParams(-1, -1))
+        lensSheet = LensSheet(this, root)
         setContentView(root)
         keepClearOfNotch(root)
 
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
-            override fun handleOnBackPressed() { if (web.canGoBack()) web.goBack() else finish() }
+            override fun handleOnBackPressed() { if (lensSheet.back()) return; if (web.canGoBack()) web.goBack() else finish() }
         })
 
         pendingQuery = sharedText(intent) ?: ""
@@ -138,6 +140,12 @@ class MainActivity : AppCompatActivity() {
         /** 📷 search by photo: "camera" or "gallery" -> window.__photo(result) */
         @JavascriptInterface fun photo(mode: String) { runOnUiThread { if (mode == "camera") photoSearch.camera() else photoSearch.gallery() } }
         @JavascriptInterface fun lens(): Boolean = photoSearch.lens()
+        /** 🔎 upload the last photo to Google Lens -> window.__lens(id, {ok, url}) */
+        @JavascriptInterface fun lensUpload(id: Int) = Net.pool.execute {
+            val r = photoSearch.lensUpload().toString()
+            runOnUiThread { web.evaluateJavascript("window.__lens&&window.__lens($id,$r)", null) }
+        }
+        @JavascriptInterface fun lensShow(url: String) { runOnUiThread { lensSheet.show(url) } }
         /** 🎟️ copy a promo code */
         @JavascriptInterface fun copy(text: String) {
             runOnUiThread {
