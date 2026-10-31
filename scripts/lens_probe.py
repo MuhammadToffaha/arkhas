@@ -12,16 +12,27 @@ def get(u, data=None, headers=None):
         resp = op.open(r, timeout=40); return resp.status, dict(resp.headers), resp.read()
     except urllib.error.HTTPError as e:
         return e.code, dict(e.headers), e.read()
-# a product photo from Wikimedia Commons
-q = json.loads(get("https://commons.wikimedia.org/w/api.php?action=query&list=search&srsearch=JBL%20headphones&srnamespace=6&format=json&srlimit=1")[2])
-name = q["query"]["search"][0]["title"]
-st, h, img = get("https://commons.wikimedia.org/wiki/Special:FilePath/" + urllib.parse.quote(name[5:]) + "?width=800")
-if st in (301, 302): st, h, img = get(h["Location"] if h.get("Location", "").startswith("http") else "https:" + h["Location"])
-log = {"image": name, "img_status": st, "img_bytes": len(img)}
+log = {}
+img = b""
+try:
+    # a product photo (JBL headphones) from Wikimedia Commons, following redirects by hand
+    q = json.loads(get("https://commons.wikimedia.org/w/api.php?action=query&list=search&srsearch=JBL%20headphones&srnamespace=6&format=json&srlimit=1")[2])
+    name = q["query"]["search"][0]["title"]
+    u = "https://commons.wikimedia.org/wiki/Special:FilePath/" + urllib.parse.quote(name[5:].replace(" ", "_")) + "?width=800"
+    for _ in range(5):
+        st, h, img = get(u)
+        if st in (301, 302, 303, 307, 308): u = urllib.parse.urljoin(u, h.get("Location") or h.get("location")); continue
+        break
+    log.update({"image": name, "img_status": st, "img_bytes": len(img), "ctype": h.get("Content-Type")})
+except Exception as e:
+    log["img_error"] = repr(e)
+    print("::warning::img " + repr(e))
 b = uuid.uuid4().hex
 body = (f"--{b}\r\nContent-Disposition: form-data; name=\"encoded_image\"; filename=\"p.jpg\"\r\nContent-Type: image/jpeg\r\n\r\n").encode() + img + f"\r\n--{b}--\r\n".encode()
+import traceback
 for i, url in enumerate([f"https://lens.google.com/v3/upload?hl=en&gl=EG&re=df&stcs={int(time.time()*1000)}&ep=gsbubb",
                          f"https://lens.google.com/upload?ep=ccm&s=&st={int(time.time()*1000)}"]):
+  try:
     st, h, data = get(url, body, {"Content-Type": f"multipart/form-data; boundary={b}", "Referer": "https://lens.google.com/", "Origin": "https://lens.google.com"})
     loc = h.get("Location") or h.get("location")
     log[f"up{i}"] = {"status": st, "location": loc, "len": len(data)}
@@ -31,5 +42,7 @@ for i, url in enumerate([f"https://lens.google.com/v3/upload?hl=en&gl=EG&re=df&s
         u = urllib.parse.urljoin(url, loc); st, h, data = get(u); loc = h.get("Location") or h.get("location"); hop += 1
         log[f"up{i}_hop{hop}"] = {"url": u[:300], "status": st, "location": (loc or "")[:300], "len": len(data)}
         open(f"probe/up{i}_hop{hop}.html", "wb").write(data)
+  except Exception as e:
+    log[f"up{i}_error"] = traceback.format_exc()[-600:]
 json.dump(log, open("probe/log.json", "w"), indent=1)
 print(json.dumps(log, indent=1))
