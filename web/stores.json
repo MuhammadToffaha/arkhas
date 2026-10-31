@@ -330,16 +330,62 @@
         "https://www.amazon.eg/s?k=home&rh=p_8%3A70-&language=en_AE",
         "https://www.amazon.eg/s?k=fashion&rh=p_8%3A70-&language=en_AE",
         "https://www.amazon.eg/s?k=shoes&rh=p_8%3A70-&language=en_AE",
-        "https://www.amazon.eg/s?k=beauty&rh=p_8%3A70-&language=en_AE",
+        {
+          "url": "https://www.amazon.eg/s?k=beauty&rh=p_8%3A70-&language=en_AE",
+          "cat": "beauty"
+        },
         "https://www.amazon.eg/s?k=toys&rh=p_8%3A70-&language=en_AE",
         "https://www.amazon.eg/s?k=sports&rh=p_8%3A70-&language=en_AE",
         "https://www.amazon.eg/s?k=kitchen+appliances&rh=p_8%3A50-&language=en_AE",
         "https://www.amazon.eg/s?k=home&rh=p_8%3A50-&language=en_AE",
         "https://www.amazon.eg/s?k=fashion&rh=p_8%3A50-&language=en_AE",
         "https://www.amazon.eg/s?k=shoes&rh=p_8%3A50-&language=en_AE",
-        "https://www.amazon.eg/s?k=beauty&rh=p_8%3A50-&language=en_AE",
+        {
+          "url": "https://www.amazon.eg/s?k=beauty&rh=p_8%3A50-&language=en_AE",
+          "cat": "beauty"
+        },
         "https://www.amazon.eg/s?k=toys&rh=p_8%3A50-&language=en_AE",
-        "https://www.amazon.eg/s?k=sports&rh=p_8%3A50-&language=en_AE"
+        "https://www.amazon.eg/s?k=sports&rh=p_8%3A50-&language=en_AE",
+        {
+          "url": "https://www.amazon.eg/s?k=makeup&rh=p_8%3A50-&language=en_AE",
+          "cat": "beauty"
+        },
+        {
+          "url": "https://www.amazon.eg/s?k=skin+care&rh=p_8%3A50-&language=en_AE",
+          "cat": "beauty"
+        },
+        {
+          "url": "https://www.amazon.eg/s?k=perfume&rh=p_8%3A50-&language=en_AE",
+          "cat": "beauty"
+        },
+        {
+          "url": "https://www.amazon.eg/s?k=hair+care&rh=p_8%3A50-&language=en_AE",
+          "cat": "beauty"
+        },
+        {
+          "url": "https://www.amazon.eg/s?k=lipstick&rh=p_8%3A50-&language=en_AE",
+          "cat": "beauty"
+        },
+        {
+          "url": "https://www.amazon.eg/s?k=foundation&rh=p_8%3A50-&language=en_AE",
+          "cat": "beauty"
+        },
+        {
+          "url": "https://www.amazon.eg/s?k=face+serum&rh=p_8%3A50-&language=en_AE",
+          "cat": "beauty"
+        },
+        {
+          "url": "https://www.amazon.eg/s?k=sunscreen&rh=p_8%3A50-&language=en_AE",
+          "cat": "beauty"
+        },
+        {
+          "url": "https://www.amazon.eg/s?k=mascara&rh=p_8%3A50-&language=en_AE",
+          "cat": "beauty"
+        },
+        {
+          "url": "https://www.amazon.eg/s?k=body+lotion&rh=p_8%3A50-&language=en_AE",
+          "cat": "beauty"
+        }
       ]
     },
     "events": {
@@ -363,6 +409,30 @@
     "deals": {
       "kind": "html",
       "urls": [
+        {
+          "url": "https://www.jumia.com.eg/hair-care/?price_discount=30-100",
+          "cat": "beauty"
+        },
+        {
+          "url": "https://www.jumia.com.eg/skin-care/?price_discount=30-100",
+          "cat": "beauty"
+        },
+        {
+          "url": "https://www.jumia.com.eg/fragrances/?price_discount=30-100",
+          "cat": "beauty"
+        },
+        {
+          "url": "https://www.jumia.com.eg/beauty-makeup/?price_discount=30-100",
+          "cat": "beauty"
+        },
+        {
+          "url": "https://www.jumia.com.eg/health-beauty/?price_discount=30-100&page=2",
+          "cat": "beauty"
+        },
+        {
+          "url": "https://www.jumia.com.eg/health-beauty/?price_discount=30-100",
+          "cat": "beauty"
+        },
         {
           "url": "https://www.jumia.com.eg/mobile-phones/?price_discount=50-100",
           "cat": "electronics"
@@ -519,7 +589,8 @@
         },
         {
           "url": "https://www.noon.com/egypt-en/beauty/?f%5Bdeal_tag%5D%5B%5D=egmega&sort%5Bby%5D=popularity&sort%5Bdir%5D=desc",
-          "tag": "mega"
+          "tag": "mega",
+          "cat": "beauty"
         },
         {
           "url": "https://www.noon.com/egypt-en/daily-deals-eg/",
@@ -571,6 +642,26 @@
         },
         {
           "url": "https://www.noon.com/egypt-en/fashion/?f%5Bis_fbn%5D%5B%5D=1&f%5Bdeal_tag%5D%5B%5D=deals-generic&sort%5Bby%5D=popularity&sort%5Bdir%5D=desc"
+        },
+        {
+          "url": "https://www.noon.com/egypt-en/beauty/?f%5Bdeal_tag%5D%5B%5D=deals-generic&sort%5Bby%5D=popularity&sort%5Bdir%5D=desc",
+          "cat": "beauty"
+        },
+        {
+          "url": "https://www.noon.com/egypt-en/beauty/makeup-16142/?f%5Bdeal_tag%5D%5B%5D=deals-generic&sort%5Bby%5D=popularity&sort%5Bdir%5D=desc",
+          "cat": "beauty"
+        },
+        {
+          "url": "https://www.noon.com/egypt-en/beauty/skin-care-16813/?f%5Bdeal_tag%5D%5B%5D=deals-generic&sort%5Bby%5D=popularity&sort%5Bdir%5D=desc",
+          "cat": "beauty"
+        },
+        {
+          "url": "https://www.noon.com/egypt-en/beauty/fragrance/?f%5Bdeal_tag%5D%5B%5D=deals-generic&sort%5Bby%5D=popularity&sort%5Bdir%5D=desc",
+          "cat": "beauty"
+        },
+        {
+          "url": "https://www.noon.com/egypt-en/beauty/hair-care/?f%5Bdeal_tag%5D%5B%5D=deals-generic&sort%5Bby%5D=popularity&sort%5Bdir%5D=desc",
+          "cat": "beauty"
         }
       ],
       "wait": "a[href*=\"/p/\"]"
@@ -952,5 +1043,75 @@
     "title": "h2, h3, [class*=\"name\"], [class*=\"title\"]",
     "price": "[class*=\"price\"]",
     "image": "img@src"
+  },
+  {
+    "name": "Feel22",
+    "type": "shopify",
+    "base_url": "https://eg.feel22.com",
+    "lang": "both",
+    "category": "beauty",
+    "deals": {
+      "kind": "shopify"
+    }
+  },
+  {
+    "name": "Source Beauty",
+    "type": "shopify",
+    "base_url": "https://sourcebeauty.com",
+    "lang": "both",
+    "category": "beauty",
+    "deals": {
+      "kind": "shopify"
+    }
+  },
+  {
+    "name": "Zynah",
+    "type": "shopify",
+    "base_url": "https://zynah.me",
+    "lang": "both",
+    "category": "beauty",
+    "deals": {
+      "kind": "shopify"
+    }
+  },
+  {
+    "name": "The Beauty Code",
+    "type": "shopify",
+    "base_url": "https://beautycodeeg.com",
+    "lang": "both",
+    "category": "beauty",
+    "deals": {
+      "kind": "shopify"
+    }
+  },
+  {
+    "name": "Be Pretty",
+    "type": "shopify",
+    "base_url": "https://beprettystores.com",
+    "lang": "both",
+    "category": "beauty",
+    "deals": {
+      "kind": "shopify"
+    }
+  },
+  {
+    "name": "Cosmetics EG",
+    "type": "shopify",
+    "base_url": "https://www.cosmeticseg.com",
+    "lang": "both",
+    "category": "beauty",
+    "deals": {
+      "kind": "shopify"
+    }
+  },
+  {
+    "name": "Ramfa Beauty",
+    "type": "shopify",
+    "base_url": "https://ramfabeauty.com",
+    "lang": "both",
+    "category": "beauty",
+    "deals": {
+      "kind": "shopify"
+    }
   }
 ]

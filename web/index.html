@@ -198,6 +198,8 @@ input:focus{border-color:var(--accent);box-shadow:0 0 0 4px var(--glow)}
 .sw input:checked+i{background:var(--grad)}
 .sheet>div{border-radius:26px 26px 0 0}
 [hidden]{display:none!important}
+#d_range button.beauty{border-color:#e91e8c}
+#d_range button.beauty.on{background:linear-gradient(120deg,#ff5fa2,#c2185b)!important;border-color:transparent;color:#fff}
 .live{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:var(--accent);background:color-mix(in srgb,var(--accent) 8%,transparent);border-radius:12px;padding:8px 12px;margin:10px 0 4px}
 .dotlive{width:9px;height:9px;border-radius:50%;background:var(--accent);animation:pulse 1s ease-in-out infinite;flex:none}
 @keyframes pulse{50%{opacity:.25;transform:scale(.8)}}
@@ -439,7 +441,7 @@ const readConfig = async (name) => (N ? N.readConfig(name) : (await fetch(name))
 const T = {
   ar: { tag: "أرخص سعر في مصر", go: "ابحث", ph: "اكتب المنتج… مثال: ايفون 15 برو", hint: "نبحث في المتاجر المصرية بالعربي والإنجليزي ونجيب لك أرخص 3",
     top: "🏆 أرخص 3 أسعار", all: "كل العروض ({n})", fb: "📘 فيسبوك والمستعمل", searched: "بحثنا عن:", none: "مفيش نتائج مطابقة لسه…",
-    noneDone: "مفيش نتائج مطابقة. جرّب اسم أدق.", src: "حالة المتاجر", langLbl: "🌐 اللغة", themeLbl: "🎨 شكل التطبيق", autoUpd: "🤫 تحديث تلقائي صامت", autoUpdD: "يدوّر على نسخة جديدة كل يوم وينزّلها ويثبّتها لوحده على الواي فاي. أول مرة أندرويد هيطلب موافقة واحدة، وبعدها من غير أسئلة (أندرويد 12+).", storesHint: "آخر بحث: عدد النتائج من كل متجر", navSearch: "بحث", navStatus: "المتاجر", navGear: "الإعدادات", acc: "إكسسوار؟", cheap: "سعر مريب", rMega: "🟡 ميجا ديلز نون", rBf: "🖤 بلاك فرايداي", bfShort: "الجمعة", bfNone: "🖤 عروض الجمعة البيضاء/الصفراء/السوداء لسه ما بدأتش في المتاجر — هتظهر هنا لوحدها أول ما تبدأ (عادةً من ~20 نوفمبر). اضغط ↻ للتحديث.", sAll: "الكل", liveHdr: "بندوّر… {done}/{all} متجر ردّ · لقينا {n} عرض من {s} متجر", liveMore: "⏳ بتتحدّث لحد ما الباقي يرد", sExact: "✓ مطابق بس", sDisc: "🏷️ عليه خصم", sBig: "🏪 أمازون/نون/جوميا", sCheap: "⬇️ الأرخص", sPct: "🔥 أكبر خصم", sNone: "مفيش نتايج بالفلتر ده — جرّب فلتر تاني", rElec: "📱 عروض الإلكترونيات", mega: "ميجا", rAll: "كل الخصومات", r30: "30%+", r5070: "🔥 50–70%", r70: "70%+", rNone: "مفيش عروض في النطاق ده — جرّب نطاق تاني", alTitle: "🔔 تنبيهات الخصومات الكبيرة", alDesc: "إشعار على الموبايل لما يظهر خصم كبير جديد — حتى والتطبيق مقفول",
+    noneDone: "مفيش نتائج مطابقة. جرّب اسم أدق.", src: "حالة المتاجر", langLbl: "🌐 اللغة", themeLbl: "🎨 شكل التطبيق", autoUpd: "🤫 تحديث تلقائي صامت", autoUpdD: "يدوّر على نسخة جديدة كل يوم وينزّلها ويثبّتها لوحده على الواي فاي. أول مرة أندرويد هيطلب موافقة واحدة، وبعدها من غير أسئلة (أندرويد 12+).", storesHint: "آخر بحث: عدد النتائج من كل متجر", navSearch: "بحث", navStatus: "المتاجر", navGear: "الإعدادات", acc: "إكسسوار؟", cheap: "سعر مريب", rMega: "🟡 ميجا ديلز نون", rBf: "🖤 بلاك فرايداي", bfShort: "الجمعة", bfNone: "🖤 عروض الجمعة البيضاء/الصفراء/السوداء لسه ما بدأتش في المتاجر — هتظهر هنا لوحدها أول ما تبدأ (عادةً من ~20 نوفمبر). اضغط ↻ للتحديث.", sAll: "الكل", liveHdr: "بندوّر… {done}/{all} متجر ردّ · لقينا {n} عرض من {s} متجر", liveMore: "⏳ بتتحدّث لحد ما الباقي يرد", sExact: "✓ مطابق بس", sDisc: "🏷️ عليه خصم", sBig: "🏪 أمازون/نون/جوميا", sCheap: "⬇️ الأرخص", sPct: "🔥 أكبر خصم", sNone: "مفيش نتايج بالفلتر ده — جرّب فلتر تاني", rElec: "📱 عروض الإلكترونيات", rBeauty: "💄 كوزماتكس وتجميل", mega: "ميجا", rAll: "كل الخصومات", r30: "30%+", r5070: "🔥 50–70%", r70: "70%+", rNone: "مفيش عروض في النطاق ده — جرّب نطاق تاني", alTitle: "🔔 تنبيهات الخصومات الكبيرة", alDesc: "إشعار على الموبايل لما يظهر خصم كبير جديد — حتى والتطبيق مقفول",
     alMin: "أقل خصم", alStores: "المتاجر", alMega: "🟡 ميجا ديلز نون كمان", alEvery: "افحص كل", alHours: "{h} ساعة", alTest: "🔍 افحص دلوقتي",
     alTesting: "جاري الفحص في الخلفية… هيوصلك إشعار لو فيه جديد", alLast: "آخر فحص {t}: {f} عرض، {n} جديد", alErr: "آخر فحص {t}: فشل ({e})",
     alNever: "لسه مفيش فحص", alTo: "ابعت العروض الجديدة على", alNotify: "🔔 إشعار على الموبايل", tgOn: "✈️ جروب تليجرام (تلقائي بالكامل)",
@@ -459,7 +461,7 @@ const T = {
     city: "مدينة فيسبوك ماركت بليس", stores: "المتاجر", saveBtn: "حفظ", ver: "نسخة", hidden: "تم إخفاء {n} نتيجة غير مطابقة" },
   en: { tag: "Best price in Egypt", go: "Search", ph: "Product… e.g. iphone 15 pro", hint: "Searching Egyptian stores in Arabic & English — top 3 cheapest",
     top: "🏆 Top 3 prices", all: "All offers ({n})", fb: "📘 Facebook & used", searched: "Searched:", none: "No matches yet…",
-    noneDone: "No matching results. Try a more specific name.", src: "Store status", langLbl: "🌐 Language", themeLbl: "🎨 App theme", autoUpd: "🤫 Silent auto-update", autoUpdD: "Checks every day and installs new versions by itself on Wi-Fi. Android asks once the first time, then no more prompts (Android 12+).", storesHint: "Last search: results per store", navSearch: "Search", navStatus: "Stores", navGear: "Settings", acc: "accessory?", cheap: "suspicious price", rMega: "🟡 Noon Mega Deals", rBf: "🖤 Black Friday", bfShort: "Friday", bfNone: "🖤 White / Yellow / Black Friday hasn't started in the stores yet — the deals appear here by themselves once it does (usually from ~20 Nov). Tap ↻ to refresh.", sAll: "All", liveHdr: "Searching… {done}/{all} stores answered · {n} offers from {s} stores so far", liveMore: "⏳ updating as more stores answer", sExact: "✓ Exact only", sDisc: "🏷️ Discounted", sBig: "🏪 Amazon/noon/Jumia", sCheap: "⬇️ Cheapest", sPct: "🔥 Biggest discount", sNone: "No results with this filter — try another", rElec: "📱 Electronics offers", mega: "MEGA", rAll: "All discounts", r30: "30%+", r5070: "🔥 50–70%", r70: "70%+", rNone: "No deals in this range — try another one", alTitle: "🔔 Big discount alerts", alDesc: "Phone notification when a new big discount appears — even with the app closed",
+    noneDone: "No matching results. Try a more specific name.", src: "Store status", langLbl: "🌐 Language", themeLbl: "🎨 App theme", autoUpd: "🤫 Silent auto-update", autoUpdD: "Checks every day and installs new versions by itself on Wi-Fi. Android asks once the first time, then no more prompts (Android 12+).", storesHint: "Last search: results per store", navSearch: "Search", navStatus: "Stores", navGear: "Settings", acc: "accessory?", cheap: "suspicious price", rMega: "🟡 Noon Mega Deals", rBf: "🖤 Black Friday", bfShort: "Friday", bfNone: "🖤 White / Yellow / Black Friday hasn't started in the stores yet — the deals appear here by themselves once it does (usually from ~20 Nov). Tap ↻ to refresh.", sAll: "All", liveHdr: "Searching… {done}/{all} stores answered · {n} offers from {s} stores so far", liveMore: "⏳ updating as more stores answer", sExact: "✓ Exact only", sDisc: "🏷️ Discounted", sBig: "🏪 Amazon/noon/Jumia", sCheap: "⬇️ Cheapest", sPct: "🔥 Biggest discount", sNone: "No results with this filter — try another", rElec: "📱 Electronics offers", rBeauty: "💄 Cosmetics & beauty", mega: "MEGA", rAll: "All discounts", r30: "30%+", r5070: "🔥 50–70%", r70: "70%+", rNone: "No deals in this range — try another one", alTitle: "🔔 Big discount alerts", alDesc: "Phone notification when a new big discount appears — even with the app closed",
     alMin: "Minimum discount", alStores: "Stores", alMega: "🟡 Noon Mega Deals too", alEvery: "Check every", alHours: "{h} h", alTest: "🔍 Check now",
     alTesting: "Checking in the background… you'll get a notification if there's something new", alLast: "Last check {t}: {f} deals, {n} new", alErr: "Last check {t}: failed ({e})",
     alNever: "No check yet", alTo: "Send new deals to", alNotify: "🔔 Phone notification", tgOn: "✈️ Telegram group (fully automatic)",
@@ -878,8 +880,8 @@ let dealHide = null;   // stores unticked in the dropdown (remembered)
 const getHide = () => { if (!dealHide) { try { dealHide = new Set(JSON.parse(pref("dealHide", "[]"))); } catch (_) { dealHide = new Set(); } } return dealHide; };
 const saveHide = () => setPref("dealHide", JSON.stringify([...getHide()]));
 let dealRange = null;   // read from prefs on first use; default 50–70%
-const RANGES = { bf: [0, 100], mega: [0, 100], elec: [10, 100], all: [10, 100], r30: [30, 100], r5070: [50, 70], r70: [70, 100] };
-const inR = (o, k) => k === "bf" ? o.tag === "bf" : k === "mega" ? o.tag === "mega" : k === "elec" ? o.cat === "electronics" && (o.pct >= 10 || o.tag === "mega") : o.pct >= RANGES[k][0] && o.pct <= RANGES[k][1];
+const RANGES = { bf: [0, 100], mega: [0, 100], elec: [10, 100], beauty: [10, 100], all: [10, 100], r30: [30, 100], r5070: [50, 70], r70: [70, 100] };
+const inR = (o, k) => k === "bf" ? o.tag === "bf" : k === "mega" ? o.tag === "mega" : k === "elec" ? o.cat === "electronics" && (o.pct >= 10 || o.tag === "mega") : k === "beauty" ? o.cat === "beauty" && (o.pct >= 10 || o.tag === "mega") : o.pct >= RANGES[k][0] && o.pct <= RANGES[k][1];
 const DEALS_TTL = 60 * 60 * 1000;   // reuse fetched deals for 1 hour
 
 function showView(v) {
@@ -902,8 +904,8 @@ function renderDeals(done = true) {
     : fmt(t.dealsLoading, { done: d.sources.length, all: d.total });
   if (!dealRange) dealRange = RANGES[pref("dealRange")] ? pref("dealRange") : "r5070";
   const bfN = d.deals.filter((o) => o.tag === "bf").length;
-  $("#d_range").innerHTML = [...(bfN || new Date().getMonth() === 10 ? [["bf", t.rBf]] : []), ["r5070", t.r5070], ["elec", t.rElec], ["mega", t.rMega], ["r70", t.r70], ["r30", t.r30], ["all", t.rAll]]
-    .map(([k, n]) => `<button data-r="${k}" class="${dealRange === k ? "on" : ""}${k === "mega" ? " mega" : ""}${k === "bf" ? " bf" : ""}">${n} · ${d.deals.filter((o) => inR(o, k)).length}</button>`).join("");
+  $("#d_range").innerHTML = [...(bfN || new Date().getMonth() === 10 ? [["bf", t.rBf]] : []), ["r5070", t.r5070], ["elec", t.rElec], ["beauty", t.rBeauty], ["mega", t.rMega], ["r70", t.r70], ["r30", t.r30], ["all", t.rAll]]
+    .map(([k, n]) => `<button data-r="${k}" class="${dealRange === k ? "on" : ""}${k === "mega" ? " mega" : ""}${k === "bf" ? " bf" : ""}${k === "beauty" ? " beauty" : ""}">${n} · ${d.deals.filter((o) => inR(o, k)).length}</button>`).join("");
   const inRange = d.deals.filter((o) => inR(o, dealRange));
   const sorts = [["pct", t.sortPct], ["save", t.sortSave], ["price", t.sortPrice]];
   $("#d_sort").innerHTML = sorts.map(([k, n]) => `<button data-k="${k}" class="${dealSort === k ? "on" : ""}">${n}</button>`).join("");
@@ -919,13 +921,16 @@ function renderDeals(done = true) {
   $("#d_ddlbl").textContent = "🏪 " + (shown.length === names.length ? t.ddAll : shown.length === 1 ? shown[0] : fmt(t.ddSome, { n: shown.length }))
     + " · " + inRange.filter((o) => !hide.has(o.source)).length;
   // 🏪 quick store filter: All · Amazon · noon · Jumia (same setting as the dropdown)
-  const QUICK = [["", "🏪 " + t.ddAll], ["Amazon.eg", "🅰️ Amazon"], ["Noon", "🟡 noon"], ["Jumia", "🟠 Jumia"]].filter(([n]) => !n || names.includes(n));
+  const QUICK = [["", "🏪 " + t.ddAll], ["Amazon.eg", "🅰️ Amazon"], ["Noon", "🟡 noon"], ["Jumia", "🟠 Jumia"],
+    // 💄 in the beauty view the cosmetics shops get their own buttons too
+    ...(dealRange === "beauty" ? STORES.filter((x) => x.category === "beauty" && counts[x.name]).map((x) => [x.name, "💄 " + x.name]) : [])]
+    .filter(([n]) => !n || names.includes(n));
   const one = shown.length === 1 ? shown[0] : null;
   $("#d_quick").innerHTML = ""+
     QUICK.map(([n, lbl]) => `<button data-q="${esc(n)}" class="${(n ? one === n : shown.length === names.length) ? "on" : ""}">${lbl} · ${n ? counts[n] || 0 : inRange.length}</button>`).join("");
   $("#d_all").textContent = t.selAll; $("#d_none").textContent = t.selNone;
   let list = inRange.filter((o) => !hide.has(o.source));
-  if ((dealRange === "r70" || dealRange === "elec" || dealRange === "bf") && dealSort === "pct") list = list.slice().sort((a, b) => b.pct - a.pct || a.price - b.price);
+  if ((dealRange === "r70" || dealRange === "elec" || dealRange === "bf" || dealRange === "beauty") && dealSort === "pct") list = list.slice().sort((a, b) => b.pct - a.pct || a.price - b.price);
   const by = { pct: (a, b) => b.pct - a.pct, save: (a, b) => (b.old_price - b.price) - (a.old_price - a.price), price: (a, b) => a.price - b.price };
   list = list.slice().sort(by[dealSort]).slice(0, 120);
   shownDeals = list;

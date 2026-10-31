@@ -831,7 +831,7 @@
           got = okPages.flatMap((x) => x.value);
         }
         const keep = got.filter((o) => o.title && o.price && o.url)
-          .map((o) => Object.assign(o, { pct: pctOff(o), source: s.name }))
+          .map((o) => Object.assign(o, { pct: pctOff(o), source: s.name }, s.category && !o.cat ? { cat: s.category } : {}))
           // tagged pages (Mega Deals) are deals by definition, even when the old price isn't shown
           .filter((o) => (o.pct >= opt.minPct || o.tag) && o.pct < 95)   // 95%+ off is almost always a data error
           .sort((a, b) => !!b.tag - !!a.tag || b.pct - a.pct);

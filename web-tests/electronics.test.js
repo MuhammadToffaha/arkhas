@@ -245,3 +245,23 @@ test("Raneen: search + deals through its Vertex search endpoint (real response)"
   const d = await E.deals({ stores: [s], DOMParser, fetcher: async () => fx });
   assert.ok(d.deals.length >= 5 && d.deals.every((o) => o.pct >= 10));
 });
+
+test("💄 cosmetics: 7 Egyptian beauty shops + Amazon/noon/Jumia beauty deals under one chip", async () => {
+  const beauty = STORES.filter((s) => s.category === "beauty");
+  assert.ok(beauty.length >= 7 && beauty.every((s) => s.type === "shopify" && s.deals.kind === "shopify"));
+  for (const n of ["Amazon.eg", "Noon", "Jumia"]) assert.ok(S[n].deals.urls.filter((u) => u.cat === "beauty").length >= 3, n);
+  // shop deals get the beauty category automatically
+  const shop = JSON.stringify({ products: [{ title: "Lip Tint", handle: "lip", variants: [{ price: "399.00", compare_at_price: "480.00", available: true }] }] });
+  const d = await E.deals({ stores: [beauty[0]], DOMParser, fetcher: async () => shop });
+  assert.equal(d.deals[0].cat, "beauty");
+  const W = new URL("../web/", import.meta.url);
+  const html = readFileSync(new URL("index.html", W), "utf8").replace('<script src="engine.js"></script>', () => `<script>${readFileSync(new URL("engine.js", W), "utf8")}</script>`);
+  const dom = new JSDOM(html, { runScripts: "dangerously", url: "https://app.local/" });
+  const w = dom.window; await new Promise((r) => setTimeout(r, 50));
+  w.eval(`STORES = ${readFileSync(new URL("stores.json", W), "utf8")}; getHide().clear();
+    const mk = (i, s, cat) => ({ title: "x" + i, price: 400, old_price: 1000, pct: 60, url: "https://x/" + i, source: s, cat });
+    dealsData = { deals: [mk(1, "Source Beauty", "beauty"), mk(2, "Noon", "beauty"), mk(3, "B.TECH", "electronics")], sources: [], total: 3, at: Date.now() };
+    dealRange = "beauty"; renderDeals(true);`);
+  assert.equal(w.document.querySelectorAll("#d_out .dc").length, 2);
+  assert.ok(w.document.querySelector('#d_quick button[data-q="Source Beauty"]'));
+});
