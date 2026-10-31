@@ -46,3 +46,23 @@ for i, url in enumerate([f"https://lens.google.com/v3/upload?hl=en&gl=EG&re=df&s
     log[f"up{i}_error"] = traceback.format_exc()[-600:]
 json.dump(log, open("probe/log.json", "w"), indent=1)
 print(json.dumps(log, indent=1))
+
+# render the results page like the phone's hidden browser would (JS on), save HTML + screenshot
+try:
+    from playwright.sync_api import sync_playwright
+    target = None
+    for k in ("up0", "up1"):
+        if log.get(k, {}).get("location"): target = log[k]["location"]; break
+    if target:
+        with sync_playwright() as p:
+            br = p.chromium.launch()
+            pg = br.new_page(user_agent=UA, viewport={"width": 412, "height": 900}, locale="en-US")
+            pg.goto(target, wait_until="domcontentloaded", timeout=60000)
+            pg.wait_for_timeout(7000)
+            open("probe/rendered.html", "w").write(pg.content())
+            pg.screenshot(path="probe/rendered.png", full_page=False)
+            log["rendered_title"] = pg.title()
+            br.close()
+except Exception as e:
+    log["render_error"] = repr(e)[:400]
+json.dump(log, open("probe/log.json", "w"), indent=1)

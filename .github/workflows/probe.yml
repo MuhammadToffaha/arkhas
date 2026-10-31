@@ -11,7 +11,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - env: { URLS: "${{ github.event.inputs.urls }}" }
-        run: if [ "$URLS" = "lens" ]; then python3 scripts/lens_probe.py; else python3 scripts/probe.py $URLS; fi
+        run: if [ "$URLS" = "lens" ]; then pip install -q playwright && python3 -m playwright install --with-deps chromium >/dev/null 2>&1; python3 scripts/lens_probe.py; else python3 scripts/probe.py $URLS; fi
       - run: |
           git config user.name "probe"; git config user.email "noreply@anthropic.com"
           git checkout --orphan probe-out && git rm -rqf --cached . && git add probe && git commit -qm probe && git push -f origin probe-out
