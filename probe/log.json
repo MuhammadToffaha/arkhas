@@ -1,0 +1,29 @@
+{
+ "image": "File:2023 S\u0142uchawki JBL TL0846 (1).jpg",
+ "img_status": 200,
+ "img_bytes": 47403,
+ "ctype": null,
+ "up0": {
+  "status": 303,
+  "location": "https://www.google.com/search?vsrid=CJmG3Z2kxtb22gEQAhgBIiRiZmNmNDllYS04ZGE4LTRiNmMtYjQ2Ni0zMDZhMWY2MDBjNWMygQEiAnJvKCdCcwoubGZlLWR1bW15OjBkZDBlMmVhLWVhMjAtNGVmNi1hNTQ1LTFkM2I3MDAzNjhlZBJBCj8vYm5zL3JvL2Jvcmcvcm8vYm5zL2xlbnMtZnJvbnRlbmQtYXBpL3Byb2QubGVucy1mcm9udGVuZC1hcGkvMzJaBAoCcm84gbC81PbklwM&vsint=CAIqDAoCCAcSAggKGAEgATojChYNAAAAPxUAAAA_HQAAgD8lAACAPzABEMAHGKcEJQAAgD8&udm=26&lns_mode=un&source=lns.web.gsbubb&vsdim=960,551&gsessionid=1m7rsN3BSA09_P9lUHYA4-LqkcrCs3DILmVf4VCHUC4yNdXNIwOlHg&lsessionid=TfYBbwIrgNABMIl7MMdX_ubiKy0T6SX-wxYaOY5jhJnGMbx7ymhLUQ&lns_surface=26&hl=en",
+  "len": 0
+ },
+ "up0_hop1": {
+  "url": "https://www.google.com/search?vsrid=CJmG3Z2kxtb22gEQAhgBIiRiZmNmNDllYS04ZGE4LTRiNmMtYjQ2Ni0zMDZhMWY2MDBjNWMygQEiAnJvKCdCcwoubGZlLWR1bW15OjBkZDBlMmVhLWVhMjAtNGVmNi1hNTQ1LTFkM2I3MDAzNjhlZBJBCj8vYm5zL3JvL2Jvcmcvcm8vYm5zL2xlbnMtZnJvbnRlbmQtYXBpL3Byb2QubGVucy1mcm9udGVuZC1hcGkvMzJaBAoCcm84gbC81PbklwM&vsin",
+  "status": 200,
+  "location": "",
+  "len": 93505
+ },
+ "up1": {
+  "status": 302,
+  "location": "https://www.google.com/search?vsrid=CNuIgd7cq7u9rAEQAhgBIiQ2ZGQ3Njg1OC0wMGU0LTRiNTUtOTkxZS00NmI1NDI5Zjc5OTkyggEiAnJvKCtCdAoubGZlLWR1bW15OjIyYjAxZmY2LWU1ZWMtNGRiNi1hMGYzLTZiNzQ0MDQ4N2I5NBJCCkAvYm5zL3JvL2Jvcmcvcm8vYm5zL2xlbnMtZnJvbnRlbmQtYXBpL3Byb2QubGVucy1mcm9udGVuZC1hcGkvMTg3WgQKAnJvOJrn0tT25JcD&vsint=CAIqDAoCCAcSAggKGAEgATojChYNAAAAPxUAAAA_HQAAgD8lAACAPzABEMAHGKcEJQAAgD8&udm=26&lns_mode=un&source=lns.web.ccm&vsdim=960,551&gsessionid=swcaFq0g5Qx5rB37sqeXftcbU7ec5QIJsCgvB6ahJsBf2TG0oSA1cw&lsessionid=QtIuAD2yMRX-lUkplepBfMksq-9585-JhnbSiELaTmo8z6pWK76zvw&lns_surface=26&qsubts=1793472756011",
+  "len": 0
+ },
+ "up1_hop1": {
+  "url": "https://www.google.com/search?vsrid=CNuIgd7cq7u9rAEQAhgBIiQ2ZGQ3Njg1OC0wMGU0LTRiNTUtOTkxZS00NmI1NDI5Zjc5OTkyggEiAnJvKCtCdAoubGZlLWR1bW15OjIyYjAxZmY2LWU1ZWMtNGRiNi1hMGYzLTZiNzQ0MDQ4N2I5NBJCCkAvYm5zL3JvL2Jvcmcvcm8vYm5zL2xlbnMtZnJvbnRlbmQtYXBpL3Byb2QubGVucy1mcm9udGVuZC1hcGkvMTg3WgQKAnJvOJrn0tT25JcD&vsi",
+  "status": 200,
+  "location": "",
+  "len": 93577
+ },
+ "rendered_title": "https://www.google.com/search?vsrid=CJmG3Z2kxtb22gEQAhgBIiRiZmNmNDllYS04ZGE4LTRiNmMtYjQ2Ni0zMDZhMWY2MDBjNWMygQEiAnJvKCdCcwoubGZlLWR1bW15OjBkZDBlMmVhLWVhMjAtNGVmNi1hNTQ1LTFkM2I3MDAzNjhlZBJBCj8vYm5zL3JvL2Jvcmcvcm8vYm5zL2xlbnMtZnJvbnRlbmQtYXBpL3Byb2QubGVucy1mcm9udGVuZC1hcGkvMzJaBAoCcm84gbC81PbklwM&vsint=CAIqDAoCCAcSAggKGAEgATojChYNAAAAPxUAAAA_HQAAgD8lAACAPzABEMAHGKcEJQAAgD8&udm=26&lns_mode=un&source=lns.web.gsbubb&vsdim=960,551&gsessionid=1m7rsN3BSA09_P9lUHYA4-LqkcrCs3DILmVf4VCHUC4yNdXNIwOlHg&lsessionid=TfYBbwIrgNABMIl7MMdX_ubiKy0T6SX-wxYaOY5jhJnGMbx7ymhLUQ&lns_surface=26&hl=en&sei=9TjmapCHHvf2yckP2PqFgQ8"
+}
