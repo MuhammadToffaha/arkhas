@@ -275,7 +275,7 @@ class MainActivity : AppCompatActivity() {
             .put("keepOn", prefs.getBoolean("keepOn", false)).put("autoKb", prefs.getBoolean("autoKb", true))
             .put("autoUpdate", Updater.auto(this)).put("lang", prefs.getString("lang", "ar"))
             .put("apps", runCatching { JSONArray(prefs.getString("apps", null)) }.getOrNull() ?: JSONObject.NULL)
-            .put("phone", Net.localIp() ?: "").put("wifi", wifiOk)
+            .put("wiz", prefs.getString("wiz", "")).put("phone", Net.localIp() ?: "").put("wifi", wifiOk)
             .put("version", BuildConfig.VERSION_NAME).put("code", BuildConfig.VERSION_CODE)
             .put("latest", Updater.latestCode).put("update", Updater.hasUpdate()).put("notes", Updater.notes)
             .put("upStatus", Updater.status).put("upPct", Updater.pct).put("upError", Updater.error)
@@ -324,7 +324,7 @@ class MainActivity : AppCompatActivity() {
             val e = prefs.edit()
             when (k) {
                 "haptic", "volKeys", "keepOn", "autoKb", "autoUpdate" -> e.putBoolean(k, v == "true")
-                "lang", "apps", "method" -> e.putString(k, v)
+                "lang", "apps", "method", "wiz" -> e.putString(k, v)
                 else -> return
             }
             e.apply()
@@ -333,6 +333,12 @@ class MainActivity : AppCompatActivity() {
             if (k == "method") reconnect()
             push()
         }
+        // ---- ⚡ ADB auto-setup wizard helpers ----
+        @JavascriptInterface fun probeAdb() = io.execute {
+            val h = curHost; val ok = h.isNotEmpty() && Net.open(h, Net.ADB, 2500)
+            js("window.onAdbProbe&&window.onAdbProbe($ok)")
+        }
+        @JavascriptInterface fun adbConnect() = io.execute { ensureAdb(); push() }
         // ---- 🧹 TV app manager + 📸 screenshot (ADB) ----
         @JavascriptInterface fun packages() = io.execute {
             if (!ensureAdb()) { js("window.onPkgs&&window.onPkgs(null)"); return@execute }

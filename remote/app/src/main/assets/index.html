@@ -281,6 +281,7 @@ nav button.on{color:#fff;background:var(--s2)}nav button.on .i{color:var(--acc2)
       <h3>🔌 <span data-t="method"></span></h3>
       <div class="seg" id="seg"><button data-m="auto" data-t="mAuto"></button><button data-m="atv">Google</button><button data-m="adb">ADB</button></div>
       <div class="mut" style="margin-top:8px" data-t="methodS"></div>
+      <button class="btn wide" id="wizBtn" style="margin-top:12px">⚡ <span data-t="wizT"></span></button>
       <div class="flex" style="margin-top:10px"><button class="btn alt sm" id="pairBtn" style="flex:1">🔗 <span data-t="pairagain"></span></button><button class="btn alt sm" id="keyBtn" style="flex:1">🔑 <span data-t="newkey"></span></button></div>
     </div>
     <div class="card" id="prefs"></div>
@@ -340,6 +341,26 @@ nav button.on{color:#fff;background:var(--s2)}nav button.on .i{color:var(--acc2)
   <div class="flex" style="margin-top:12px"><button class="btn alt" id="shotX" style="flex:1">✕</button><button class="btn" id="shotR" style="flex:2"><svg class="i" style="width:18px;height:18px"><use href="#i-refresh"/></svg></button></div>
 </div>
 
+<!-- ⚡ ADB auto-setup -->
+<div class="sheet" id="wiz" hidden>
+  <h3>⚡ <span data-t="wizT"></span> <span class="mut" id="wizStep" style="font-size:12px"></span></h3>
+  <div id="wizBody" style="font-size:14px;line-height:1.65"></div>
+  <div id="wizPad" hidden>
+    <div class="grid g3 ltr" style="margin:12px 0 0">
+      <button class="k" data-k="4"><svg class="i"><use href="#i-back"/></svg></button>
+      <button class="k" data-k="19" data-rep><svg class="i"><use href="#i-up"/></svg></button>
+      <button class="k" data-k="3"><svg class="i"><use href="#i-home"/></svg></button>
+      <button class="k" data-k="21" data-rep><svg class="i"><use href="#i-left"/></svg></button>
+      <button class="k acc" data-k="23">OK</button>
+      <button class="k" data-k="22" data-rep><svg class="i"><use href="#i-right"/></svg></button>
+      <span></span>
+      <button class="k" data-k="20" data-rep><svg class="i"><use href="#i-down"/></svg></button>
+      <span></span>
+    </div>
+  </div>
+  <div id="wizBtns" class="flex" style="margin-top:14px;flex-wrap:wrap"></div>
+</div>
+
 <div class="pop" id="upPop" hidden><div class="popbox">
   <div class="e">🆕</div><b id="upPopT"></b><div class="mut" id="upPopS"></div>
   <div class="popb"><button class="btn alt" id="upLater"></button><button class="btn" id="upNow"></button></div>
@@ -347,7 +368,7 @@ nav button.on{color:#fff;background:var(--s2)}nav button.on .i{color:var(--acc2)
 
 <script>
 const R = window.Rowa || {state:()=>JSON.stringify({status:'idle',tvs:[],found:[],lang:'ar',version:'dev',haptic:true,volKeys:true,autoKb:true,autoUpdate:true,method:'auto'}),
-  key(){},keyDown(){},keyUp(){},repeat(){},text(){},clearText(){},launch(){},scan(){},use(){},forget(){},reconnect(){},doctor(){},pair(){},code(){return true},cancelPair(){},resetKey(){},setPref(){},packages(){},pkg(){},shot(){},checkUpdate(){},installUpdate(){},open(){}};
+  key(){},keyDown(){},keyUp(){},repeat(){},text(){},clearText(){},launch(){},scan(){},use(){},forget(){},reconnect(){},doctor(){},pair(){},code(){return true},cancelPair(){},resetKey(){},setPref(){},packages(){},pkg(){},shot(){},probeAdb(){},adbConnect(){},checkUpdate(){},installUpdate(){},open(){}};
 const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
 
 const T = {
@@ -374,6 +395,20 @@ const T = {
   z1:'شغّل شاشة التلفزيون بالريموت العادي واستنى 10 ثواني وجرّب تاني.',z2:'في التلفزيون: الإعدادات ← الشبكة ← اقفل <b>توفير طاقة الواي فاي / Eco</b> وشغّل <b>Network standby / Wake on Wi-Fi</b> لو موجودين.',
   z3:'في الراوتر: اقفل <b>AP / Client isolation</b> وماتستخدمش شبكة الضيوف.',z4:'لو لسه: فعّل ADB (الخطوات تحت) — بيشتغل حتى لو خدمة Google مش موجودة.',
   mgr:'تطبيقات التلفزيون',mgrS:'إيقاف / حذف (ADB)',shotT:'شاشة التلفزيون',shotS:'صورة من الشاشة (ADB)',mgrHint:'إيقاف تطبيق نظام بيشيله من التلفزيون بأمان، وتقدر ترجعه بعدين. متوقفش حاجات زي Launcher أو Settings.',
+  wizT:'تفعيل ADB أوتوماتيك',wizStepN:'خطوة',yes:'أيوه ✅',no:'لأ',cont:'كمّل',start:'ابدأ',skip:'بعدين',again:'جرّب تاني',close:'تمام',tap8:'اضغط Build ×8',working:'التطبيق بيحرّك التلفزيون… ماتلمسش الريموت',
+  w0:'التطبيق هيفتح إعدادات التلفزيون ويفعّل <b>Developer options</b> و<b>USB debugging</b> لوحده. هيسألك بس "شايف كذا؟" في كام خطوة.<br><br>📺 خلّي شاشة التلفزيون شغالة وبص عليها.',
+  wOffer:'🎉 اتصلنا! عايز نفعّل ADB كمان؟ بيفتح: إدارة تطبيقات التلفزيون، صورة الشاشة، ويخلّي الريموت يشتغل حتى لو خدمة Google وقفت.',
+  w1q:'على التلفزيون ظهرت صفحة <b>About / حول</b> (فيها Model, Version, Build)؟',
+  w1m:'افتح الإعدادات بالأسهم دي: <b>Device Preferences / تفضيلات الجهاز ← About / حول</b>، وبعدين اضغط "كمّل".',
+  w2q:'التلفزيون كتب <b>"You are now a developer"</b> أو <b>"already a developer"</b>؟',
+  w2m:'حط التحديد على <b>Build</b> بالأسهم، واضغط "اضغط Build ×8".',
+  w3q:'ظهرت صفحة <b>Developer options / خيارات المطور</b>؟',
+  w3m:'ارجع بالأسهم لـ <b>Device Preferences</b> ← انزل لآخر القائمة ← <b>Developer options</b> ← OK، وبعدين "كمّل".',
+  w4:'بالأسهم: انزل لـ <b>USB debugging</b> واضغط OK، وبعدين OK على "Allow USB debugging?".<br>لو فيه <b>Network debugging</b> أو <b>ADB over network</b> شغّله كمان.<br><br><span class="spin" style="width:14px;height:14px;border-width:2px"></span> التطبيق بيستنى المنفذ 5555 يفتح…',
+  w4late:'⚠️ لسه مقفول. دوّر في نفس الصفحة على <b>Network debugging / ADB over network / Wireless debugging</b> وشغّله. لو مش موجود خالص، التلفزيون ده محتاج كمبيوتر بكابل مرة واحدة (adb tcpip 5555).',
+  w5:'📺 على التلفزيون ظهرت رسالة <b>Allow USB debugging?</b> — علّم <b>Always allow from this computer</b> واضغط <b>OK</b> (بالأسهم هنا أو بالريموت العادي).',
+  w5c:'<span class="spin" style="width:14px;height:14px;border-width:2px"></span> بيتصل بـ ADB…',
+  w6:'✅ <b>ADB جاهز!</b> إدارة تطبيقات التلفزيون وصورة الشاشة شغالين. ولو خدمة Google وقعت، التطبيق هيكمّل بـ ADB لوحده.',
   filter:'دوّر…',fUser:'متثبتة',fSys:'نظام',fOff:'متوقفة',open:'فتح',disable:'إيقاف',enable:'تشغيل',uninstall:'حذف',needAdb:'محتاج ADB مفعّل على التلفزيون — افتح "فحص الاتصال" في الإعدادات.',loading:'بيحمّل…',sure:'متأكد؟'},
  en:{t_remote:'Remote',t_touch:'Touch',t_keys:'Keys',t_apps:'Apps',t_set:'Settings',input:'Input',tvset:'Settings',allapps:'Apps',search:'Search',back:'Back',home:'Home',menu:'Menu',mute:'Mute',play:'Play',
   tphint:'Swipe to move · tap = OK · long-press = options',appshint:'Tap to open on the TV · long-press to remove',tvs:'TVs',pairagain:'Pair again',iphint:'TV IP: TV Settings → Network & Internet → your Wi-Fi',
@@ -398,6 +433,20 @@ const T = {
   z1:'Turn the TV screen on with its normal remote, wait 10 seconds, retry.',z2:'On the TV: Settings → Network → turn off <b>Wi-Fi power saving / Eco</b>, turn on <b>Network standby / Wake on Wi-Fi</b> if present.',
   z3:'On the router: turn off <b>AP / Client isolation</b>, don\'t use the guest network.',z4:'Still nothing: turn on ADB (steps below) — works even without the Google service.',
   mgr:'TV apps',mgrS:'Disable / remove (ADB)',shotT:'TV screen',shotS:'Screenshot (ADB)',mgrHint:'Disabling a system app removes it safely, you can enable it later. Don\'t disable things like the Launcher or Settings.',
+  wizT:'Auto-enable ADB',wizStepN:'Step',yes:'Yes ✅',no:'No',cont:'Continue',start:'Start',skip:'Later',again:'Try again',close:'Done',tap8:'Press Build ×8',working:'The app is driving the TV… don\'t touch the remote',
+  w0:'The app opens the TV settings and turns on <b>Developer options</b> and <b>USB debugging</b> by itself. It only asks "do you see X?" at a few steps.<br><br>📺 Keep the TV screen on and watch it.',
+  wOffer:'🎉 Connected! Turn on ADB too? It unlocks the TV app manager, screenshots, and keeps the remote working even if the Google service fails.',
+  w1q:'Does the TV show the <b>About</b> page (Model, Version, Build)?',
+  w1m:'Use these arrows: <b>Device Preferences → About</b>, then tap Continue.',
+  w2q:'Did the TV say <b>"You are now a developer"</b> or <b>"already a developer"</b>?',
+  w2m:'Highlight <b>Build</b> with the arrows, then tap "Press Build ×8".',
+  w3q:'Do you see the <b>Developer options</b> page?',
+  w3m:'With the arrows: back to <b>Device Preferences</b> → bottom of the list → <b>Developer options</b> → OK, then Continue.',
+  w4:'With the arrows: go to <b>USB debugging</b>, press OK, then OK on "Allow USB debugging?".<br>If there is <b>Network debugging</b> or <b>ADB over network</b>, turn it on too.<br><br><span class="spin" style="width:14px;height:14px;border-width:2px"></span> Waiting for port 5555 to open…',
+  w4late:'⚠️ Still closed. On the same page look for <b>Network debugging / ADB over network / Wireless debugging</b> and turn it on. If none exists, this TV needs a PC with a cable once (adb tcpip 5555).',
+  w5:'📺 The TV shows <b>Allow USB debugging?</b> — tick <b>Always allow from this computer</b> and press <b>OK</b> (arrows here or the normal remote).',
+  w5c:'<span class="spin" style="width:14px;height:14px;border-width:2px"></span> Connecting ADB…',
+  w6:'✅ <b>ADB ready!</b> TV app manager and screenshots work. If the Google service ever drops, the app carries on with ADB.',
   filter:'Search…',fUser:'Installed',fSys:'System',fOff:'Disabled',open:'Open',disable:'Disable',enable:'Enable',uninstall:'Remove',needAdb:'Needs ADB on the TV — open "Check connection" in Settings.',loading:'Loading…',sure:'Sure?'}
 };
 let S = JSON.parse(R.state()), L = S.lang || 'ar';
@@ -467,9 +516,9 @@ function go(p){ page = p; $$('#nav button').forEach(b => b.classList.toggle('on'
 $$('#nav button').forEach(b => b.onclick = () => go(b.dataset.p));
 
 /* ---------- sheets ---------- */
-const SHEETS = ['#kb','#addApp','#mgr','#shotS'];
+const SHEETS = ['#kb','#addApp','#mgr','#shotS','#wiz'];
 function openSheet(id){ SHEETS.forEach(s => $(s).hidden = s !== id); $('#scrim').hidden = false }
-function closeSheets(){ SHEETS.forEach(s => $(s).hidden = true); $('#scrim').hidden = !!$('#pr').hidden; $('#kbIn').blur() }
+function closeSheets(){ if (!$('#wiz').hidden && typeof wizStop === 'function') { wizStop(); W.step = -1 } SHEETS.forEach(s => $(s).hidden = true); $('#scrim').hidden = !!$('#pr').hidden; $('#kbIn').blur() }
 $('#scrim').onclick = () => { if (!$('#pr').hidden && S.status !== 'pairing') { prHidden = true; if (S.status === 'code') R.cancelPair(); renderPair() } closeSheets() };
 
 /* ---------- keyboard ---------- */
@@ -534,6 +583,63 @@ $('#tShot').onclick = () => { openSheet('#shotS'); shot() };
 $('#shotR').onclick = shot; $('#shotX').onclick = closeSheets;
 function shot(){ $('#shotBox').innerHTML = `<p class="mut"><span class="spin"></span> ${t('loading')}</p>`; R.shot() }
 window.onShot = b64 => { $('#shotBox').innerHTML = b64 ? `<img class="shot" src="data:image/png;base64,${b64}">` : `<p class="mut">${t('needAdb')}</p>` };
+
+
+/* ---------- ⚡ ADB auto-setup wizard ---------- */
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+let W = {step: -1, run: 0, polls: 0, timer: null};
+async function press(code, n = 1, gap = 160){ for (let i = 0; i < n; i++) { if (W.run !== W.my) return; R.repeat(code); await sleep(gap) } }
+function wizShow(step, body, btns, pad){
+  W.step = step; openSheet('#wiz');
+  $('#wizStep').textContent = step > 0 && step < 6 ? `· ${t('wizStepN')} ${step}/5` : '';
+  $('#wizBody').innerHTML = body; $('#wizPad').hidden = !pad; bindKeys($('#wizPad'));
+  $('#wizBtns').innerHTML = ''; (btns || []).forEach(([label, fn, alt]) => { const b = document.createElement('button');
+    b.className = 'btn' + (alt ? ' alt' : ''); b.style.flex = '1'; b.textContent = label; b.onclick = fn; $('#wizBtns').appendChild(b) });
+}
+function busy(){ wizShow(W.step, `<p class="mut"><span class="spin" style="width:14px;height:14px;border-width:2px"></span> ${t('working')}</p>`, [], false) }
+function wizStop(){ W.run++; clearInterval(W.timer); W.timer = null }
+function wizOpen(offer){ wizStop(); if (S.adbTools) return wizShow(6, `<p>${t('w6')}</p>`, [[t('close'), () => closeSheets()]], false); wizShow(0, offer ? `<p>${t('wOffer')}</p><p class="mut">${t('w0')}</p>` : `<p>${t('w0')}</p>`,
+  [[t('start'), () => w1()], [t('skip'), () => { R.setPref('wiz', 'later'); wizStop(); closeSheets() }, true]]) }
+// 1 · open About (deep link first, menus as fallback)
+async function w1(){ W.my = ++W.run; busy();
+  R.key(3); await sleep(1500);
+  R.launch('intent:#Intent;action=android.settings.DEVICE_INFO_SETTINGS;end'); await sleep(3000);
+  if (W.run !== W.my) return;
+  wizShow(1, `<p>${t('w1q')}</p>`, [[t('yes'), () => w2()], [t('no'), () => w1manual(), true]]) }
+async function w1manual(){ W.my = ++W.run; R.key(176); await sleep(1800); if (W.run !== W.my) return;
+  wizShow(1, `<p>${t('w1m')}</p>`, [[t('cont'), () => w2()]], true) }
+// 2 · tap Build ×8 (Build is the last row of About)
+async function w2(auto = true){ W.my = ++W.run; busy();
+  if (auto) await press(20, 25, 110);
+  await sleep(400); await press(23, 8, 380); await sleep(1200);
+  if (W.run !== W.my) return;
+  wizShow(2, `<p>${t('w2q')}</p>`, [[t('yes'), () => w3()], [t('no'), () => wizShow(2, `<p>${t('w2m')}</p>`, [[t('tap8'), () => w2(false)]], true), true]]) }
+// 3 · open Developer options
+async function w3(){ W.my = ++W.run; busy();
+  R.launch('intent:#Intent;action=android.settings.APPLICATION_DEVELOPMENT_SETTINGS;end'); await sleep(3000);
+  if (W.run !== W.my) return;
+  wizShow(3, `<p>${t('w3q')}</p>`, [[t('yes'), () => w4()], [t('no'), () => w3menu(), true]]) }
+async function w3menu(){ W.my = ++W.run; busy();
+  await press(4, 1); await sleep(1200); await press(20, 30, 110); await sleep(300); await press(23, 1); await sleep(2200);
+  if (W.run !== W.my) return;
+  wizShow(3, `<p>${t('w3q')}</p>`, [[t('yes'), () => w4()], [t('no'), () => wizShow(3, `<p>${t('w3m')}</p>`, [[t('cont'), () => w4()]], true), true]]) }
+// 4 · user flips USB debugging; app watches port 5555
+function w4(){ W.my = ++W.run; W.polls = 0;
+  wizShow(4, `<p>${t('w4')}</p><div id="w4late"></div>`, [[t('skip'), () => { wizStop(); closeSheets() }, true]], true);
+  clearInterval(W.timer); W.timer = setInterval(() => { W.polls++; R.probeAdb(); if (W.polls === 25 && $('#w4late')) $('#w4late').innerHTML = `<p style="margin-top:10px">${t('w4late')}</p>` }, 2000) }
+window.onAdbProbe = ok => {
+  if (W.step === 4 && ok) { clearInterval(W.timer); W.timer = null; w5() }
+  else if (W.step === -1 && !ok && !S.wiz) wizOpen(true);        // first connection: offer the setup
+};
+// 5 · accept the RSA prompt on the TV
+function w5(){ W.my = ++W.run; delete $('#wizBody').dataset.auth; R.adbConnect(); wizShow(5, `<p>${t('w5c')}</p>`, [], true) }
+function wizState(){
+  if (W.step === 5) {
+    if (S.adbStatus === 'auth') { if (!$('#wizBody').dataset.auth) { $('#wizBody').dataset.auth = 1; $('#wizBody').innerHTML = `<p>${t('w5')}</p>` } }
+    if (S.adbTools) { delete $('#wizBody').dataset.auth; R.setPref('wiz', 'done'); wizStop(); wizShow(6, `<p>${t('w6')}</p>`, [[t('close'), () => closeSheets()]], false) }
+  }
+}
+$('#wizBtn').onclick = () => wizOpen(false);
 
 /* ---------- pairing ---------- */
 let prHidden = false, lastStatus = '';
@@ -669,7 +775,8 @@ function render(){
     if (S.status === 'needpair' && lastStatus !== 'code' && lastStatus !== 'pairing') prHidden = false;
     if (S.status !== 'code' && $('#codeIn')) $('#pr').innerHTML = '';
   }
-  renderTop(); renderPair(); if (page === 'set') renderSet(); renderPop();
+  renderTop(); renderPair(); if (page === 'set') renderSet(); renderPop(); wizState();
+  if (S.status === 'connected' && S.mode === 'atv' && !S.wiz && !render._probed) { render._probed = 1; setTimeout(() => R.probeAdb(), 1500) }
   const a = JSON.stringify(S.apps); if (a !== render._apps) { render._apps = a; renderApps() }
   lastStatus = S.status;
 }
