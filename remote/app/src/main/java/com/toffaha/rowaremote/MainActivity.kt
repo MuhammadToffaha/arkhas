@@ -53,6 +53,8 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         atv = AtvClient(applicationContext, { push() }, { txt -> lastText = txt; adbReset(txt); js("window.onIme&&window.onIme(${JSONObject.quote(txt)})") })
         adb = AdbClient(applicationContext) { push() }
+        atv.onGiveUp = { giveUp() }
+        bindWifi()
         finder = Finder(this, { n, h, kind -> addFound(h, n, kind); push() }, { push() })
 
         val root = FrameLayout(this)
@@ -121,8 +123,9 @@ class MainActivity : AppCompatActivity() {
         mode = ""; phase = "probing"; doctor = null; push()
         io.execute {
             val m = method
-            val a = m != "adb" && (Net.open(host, Net.ATV, 2500) || Net.open(host, Net.ATV, 2500))
-            val d = !a && m != "atv" && Net.open(host, Net.ADB, 2500)
+            runCatching { java.net.InetAddress.getByName(host).isReachable(1000) }   // wake a napping TV radio
+            val a = m != "adb" && (Net.open(host, Net.ATV, 3500) || Net.open(host, Net.ATV, 3500))
+            val d = !a && m != "atv" && Net.open(host, Net.ADB, 3500)
             runOnUiThread {
                 if (curHost.isNotEmpty() && curHost != host) return@runOnUiThread
                 when {
@@ -132,6 +135,32 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    /** Google remote never answered → auto: try ADB; otherwise show the connection check */
+    private fun giveUp() = io.execute {
+        val h = curHost.ifEmpty { atv.host }
+        if (method == "auto" && Net.open(h, Net.ADB, 4000)) runOnUiThread { mode = "adb"; phase = ""; adb.connect(h, nameOf(h)) }
+        else { phase = "noports"; doctor = null; push(); runDoctor(h) }
+    }
+
+    /** send TV traffic over Wi-Fi even when Android prefers mobile data (Wi-Fi "without internet") */
+    @Volatile private var wifiOk = true
+    private fun bindWifi() = runCatching {
+        val cm = getSystemService(android.net.ConnectivityManager::class.java)
+        val req = android.net.NetworkRequest.Builder().addTransportType(android.net.NetworkCapabilities.TRANSPORT_WIFI).build()
+        cm.registerNetworkCallback(req, object : android.net.ConnectivityManager.NetworkCallback() {
+            override fun onAvailable(n: android.net.Network) {
+                cm.bindProcessToNetwork(n)
+                val was = wifiOk; wifiOk = true
+                if (!was && visible) runOnUiThread { if (curHost.isNotEmpty()) connectTv(curHost, nameOf(curHost), save = false) }
+                push()
+            }
+            override fun onLost(n: android.net.Network) {
+                if (cm.boundNetworkForProcess == n) cm.bindProcessToNetwork(null)
+                wifiOk = false; push()
+            }
+        })
     }
 
     private fun runDoctor(host: String) = io.execute {
@@ -246,7 +275,7 @@ class MainActivity : AppCompatActivity() {
             .put("keepOn", prefs.getBoolean("keepOn", false)).put("autoKb", prefs.getBoolean("autoKb", true))
             .put("autoUpdate", Updater.auto(this)).put("lang", prefs.getString("lang", "ar"))
             .put("apps", runCatching { JSONArray(prefs.getString("apps", null)) }.getOrNull() ?: JSONObject.NULL)
-            .put("phone", Net.localIp() ?: "")
+            .put("phone", Net.localIp() ?: "").put("wifi", wifiOk)
             .put("version", BuildConfig.VERSION_NAME).put("code", BuildConfig.VERSION_CODE)
             .put("latest", Updater.latestCode).put("update", Updater.hasUpdate()).put("notes", Updater.notes)
             .put("upStatus", Updater.status).put("upPct", Updater.pct).put("upError", Updater.error)

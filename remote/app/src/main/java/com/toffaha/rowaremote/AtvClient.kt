@@ -44,6 +44,9 @@ class AtvClient(private val ctx: Context, private val onChange: () -> Unit, priv
     @Volatile var tvVendor = ""
     /** keep reconnecting while the screen is open */
     @Volatile var wanted = false
+    /** called when the TV never answered on 6466 (twice) — MainActivity then tries ADB / shows the check */
+    @Volatile var onGiveUp: (() -> Unit)? = null
+    private var everConnected = false
 
     private var gen = 0
     private var sock: Socket? = null
@@ -57,7 +60,9 @@ class AtvClient(private val ctx: Context, private val onChange: () -> Unit, priv
     private fun set(s: String, e: String = "") { status = s; error = e; onChange() }
 
     private fun open(port: Int, readTimeout: Int): SSLSocket {
-        val plain = Socket().apply { connect(InetSocketAddress(host, port), 5000); tcpNoDelay = true }
+        // cheap TVs nap their Wi-Fi: a ping wakes the radio, then a patient connect
+        runCatching { java.net.InetAddress.getByName(host).isReachable(800) }
+        val plain = Socket().apply { connect(InetSocketAddress(host, port), 10_000); tcpNoDelay = true; keepAlive = true }
         val s = Cert.ssl(ctx).socketFactory.createSocket(plain, host, port, true) as SSLSocket
         s.soTimeout = 10_000
         s.startHandshake()
@@ -77,6 +82,7 @@ class AtvClient(private val ctx: Context, private val onChange: () -> Unit, priv
     fun connect(h: String = host, n: String = name) {
         if (h.isBlank()) return
         closeAll()
+        if (h != host) everConnected = false
         host = h; name = n; wanted = true
         val g = synchronized(this) { gen }
         set("connecting")
@@ -102,6 +108,11 @@ class AtvClient(private val ctx: Context, private val onChange: () -> Unit, priv
             when {
                 // TV answered but dropped us before configuring → it doesn't trust this phone yet
                 !configured && (reached || e is SSLException) -> { wanted = false; set("needpair") }
+                !everConnected && attempt >= 1 -> {
+                    wanted = false
+                    set("unreachable", if (e is java.net.SocketTimeoutException) "timeout" else if (e is java.net.ConnectException) "refused" else (e.message ?: ""))
+                    onGiveUp?.invoke()
+                }
                 wanted -> {
                     set("offline", if (configured) "reconnecting" else (e.message ?: "unreachable"))
                     Thread.sleep(minOf(10_000L, 1500L * (attempt + 1)))
@@ -120,6 +131,7 @@ class AtvClient(private val ctx: Context, private val onChange: () -> Unit, priv
                 c.msg(2)?.let { tvModel = it.str(1); tvVendor = it.str(2) }
                 val active = if (supported != 0) FEATURES and supported else FEATURES
                 send(PB().msg(1, PB().int(1, active).msg(2, PB().int(3, 1).str(4, "1").str(5, "atvremote").str(6, "1.0.0"))))
+                everConnected = true
                 set("connected")
             }
             m.has(2) -> send(PB().msg(2, PB().int(1, FEATURES)))                  // remote_set_active

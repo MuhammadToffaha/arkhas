@@ -369,7 +369,10 @@ const T = {
   s2:'<b>أو ADB (بيشتغل على أي تلفزيون):</b> الإعدادات ← تفضيلات الجهاز ← حول ← اضغط على <b>Build</b> 7 مرات.',
   s3:'ارجع ← <b>خيارات المطور</b> ← شغّل <b>USB debugging</b> (ولو موجود: <b>Network/ADB debugging</b>).',
   s4:'ارجع هنا واضغط "تاني".',aOld:'التلفزيون عليه نسخة قديمة من خدمة الريموت — حدّث Android TV Remote Service من Play Store.',
-  aAdbOk:'ADB شغال على التلفزيون ده ✅',useAdb:'استخدم ADB',
+  aAdbOk:'ADB شغال على التلفزيون ده ✅',useAdb:'استخدم ADB',unreachable:'التلفزيون مش بيرد',noWifi:'📶 شغّل الواي فاي على الموبايل',errTimeout:'التلفزيون مبيردش (ممكن الواي فاي بتاعه نايم)',errRefused:'التلفزيون رفض الاتصال',
+  aSleep:'التلفزيون بيرد على الشبكة بس مش بيرد على أبواب التحكم. غالباً الواي فاي بتاعه نايم أو الراوتر مانع الأجهزة تكلم بعض:',
+  z1:'شغّل شاشة التلفزيون بالريموت العادي واستنى 10 ثواني وجرّب تاني.',z2:'في التلفزيون: الإعدادات ← الشبكة ← اقفل <b>توفير طاقة الواي فاي / Eco</b> وشغّل <b>Network standby / Wake on Wi-Fi</b> لو موجودين.',
+  z3:'في الراوتر: اقفل <b>AP / Client isolation</b> وماتستخدمش شبكة الضيوف.',z4:'لو لسه: فعّل ADB (الخطوات تحت) — بيشتغل حتى لو خدمة Google مش موجودة.',
   mgr:'تطبيقات التلفزيون',mgrS:'إيقاف / حذف (ADB)',shotT:'شاشة التلفزيون',shotS:'صورة من الشاشة (ADB)',mgrHint:'إيقاف تطبيق نظام بيشيله من التلفزيون بأمان، وتقدر ترجعه بعدين. متوقفش حاجات زي Launcher أو Settings.',
   filter:'دوّر…',fUser:'متثبتة',fSys:'نظام',fOff:'متوقفة',open:'فتح',disable:'إيقاف',enable:'تشغيل',uninstall:'حذف',needAdb:'محتاج ADB مفعّل على التلفزيون — افتح "فحص الاتصال" في الإعدادات.',loading:'بيحمّل…',sure:'متأكد؟'},
  en:{t_remote:'Remote',t_touch:'Touch',t_keys:'Keys',t_apps:'Apps',t_set:'Settings',input:'Input',tvset:'Settings',allapps:'Apps',search:'Search',back:'Back',home:'Home',menu:'Menu',mute:'Mute',play:'Play',
@@ -390,7 +393,10 @@ const T = {
   s2:'<b>Or ADB (works on any TV):</b> Settings → Device Preferences → About → click <b>Build</b> 7 times.',
   s3:'Back → <b>Developer options</b> → turn on <b>USB debugging</b> (and <b>Network/ADB debugging</b> if listed).',
   s4:'Come back here and tap Retry.',aOld:'The TV has an old remote service — update Android TV Remote Service from Play Store.',
-  aAdbOk:'ADB is open on this TV ✅',useAdb:'Use ADB',
+  aAdbOk:'ADB is open on this TV ✅',useAdb:'Use ADB',unreachable:'TV not answering',noWifi:'📶 Turn on Wi-Fi on the phone',errTimeout:'TV didn\'t answer (its Wi-Fi may be asleep)',errRefused:'TV refused the connection',
+  aSleep:'The TV answers on the network but ignores the control ports. Usually its Wi-Fi is napping or the router stops devices talking to each other:',
+  z1:'Turn the TV screen on with its normal remote, wait 10 seconds, retry.',z2:'On the TV: Settings → Network → turn off <b>Wi-Fi power saving / Eco</b>, turn on <b>Network standby / Wake on Wi-Fi</b> if present.',
+  z3:'On the router: turn off <b>AP / Client isolation</b>, don\'t use the guest network.',z4:'Still nothing: turn on ADB (steps below) — works even without the Google service.',
   mgr:'TV apps',mgrS:'Disable / remove (ADB)',shotT:'TV screen',shotS:'Screenshot (ADB)',mgrHint:'Disabling a system app removes it safely, you can enable it later. Don\'t disable things like the Launcher or Settings.',
   filter:'Search…',fUser:'Installed',fSys:'System',fOff:'Disabled',open:'Open',disable:'Disable',enable:'Enable',uninstall:'Remove',needAdb:'Needs ADB on the TV — open "Check connection" in Settings.',loading:'Loading…',sure:'Sure?'}
 };
@@ -571,6 +577,7 @@ function doctorHtml(){
   if (!d.sameNet) advice = `<p>${t('aNet')}</p>`;
   else if (!d.ping) advice = `<p>${t('aPing')}</p>`;
   else if (d.adb && !d.atv) advice = `<p>${t('aAdbOk')}</p><button class="btn wide" onclick="R.setPref('method','adb')">${t('useAdb')}</button>`;
+  else if (!d.atv && !d.adb && (d.atvState === 'timeout' || d.adbState === 'timeout') && d.atvState !== 'refused') advice = `<p>${t('aSleep')}</p><ol class="steps"><li>${t('z1')}</li><li>${t('z2')}</li><li>${t('z3')}</li><li>${t('z4')}</li></ol><ol class="steps" start="5"><li>${t('s2')}</li><li>${t('s3')}</li></ol>`;
   else if (!d.atv && !d.adb) advice = `<p>${old ? t('aOld') + '<br>' : ''}${t('aShut')}</p><ol class="steps"><li>${t('s1')}</li><li>${t('s2')}</li><li>${t('s3')}</li><li>${t('s4')}</li></ol>`;
   else advice = d.adb ? `<button class="btn alt wide" onclick="R.setPref('method','adb')">${t('useAdb')}</button>` : '';
   return `<div class="doc ltr">${yn(true, t('dPhone') + ' ' + esc(d.phone || '?'))}${yn(d.sameNet, t('dSame'))}${yn(d.ping, t('dPing'))}${yn(d.atv, t('dAtv') + ' 6466')}${yn(d.pair, t('dPair') + ' 6467')}${yn(d.adb, t('dAdb') + ' 5555')}</div>
@@ -591,8 +598,10 @@ function renderTop(){
   if (v) { $('#volI').style.width = (S.muted ? 0 : Math.round(100 * S.vol / (S.volMax || 100))) + '%'; $('#volN').textContent = S.muted ? '🔇' : S.vol }
   // banner
   const ban = $('#ban'); let b = null;
-  if (st === 'auth') b = ['warn', '📺', t('authT'), null];
-  else if (S.host && (st === 'offline' || st === 'idle')) b = ['bad', '📡', t('offline') + (S.error && S.error !== 'reconnecting' ? ' — ' + S.error : ''), [t('retry'), () => R.reconnect()]];
+  const errTxt = e => !e || e === 'reconnecting' ? '' : /timeout|timed out|failed to connect|unreachable|EHOSTUNREACH/i.test(e) ? t('errTimeout') : /refused|ECONNREFUSED/i.test(e) ? t('errRefused') : '';
+  if (S.wifi === false) b = ['bad', '📶', t('noWifi'), null];
+  else if (st === 'auth') b = ['warn', '📺', t('authT'), null];
+  else if (S.host && (st === 'offline' || st === 'idle' || st === 'unreachable')) { const x = errTxt(S.error); b = ['bad', '📡', t(st === 'unreachable' ? 'unreachable' : 'offline') + (x ? ' — ' + x : ''), [t('retry'), () => R.reconnect()]] }
   else if (st === 'needpair' && prHidden && S.mode === 'atv') b = ['', '🔗', t('needpair'), [t('pairNow'), () => { prHidden = false; renderPair() }]];
   ban.hidden = !b;
   if (b) { ban.className = 'ban ' + b[0]; $('#banE').textContent = b[1]; $('#banT').textContent = b[2]; $('#banB').hidden = !b[3]; if (b[3]) { $('#banB').textContent = b[3][0]; $('#banB').onclick = b[3][1] } }

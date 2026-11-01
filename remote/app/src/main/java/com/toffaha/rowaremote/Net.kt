@@ -13,9 +13,12 @@ import java.util.concurrent.atomic.AtomicInteger
 object Net {
     const val ATV = 6466; const val ATV_PAIR = 6467; const val ADB = 5555; const val CAST = 8009
 
-    fun open(host: String, port: Int, timeout: Int = 900): Boolean = try {
-        Socket().use { it.connect(InetSocketAddress(host, port), timeout) }; true
-    } catch (_: Exception) { false }
+    fun open(host: String, port: Int, timeout: Int = 900): Boolean = state(host, port, timeout) == "open"
+
+    /** open · refused (TV answered: nothing listens) · timeout (no answer at all) */
+    fun state(host: String, port: Int, timeout: Int): String = try {
+        Socket().use { it.connect(InetSocketAddress(host, port), timeout) }; "open"
+    } catch (e: java.net.SocketTimeoutException) { "timeout" } catch (e: java.net.ConnectException) { "refused" } catch (e: Exception) { "timeout" }
 
     /** phone's own Wi-Fi IPv4 */
     fun localIp(): String? = runCatching {
@@ -51,10 +54,12 @@ object Net {
     fun doctor(host: String): Map<String, Any> {
         val me = localIp() ?: ""
         val sameNet = me.isNotEmpty() && host.substringBeforeLast('.') == me.substringBeforeLast('.')
-        val ping = runCatching { InetAddress.getByName(host).isReachable(1500) }.getOrDefault(false)
-        val atv = open(host, ATV, 1500); val pair = open(host, ATV_PAIR, 1500)
-        val adb = open(host, ADB, 1500); val cast = open(host, CAST, 1500)
-        return mapOf("phone" to me, "host" to host, "sameNet" to sameNet, "ping" to (ping || atv || adb || cast),
-            "atv" to atv, "pair" to pair, "adb" to adb, "cast" to cast)
+        val ping = runCatching { InetAddress.getByName(host).isReachable(2500) }.getOrDefault(false)
+        val a = state(host, ATV, 4000); val p = state(host, ATV_PAIR, 4000)
+        val d = state(host, ADB, 4000); val c = state(host, CAST, 3000)
+        val answered = ping || listOf(a, p, d, c).any { it != "timeout" }
+        return mapOf("phone" to me, "host" to host, "sameNet" to sameNet, "ping" to answered,
+            "atv" to (a == "open"), "pair" to (p == "open"), "adb" to (d == "open"), "cast" to (c == "open"),
+            "atvState" to a, "adbState" to d)
     }
 }
