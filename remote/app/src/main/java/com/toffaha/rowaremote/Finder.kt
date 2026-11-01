@@ -8,55 +8,67 @@ import android.os.Handler
 import android.os.Looper
 import java.util.concurrent.ConcurrentLinkedQueue
 
-/** 🔍 Finds Android TVs on the Wi-Fi (they announce "_androidtvremote2._tcp"). */
-class Finder(ctx: Context, private val onFound: (name: String, host: String) -> Unit, private val onDone: () -> Unit) {
+/**
+ * 🔍 mDNS: Android TVs announce "_androidtvremote2._tcp" (current remote service).
+ * "_androidtvremote._tcp" = old service (needs an update on the TV), "_googlecast._tcp" = Chromecast built-in.
+ */
+class Finder(ctx: Context, private val onFound: (name: String, host: String, kind: String) -> Unit, private val onDone: () -> Unit) {
     private val nsd = ctx.getSystemService(Context.NSD_SERVICE) as NsdManager
     private val wifi = ctx.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
     private var lock: WifiManager.MulticastLock? = null
-    private val queue = ConcurrentLinkedQueue<NsdServiceInfo>()
+    private val queue = ConcurrentLinkedQueue<Pair<NsdServiceInfo, String>>()
     @Volatile private var resolving = false
     @Volatile var running = false
         private set
     private val main = Handler(Looper.getMainLooper())
+    private val listeners = mutableListOf<NsdManager.DiscoveryListener>()
+    private var token = 0
 
-    private var listener: NsdManager.DiscoveryListener? = null
-    private fun newListener() = object : NsdManager.DiscoveryListener {
+    private val types = mapOf("_androidtvremote2._tcp" to "atv", "_androidtvremote._tcp" to "old", "_googlecast._tcp" to "cast")
+
+    private fun newListener(kind: String) = object : NsdManager.DiscoveryListener {
         override fun onDiscoveryStarted(t: String) {}
         override fun onDiscoveryStopped(t: String) {}
-        override fun onStartDiscoveryFailed(t: String, e: Int) { finish() }
+        override fun onStartDiscoveryFailed(t: String, e: Int) {}
         override fun onStopDiscoveryFailed(t: String, e: Int) {}
-        override fun onServiceFound(s: NsdServiceInfo) { queue.add(s); next() }
+        override fun onServiceFound(s: NsdServiceInfo) { queue.add(s to kind); next() }
         override fun onServiceLost(s: NsdServiceInfo) {}
     }
 
     @Suppress("DEPRECATION")
     private fun next() {
         if (resolving) return
-        val s = queue.poll() ?: return
+        val (s, kind) = queue.poll() ?: return
         resolving = true
-        nsd.resolveService(s, object : NsdManager.ResolveListener {
-            override fun onResolveFailed(i: NsdServiceInfo, e: Int) { resolving = false; next() }
-            override fun onServiceResolved(i: NsdServiceInfo) {
-                resolving = false
-                i.host?.hostAddress?.takeIf { !it.contains(':') }?.let { onFound(i.serviceName, it) }
-                next()
-            }
-        })
+        runCatching {
+            nsd.resolveService(s, object : NsdManager.ResolveListener {
+                override fun onResolveFailed(i: NsdServiceInfo, e: Int) { resolving = false; main.postDelayed({ next() }, 150) }
+                override fun onServiceResolved(i: NsdServiceInfo) {
+                    resolving = false
+                    val name = if (kind == "cast") (i.attributes["fn"]?.toString(Charsets.UTF_8) ?: i.serviceName) else i.serviceName
+                    i.host?.hostAddress?.takeIf { !it.contains(':') }?.let { onFound(name, it, kind) }
+                    next()
+                }
+            })
+        }.onFailure { resolving = false }
     }
 
     fun start(seconds: Long = 12) {
         if (running) return
         running = true
+        val my = ++token
         runCatching { lock = wifi.createMulticastLock("rowa-remote").apply { setReferenceCounted(false); acquire() } }
-        val l = newListener(); listener = l
-        runCatching { nsd.discoverServices("_androidtvremote2._tcp", NsdManager.PROTOCOL_DNS_SD, l) }.onFailure { finish(); return }
-        main.postDelayed({ finish() }, seconds * 1000)
+        for ((type, kind) in types) {
+            val l = newListener(kind)
+            if (runCatching { nsd.discoverServices(type, NsdManager.PROTOCOL_DNS_SD, l) }.isSuccess) listeners.add(l)
+        }
+        main.postDelayed({ if (token == my) finish() }, seconds * 1000)
     }
 
     fun finish() {
         if (!running) return
         running = false
-        listener?.let { l -> runCatching { nsd.stopServiceDiscovery(l) } }; listener = null
+        listeners.forEach { l -> runCatching { nsd.stopServiceDiscovery(l) } }; listeners.clear()
         runCatching { lock?.release() }
         onDone()
     }

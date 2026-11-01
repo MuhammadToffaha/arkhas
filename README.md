@@ -50,15 +50,16 @@ If `web/index.html` ever needs new native features, bump `arkhas-bridge` in it; 
 
 ## 📺 ROWA Remote (`remote/`)
 
-Phone → **ROWA Android TV** remote over Wi-Fi. Uses Android TV Remote v2 (same protocol as Google's TV app): no ADB, no developer options.
+Phone → **ROWA Android TV** remote over Wi-Fi. Two ways in, picked automatically: **Google TV Remote** protocol (port 6466, pair with a code) or **ADB over Wi-Fi** (port 5555, "Allow debugging" once). 🩺 Connection check tells what's blocked; 🔍 finds the TV by mDNS **and** a Wi-Fi subnet scan.
 
 - 🎮 D-pad + OK (long-press = options), back/home/menu, volume, channels, media keys, power
 - 🖐️ touchpad (swipe = arrows, tap = OK) · 🔢 numbers, colour keys, HDMI 1–4, input, guide, subtitles, audio track, sleep/wake…
 - ⌨️ type on the TV (opens by itself when the TV shows a keyboard) · 🔊 phone volume buttons control the TV
 - 📺 app shortcuts (YouTube, Netflix…; **📌 add the app open now** grabs any app)
-- 🔍 finds the TV on Wi-Fi (auto-picks the one named ROWA) or manual IP · 🔗 pair once: 6-character code on the TV
+- 🔍 finds the TV (auto-picks the one named ROWA) or manual IP · 🔗 pair once: 6-character code on the TV
+- 🧹 ADB extras: TV app manager (disable bloat / enable / remove) and 📸 TV screenshot
 
-Releases: tag `remote-vN` → `rowa-remote.apk` (never "latest"). Installed/updated from **JAMA**; also updates itself (daily silent + pop-up on open). TV side needs the built-in *Android TV Remote Service* (Google-certified Android TV).
+Releases: tag `remote-vN` → `rowa-remote.apk` (never "latest"). Installed/updated from **JAMA**; also updates itself (daily silent + pop-up on open). Google mode needs *Android TV Remote Service* on the TV; ADB mode needs Developer options → USB/Network debugging.
 
 ## 📘 Why Facebook is a link, not scraped
 

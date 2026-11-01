@@ -5,184 +5,260 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <title>ROWA Remote</title>
 <style>
-:root{--bg:#0b0d12;--card:#151821;--card2:#1c2030;--ink:#eef0f6;--muted:#8b91a7;--line:#262b3b;--acc:#ff5a1f;--acc2:#ff8a3d;--grad:linear-gradient(135deg,var(--acc),var(--acc2));--ok:#22c55e;--warn:#f59e0b;--bad:#ef4444}
+:root{
+  --bg:#07080d;--s1:rgba(255,255,255,.045);--s2:rgba(255,255,255,.075);--s3:rgba(255,255,255,.11);--bd:rgba(255,255,255,.07);
+  --ink:#f2f4fa;--mut:#8a90a6;--acc:#ff5a1f;--acc2:#ff9a3c;--grad:linear-gradient(135deg,#ff4d1a,#ff9a3c);
+  --ok:#2bd67b;--warn:#ffb020;--bad:#ff4d5e;--r:22px;--glow:0 10px 30px -8px rgba(255,90,31,.55)
+}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}
 html,body{height:100%}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:"Cairo",system-ui,"Noto Sans Arabic",sans-serif;display:flex;flex-direction:column;overflow:hidden}
+body{margin:0;color:var(--ink);font-family:"Cairo",system-ui,"Noto Sans Arabic",sans-serif;display:flex;flex-direction:column;overflow:hidden;
+  background:radial-gradient(120% 60% at 50% -10%,rgba(255,90,31,.16),transparent 60%),radial-gradient(90% 50% at 100% 110%,rgba(120,80,255,.10),transparent 60%),var(--bg)}
 [hidden]{display:none!important}
-input,textarea{-webkit-user-select:text;user-select:text}
-button{font:inherit;color:inherit;border:0;background:none;padding:0;touch-action:manipulation}
-/* header */
-header{display:flex;align-items:center;gap:8px;padding:10px 14px 8px}
-.who{flex:1;min-width:0;display:flex;align-items:center;gap:8px}
-.dot{width:10px;height:10px;border-radius:50%;background:var(--muted);flex:none;box-shadow:0 0 0 4px #ffffff0d}
-.dot.ok{background:var(--ok);box-shadow:0 0 0 4px #22c55e22}.dot.wait{background:var(--warn);animation:bl 1s infinite}.dot.bad{background:var(--bad)}
-@keyframes bl{50%{opacity:.3}}
-.who b{font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.who small{display:block;color:var(--muted);font-size:11.5px;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.hb{width:44px;height:44px;border-radius:14px;background:var(--card);display:flex;align-items:center;justify-content:center;font-size:20px}
-.hb.pw{background:#ef444422;color:#ff6b6b;font-size:22px}
-.hb.on,.k.on{transform:scale(.92);filter:brightness(1.35)}
-.vol{margin:0 14px 4px;height:5px;border-radius:5px;background:var(--line);overflow:hidden}
-.vol i{display:block;height:100%;background:var(--grad);transition:width .25s}
-.banner{margin:6px 14px;padding:10px 12px;border-radius:14px;background:var(--card);font-size:13.5px;display:flex;gap:10px;align-items:center}
-.banner .t{flex:1}
-.banner.bad{background:#ef444418}
-/* pages */
-main{flex:1;overflow-y:auto;overflow-x:hidden;padding:4px 14px 12px}
-.page{display:none}.page.on{display:block;animation:fd .18s}
-@keyframes fd{from{opacity:.3;transform:translateY(6px)}}
+input{-webkit-user-select:text;user-select:text}
+button{font:inherit;color:inherit;border:0;background:none;padding:0;cursor:pointer}
+.i{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.i.f{fill:currentColor;stroke:none}
 .ltr{direction:ltr}
-.k{border-radius:18px;background:var(--card);display:flex;align-items:center;justify-content:center;flex-direction:column;font-size:22px;min-height:54px;transition:transform .06s;touch-action:none;box-shadow:inset 0 -2px 0 #00000055}
-.k small{font-size:10.5px;color:var(--muted);margin-top:1px;line-height:1.1}
-.k.acc{background:var(--grad);color:#fff}
-.row{display:grid;gap:10px;margin:10px 0}
-.r3{grid-template-columns:repeat(3,1fr)}.r4{grid-template-columns:repeat(4,1fr)}.r5{grid-template-columns:repeat(5,1fr)}
+/* ---------- header ---------- */
+header{display:flex;align-items:center;gap:10px;padding:12px 16px 6px}
+.chip{flex:1;min-width:0;display:flex;align-items:center;gap:10px;padding:8px 12px 8px 10px;border-radius:18px;background:var(--s1);border:1px solid var(--bd);backdrop-filter:blur(14px)}
+.tvic{width:38px;height:38px;border-radius:13px;display:grid;place-items:center;background:var(--s2);position:relative;flex:none}
+.tvic:after{content:"";position:absolute;width:10px;height:10px;border-radius:50%;bottom:-2px;inset-inline-end:-2px;background:var(--mut);border:2px solid #10121a}
+.chip.ok .tvic:after{background:var(--ok);box-shadow:0 0 10px var(--ok)}.chip.wait .tvic:after{background:var(--warn);animation:bl 1s infinite}.chip.bad .tvic:after{background:var(--bad)}
+@keyframes bl{50%{opacity:.25}}
+.chip b{display:block;font-size:15.5px;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chip small{display:flex;gap:6px;align-items:center;color:var(--mut);font-size:11.5px;white-space:nowrap;overflow:hidden}
+.tag{font-size:10px;font-weight:800;letter-spacing:.4px;padding:1px 7px;border-radius:99px;background:var(--s3);color:var(--ink)}
+.tag.g{background:rgba(43,214,123,.15);color:var(--ok)}.tag.a{background:rgba(255,154,60,.16);color:var(--acc2)}
+.hb{width:50px;height:50px;border-radius:17px;display:grid;place-items:center;background:var(--s1);border:1px solid var(--bd);transition:transform .08s}
+.hb.pw{color:#ff6b6b;background:rgba(255,77,94,.10);border-color:rgba(255,77,94,.2)}
+.press{transform:scale(.93)!important;filter:brightness(1.3)}
+.vol{display:flex;align-items:center;gap:8px;margin:2px 18px 0;color:var(--mut);font-size:11px}
+.vol .t{flex:1;height:4px;border-radius:4px;background:var(--s2);overflow:hidden}.vol .t i{display:block;height:100%;background:var(--grad);transition:width .25s}
+/* ---------- banners ---------- */
+.ban{margin:8px 16px 0;padding:12px 14px;border-radius:18px;background:var(--s1);border:1px solid var(--bd);font-size:13.5px;display:flex;gap:10px;align-items:center}
+.ban .t{flex:1;line-height:1.45}.ban.bad{background:rgba(255,77,94,.08);border-color:rgba(255,77,94,.18)}.ban.warn{background:rgba(255,176,32,.08);border-color:rgba(255,176,32,.2)}
+/* ---------- pages ---------- */
+main{flex:1;overflow-y:auto;overflow-x:hidden;padding:6px 16px 110px;scrollbar-width:none}
+main::-webkit-scrollbar{display:none}
+.page{display:none}.page.on{display:block;animation:fd .22s ease}
+@keyframes fd{from{opacity:0;transform:translateY(8px)}}
+.k{position:relative;border-radius:20px;background:var(--s1);border:1px solid var(--bd);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:3px;min-height:58px;font-size:20px;font-weight:700;transition:transform .08s,background .15s;touch-action:none;color:#dfe3ef}
+.k small{font-size:10.5px;font-weight:600;color:var(--mut);line-height:1.1}
+.k.acc{background:var(--grad);border-color:transparent;color:#fff;box-shadow:var(--glow)}.k.acc small{color:#fff}
+.k.press{background:var(--s3)}
+.grid{display:grid;gap:10px;margin:12px 0}
+.g3{grid-template-columns:repeat(3,1fr)}.g4{grid-template-columns:repeat(4,1fr)}.g5{grid-template-columns:repeat(5,1fr)}
 /* d-pad */
-.pad{position:relative;width:min(78vw,300px);aspect-ratio:1;margin:8px auto 4px;border-radius:50%;background:radial-gradient(circle at 50% 40%,#232838,#151821 70%);box-shadow:0 14px 40px #0008,inset 0 2px 0 #ffffff10}
-.pad .k{position:absolute;background:transparent;box-shadow:none;font-size:30px;color:#cfd3e2;border-radius:50%}
-.pad .u{top:2%;left:33%;width:34%;height:30%}.pad .d{bottom:2%;left:33%;width:34%;height:30%}
-.pad .l{left:2%;top:33%;width:30%;height:34%}.pad .r{right:2%;top:33%;width:30%;height:34%}
-.pad .ok{left:31%;top:31%;width:38%;height:38%;background:var(--grad);color:#fff;font-size:19px;font-weight:900;box-shadow:0 8px 24px #ff5a1f55}
-.side{display:grid;grid-template-columns:1fr 1.6fr 1fr;gap:10px;margin-top:10px}
-.rock{display:grid;grid-template-rows:1fr auto 1fr;border-radius:22px;background:var(--card);overflow:hidden}
-.rock .k{border-radius:0;box-shadow:none;background:transparent;min-height:58px}
-.rock .mid{text-align:center;font-size:11px;color:var(--muted);padding:2px 0}
-.mid3{display:grid;grid-template-rows:repeat(2,1fr);gap:10px}
+.pad{position:relative;width:min(80vw,310px);aspect-ratio:1;margin:14px auto 6px;border-radius:50%;
+  background:radial-gradient(circle at 50% 35%,#1d2130,#11131c 72%);border:1px solid var(--bd);
+  box-shadow:0 30px 60px -20px #000,inset 0 1px 0 rgba(255,255,255,.08),inset 0 -12px 30px rgba(0,0,0,.4)}
+.pad:before{content:"";position:absolute;inset:10px;border-radius:50%;border:1px dashed rgba(255,255,255,.05)}
+.pad .k{position:absolute;background:transparent;border:0;border-radius:50%;color:#c9cede;min-height:0}
+.pad .k .i{width:34px;height:34px;stroke-width:2.4}
+.pad .k.press{background:rgba(255,255,255,.06)}
+.pad .u{top:3%;left:30%;width:40%;height:28%}.pad .d{bottom:3%;left:30%;width:40%;height:28%}
+.pad .l{left:3%;top:30%;width:28%;height:40%}.pad .r{right:3%;top:30%;width:28%;height:40%}
+.pad .ok{left:31%;top:31%;width:38%;height:38%;background:var(--grad);color:#fff;font-size:18px;font-weight:900;letter-spacing:1px;box-shadow:0 12px 34px -6px rgba(255,90,31,.7),inset 0 2px 0 rgba(255,255,255,.25)}
+.pad .ok.press{transform:scale(.94);background:var(--grad)}
+.side{display:grid;grid-template-columns:1fr 1.5fr 1fr;gap:10px;margin-top:12px}
+.rock{display:flex;flex-direction:column;border-radius:26px;background:var(--s1);border:1px solid var(--bd);overflow:hidden}
+.rock .k{flex:1;border:0;border-radius:0;background:transparent;min-height:62px}
+.rock .lb{text-align:center;font-size:10.5px;font-weight:800;letter-spacing:1px;color:var(--mut)}
+.mid{display:grid;grid-template-rows:1fr 1fr;gap:10px}
 /* touchpad */
-.tp{height:min(62vh,440px);border-radius:26px;background:repeating-linear-gradient(0deg,#ffffff05 0 1px,transparent 1px 28px),repeating-linear-gradient(90deg,#ffffff05 0 1px,transparent 1px 28px),var(--card);position:relative;overflow:hidden;touch-action:none;display:flex;align-items:center;justify-content:center;text-align:center;color:var(--muted);font-size:13.5px;padding:20px}
-.tp i{position:absolute;width:56px;height:56px;margin:-28px;border-radius:50%;background:#ff5a1f55;pointer-events:none;transition:opacity .3s}
-/* cards / lists */
-.card{background:var(--card);border-radius:18px;padding:14px;margin:10px 0}
-.card h3{margin:0 0 8px;font-size:15px}
-.li{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--line)}
-.li:first-of-type{border-top:0}
-.li .t{flex:1;min-width:0}.li .t b{display:block;font-size:14.5px}.li .t small{color:var(--muted);font-size:12px}
-.btn{font-weight:800;font-size:14.5px;border-radius:14px;padding:11px 14px;background:var(--grad);color:#fff}
-.btn.alt{background:var(--card2);color:var(--ink)}.btn.sm{padding:7px 11px;font-size:13px}
-.btn:disabled{opacity:.5}
-.inp{width:100%;font:inherit;font-size:16px;background:var(--card2);color:var(--ink);border:1px solid var(--line);border-radius:14px;padding:11px 12px;outline:none}
-.inp:focus{border-color:var(--acc)}
+.tp{height:min(58vh,430px);border-radius:28px;position:relative;overflow:hidden;touch-action:none;display:flex;align-items:center;justify-content:center;text-align:center;color:var(--mut);font-size:13.5px;padding:24px;
+  background:radial-gradient(circle at 50% 50%,rgba(255,255,255,.04),transparent 70%),repeating-radial-gradient(circle at 50% 50%,rgba(255,255,255,.025) 0 1px,transparent 1px 34px),var(--s1);border:1px solid var(--bd)}
+.tp i{position:absolute;width:64px;height:64px;margin:-32px;border-radius:50%;background:radial-gradient(circle,rgba(255,90,31,.55),transparent 70%);pointer-events:none;transition:opacity .35s}
+/* cards */
+.card{background:var(--s1);border:1px solid var(--bd);border-radius:var(--r);padding:16px;margin:12px 0}
+.card h3{margin:0 0 10px;font-size:15px;display:flex;align-items:center;gap:8px}
+.li{display:flex;align-items:center;gap:12px;padding:11px 0;border-top:1px solid var(--bd)}
+.li:first-child{border-top:0}
+.li .t{flex:1;min-width:0}.li .t b{display:block;font-size:14.5px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.li .t small{color:var(--mut);font-size:12px}
+.btn{font-weight:800;font-size:14.5px;border-radius:15px;padding:12px 16px;background:var(--grad);color:#fff;box-shadow:var(--glow);display:inline-flex;align-items:center;justify-content:center;gap:6px}
+.btn.alt{background:var(--s2);color:var(--ink);box-shadow:none;border:1px solid var(--bd)}.btn.sm{padding:7px 12px;font-size:12.5px;border-radius:12px}
+.btn.wide{width:100%}.btn:disabled{opacity:.45}
+.inp{width:100%;font:inherit;font-size:16px;background:rgba(0,0,0,.25);color:var(--ink);border:1px solid var(--bd);border-radius:15px;padding:12px 14px;outline:none}
+.inp:focus{border-color:rgba(255,90,31,.6)}
 .flex{display:flex;gap:8px;align-items:center}.flex>.inp{flex:1}
-.muted{color:var(--muted);font-size:12.5px}
+.mut{color:var(--mut);font-size:12.5px;line-height:1.55}
+.seg{display:flex;background:rgba(0,0,0,.25);border:1px solid var(--bd);border-radius:14px;padding:3px;gap:3px}
+.seg button{flex:1;padding:8px 4px;border-radius:11px;font-size:12.5px;font-weight:700;color:var(--mut)}
+.seg button.on{background:var(--grad);color:#fff}
 .sw{position:relative;display:inline-block;width:48px;height:28px;flex:none}
-.sw input{opacity:0;width:0;height:0}
-.sw i{position:absolute;inset:0;border-radius:14px;background:var(--line);transition:.2s}
+.sw input{opacity:0;width:0;height:0}.sw i{position:absolute;inset:0;border-radius:14px;background:var(--s3);transition:.2s}
 .sw i:before{content:"";position:absolute;width:22px;height:22px;top:3px;inset-inline-start:3px;border-radius:50%;background:#fff;transition:.2s}
-.sw input:checked+i{background:var(--grad)}
-.sw input:checked+i:before{transform:translateX(20px)}[dir=rtl] .sw input:checked+i:before{transform:translateX(-20px)}
+.sw input:checked+i{background:var(--grad)}.sw input:checked+i:before{transform:translateX(20px)}[dir=rtl] .sw input:checked+i:before{transform:translateX(-20px)}
+.badges{display:flex;gap:4px;flex-wrap:wrap;margin-top:3px}
+.bar{height:5px;border-radius:5px;background:var(--s2);overflow:hidden;margin-top:10px}.bar i{display:block;height:100%;background:var(--grad);transition:width .3s}
+/* doctor */
+.doc{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0}
+.doc div{background:rgba(0,0,0,.22);border-radius:14px;padding:9px 10px;font-size:12.5px;display:flex;gap:6px;align-items:center}
+.doc .y{color:var(--ok)}.doc .n{color:var(--bad)}
+.steps{margin:8px 0 0;padding-inline-start:20px;font-size:13px;line-height:1.7}
 /* apps */
-.apps{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px}
-.app{background:var(--card);border-radius:18px;padding:14px 6px 10px;text-align:center;touch-action:manipulation}
-.app .e{font-size:30px;line-height:1.1}.app b{display:block;font-size:12.5px;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.app.add{border:2px dashed var(--line);background:transparent;color:var(--muted)}
-/* colors */
-.cl{min-height:40px;border-radius:14px}
+.apps{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}
+.app{background:var(--s1);border:1px solid var(--bd);border-radius:20px;padding:16px 6px 12px;text-align:center;transition:transform .08s}
+.app:active{transform:scale(.95)}
+.app .e{font-size:30px;line-height:1.1}.app b{display:block;font-size:12.5px;margin-top:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.app.add{border-style:dashed;background:transparent;color:var(--mut)}
+.tools{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.tool{background:var(--s1);border:1px solid var(--bd);border-radius:20px;padding:14px;text-align:start;display:flex;gap:10px;align-items:center}
+.tool .ic{width:40px;height:40px;border-radius:13px;display:grid;place-items:center;background:var(--grad);color:#fff;flex:none}
+.tool b{font-size:13.5px;display:block}.tool small{color:var(--mut);font-size:11px}
+.pk .t b{font-family:ui-monospace,monospace;font-size:12.5px;font-weight:600;direction:ltr;text-align:start}
+.cl{min-height:42px;border-radius:15px;border:0}
 /* nav */
-nav{display:grid;grid-template-columns:repeat(5,1fr);background:#10131b;border-top:1px solid var(--line);padding:6px 4px 8px}
-nav button{display:flex;flex-direction:column;align-items:center;font-size:21px;color:var(--muted);padding:4px 0;border-radius:12px}
-nav button small{font-size:10.5px;margin-top:1px}
-nav button.on{color:var(--acc)}
-/* sheets & pop-ups */
-.sheet{position:fixed;inset-inline:0;bottom:0;z-index:30;background:var(--card);border-radius:24px 24px 0 0;padding:16px 16px 20px;box-shadow:0 -14px 40px #000a;animation:up .2s}
-@keyframes up{from{transform:translateY(40%);opacity:.4}}
-.sheet h3{margin:0 0 10px;font-size:16px}
-.scrim{position:fixed;inset:0;z-index:29;background:#0008}
-.pop{position:fixed;inset:0;z-index:40;background:#000a;display:flex;align-items:center;justify-content:center;padding:24px}
-.popbox{background:var(--card);border-radius:24px;padding:20px 18px 16px;max-width:340px;width:100%;text-align:center;animation:pin .25s cubic-bezier(.2,1.4,.4,1)}
-.popbox .e{font-size:44px;line-height:1.1}.popbox b{display:block;font-size:18px;margin:6px 0 4px}
-.popb{display:flex;gap:8px;margin-top:14px}.popb .btn{flex:1}
+nav{position:fixed;left:12px;right:12px;bottom:12px;display:grid;grid-template-columns:repeat(5,1fr);background:rgba(18,20,30,.78);backdrop-filter:blur(20px);border:1px solid var(--bd);border-radius:24px;padding:7px;box-shadow:0 20px 40px -10px #000;z-index:10}
+nav button{display:flex;flex-direction:column;align-items:center;gap:2px;color:var(--mut);padding:7px 0 5px;border-radius:17px;transition:.15s}
+nav button small{font-size:10.5px;font-weight:700}
+nav button.on{color:#fff;background:var(--s2)}nav button.on .i{color:var(--acc2)}
+/* sheets */
+.scrim{position:fixed;inset:0;z-index:29;background:rgba(0,0,0,.55);backdrop-filter:blur(3px);animation:fdi .2s}
+@keyframes fdi{from{opacity:0}}
+.sheet{position:fixed;inset-inline:0;bottom:0;z-index:30;background:#121520;border-top:1px solid var(--bd);border-radius:28px 28px 0 0;padding:10px 18px 22px;box-shadow:0 -20px 50px #000;animation:up .25s cubic-bezier(.2,.9,.3,1);max-height:88vh;overflow-y:auto}
+.sheet:before{content:"";display:block;width:40px;height:4px;border-radius:4px;background:var(--s3);margin:0 auto 14px}
+@keyframes up{from{transform:translateY(60%);opacity:.3}}
+.sheet h3{margin:0 0 8px;font-size:17px}
+.pop{position:fixed;inset:0;z-index:40;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;padding:24px}
+.popbox{background:#151925;border:1px solid var(--bd);border-radius:26px;padding:22px 18px 16px;max-width:340px;width:100%;text-align:center;animation:pin .28s cubic-bezier(.2,1.4,.4,1)}
+.popbox .e{font-size:44px;line-height:1.1}.popbox b{display:block;font-size:18px;margin:8px 0 4px}
+.popb{display:flex;gap:8px;margin-top:16px}.popb .btn{flex:1}
 @keyframes pin{from{transform:scale(.85);opacity:0}}
-.code{font-family:ui-monospace,monospace;font-size:30px;letter-spacing:10px;text-align:center;text-transform:uppercase;direction:ltr}
+.code{font-family:ui-monospace,monospace;font-size:32px;letter-spacing:12px;text-align:center;text-transform:uppercase;direction:ltr;padding:14px}
 .shake{animation:sh .35s}@keyframes sh{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
-.credit{text-align:center;color:var(--muted);font-size:12px;margin:18px 0 6px;opacity:.85}
-.bar{height:5px;border-radius:5px;background:var(--line);overflow:hidden;margin-top:8px}.bar i{display:block;height:100%;background:var(--grad)}
+.credit{text-align:center;color:var(--mut);font-size:12px;margin:20px 0 6px;opacity:.8}
+.shot{width:100%;border-radius:14px;border:1px solid var(--bd);display:block;background:#000;min-height:120px}
+.spin{width:22px;height:22px;border-radius:50%;border:3px solid var(--s3);border-top-color:var(--acc);animation:rot .8s linear infinite;display:inline-block;vertical-align:middle}
+@keyframes rot{to{transform:rotate(360deg)}}
 </style>
 </head>
 <body>
+<svg width="0" height="0" style="position:absolute">
+ <symbol id="i-power" viewBox="0 0 24 24"><path d="M12 2v9"/><path d="M18.4 6.6a9 9 0 1 1-12.8 0"/></symbol>
+ <symbol id="i-kb" viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2.5"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M7 14h10"/></symbol>
+ <symbol id="i-up" viewBox="0 0 24 24"><path d="m6 15 6-6 6 6"/></symbol>
+ <symbol id="i-down" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+ <symbol id="i-left" viewBox="0 0 24 24"><path d="m15 6-6 6 6 6"/></symbol>
+ <symbol id="i-right" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></symbol>
+ <symbol id="i-back" viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></symbol>
+ <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M10 21v-6h4v6"/></symbol>
+ <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></symbol>
+ <symbol id="i-volup" viewBox="0 0 24 24"><path d="M11 5 6 9H2v6h4l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M19 5a10 10 0 0 1 0 14"/></symbol>
+ <symbol id="i-voldn" viewBox="0 0 24 24"><path d="M11 5 6 9H2v6h4l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/></symbol>
+ <symbol id="i-mute" viewBox="0 0 24 24"><path d="M11 5 6 9H2v6h4l5 4z"/><path d="m22 9-6 6M16 9l6 6"/></symbol>
+ <symbol id="i-pp" viewBox="0 0 24 24"><path d="M5 5v14l8-7z"/><path d="M16 5v14M20 5v14"/></symbol>
+ <symbol id="i-prev" viewBox="0 0 24 24"><path d="M19 19 9 12l10-7z"/><path d="M5 5v14"/></symbol>
+ <symbol id="i-next" viewBox="0 0 24 24"><path d="m5 5 10 7-10 7z"/><path d="M19 5v14"/></symbol>
+ <symbol id="i-rew" viewBox="0 0 24 24"><path d="M11 18 3 12l8-6z"/><path d="M21 18l-8-6 8-6z"/></symbol>
+ <symbol id="i-ff" viewBox="0 0 24 24"><path d="m13 18 8-6-8-6z"/><path d="m3 18 8-6-8-6z"/></symbol>
+ <symbol id="i-stop" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2"/></symbol>
+ <symbol id="i-input" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8M12 17v4M9 10.5h6M12.5 8l2.5 2.5-2.5 2.5"/></symbol>
+ <symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M2 12h3M19 12h3M4.9 19.1 7 17M17 7l2.1-2.1"/></symbol>
+ <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></symbol>
+ <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></symbol>
+ <symbol id="i-remote" viewBox="0 0 24 24"><rect x="7" y="2" width="10" height="20" rx="3.5"/><circle cx="12" cy="8" r="2.2"/><path d="M10 14h.01M14 14h.01M10 17.5h.01M14 17.5h.01"/></symbol>
+ <symbol id="i-touch" viewBox="0 0 24 24"><path d="M9 11V5a2 2 0 0 1 4 0v6"/><path d="M13 10a2 2 0 0 1 4 0v2a2 2 0 0 1 4 0v3a7 7 0 0 1-7 7h-1a7 7 0 0 1-6-3.4L4 16a2 2 0 0 1 3.4-2L9 16"/></symbol>
+ <symbol id="i-hash" viewBox="0 0 24 24"><path d="M4 9h16M4 15h16M10 3 8 21M16 3l-2 18"/></symbol>
+ <symbol id="i-sliders" viewBox="0 0 24 24"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/></symbol>
+ <symbol id="i-tv" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="13" rx="2.5"/><path d="M8 21h8M8 2l4 3 4-3"/></symbol>
+ <symbol id="i-cam" viewBox="0 0 24 24"><path d="M4 7h3l2-3h6l2 3h3a1 1 0 0 1 1 1v11a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1z"/><circle cx="12" cy="13" r="4"/></symbol>
+ <symbol id="i-broom" viewBox="0 0 24 24"><path d="M19 3 12 10"/><path d="M8 11.5 12.5 16 9 21H3l5-9.5z"/><path d="M10.5 9.5l4 4"/></symbol>
+ <symbol id="i-pulse" viewBox="0 0 24 24"><path d="M3 12h4l3-8 4 16 3-8h4"/></symbol>
+ <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-2.6-6.4L21 8"/><path d="M21 3v5h-5"/></symbol>
+</svg>
 
 <header>
-  <div class="who"><span class="dot" id="dot"></span><div style="min-width:0"><b id="tvName">ROWA</b><small id="tvSub"></small></div></div>
-  <button class="hb" id="kbBtn" aria-label="keyboard">⌨️</button>
-  <button class="hb pw k" data-k="26" data-long aria-label="power">⏻</button>
+  <div class="chip" id="chip">
+    <div class="tvic"><svg class="i"><use href="#i-tv"/></svg></div>
+    <div style="min-width:0;flex:1"><b id="tvName">ROWA</b><small><span id="tvSub"></span><span class="tag" id="tvTag" hidden></span></small></div>
+  </div>
+  <button class="hb" id="kbBtn" aria-label="keyboard"><svg class="i"><use href="#i-kb"/></svg></button>
+  <button class="hb pw k" data-k="26" data-long aria-label="power"><svg class="i"><use href="#i-power"/></svg></button>
 </header>
-<div class="vol" id="vol" hidden><i id="volI"></i></div>
-<div class="banner" id="ban" hidden><span id="banE">📡</span><div class="t" id="banT"></div><button class="btn sm alt" id="banB"></button></div>
+<div class="vol" id="vol" hidden><svg class="i" style="width:15px;height:15px"><use href="#i-voldn"/></svg><div class="t"><i id="volI"></i></div><span id="volN"></span></div>
+<div class="ban" id="ban" hidden><span id="banE" style="font-size:20px">📡</span><div class="t" id="banT"></div><button class="btn sm alt" id="banB"></button></div>
 
 <main>
   <!-- 🎮 remote -->
   <section class="page on" id="p-remote">
-    <div class="card" id="noTv" hidden></div>
-    <div class="row r4 ltr">
-      <button class="k" data-k="178"><span>🔌</span><small data-t="input"></small></button>
-      <button class="k" data-k="176"><span>⚙️</span><small data-t="tvset"></small></button>
-      <button class="k" data-k="284"><span>🔲</span><small data-t="allapps"></small></button>
-      <button class="k" data-k="84"><span>🔍</span><small data-t="search"></small></button>
+    <div id="hero"></div>
+    <div class="grid g4 ltr">
+      <button class="k" data-k="178"><svg class="i"><use href="#i-input"/></svg><small data-t="input"></small></button>
+      <button class="k" data-k="176"><svg class="i"><use href="#i-gear"/></svg><small data-t="tvset"></small></button>
+      <button class="k" data-k="284"><svg class="i"><use href="#i-grid"/></svg><small data-t="allapps"></small></button>
+      <button class="k" data-k="84"><svg class="i"><use href="#i-search"/></svg><small data-t="search"></small></button>
     </div>
     <div class="pad ltr">
-      <button class="k u" data-k="19" data-rep>▲</button>
-      <button class="k l" data-k="21" data-rep>◀</button>
+      <button class="k u" data-k="19" data-rep><svg class="i"><use href="#i-up"/></svg></button>
+      <button class="k l" data-k="21" data-rep><svg class="i"><use href="#i-left"/></svg></button>
       <button class="k ok" data-k="23" data-long>OK</button>
-      <button class="k r" data-k="22" data-rep>▶</button>
-      <button class="k d" data-k="20" data-rep>▼</button>
+      <button class="k r" data-k="22" data-rep><svg class="i"><use href="#i-right"/></svg></button>
+      <button class="k d" data-k="20" data-rep><svg class="i"><use href="#i-down"/></svg></button>
     </div>
-    <div class="row r3 ltr">
-      <button class="k" data-k="4" data-long><span>↩️</span><small data-t="back"></small></button>
-      <button class="k" data-k="3" data-long><span>🏠</span><small data-t="home"></small></button>
-      <button class="k" data-k="82"><span>☰</span><small data-t="menu"></small></button>
+    <div class="grid g3 ltr">
+      <button class="k" data-k="4" data-long><svg class="i"><use href="#i-back"/></svg><small data-t="back"></small></button>
+      <button class="k" data-k="3" data-long><svg class="i"><use href="#i-home"/></svg><small data-t="home"></small></button>
+      <button class="k" data-k="82"><svg class="i"><use href="#i-menu"/></svg><small data-t="menu"></small></button>
     </div>
     <div class="side ltr">
       <div class="rock">
-        <button class="k" data-k="24" data-rep>🔊</button>
-        <div class="mid">VOL</div>
-        <button class="k" data-k="25" data-rep>🔉</button>
+        <button class="k" data-k="24" data-rep><svg class="i"><use href="#i-volup"/></svg></button>
+        <div class="lb">VOL</div>
+        <button class="k" data-k="25" data-rep><svg class="i"><use href="#i-voldn"/></svg></button>
       </div>
-      <div class="mid3">
-        <button class="k" data-k="164"><span>🔇</span><small data-t="mute"></small></button>
-        <button class="k acc" data-k="85"><span>⏯️</span><small style="color:#fff" data-t="play"></small></button>
+      <div class="mid">
+        <button class="k" data-k="164"><svg class="i"><use href="#i-mute"/></svg><small data-t="mute"></small></button>
+        <button class="k acc" data-k="85"><svg class="i"><use href="#i-pp"/></svg><small data-t="play"></small></button>
       </div>
       <div class="rock">
-        <button class="k" data-k="166" data-rep>⬆️</button>
-        <div class="mid">CH</div>
-        <button class="k" data-k="167" data-rep>⬇️</button>
+        <button class="k" data-k="166" data-rep><svg class="i"><use href="#i-up"/></svg></button>
+        <div class="lb">CH</div>
+        <button class="k" data-k="167" data-rep><svg class="i"><use href="#i-down"/></svg></button>
       </div>
     </div>
-    <div class="row r5 ltr">
-      <button class="k" data-k="88">⏮️</button>
-      <button class="k" data-k="89" data-rep>⏪</button>
-      <button class="k" data-k="86">⏹️</button>
-      <button class="k" data-k="90" data-rep>⏩</button>
-      <button class="k" data-k="87">⏭️</button>
+    <div class="grid g5 ltr">
+      <button class="k" data-k="88"><svg class="i"><use href="#i-prev"/></svg></button>
+      <button class="k" data-k="89" data-rep><svg class="i"><use href="#i-rew"/></svg></button>
+      <button class="k" data-k="86"><svg class="i"><use href="#i-stop"/></svg></button>
+      <button class="k" data-k="90" data-rep><svg class="i"><use href="#i-ff"/></svg></button>
+      <button class="k" data-k="87"><svg class="i"><use href="#i-next"/></svg></button>
     </div>
   </section>
 
   <!-- 🖐️ touchpad -->
   <section class="page" id="p-touch">
     <div class="tp" id="tp"><span data-t="tphint"></span></div>
-    <div class="row r4 ltr">
-      <button class="k" data-k="4" data-long><span>↩️</span><small data-t="back"></small></button>
-      <button class="k" data-k="3" data-long><span>🏠</span><small data-t="home"></small></button>
-      <button class="k acc" data-k="85">⏯️</button>
-      <button class="k" data-k="82"><span>☰</span><small data-t="menu"></small></button>
+    <div class="grid g4 ltr">
+      <button class="k" data-k="4" data-long><svg class="i"><use href="#i-back"/></svg><small data-t="back"></small></button>
+      <button class="k" data-k="3" data-long><svg class="i"><use href="#i-home"/></svg><small data-t="home"></small></button>
+      <button class="k acc" data-k="85"><svg class="i"><use href="#i-pp"/></svg></button>
+      <button class="k" data-k="82"><svg class="i"><use href="#i-menu"/></svg><small data-t="menu"></small></button>
     </div>
   </section>
 
-  <!-- 🔢 more keys -->
+  <!-- 🔢 keys -->
   <section class="page" id="p-keys">
-    <div class="row r3 ltr" id="num"></div>
-    <div class="row r4 ltr">
-      <button class="k cl" data-k="183" style="background:#dc2626"></button>
-      <button class="k cl" data-k="184" style="background:#16a34a"></button>
-      <button class="k cl" data-k="185" style="background:#eab308"></button>
-      <button class="k cl" data-k="186" style="background:#2563eb"></button>
+    <div class="grid g3 ltr" id="num"></div>
+    <div class="grid g4 ltr">
+      <button class="k cl" data-k="183" style="background:#e5484d"></button>
+      <button class="k cl" data-k="184" style="background:#30a46c"></button>
+      <button class="k cl" data-k="185" style="background:#f5d90a"></button>
+      <button class="k cl" data-k="186" style="background:#3e63dd"></button>
     </div>
-    <div class="row r4 ltr" id="extra"></div>
+    <div class="grid g4 ltr" id="extra"></div>
   </section>
 
   <!-- 📺 apps -->
   <section class="page" id="p-apps">
-    <div class="muted" data-t="appshint"></div>
+    <div class="mut" data-t="appshint"></div>
     <div class="apps" id="apps"></div>
+    <div class="tools">
+      <button class="tool" id="tMgr"><div class="ic"><svg class="i"><use href="#i-broom"/></svg></div><div><b data-t="mgr"></b><small data-t="mgrS"></small></div></button>
+      <button class="tool" id="tShot"><div class="ic"><svg class="i"><use href="#i-cam"/></svg></div><div><b data-t="shotT"></b><small data-t="shotS"></small></div></button>
+    </div>
   </section>
 
   <!-- ⚙️ settings -->
@@ -190,99 +266,138 @@ nav button.on{color:var(--acc)}
     <div class="card">
       <h3>📺 <span data-t="tvs"></span></h3>
       <div id="tvList"></div>
-      <div class="flex" style="margin-top:10px">
+      <div class="bar" id="scanBar" hidden><i id="scanBarI"></i></div>
+      <div class="flex" style="margin-top:12px">
         <button class="btn alt" id="scanBtn" style="flex:1"></button>
-        <button class="btn alt" id="pairBtn" style="flex:1">🔗 <span data-t="pairagain"></span></button>
+        <button class="btn alt" id="docBtn" style="flex:1"><svg class="i" style="width:18px;height:18px"><use href="#i-pulse"/></svg><span data-t="doctor"></span></button>
       </div>
       <div class="flex" style="margin-top:10px">
         <input class="inp ltr" id="ip" inputmode="decimal" placeholder="192.168.1.50">
         <button class="btn" id="ipBtn">➕</button>
       </div>
-      <div class="muted" style="margin-top:6px" data-t="iphint"></div>
+      <div class="mut" style="margin-top:6px" data-t="iphint"></div>
+    </div>
+    <div class="card">
+      <h3>🔌 <span data-t="method"></span></h3>
+      <div class="seg" id="seg"><button data-m="auto" data-t="mAuto"></button><button data-m="atv">Google</button><button data-m="adb">ADB</button></div>
+      <div class="mut" style="margin-top:8px" data-t="methodS"></div>
+      <div class="flex" style="margin-top:10px"><button class="btn alt sm" id="pairBtn" style="flex:1">🔗 <span data-t="pairagain"></span></button><button class="btn alt sm" id="keyBtn" style="flex:1">🔑 <span data-t="newkey"></span></button></div>
     </div>
     <div class="card" id="prefs"></div>
     <div class="card">
       <h3>🔄 <span data-t="updates"></span></h3>
       <div class="li"><div class="t"><b id="verT"></b><small id="verS"></small></div><button class="btn sm" id="upBtn"></button></div>
       <div class="bar" id="upBar" hidden><i id="upBarI"></i></div>
-    </div>
-    <div class="card">
       <div class="li"><div class="t"><b>🌐 <span data-t="lang"></span></b></div><button class="btn sm alt" id="langBtn"></button></div>
-      <div class="li"><div class="t"><b>🔑 <span data-t="newkey"></span></b><small data-t="newkeyhint"></small></div><button class="btn sm alt" id="keyBtn">↻</button></div>
     </div>
     <div class="credit">Designed by Muhammad Toffaha · <span id="credV"></span></div>
   </section>
 </main>
 
 <nav id="nav">
-  <button data-p="remote" class="on">🎮<small data-t="t_remote"></small></button>
-  <button data-p="touch">🖐️<small data-t="t_touch"></small></button>
-  <button data-p="keys">🔢<small data-t="t_keys"></small></button>
-  <button data-p="apps">📺<small data-t="t_apps"></small></button>
-  <button data-p="set">⚙️<small data-t="t_set"></small></button>
+  <button data-p="remote" class="on"><svg class="i"><use href="#i-remote"/></svg><small data-t="t_remote"></small></button>
+  <button data-p="touch"><svg class="i"><use href="#i-touch"/></svg><small data-t="t_touch"></small></button>
+  <button data-p="keys"><svg class="i"><use href="#i-hash"/></svg><small data-t="t_keys"></small></button>
+  <button data-p="apps"><svg class="i"><use href="#i-grid"/></svg><small data-t="t_apps"></small></button>
+  <button data-p="set"><svg class="i"><use href="#i-sliders"/></svg><small data-t="t_set"></small></button>
 </nav>
 
+<div class="scrim" id="scrim" hidden></div>
 <!-- ⌨️ keyboard -->
-<div class="scrim" id="kbScrim" hidden></div>
 <div class="sheet" id="kb" hidden>
   <h3>⌨️ <span data-t="kbtitle"></span></h3>
   <input class="inp" id="kbIn" dir="auto" autocomplete="off" autocapitalize="off" spellcheck="false">
-  <div class="row r4 ltr" style="margin-bottom:0">
+  <div class="grid g4 ltr" style="margin-bottom:0">
     <button class="k" data-k="67">⌫</button>
     <button class="k" id="kbClr">🧹</button>
     <button class="k acc" data-k="66">↵</button>
-    <button class="k" id="kbX">✖</button>
+    <button class="k" id="kbX">✕</button>
   </div>
-  <div class="muted" style="margin-top:8px" data-t="kbhint"></div>
+  <div class="mut" style="margin-top:8px" id="kbHint"></div>
 </div>
-
 <!-- 🔗 pairing -->
-<div class="scrim" id="prScrim" hidden></div>
 <div class="sheet" id="pr" hidden></div>
-
 <!-- ➕ add app -->
 <div class="sheet" id="addApp" hidden>
   <h3>➕ <span data-t="addapp"></span></h3>
-  <div class="flex"><input class="inp" id="aE" style="max-width:70px;text-align:center" value="📺"><input class="inp" id="aN" data-ph="appname"></div>
+  <div class="flex"><input class="inp" id="aE" style="max-width:72px;text-align:center" value="📺"><input class="inp" id="aN" data-ph="appname"></div>
   <input class="inp ltr" id="aP" style="margin-top:8px" placeholder="com.example.app  ·  https://…">
-  <button class="btn alt" id="aCur" style="width:100%;margin-top:8px" hidden></button>
-  <div class="flex" style="margin-top:10px"><button class="btn alt" id="aX" style="flex:1">✖</button><button class="btn" id="aOk" style="flex:2">💾</button></div>
+  <button class="btn alt wide" id="aCur" style="margin-top:8px" hidden></button>
+  <div class="flex" style="margin-top:12px"><button class="btn alt" id="aX" style="flex:1">✕</button><button class="btn" id="aOk" style="flex:2">💾</button></div>
+</div>
+<!-- 🧹 manager -->
+<div class="sheet" id="mgr" hidden>
+  <h3>🧹 <span data-t="mgr"></span></h3>
+  <div class="mut" data-t="mgrHint"></div>
+  <input class="inp ltr" id="pkF" style="margin:10px 0" data-ph="filter">
+  <div class="seg" id="pkSeg" style="margin-bottom:6px"><button data-f="user" class="on" data-t="fUser"></button><button data-f="sys" data-t="fSys"></button><button data-f="off" data-t="fOff"></button></div>
+  <div id="pkList"></div>
+</div>
+<!-- 📸 screen -->
+<div class="sheet" id="shotS" hidden>
+  <h3>📸 <span data-t="shotT"></span></h3>
+  <div id="shotBox"></div>
+  <div class="flex" style="margin-top:12px"><button class="btn alt" id="shotX" style="flex:1">✕</button><button class="btn" id="shotR" style="flex:2"><svg class="i" style="width:18px;height:18px"><use href="#i-refresh"/></svg></button></div>
 </div>
 
-<!-- 🆕 update pop-up -->
 <div class="pop" id="upPop" hidden><div class="popbox">
-  <div class="e">🆕</div><b id="upPopT"></b><div class="muted" id="upPopS"></div>
+  <div class="e">🆕</div><b id="upPopT"></b><div class="mut" id="upPopS"></div>
   <div class="popb"><button class="btn alt" id="upLater"></button><button class="btn" id="upNow"></button></div>
 </div></div>
 
 <script>
-const R = window.Rowa || {state:()=>JSON.stringify({status:'idle',tvs:[],found:[],lang:'ar',version:'dev',haptic:true,volKeys:true,autoKb:true,autoUpdate:true}),
-  key(){},keyDown(){},keyUp(){},repeat(){},text(){},launch(){},scan(){},use(){},forget(){},reconnect(){},pair(){},code(){return true},cancelPair(){},resetKey(){},setPref(){},checkUpdate(){},installUpdate(){},open(){}};
+const R = window.Rowa || {state:()=>JSON.stringify({status:'idle',tvs:[],found:[],lang:'ar',version:'dev',haptic:true,volKeys:true,autoKb:true,autoUpdate:true,method:'auto'}),
+  key(){},keyDown(){},keyUp(){},repeat(){},text(){},clearText(){},launch(){},scan(){},use(){},forget(){},reconnect(){},doctor(){},pair(){},code(){return true},cancelPair(){},resetKey(){},setPref(){},packages(){},pkg(){},shot(){},checkUpdate(){},installUpdate(){},open(){}};
 const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
 
 const T = {
  ar:{t_remote:'ريموت',t_touch:'لمس',t_keys:'أزرار',t_apps:'تطبيقات',t_set:'إعدادات',input:'المصدر',tvset:'إعدادات',allapps:'التطبيقات',search:'بحث',back:'رجوع',home:'الرئيسية',menu:'قائمة',mute:'كتم',play:'تشغيل',
-  tphint:'اسحب بإصبعك للتحرك 👆 · اضغط = OK · اضغط مطوّل = قائمة الخيارات',appshint:'اضغط لفتح التطبيق على التلفزيون · اضغط مطوّل للحذف',tvs:'التلفزيونات',pairagain:'ربط من جديد',iphint:'لو البحث ملقاش التلفزيون: اكتب الـ IP من إعدادات التلفزيون ← الشبكة',
-  updates:'التحديثات',lang:'اللغة',newkey:'مفتاح جديد',newkeyhint:'كل التلفزيونات هتحتاج ربط من جديد',kbtitle:'اكتب على التلفزيون',kbhint:'لازم يكون فيه خانة كتابة مفتوحة على التلفزيون (بحث مثلاً)',addapp:'إضافة تطبيق',appname:'الاسم',
-  scan:'🔍 بحث',scanning:'⏳ بيدوّر…',connected:'متصل',connecting:'جاري الاتصال…',offline:'مش متصل',needpair:'محتاج ربط',idle:'—',pairing:'بيربط…',code:'اكتب الكود',paired:'تم الربط ✅',
-  notv:'📡 مش لاقي التلفزيون — اتأكد إنه شغال وعلى نفس الواي فاي',retry:'🔄 تاني',pairNow:'🔗 ربط',findTitle:'🔍 دوّر على التلفزيون',findHint:'الموبايل والتلفزيون لازم يكونوا على نفس الواي فاي.',nothing:'لسه ملقيناش حاجة…',use:'استخدم',
-  prNeed:'🔗 اربط الموبايل بالتلفزيون (مرة واحدة بس)',prNeedS:'اضغط "ابدأ" وهيظهر كود على شاشة التلفزيون.',prStart:'ابدأ الربط',prWait:'⏳ بيكلّم التلفزيون…',prCode:'🔢 اكتب الكود اللي ظاهر على التلفزيون',prBad:'❌ الكود غلط — راجعه وجرّب تاني',prOk:'✅ تم الربط! الريموت جاهز',prFail:'⚠️ الربط اتقطع — جرّب تاني',
+  tphint:'اسحب بإصبعك للتحرك · اضغط = OK · ضغطة طويلة = الخيارات',appshint:'اضغط لفتح التطبيق على التلفزيون · ضغطة طويلة للحذف',tvs:'التلفزيونات',pairagain:'ربط من جديد',iphint:'الـ IP موجود في التلفزيون: الإعدادات ← الشبكة والإنترنت ← شبكتك',
+  updates:'التحديثات',lang:'اللغة',newkey:'مفتاح جديد',newkeyhint:'كل التلفزيونات هتحتاج ربط من جديد',kbtitle:'اكتب على التلفزيون',kbhintA:'لازم تكون فيه خانة كتابة مفتوحة على التلفزيون (بحث مثلاً)',kbhintD:'وضع ADB: حروف إنجليزي وأرقام بس',addapp:'إضافة تطبيق',appname:'الاسم',
+  scan:'🔍 دوّر على التلفزيون',scanning:'بيدوّر…',connected:'متصل',connecting:'بيتصل…',probing:'بيفحص التلفزيون…',noports:'مش قادر يدخل',offline:'مش متصل',needpair:'محتاج ربط',idle:'مش متصل',pairing:'بيربط…',code:'اكتب الكود',paired:'تم الربط',auth:'وافق على التلفزيون',
+  retry:'تاني',pairNow:'ربط',findTitle:'🔍 بندوّر على التلفزيون',findHint:'الموبايل والتلفزيون لازم يكونوا على نفس الواي فاي. لو ملقيناش حاجة اكتب الـ IP تحت.',nothing:'لسه ملقيناش حاجة…',use:'اتصل',
+  prNeed:'🔗 اربط الموبايل بالتلفزيون (مرة واحدة)',prNeedS:'اضغط "ابدأ" وهيظهر كود من 6 حروف على شاشة التلفزيون.',prStart:'ابدأ الربط',prWait:'بيكلّم التلفزيون…',prCode:'🔢 اكتب الكود اللي على التلفزيون',prBad:'❌ الكود غلط — راجعه وجرّب تاني',prOk:'✅ تم الربط! الريموت جاهز',prFail:'⚠️ الربط اتقطع — جرّب تاني',prAdb:'🔧 جرّب طريقة ADB بدل كده',
+  authT:'📺 على التلفزيون ظهرت رسالة "Allow debugging" — علّم "Always allow" واضغط OK بالريموت العادي.',
   haptic:'📳 اهتزاز مع كل ضغطة',volKeys:'🔊 أزرار صوت الموبايل تتحكم في التلفزيون',keepOn:'☀️ الشاشة تفضل منورة',autoKb:'⌨️ افتح الكيبورد لوحده لما التلفزيون يطلب كتابة',autoUpdate:'🤫 تحديث تلقائي (مرة في اليوم)',
-  ver:'النسخة',latest:'آخر نسخة',uptodate:'✅ أحدث نسخة',check:'فحص',updateNow:'تحديث',later:'بعدين',newVer:'نسخة جديدة',current:'الحالية',app:'التطبيق الحالي',addCur:'📌 أضف التطبيق المفتوح دلوقتي',del:'نحذف',
-  on:'شغال',off:'مطفي',cur:'الحالي'},
+  ver:'النسخة',latest:'آخر نسخة',uptodate:'✅ أحدث نسخة',check:'فحص',updateNow:'تحديث',later:'بعدين',newVer:'نسخة جديدة',current:'الحالية',addCur:'📌 أضف التطبيق المفتوح دلوقتي',del:'نحذف',off:'مطفي',
+  method:'طريقة الاتصال',mAuto:'تلقائي',methodS:'تلقائي = يجرّب Google TV Remote الأول، ولو مش موجود يستخدم ADB.',doctor:'فحص الاتصال',
+  docT:'🩺 فحص الاتصال',dPhone:'الموبايل',dSame:'نفس الشبكة',dPing:'التلفزيون بيرد',dAtv:'Google Remote',dAdb:'ADB',dPair:'الربط',
+  aNet:'الموبايل والتلفزيون على شبكتين مختلفين. وصّل الاتنين على نفس الواي فاي (مش شبكة الضيوف) وجرّب تاني.',
+  aPing:'التلفزيون مش بيرد على الـ IP ده. اتأكد إنه شغال، وراجع الـ IP من إعدادات التلفزيون ← الشبكة. لو الراوتر فيه "AP isolation" اقفله.',
+  aShut:'التلفزيون موجود لكن قافل أبواب التحكم. فعّل واحدة من دول:',
+  s1:'<b>الأسهل:</b> على التلفزيون افتح Play Store ودوّر على <b>Android TV Remote Service</b> ← ثبّت أو حدّث.',
+  s2:'<b>أو ADB (بيشتغل على أي تلفزيون):</b> الإعدادات ← تفضيلات الجهاز ← حول ← اضغط على <b>Build</b> 7 مرات.',
+  s3:'ارجع ← <b>خيارات المطور</b> ← شغّل <b>USB debugging</b> (ولو موجود: <b>Network/ADB debugging</b>).',
+  s4:'ارجع هنا واضغط "تاني".',aOld:'التلفزيون عليه نسخة قديمة من خدمة الريموت — حدّث Android TV Remote Service من Play Store.',
+  aAdbOk:'ADB شغال على التلفزيون ده ✅',useAdb:'استخدم ADB',
+  mgr:'تطبيقات التلفزيون',mgrS:'إيقاف / حذف (ADB)',shotT:'شاشة التلفزيون',shotS:'صورة من الشاشة (ADB)',mgrHint:'إيقاف تطبيق نظام بيشيله من التلفزيون بأمان، وتقدر ترجعه بعدين. متوقفش حاجات زي Launcher أو Settings.',
+  filter:'دوّر…',fUser:'متثبتة',fSys:'نظام',fOff:'متوقفة',open:'فتح',disable:'إيقاف',enable:'تشغيل',uninstall:'حذف',needAdb:'محتاج ADB مفعّل على التلفزيون — افتح "فحص الاتصال" في الإعدادات.',loading:'بيحمّل…',sure:'متأكد؟'},
  en:{t_remote:'Remote',t_touch:'Touch',t_keys:'Keys',t_apps:'Apps',t_set:'Settings',input:'Input',tvset:'Settings',allapps:'Apps',search:'Search',back:'Back',home:'Home',menu:'Menu',mute:'Mute',play:'Play',
-  tphint:'Swipe to move 👆 · tap = OK · long-press = options menu',appshint:'Tap to open on the TV · long-press to remove',tvs:'TVs',pairagain:'Pair again',iphint:'If scan finds nothing: type the TV IP (TV Settings → Network)',
-  updates:'Updates',lang:'Language',newkey:'New key',newkeyhint:'Every TV will need pairing again',kbtitle:'Type on the TV',kbhint:'A text box must be open on the TV (e.g. search)',addapp:'Add app',appname:'Name',
-  scan:'🔍 Scan',scanning:'⏳ Scanning…',connected:'Connected',connecting:'Connecting…',offline:'Not connected',needpair:'Needs pairing',idle:'—',pairing:'Pairing…',code:'Enter code',paired:'Paired ✅',
-  notv:'📡 Can\'t reach the TV — is it on and on the same Wi-Fi?',retry:'🔄 Retry',pairNow:'🔗 Pair',findTitle:'🔍 Find your TV',findHint:'Phone and TV must be on the same Wi-Fi.',nothing:'Nothing found yet…',use:'Use',
-  prNeed:'🔗 Pair the phone with the TV (one time)',prNeedS:'Tap Start and a code appears on the TV screen.',prStart:'Start pairing',prWait:'⏳ Talking to the TV…',prCode:'🔢 Type the code shown on the TV',prBad:'❌ Wrong code — check it and try again',prOk:'✅ Paired! The remote is ready',prFail:'⚠️ Pairing dropped — try again',
+  tphint:'Swipe to move · tap = OK · long-press = options',appshint:'Tap to open on the TV · long-press to remove',tvs:'TVs',pairagain:'Pair again',iphint:'TV IP: TV Settings → Network & Internet → your Wi-Fi',
+  updates:'Updates',lang:'Language',newkey:'New key',newkeyhint:'Every TV will need pairing again',kbtitle:'Type on the TV',kbhintA:'A text box must be open on the TV (e.g. search)',kbhintD:'ADB mode: English letters and numbers only',addapp:'Add app',appname:'Name',
+  scan:'🔍 Find my TV',scanning:'Scanning…',connected:'Connected',connecting:'Connecting…',probing:'Checking the TV…',noports:'Can\'t get in',offline:'Not connected',needpair:'Needs pairing',idle:'Not connected',pairing:'Pairing…',code:'Enter code',paired:'Paired',auth:'Accept on TV',
+  retry:'Retry',pairNow:'Pair',findTitle:'🔍 Looking for your TV',findHint:'Phone and TV must be on the same Wi-Fi. Nothing found? Type the IP below.',nothing:'Nothing found yet…',use:'Connect',
+  prNeed:'🔗 Pair the phone with the TV (one time)',prNeedS:'Tap Start and a 6-character code appears on the TV.',prStart:'Start pairing',prWait:'Talking to the TV…',prCode:'🔢 Type the code shown on the TV',prBad:'❌ Wrong code — check it and try again',prOk:'✅ Paired! The remote is ready',prFail:'⚠️ Pairing dropped — try again',prAdb:'🔧 Try ADB instead',
+  authT:'📺 The TV shows "Allow debugging" — tick "Always allow" and press OK with the normal remote.',
   haptic:'📳 Vibrate on every press',volKeys:'🔊 Phone volume buttons control the TV',keepOn:'☀️ Keep the screen on',autoKb:'⌨️ Open keyboard when the TV asks for text',autoUpdate:'🤫 Auto-update (once a day)',
-  ver:'Version',latest:'Latest',uptodate:'✅ Up to date',check:'Check',updateNow:'Update',later:'Later',newVer:'New version',current:'current',app:'Current app',addCur:'📌 Add the app open right now',del:'Remove',
-  on:'on',off:'off',cur:'current'}
+  ver:'Version',latest:'Latest',uptodate:'✅ Up to date',check:'Check',updateNow:'Update',later:'Later',newVer:'New version',current:'current',addCur:'📌 Add the app open right now',del:'Remove',off:'off',
+  method:'Connection method',mAuto:'Auto',methodS:'Auto = Google TV Remote first, ADB if that is missing.',doctor:'Check connection',
+  docT:'🩺 Connection check',dPhone:'Phone',dSame:'Same network',dPing:'TV answers',dAtv:'Google Remote',dAdb:'ADB',dPair:'Pairing',
+  aNet:'Phone and TV are on different networks. Put both on the same Wi-Fi (not a guest network) and retry.',
+  aPing:'The TV doesn\'t answer at this IP. Is it on? Check the IP in TV Settings → Network. If the router has "AP isolation", turn it off.',
+  aShut:'The TV is there but its control doors are closed. Turn on one of these:',
+  s1:'<b>Easiest:</b> on the TV open Play Store, find <b>Android TV Remote Service</b> → install or update.',
+  s2:'<b>Or ADB (works on any TV):</b> Settings → Device Preferences → About → click <b>Build</b> 7 times.',
+  s3:'Back → <b>Developer options</b> → turn on <b>USB debugging</b> (and <b>Network/ADB debugging</b> if listed).',
+  s4:'Come back here and tap Retry.',aOld:'The TV has an old remote service — update Android TV Remote Service from Play Store.',
+  aAdbOk:'ADB is open on this TV ✅',useAdb:'Use ADB',
+  mgr:'TV apps',mgrS:'Disable / remove (ADB)',shotT:'TV screen',shotS:'Screenshot (ADB)',mgrHint:'Disabling a system app removes it safely, you can enable it later. Don\'t disable things like the Launcher or Settings.',
+  filter:'Search…',fUser:'Installed',fSys:'System',fOff:'Disabled',open:'Open',disable:'Disable',enable:'Enable',uninstall:'Remove',needAdb:'Needs ADB on the TV — open "Check connection" in Settings.',loading:'Loading…',sure:'Sure?'}
 };
 let S = JSON.parse(R.state()), L = S.lang || 'ar';
 const t = k => (T[L] && T[L][k]) || T.en[k] || k;
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const J = v => esc(JSON.stringify(v));
 
 function applyLang(){
   document.documentElement.lang = L; document.documentElement.dir = L === 'ar' ? 'rtl' : 'ltr';
@@ -299,23 +414,22 @@ function bindKeys(root = document){
     let t1, t2, longOn = false, down = false;
     b.addEventListener('pointerdown', e => {
       e.preventDefault(); try{ b.setPointerCapture(e.pointerId) }catch(_){}
-      down = true; b.classList.add('on');
+      down = true; b.classList.add('press');
       if (lng) { longOn = false; t1 = setTimeout(() => { longOn = true; R.keyDown(k) }, 450) }
-      else { R.key(k); if (rep) t1 = setTimeout(() => { t2 = setInterval(() => R.repeat(k), 110) }, 400) }
+      else { R.key(k); if (rep) t1 = setTimeout(() => { t2 = setInterval(() => R.repeat(k), 120) }, 400) }
     });
-    const up = () => { if (!down) return; down = false; b.classList.remove('on'); clearTimeout(t1); clearInterval(t2);
+    const up = () => { if (!down) return; down = false; b.classList.remove('press'); clearTimeout(t1); clearInterval(t2);
       if (lng) { if (longOn) R.keyUp(k); else R.key(k) } };
     ['pointerup','pointercancel','lostpointercapture'].forEach(ev => b.addEventListener(ev, up));
   });
 }
 
-/* ---------- extra keys page ---------- */
-$('#num').innerHTML = [1,2,3,4,5,6,7,8,9].map(n => `<button class="k" data-k="${7+n}">${n}</button>`).join('')
-  + `<button class="k" data-k="170"><span>📺</span><small>TV</small></button><button class="k" data-k="7">0</button><button class="k" data-k="229"><span>⤺</span><small>Last</small></button>`;
+$('#num').innerHTML = [1,2,3,4,5,6,7,8,9].map(n => `<button class="k" style="font-size:24px" data-k="${7+n}">${n}</button>`).join('')
+  + `<button class="k" data-k="170"><svg class="i"><use href="#i-tv"/></svg><small>TV</small></button><button class="k" style="font-size:24px" data-k="7">0</button><button class="k" data-k="229"><span>⤺</span><small>Last</small></button>`;
 const EXTRA = [['ℹ️','Info',165],['📅','Guide',172],['💬','Subtitles',175],['🎧','Audio',222],['🎙️','Assistant',219],['🗂️','Recents',187],['🔔','Notify',83],['⚙️','Settings',176],
-  ['1️⃣','HDMI 1',243],['2️⃣','HDMI 2',244],['3️⃣','HDMI 3',245],['4️⃣','HDMI 4',246],['📡','Antenna',242],['🔌','Input',178],['🔍','Zoom',255],['📸','Screenshot',120],
+  ['1️⃣','HDMI 1',243],['2️⃣','HDMI 2',244],['3️⃣','HDMI 3',245],['4️⃣','HDMI 4',246],['📡','Antenna',242],['🔌','Input',178],['🔍','Zoom',255],['📸','Capture',120],
   ['⏺️','Record',130],['⏹️','Stop',86],['⎋','Esc',111],['⌫','Delete',67],['⏫','Page ↑',92],['⏬','Page ↓',93],['😴','Sleep',223],['☀️','Wake',224]];
-$('#extra').innerHTML = EXTRA.map(([e,n,k]) => `<button class="k" data-k="${k}"><span>${e}</span><small>${n}</small></button>`).join('');
+$('#extra').innerHTML = EXTRA.map(([e,n,k]) => `<button class="k" data-k="${k}"><span style="font-size:19px">${e}</span><small>${n}</small></button>`).join('');
 
 /* ---------- touchpad ---------- */
 (() => {
@@ -337,7 +451,7 @@ $('#extra').innerHTML = EXTRA.map(([e,n,k]) => `<button class="k" data-k="${k}">
   });
   const end = () => { if (x0 == null) return; clearTimeout(lt);
     if (longOn) R.keyUp(23); else if (!moved) R.key(23);
-    x0 = null; if (dot) { const d = dot; d.style.opacity = 0; setTimeout(() => d.remove(), 300) } };
+    x0 = null; if (dot) { const d = dot; d.style.opacity = 0; setTimeout(() => d.remove(), 350) } };
   ['pointerup','pointercancel'].forEach(ev => tp.addEventListener(ev, end));
 })();
 
@@ -346,18 +460,20 @@ let page = 'remote';
 function go(p){ page = p; $$('#nav button').forEach(b => b.classList.toggle('on', b.dataset.p === p)); $$('.page').forEach(s => s.classList.toggle('on', s.id === 'p-' + p)); $('main').scrollTop = 0; if (p === 'set') renderSet() }
 $$('#nav button').forEach(b => b.onclick = () => go(b.dataset.p));
 
+/* ---------- sheets ---------- */
+const SHEETS = ['#kb','#addApp','#mgr','#shotS'];
+function openSheet(id){ SHEETS.forEach(s => $(s).hidden = s !== id); $('#scrim').hidden = false }
+function closeSheets(){ SHEETS.forEach(s => $(s).hidden = true); $('#scrim').hidden = !!$('#pr').hidden; $('#kbIn').blur() }
+$('#scrim').onclick = () => { if (!$('#pr').hidden && S.status !== 'pairing') { prHidden = true; if (S.status === 'code') R.cancelPair(); renderPair() } closeSheets() };
+
 /* ---------- keyboard ---------- */
-let prevTxt = '', kbT;
-function openKb(txt){ $('#kb').hidden = $('#kbScrim').hidden = false; const i = $('#kbIn'); if (txt != null) { i.value = txt; prevTxt = txt } setTimeout(() => i.focus(), 60) }
-function closeKb(){ $('#kb').hidden = $('#kbScrim').hidden = true; $('#kbIn').blur() }
+let kbT;
+function openKb(txt){ openSheet('#kb'); const i = $('#kbIn'); if (txt != null) i.value = txt; $('#kbHint').textContent = S.mode === 'adb' ? t('kbhintD') : t('kbhintA'); setTimeout(() => i.focus(), 80) }
 $('#kbBtn').onclick = () => openKb();
-$('#kbX').onclick = closeKb; $('#kbScrim').onclick = closeKb;
-$('#kbIn').addEventListener('input', () => { clearTimeout(kbT); kbT = setTimeout(() => {
-  const v = $('#kbIn').value;
-  if (v) R.text(v); else for (let i = 0; i < Math.min(prevTxt.length, 60); i++) R.repeat(67);
-  prevTxt = v }, 120) });
+$('#kbX').onclick = closeSheets;
+$('#kbIn').addEventListener('input', () => { clearTimeout(kbT); kbT = setTimeout(() => R.text($('#kbIn').value), 140) });
 $('#kbIn').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); R.key(66) } });
-$('#kbClr').onclick = () => { for (let i = 0; i < Math.min(Math.max(prevTxt.length, 20), 60); i++) R.repeat(67); $('#kbIn').value = ''; prevTxt = '' };
+$('#kbClr').onclick = () => { R.clearText(); $('#kbIn').value = '' };
 window.onIme = txt => { if (S.autoKb && $('#kb').hidden) openKb(txt) };
 
 /* ---------- apps ---------- */
@@ -366,8 +482,8 @@ const DEF = [['▶️','YouTube','com.google.android.youtube.tv'],['🎬','Netfl
 const apps = () => Array.isArray(S.apps) ? S.apps : DEF;
 const linkOf = p => p.includes('://') ? p : 'market://launch?id=' + p;
 function renderApps(){
-  $('#apps').innerHTML = apps().map(([e,n,p], i) => `<button class="app" data-i="${i}"><div class="e">${esc(e)}</div><b>${esc(n)}</b></button>`).join('')
-    + `<button class="app add" id="addBtn"><div class="e">➕</div><b>${t('addapp')}</b></button>`;
+  $('#apps').innerHTML = apps().map(([e,n], i) => `<button class="app" data-i="${i}"><div class="e">${esc(e)}</div><b>${esc(n)}</b></button>`).join('')
+    + `<button class="app add" id="addBtn"><div class="e">＋</div><b>${t('addapp')}</b></button>`;
   $$('#apps .app[data-i]').forEach(b => {
     let lt, longOn = false;
     b.addEventListener('pointerdown', () => { longOn = false; lt = setTimeout(() => { longOn = true; delApp(+b.dataset.i) }, 650) });
@@ -375,102 +491,157 @@ function renderApps(){
     b.addEventListener('click', () => { if (!longOn) R.launch(linkOf(apps()[+b.dataset.i][2])) });
   });
   $('#addBtn').onclick = () => { $('#aN').value = ''; $('#aP').value = ''; $('#aE').value = '📺';
-    $('#aCur').hidden = !S.app; $('#aCur').textContent = t('addCur') + (S.app ? ' · ' + S.app : '');
-    $('#addApp').hidden = $('#kbScrim').hidden = false };
+    $('#aCur').hidden = !S.app; $('#aCur').textContent = t('addCur') + (S.app ? ' · ' + S.app : ''); openSheet('#addApp') };
 }
 function saveApps(a){ S.apps = a; R.setPref('apps', JSON.stringify(a)); renderApps() }
 function delApp(i){ const a = apps().slice(); if (confirm(t('del') + ' ' + a[i][1] + '?')) { a.splice(i, 1); saveApps(a) } }
 $('#aCur').onclick = () => { $('#aP').value = S.app; if (!$('#aN').value) $('#aN').value = S.app.split('.').pop() };
-$('#aX').onclick = () => { $('#addApp').hidden = $('#kbScrim').hidden = true };
+$('#aX').onclick = closeSheets;
 $('#aOk').onclick = () => { const p = $('#aP').value.trim(); if (!p) return $('#aP').focus();
-  saveApps([...apps(), [$('#aE').value.trim() || '📺', $('#aN').value.trim() || p.split('.').pop(), p]]); $('#aX').onclick() };
-$('#kbScrim').addEventListener('click', () => { $('#addApp').hidden = true });
+  saveApps([...apps(), [$('#aE').value.trim() || '📺', $('#aN').value.trim() || p.split('.').pop(), p]]); closeSheets() };
 
-/* ---------- pairing sheet ---------- */
-let prHidden = false, lastStatus = '', codeErr = '';
+/* ---------- 🧹 TV app manager (ADB) ---------- */
+let PK = null, pkF = 'user';
+$('#tMgr').onclick = () => { openSheet('#mgr'); PK = null; renderPk(); R.packages() };
+window.onPkgs = list => { PK = list === null ? 'na' : list; renderPk() };
+window.onPkgDone = () => R.packages();
+$$('#pkSeg button').forEach(b => b.onclick = () => { pkF = b.dataset.f; $$('#pkSeg button').forEach(x => x.classList.toggle('on', x === b)); renderPk() });
+$('#pkF').addEventListener('input', () => renderPk());
+function renderPk(){
+  const box = $('#pkList');
+  if (PK === null) { box.innerHTML = `<p class="mut"><span class="spin"></span> ${t('loading')}</p>`; return }
+  if (PK === 'na') { box.innerHTML = `<p class="mut">${t('needAdb')}</p>`; return }
+  const q = $('#pkF').value.trim().toLowerCase();
+  const l = PK.filter(p => (pkF === 'off' ? p.off : pkF === 'sys' ? p.sys && !p.off : !p.sys && !p.off) && (!q || p.p.toLowerCase().includes(q)));
+  box.innerHTML = l.slice(0, 250).map(p => `<div class="li pk"><div class="t"><b>${esc(p.p)}</b></div>
+    ${p.off ? `<button class="btn sm" data-a="on" data-p="${esc(p.p)}">${t('enable')}</button>`
+      : `<button class="btn sm alt" data-a="open" data-p="${esc(p.p)}">${t('open')}</button>
+         <button class="btn sm alt" data-a="${p.sys ? 'off' : 'del'}" data-p="${esc(p.p)}">${p.sys ? t('disable') : t('uninstall')}</button>`}</div>`).join('') || `<p class="mut">—</p>`;
+  box.querySelectorAll('[data-a]').forEach(b => b.onclick = () => {
+    const a = b.dataset.a, p = b.dataset.p;
+    if ((a === 'off' || a === 'del') && !confirm(`${a === 'off' ? t('disable') : t('uninstall')} ${p} — ${t('sure')}`)) return;
+    b.disabled = true; b.innerHTML = '<span class="spin" style="width:14px;height:14px;border-width:2px"></span>'; R.pkg(p, a) });
+}
+
+/* ---------- 📸 screenshot ---------- */
+$('#tShot').onclick = () => { openSheet('#shotS'); shot() };
+$('#shotR').onclick = shot; $('#shotX').onclick = closeSheets;
+function shot(){ $('#shotBox').innerHTML = `<p class="mut"><span class="spin"></span> ${t('loading')}</p>`; R.shot() }
+window.onShot = b64 => { $('#shotBox').innerHTML = b64 ? `<img class="shot" src="data:image/png;base64,${b64}">` : `<p class="mut">${t('needAdb')}</p>` };
+
+/* ---------- pairing ---------- */
+let prHidden = false, lastStatus = '';
 function renderPair(){
-  const st = S.status, show = ['needpair','pairing','code','paired'].includes(st) && !prHidden;
-  $('#pr').hidden = $('#prScrim').hidden = !show;
-  if (!show) return;
+  const st = S.status, show = S.mode === 'atv' && ['needpair','pairing','code','paired'].includes(st) && !prHidden;
+  $('#pr').hidden = !show;
+  if (!show) { if (SHEETS.every(s => $(s).hidden)) $('#scrim').hidden = true; return }
+  $('#scrim').hidden = false;
   if (st === 'code') {
-    if (!$('#codeIn')) {
-      $('#pr').innerHTML = `<h3>${t('prCode')}</h3><input class="inp code" id="codeIn" maxlength="6" autocomplete="off" autocapitalize="characters" spellcheck="false">
-        <div class="muted" id="codeErr" style="margin-top:8px;min-height:18px"></div><div class="flex" style="margin-top:6px"><button class="btn alt" id="prX" style="flex:1">✖</button><button class="btn" id="codeOk" style="flex:2">🔗</button></div>`;
-      const i = $('#codeIn'); setTimeout(() => i.focus(), 80);
-      const send = () => { const v = i.value.trim().toUpperCase(); if (v.length !== 6) return;
-        if (!R.code(v)) { $('#codeErr').textContent = t('prBad'); i.classList.remove('shake'); void i.offsetWidth; i.classList.add('shake'); i.select() }
-        else $('#codeErr').textContent = t('prWait') };
-      i.addEventListener('input', () => { i.value = i.value.toUpperCase().replace(/[^0-9A-F]/g, ''); if (i.value.length === 6) send() });
-      $('#codeOk').onclick = send; $('#prX').onclick = () => { prHidden = true; R.cancelPair(); renderPair() };
-    }
+    if ($('#codeIn')) return;
+    $('#pr').innerHTML = `<h3>${t('prCode')}</h3><input class="inp code" id="codeIn" maxlength="6" autocomplete="off" autocapitalize="characters" spellcheck="false">
+      <div class="mut" id="codeErr" style="margin-top:8px;min-height:20px"></div><div class="flex" style="margin-top:6px"><button class="btn alt" id="prX" style="flex:1">✕</button><button class="btn" id="codeOk" style="flex:2">🔗</button></div>`;
+    const i = $('#codeIn'); setTimeout(() => i.focus(), 80);
+    const send = () => { const v = i.value.trim().toUpperCase(); if (v.length !== 6) return;
+      if (!R.code(v)) { $('#codeErr').textContent = t('prBad'); i.classList.remove('shake'); void i.offsetWidth; i.classList.add('shake'); i.select() }
+      else $('#codeErr').innerHTML = `<span class="spin" style="width:14px;height:14px;border-width:2px"></span> ${t('prWait')}` };
+    i.addEventListener('input', () => { i.value = i.value.toUpperCase().replace(/[^0-9A-F]/g, ''); if (i.value.length === 6) send() });
+    $('#codeOk').onclick = send; $('#prX').onclick = () => { prHidden = true; R.cancelPair(); renderPair() };
     return;
   }
-  const msg = st === 'paired' ? t('prOk') : st === 'pairing' ? t('prWait')
+  const msg = st === 'pairing' ? `<span class="spin" style="width:16px;height:16px;border-width:2px"></span> ${t('prWait')}`
     : (S.error === 'badcode' ? t('prBad') : (S.error && lastStatus === 'code') ? t('prFail') : '');
   $('#pr').innerHTML = `<h3>${st === 'paired' ? t('prOk') : t('prNeed')}</h3>
-    <div class="muted">${esc(S.name || S.host)} · ${esc(S.host)}</div>
-    ${st === 'needpair' ? `<p style="margin:10px 0">${t('prNeedS')}</p>` : ''}
+    <div class="mut ltr" style="text-align:start">${esc(S.name)} · ${esc(S.host)}</div>
+    ${st === 'needpair' ? `<p style="margin:12px 0;line-height:1.6">${t('prNeedS')}</p>` : ''}
     ${msg && st !== 'paired' ? `<p style="margin:8px 0">${msg}</p>` : ''}
-    ${st === 'needpair' ? `<div class="flex" style="margin-top:10px"><button class="btn alt" id="prX" style="flex:1">✖</button><button class="btn" id="prGo" style="flex:2">${t('prStart')}</button></div>` : ''}`;
+    ${st === 'needpair' ? `<div class="flex" style="margin-top:12px"><button class="btn alt" id="prX" style="flex:1">✕</button><button class="btn" id="prGo" style="flex:2">${t('prStart')}</button></div>
+      <button class="btn alt wide sm" id="prAdb" style="margin-top:10px">${t('prAdb')}</button>` : ''}`;
   if ($('#prGo')) $('#prGo').onclick = () => R.pair();
   if ($('#prX')) $('#prX').onclick = () => { prHidden = true; renderPair() };
+  if ($('#prAdb')) $('#prAdb').onclick = () => { prHidden = true; R.setPref('method', 'adb') };
 }
-$('#prScrim').onclick = () => { if (S.status !== 'pairing') { prHidden = true; renderPair() } };
 
-/* ---------- top / banner ---------- */
+/* ---------- doctor ---------- */
+function doctorHtml(){
+  const d = S.doctor;
+  if (!d) return `<p class="mut"><span class="spin"></span> ${t('probing')}</p>`;
+  const yn = (ok, label) => `<div><span class="${ok ? 'y' : 'n'}">${ok ? '✔' : '✖'}</span>${label}</div>`;
+  const old = (S.found || []).some(f => f.host === d.host && f.old);
+  let advice;
+  if (!d.sameNet) advice = `<p>${t('aNet')}</p>`;
+  else if (!d.ping) advice = `<p>${t('aPing')}</p>`;
+  else if (d.adb && !d.atv) advice = `<p>${t('aAdbOk')}</p><button class="btn wide" onclick="R.setPref('method','adb')">${t('useAdb')}</button>`;
+  else if (!d.atv && !d.adb) advice = `<p>${old ? t('aOld') + '<br>' : ''}${t('aShut')}</p><ol class="steps"><li>${t('s1')}</li><li>${t('s2')}</li><li>${t('s3')}</li><li>${t('s4')}</li></ol>`;
+  else advice = d.adb ? `<button class="btn alt wide" onclick="R.setPref('method','adb')">${t('useAdb')}</button>` : '';
+  return `<div class="doc ltr">${yn(true, t('dPhone') + ' ' + esc(d.phone || '?'))}${yn(d.sameNet, t('dSame'))}${yn(d.ping, t('dPing'))}${yn(d.atv, t('dAtv') + ' 6466')}${yn(d.pair, t('dPair') + ' 6467')}${yn(d.adb, t('dAdb') + ' 5555')}</div>
+    <div style="font-size:13.5px;line-height:1.6">${advice}</div>
+    <button class="btn alt wide" style="margin-top:10px" onclick="R.reconnect()">🔄 ${t('retry')}</button>`;
+}
+
+/* ---------- header / hero ---------- */
+const BUSY = ['connecting','probing','pairing','auth'];
 function renderTop(){
   const st = S.status;
-  $('#dot').className = 'dot ' + (st === 'connected' ? 'ok' : (st === 'connecting' || st === 'pairing') ? 'wait' : S.host ? 'bad' : '');
-  $('#tvName').textContent = S.name || 'ROWA';
+  $('#chip').className = 'chip ' + (st === 'connected' ? 'ok' : BUSY.includes(st) || st === 'code' ? 'wait' : S.host ? 'bad' : '');
+  $('#tvName').textContent = S.name || 'ROWA TV';
   const sub = [t(st)]; if (st === 'connected' && S.on === false) sub.push('💤 ' + t('off')); if (S.app && st === 'connected') sub.push(S.app.split('.').pop());
   $('#tvSub').textContent = sub.join(' · ');
+  const tag = $('#tvTag'); tag.hidden = !S.mode; tag.textContent = S.mode === 'adb' ? 'ADB' : 'GOOGLE'; tag.className = 'tag ' + (S.mode === 'adb' ? 'a' : 'g');
   const v = S.vol >= 0 && st === 'connected'; $('#vol').hidden = !v;
-  if (v) $('#volI').style.width = (S.muted ? 0 : Math.round(100 * S.vol / (S.volMax || 100))) + '%';
+  if (v) { $('#volI').style.width = (S.muted ? 0 : Math.round(100 * S.vol / (S.volMax || 100))) + '%'; $('#volN').textContent = S.muted ? '🔇' : S.vol }
   // banner
-  const ban = $('#ban');
-  if (S.host && (st === 'offline' || (st === 'idle' && S.host))) {
-    ban.hidden = false; ban.className = 'banner bad'; $('#banE').textContent = '📡'; $('#banT').textContent = t('notv');
-    $('#banB').textContent = t('retry'); $('#banB').onclick = () => R.reconnect();
-  } else if (st === 'needpair' && prHidden) {
-    ban.hidden = false; ban.className = 'banner'; $('#banE').textContent = '🔗'; $('#banT').textContent = t('needpair');
-    $('#banB').textContent = t('pairNow'); $('#banB').onclick = () => { prHidden = false; renderPair() };
-  } else ban.hidden = true;
-  // first run: find the TV
-  const nt = $('#noTv'); nt.hidden = !!S.host;
-  if (!S.host) nt.innerHTML = `<h3>${t('findTitle')}</h3><div class="muted">${t('findHint')}</div>${foundList()}
-    <button class="btn" style="width:100%;margin-top:10px" onclick="R.scan()" ${S.scanning ? 'disabled' : ''}>${S.scanning ? t('scanning') : t('scan')}</button>`;
+  const ban = $('#ban'); let b = null;
+  if (st === 'auth') b = ['warn', '📺', t('authT'), null];
+  else if (S.host && (st === 'offline' || st === 'idle')) b = ['bad', '📡', t('offline') + (S.error && S.error !== 'reconnecting' ? ' — ' + S.error : ''), [t('retry'), () => R.reconnect()]];
+  else if (st === 'needpair' && prHidden && S.mode === 'atv') b = ['', '🔗', t('needpair'), [t('pairNow'), () => { prHidden = false; renderPair() }]];
+  ban.hidden = !b;
+  if (b) { ban.className = 'ban ' + b[0]; $('#banE').textContent = b[1]; $('#banT').textContent = b[2]; $('#banB').hidden = !b[3]; if (b[3]) { $('#banB').textContent = b[3][0]; $('#banB').onclick = b[3][1] } }
+  // hero card on the remote page
+  const hero = $('#hero');
+  if (!S.host) hero.innerHTML = `<div class="card"><h3>${t('findTitle')}</h3><div class="mut">${t('findHint')}</div>${foundList()}
+      ${S.scanning ? `<div class="bar"><i style="width:${Math.max(5, S.scanPct)}%"></i></div>` : `<button class="btn wide" style="margin-top:12px" onclick="R.scan()">${t('scan')}</button>`}
+      <div class="flex" style="margin-top:10px"><input class="inp ltr" id="ip2" inputmode="decimal" placeholder="192.168.1.50"><button class="btn" onclick="manualIp('#ip2')">➕</button></div></div>`;
+  else if (st === 'noports' || st === 'probing') hero.innerHTML = `<div class="card"><h3>${t('docT')}</h3>${st === 'probing' ? `<p class="mut"><span class="spin"></span> ${t('probing')}</p>` : doctorHtml()}</div>`;
+  else hero.innerHTML = '';
 }
+function badges(d){ return `<div class="badges">${d.atv ? '<span class="tag g">GOOGLE</span>' : ''}${d.adb ? '<span class="tag a">ADB</span>' : ''}${d.cast ? '<span class="tag">CAST</span>' : ''}${d.old ? '<span class="tag">OLD</span>' : ''}</div>` }
 function foundList(){
-  const f = S.found || [];
-  if (!f.length) return `<div class="muted" style="margin-top:8px">${S.scanning ? '⏳ ' : ''}${t('nothing')}</div>`;
-  return f.map(d => `<div class="li"><div class="t"><b>📺 ${esc(d.name)}</b><small class="ltr">${esc(d.host)}</small></div><button class="btn sm" onclick='R.use(${JSON.stringify(d.host)},${JSON.stringify(d.name)})'>${t('use')}</button></div>`).join('');
+  const f = (S.found || []).filter(d => d.atv || d.adb || d.cast || d.old);
+  if (!f.length) return `<div class="mut" style="margin-top:10px">${S.scanning ? '<span class="spin" style="width:14px;height:14px;border-width:2px"></span> ' + t('scanning') : t('nothing')}</div>`;
+  return '<div style="margin-top:6px">' + f.map(d => `<div class="li"><div class="t"><b>📺 ${esc(d.name)}</b><small class="ltr">${esc(d.host)}</small>${badges(d)}</div><button class="btn sm" onclick="R.use(${J(d.host)},${J(d.name)})">${t('use')}</button></div>`).join('') + '</div>';
 }
+function manualIp(sel){ const h = $(sel).value.trim(); if (!/^\d{1,3}(\.\d{1,3}){3}$/.test(h)) { $(sel).classList.remove('shake'); void $(sel).offsetWidth; $(sel).classList.add('shake'); return } R.use(h, 'TV ' + h); $(sel).value = '' }
 
 /* ---------- settings ---------- */
 function renderSet(){
-  const saved = S.tvs || [], hosts = new Set(saved.map(x => x.host));
-  $('#tvList').innerHTML = saved.map(d => `<div class="li"><div class="t"><b>${d.host === S.host ? '✅ ' : '📺 '}${esc(d.name)}</b><small class="ltr">${esc(d.host)}${d.host === S.host ? ' · ' + t(S.status) : ''}</small></div>
-      ${d.host === S.host ? '' : `<button class="btn sm" onclick='R.use(${JSON.stringify(d.host)},${JSON.stringify(d.name)})'>${t('use')}</button>`}
-      <button class="btn sm alt" onclick='R.forget(${JSON.stringify(d.host)})'>🗑️</button></div>`).join('')
-    + (S.found || []).filter(d => !hosts.has(d.host)).map(d => `<div class="li"><div class="t"><b>🆕 ${esc(d.name)}</b><small class="ltr">${esc(d.host)}</small></div><button class="btn sm" onclick='R.use(${JSON.stringify(d.host)},${JSON.stringify(d.name)})'>${t('use')}</button></div>`).join('')
-    || `<div class="muted">${t('nothing')}</div>`;
+  const saved = S.tvs || [], hosts = new Set(saved.map(x => x.host)), fmap = {}; (S.found || []).forEach(f => fmap[f.host] = f);
+  $('#tvList').innerHTML = saved.map(d => `<div class="li"><div class="t"><b>${d.host === S.host ? '✅ ' : '📺 '}${esc(d.name)}</b><small class="ltr">${esc(d.host)}${d.host === S.host ? ' · ' + t(S.status) : ''}</small>${fmap[d.host] ? badges(fmap[d.host]) : ''}</div>
+      ${d.host === S.host ? '' : `<button class="btn sm" onclick="R.use(${J(d.host)},${J(d.name)})">${t('use')}</button>`}
+      <button class="btn sm alt" onclick="R.forget(${J(d.host)})">🗑️</button></div>`).join('')
+    + (S.found || []).filter(d => !hosts.has(d.host) && (d.atv || d.adb || d.cast)).map(d => `<div class="li"><div class="t"><b>🆕 ${esc(d.name)}</b><small class="ltr">${esc(d.host)}</small>${badges(d)}</div><button class="btn sm" onclick="R.use(${J(d.host)},${J(d.name)})">${t('use')}</button></div>`).join('')
+    || `<div class="mut">${t('nothing')}</div>`;
   $('#scanBtn').textContent = S.scanning ? t('scanning') : t('scan'); $('#scanBtn').disabled = !!S.scanning;
+  $('#scanBar').hidden = !S.scanning; $('#scanBarI').style.width = Math.max(5, S.scanPct) + '%';
+  $('#docBtn').disabled = !S.host;
+  $$('#seg button').forEach(b => b.classList.toggle('on', b.dataset.m === (S.method || 'auto')));
   $('#pairBtn').disabled = !S.host;
   $('#prefs').innerHTML = ['haptic','volKeys','keepOn','autoKb','autoUpdate'].map(k =>
-    `<div class="li"><div class="t"><b style="font-weight:600">${t(k)}</b></div><label class="sw"><input type="checkbox" data-pref="${k}" ${S[k] ? 'checked' : ''}><i></i></label></div>`).join('');
+    `<div class="li"><div class="t"><b style="font-weight:600;white-space:normal">${t(k)}</b></div><label class="sw"><input type="checkbox" data-pref="${k}" ${S[k] ? 'checked' : ''}><i></i></label></div>`).join('');
   $$('[data-pref]').forEach(c => c.onchange = () => { S[c.dataset.pref] = c.checked; R.setPref(c.dataset.pref, String(c.checked)) });
   $('#verT').textContent = `${t('ver')} ${S.version}`;
   const busy = S.upStatus === 'downloading' || S.upStatus === 'installing';
   $('#verS').textContent = S.update ? `🆕 ${t('latest')}: 1.0.${S.latest}` : (S.upError ? '⚠️ ' + S.upError : S.latest ? t('uptodate') : '');
-  $('#upBtn').textContent = busy ? (S.upPct >= 0 ? S.upPct + '%' : '⏳') : S.update ? t('updateNow') : (S.upStatus === 'checking' ? '⏳' : t('check'));
+  $('#upBtn').textContent = busy ? (S.upPct >= 0 ? S.upPct + '%' : '…') : S.update ? t('updateNow') : (S.upStatus === 'checking' ? '…' : t('check'));
   $('#upBtn').disabled = busy; $('#upBtn').onclick = () => S.update ? R.installUpdate() : R.checkUpdate();
   $('#upBar').hidden = !busy; $('#upBarI').style.width = Math.max(0, S.upPct) + '%';
   $('#credV').textContent = S.version;
 }
 $('#scanBtn').onclick = () => R.scan();
+$('#docBtn').onclick = () => { R.doctor(); go('remote') };
+$$('#seg button').forEach(b => b.onclick = () => { S.method = b.dataset.m; R.setPref('method', b.dataset.m); renderSet() });
 $('#pairBtn').onclick = () => { prHidden = false; R.pair() };
-$('#ipBtn').onclick = () => { const h = $('#ip').value.trim(); if (!/^\d{1,3}(\.\d{1,3}){3}$/.test(h)) return $('#ip').focus(); R.use(h, 'TV ' + h); $('#ip').value = '' };
-$('#langBtn').onclick = () => { L = L === 'ar' ? 'en' : 'ar'; R.setPref('lang', L); applyLang(); render() };
+$('#ipBtn').onclick = () => manualIp('#ip');
+$('#langBtn').onclick = () => { L = L === 'ar' ? 'en' : 'ar'; R.setPref('lang', L); applyLang(); render(); renderApps() };
 $('#keyBtn').onclick = () => { if (confirm(t('newkeyhint') + '?')) { prHidden = false; R.resetKey() } };
 
 /* ---------- update pop-up (once per open) ---------- */
@@ -485,16 +656,18 @@ $('#upNow').onclick = () => { $('#upPop').hidden = true; R.installUpdate(); go('
 
 /* ---------- state ---------- */
 function render(){
-  if (S.status !== lastStatus) { if (S.status === 'needpair' && lastStatus !== 'code' && lastStatus !== 'pairing') prHidden = false; if (S.status !== 'code' && $('#codeIn')) $('#pr').innerHTML = '' }
+  if (S.status !== lastStatus) {
+    if (S.status === 'needpair' && lastStatus !== 'code' && lastStatus !== 'pairing') prHidden = false;
+    if (S.status !== 'code' && $('#codeIn')) $('#pr').innerHTML = '';
+  }
   renderTop(); renderPair(); if (page === 'set') renderSet(); renderPop();
-  if (JSON.stringify(S.apps) !== renderApps._last) { renderApps._last = JSON.stringify(S.apps); renderApps() }
+  const a = JSON.stringify(S.apps); if (a !== render._apps) { render._apps = a; renderApps() }
   lastStatus = S.status;
 }
 window.onRowa = s => { S = s; render() };
 window.rowaBack = () => {
   if (!$('#upPop').hidden) { $('#upPop').hidden = true; return true }
-  if (!$('#addApp').hidden) { $('#aX').onclick(); return true }
-  if (!$('#kb').hidden) { closeKb(); return true }
+  if (SHEETS.some(s => !$(s).hidden)) { closeSheets(); return true }
   if (!$('#pr').hidden) { prHidden = true; if (S.status === 'code') R.cancelPair(); renderPair(); return true }
   if (page !== 'remote') { go('remote'); return true }
   return false;
