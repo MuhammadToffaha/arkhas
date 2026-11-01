@@ -154,6 +154,8 @@ nav button.on{color:#fff}nav button.on .i{color:#ff6f9c}
 #setup h1{font-size:27px;line-height:1.2;margin:8px 0 6px;letter-spacing:-.4px;text-align:center}
 #setup .lead{color:var(--mut);font-size:14px;line-height:1.6;text-align:center;margin:0 auto 16px;max-width:340px}
 #setup .body{flex:1}
+.k.blk{opacity:.28;filter:grayscale(1)}
+.toast{position:fixed;left:16px;right:16px;bottom:100px;z-index:70;padding:12px 14px;border-radius:18px;background:rgba(30,31,46,.95);border:1px solid var(--bd);font-size:13.5px;line-height:1.5;box-shadow:0 20px 40px -10px #000;animation:up .25s}
 </style>
 </head>
 <body>
@@ -309,6 +311,7 @@ nav button.on{color:#fff}nav button.on .i{color:#ff6f9c}
       <h3>🔌 <span data-t="method"></span></h3>
       <div class="seg" id="seg"><button data-m="auto" data-t="mAuto"></button><button data-m="atv">Google</button><button data-m="adb">ADB</button></div>
       <div class="mut" style="margin-top:8px" data-t="methodS"></div>
+      <button class="btn alt wide sm" id="unblkBtn" style="margin-top:10px">🛡️ <span data-t="unblk"></span></button>
       <button class="btn wide" id="wizBtn" style="margin-top:12px">⚡ <span data-t="wizT"></span></button>
       <div class="flex" style="margin-top:10px"><button class="btn alt sm" id="pairBtn" style="flex:1">🔗 <span data-t="pairagain"></span></button><button class="btn alt sm" id="keyBtn" style="flex:1">🔑 <span data-t="newkey"></span></button></div>
     </div>
@@ -333,6 +336,7 @@ nav button.on{color:#fff}nav button.on .i{color:#ff6f9c}
   <button data-p="set"><svg class="i"><use href="#i-sliders"/></svg><small data-t="t_set"></small></button>
 </nav>
 
+<div class="toast" id="toast" hidden></div>
 <div class="scrim" id="scrim" hidden></div>
 <div class="sheet" id="kb" hidden>
   <h3>⌨️ <span data-t="kbtitle"></span></h3>
@@ -391,7 +395,7 @@ nav button.on{color:#fff}nav button.on .i{color:#ff6f9c}
 <script>
 
 const R = window.Rowa || {state:()=>JSON.stringify({status:'idle',tvs:[],found:[],lang:'ar',version:'dev',haptic:true,volKeys:true,autoKb:true,autoUpdate:true,method:'auto'}),
-  key(){},keyDown(){},keyUp(){},repeat(){},text(){},clearText(){},launch(){},scan(){},use(){},forget(){},reconnect(){},doctor(){},pair(){},code(){return true},cancelPair(){},resetKey(){},setPref(){},packages(){},pkg(){},shot(){},probeAdb(){},adbConnect(){},log(){return ''},shareLog(){},checkUpdate(){},installUpdate(){},open(){}};
+  key(){},keyDown(){},keyUp(){},repeat(){},text(){},clearText(){},launch(){},scan(){},use(){},forget(){},reconnect(){},doctor(){},pair(){},code(){return true},cancelPair(){},resetKey(){},setPref(){},packages(){},pkg(){},shot(){},probeAdb(){},adbConnect(){},log(){return ''},shareLog(){},unblock(){},checkUpdate(){},installUpdate(){},open(){}};
 const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
 
 const T = {
@@ -437,6 +441,8 @@ const T = {
   sGo:'ابدأ استخدام الريموت',sOther:'تلفزيون تاني',sAuthT:'وافق على التلفزيون',sDocT:'محتاجين خطوة صغيرة',sDocL:'التلفزيون ظاهر على الشبكة بس مش راضي يتحكم فيه.',sSkip:'تخطي',
   setupAgain:'إعداد الاتصال من الأول',sAdbOpt:'⚡ فعّل ADB كمان (اختياري)',
   w1m:'فتحنا الإعدادات على التلفزيون. بالأسهم هنا روح لـ <b>Device Preferences / تفضيلات الجهاز ← About / حول</b>، وبعدين اضغط "كمّل".',
+  blk:'🛡️ الزرار ده بيوقّع خدمة الريموت في التلفزيون ده، فاتقفل عشان التلفزيون مايعلّقش.',blkNew:'🛡️ التلفزيون قفل الاتصال بعد الزرار ده — اتقفل علشان مايتكررش. أعد تشغيل التلفزيون (افصل الكهربا دقيقة).',unblk:'إعادة الأزرار المقفولة',
+  w1g:'هنضغط Home. بعدين بالأسهم هنا: <b>اطلع لفوق</b> لعلامة الترس ⚙️ (فوق على اليمين في الشاشة الرئيسية) ← OK ← <b>Device Preferences ← About</b>، وبعدين اضغط "كمّل".',
   filter:'دوّر…',fUser:'متثبتة',fSys:'نظام',fOff:'متوقفة',open:'فتح',disable:'إيقاف',enable:'تشغيل',uninstall:'حذف',needAdb:'محتاج ADB مفعّل على التلفزيون — افتح "فحص الاتصال" في الإعدادات.',loading:'بيحمّل…',sure:'متأكد؟'},
  en:{t_remote:'Remote',t_touch:'Touch',t_keys:'Keys',t_apps:'Apps',t_set:'Settings',input:'Input',tvset:'Settings',allapps:'Apps',search:'Search',back:'Back',home:'Home',menu:'Menu',mute:'Mute',play:'Play',
   tphint:'Swipe to move · tap = OK · long-press = options',appshint:'Tap to open on the TV · long-press to remove',tvs:'TVs',pairagain:'Pair again',iphint:'TV IP: TV Settings → Network & Internet → your Wi-Fi',
@@ -480,6 +486,8 @@ const T = {
   sGo:'Start using the remote',sOther:'Another TV',sAuthT:'Accept on the TV',sDocT:'One small step',sDocL:'The TV is on the network but won\'t accept control yet.',sSkip:'Skip',
   setupAgain:'Run connection setup again',sAdbOpt:'⚡ Also turn on ADB (optional)',
   w1m:'Settings is open on the TV. With these arrows go to <b>Device Preferences → About</b>, then tap Continue.',
+  blk:'🛡️ This key crashes this TV\'s remote service, so it\'s disabled to keep the TV from freezing.',blkNew:'🛡️ The TV dropped the link right after this key — it\'s now disabled so it can\'t happen again. Restart the TV (unplug 1 min).',unblk:'Reset disabled keys',
+  w1g:'We press Home. Then with these arrows: <b>go up</b> to the gear ⚙️ (top right of the home screen) → OK → <b>Device Preferences → About</b>, then tap Continue.',
   filter:'Search…',fUser:'Installed',fSys:'System',fOff:'Disabled',open:'Open',disable:'Disable',enable:'Enable',uninstall:'Remove',needAdb:'Needs ADB on the TV — open "Check connection" in Settings.',loading:'Loading…',sure:'Sure?'}
 };
 let S = JSON.parse(R.state()), L = S.lang || 'ar';
@@ -502,6 +510,7 @@ function bindKeys(root = document){
     let t1, t2, longOn = false, down = false;
     b.addEventListener('pointerdown', e => {
       e.preventDefault(); try{ b.setPointerCapture(e.pointerId) }catch(_){}
+      if ((S.blocked || []).includes(k)) { toast(t('blk')); return }
       down = true; b.classList.add('press');
       if (lng) { longOn = false; t1 = setTimeout(() => { longOn = true; R.keyDown(k) }, 450) }
       else { R.key(k); if (rep) t1 = setTimeout(() => { t2 = setInterval(() => R.repeat(k), 250) }, 450) }
@@ -543,6 +552,11 @@ $('#extra').innerHTML = EXTRA.map(([e,n,k]) => `<button class="k" data-k="${k}">
   ['pointerup','pointercancel'].forEach(ev => tp.addEventListener(ev, end));
 })();
 
+/* ---------- 🛡️ blocked keys ---------- */
+let toastT;
+function toast(msg){ const e = $('#toast'); e.textContent = msg; e.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => e.hidden = true, 5000) }
+function markBlocked(){ const bl = S.blocked || []; $$('[data-k]').forEach(b => b.classList.toggle('blk', bl.includes(+b.dataset.k))) }
+window.onBlocked = k => toast(t('blkNew'));
 /* ---------- nav ---------- */
 let page = 'remote';
 function moveInd(){ const b = $(`#nav button[data-p="${page}"]`), n = $('#nav'); if (!b) return; const r = b.getBoundingClientRect(), q = n.getBoundingClientRect();
@@ -636,11 +650,11 @@ function busy(){ wizShow(W.step, `<p class="mut"><span class="spin" style="width
 function wizStop(){ W.run++; clearInterval(W.timer); W.timer = null }
 function wizOpen(offer){ wizStop(); if (S.adbTools) return wizShow(6, `<p>${t('w6')}</p>`, [[t('close'), () => closeSheets()]], false); wizShow(0, offer ? `<p>${t('wOffer')}</p><p class="mut">${t('w0')}</p>` : `<p>${t('w0')}</p>`,
   [[t('start'), () => w1()], [t('skip'), () => { R.setPref('wiz', 'later'); wizStop(); closeSheets() }, true]]) }
-// 1 · open Settings with the Settings key; the user steers to About (menus differ per TV)
+// 1 · Home, then the user steers to the gear → About (the Settings key crashes some TVs' remote service)
 async function w1(){ W.my = ++W.run; busy();
-  R.key(3); await sleep(1500); R.key(176); await sleep(2200);
+  R.key(3); await sleep(1800);
   if (W.run !== W.my) return;
-  wizShow(1, `<p>${t('w1m')}</p>`, [[t('cont'), () => w2()]], true) }
+  wizShow(1, `<p>${t('w1g')}</p>`, [[t('cont'), () => w2()]], true) }
 // 2 · tap Build ×8 (Build is the last row of About)
 async function w2(auto = true){ W.my = ++W.run; busy();
   if (auto) await press(20, 25, 230);
@@ -669,6 +683,7 @@ function wizState(){
   }
 }
 $('#wizBtn').onclick = () => wizOpen(false);
+$('#unblkBtn').onclick = () => { if (confirm(t('unblk') + '?')) R.unblock() };
 function showLog(){ $('#logBox').textContent = R.log() || '—'; openSheet('#logS'); const b = $('#logBox'); b.scrollTop = b.scrollHeight }
 $('#logBtn').onclick = showLog; $('#logR').onclick = showLog; $('#logX').onclick = closeSheets; $('#logSh').onclick = () => R.shareLog();
 
@@ -872,7 +887,7 @@ function render(){
     if (S.status === 'needpair' && lastStatus !== 'code' && lastStatus !== 'pairing') prHidden = false;
     if (S.status !== 'code' && $('#codeIn')) $('#pr').innerHTML = '';
   }
-  renderTop(); renderSetup(); renderPair(); if (page === 'set') renderSet(); renderPop(); wizState();
+  markBlocked(); renderTop(); renderSetup(); renderPair(); if (page === 'set') renderSet(); renderPop(); wizState();
   if (!setupOn() && S.status === 'connected' && S.mode === 'atv' && !S.wiz && !render._probed) { render._probed = 1; setTimeout(() => R.probeAdb(), 1500) }
   const a = JSON.stringify(S.apps); if (a !== render._apps) { render._apps = a; renderApps() }
   lastStatus = S.status;

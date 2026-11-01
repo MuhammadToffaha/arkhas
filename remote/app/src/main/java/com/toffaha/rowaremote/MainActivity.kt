@@ -54,6 +54,9 @@ class MainActivity : AppCompatActivity() {
         atv = AtvClient(applicationContext, { push() }, { txt -> lastText = txt; adbReset(txt); atv.resetText(txt); js("window.onIme&&window.onIme(${JSONObject.quote(txt)})") })
         adb = AdbClient(applicationContext) { push() }
         atv.onGiveUp = { giveUp() }
+        // 🛡️ keys that crash this TV's remote service (176 Settings proven on TCL v7) + whatever we learn later
+        atv.blocked.addAll((prefs.getString("blocked", "176") ?: "176").split(",").mapNotNull { it.trim().toIntOrNull() })
+        atv.onBlockedLearned = { k -> prefs.edit().putString("blocked", atv.blocked.joinToString(",")).apply(); js("window.onBlocked&&window.onBlocked($k)"); push() }
         bindWifi()
         finder = Finder(this, { n, h, kind -> addFound(h, n, kind); push() }, { push() })
 
@@ -291,6 +294,7 @@ class MainActivity : AppCompatActivity() {
             .put("on", if (mode == "atv") (atv.isOn ?: JSONObject.NULL) else JSONObject.NULL)
             .put("vol", if (mode == "atv") atv.volLevel else -1).put("volMax", atv.volMax).put("muted", atv.muted)
             .put("app", if (mode == "adb") adb.app else atv.app)
+            .put("blocked", JSONArray(if (mode == "atv") atv.blocked.toList() else emptyList<Int>()))
             .put("adbTools", adb.connected).put("adbStatus", adb.status)
             .put("doctor", doctor ?: JSONObject.NULL)
             .put("tvs", tvs()).put("found", f).put("scanning", finder.running || scanPct in 0..99).put("scanPct", scanPct)
@@ -383,6 +387,7 @@ class MainActivity : AppCompatActivity() {
             val png = if (ensureAdb()) adb.screenshot() else null
             js("window.onShot&&window.onShot(${if (png == null) "null" else "'" + Base64.encodeToString(png, Base64.NO_WRAP) + "'"})")
         }
+        @JavascriptInterface fun unblock() { atv.blocked.clear(); prefs.edit().putString("blocked", "").apply(); push() }
         @JavascriptInterface fun checkUpdate() = io.execute { Updater.check(this@MainActivity); push() }
         @JavascriptInterface fun installUpdate() {
             if (!Updater.canInstall(this@MainActivity)) {

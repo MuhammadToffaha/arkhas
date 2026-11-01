@@ -107,6 +107,11 @@ class AtvClient(private val ctx: Context, private val onChange: () -> Unit, priv
         } catch (e: Exception) {
             if (g != gen) return
             Log.d("google: link ended reached=$reached configured=$configured ${e.javaClass.simpleName}: ${e.message}")
+            // TV dropped us within 2 s of a special key → that key kills this TV's remote service: never send it again
+            if (configured && lastSentKey != 0 && lastSentKey !in core && System.currentTimeMillis() - lastSentAt < 2000 && blocked.add(lastSentKey)) {
+                Log.d("google: key $lastSentKey crashed the TV's remote service → blocked from now on")
+                onBlockedLearned?.invoke(lastSentKey)
+            }
             synchronized(this) { sock = null; out = null }
             when {
                 // TV answered but dropped us before configuring → it doesn't trust this phone yet
@@ -188,8 +193,18 @@ class AtvClient(private val ctx: Context, private val onChange: () -> Unit, priv
      * Keys only as SHORT presses, paced (≥160 ms apart) and never piled up: a weak TV that gets a
      * "key down" without its "key up", or a flood of keys, freezes its whole input system.
      */
+    /** keys this TV's remote service crashes on (learned + known), persisted by MainActivity */
+    val blocked: MutableSet<Int> = java.util.Collections.synchronizedSet(mutableSetOf())
+    @Volatile var onBlockedLearned: ((Int) -> Unit)? = null
+    @Volatile private var lastSentKey = 0
+    @Volatile private var lastSentAt = 0L
+    /** the basics never get blocked — a drop right after them is something else */
+    private val core = setOf(19, 20, 21, 22, 23, 4, 3, 24, 25, 164, 85, 66, 67)
+
     fun key(code: Int, dir: Int = SHORT) {
         if (!connected || dir != SHORT) return
+        if (code in blocked) { Log.d("google: key $code is blocked on this TV (crashes its remote service)"); return }
+        lastSentKey = code; lastSentAt = System.currentTimeMillis()
         if (pendingKeys.get() >= 2) { Log.d("google: key $code dropped (TV still busy)"); return }
         pendingKeys.incrementAndGet()
         val body = PB().msg(10, PB().int(1, code).int(2, SHORT)).toBytes(); tx(body)
