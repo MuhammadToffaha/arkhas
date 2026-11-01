@@ -142,9 +142,29 @@ class MainActivity : AppCompatActivity() {
     private fun giveUp() = io.execute {
         val h = curHost.ifEmpty { atv.host }
         Log.d("google remote not answering → " + if (method == "auto") "trying ADB" else "connection check")
-        if (method == "auto" && Net.open(h, Net.ADB, 4000)) runOnUiThread { mode = "adb"; phase = ""; adb.connect(h, nameOf(h)) }
-        else { phase = "noports"; doctor = null; push(); runDoctor(h) }
+        if (method == "auto" && Net.open(h, Net.ADB, 4000)) { runOnUiThread { mode = "adb"; phase = ""; adb.connect(h, nameOf(h)) }; return@execute }
+        // 🔀 the TV may have a new IP after a restart (router gave .7 to another device) → look for it and follow
+        if (!rescued.contains(h)) {
+            rescued.add(h)
+            phase = "searching"; push()
+            Log.d("searching the network for the TV (maybe new IP)")
+            runOnUiThread { finder.start(10) }
+            Net.scan(applicationContext, { hit -> if (hit.adb) addFound(hit.host, null, "adb"); if (hit.atv) addFound(hit.host, null, "atv"); if (hit.cast) addFound(hit.host, null, "cast") }, { p -> scanPct = p; push() })
+            Thread.sleep(1500)
+            val name = nameOf(h)
+            val cand = synchronized(found) { found.values.filter { it.optString("host") != h && (it.optBoolean("atv") || it.optBoolean("adb")) } }
+            val pick = cand.firstOrNull { it.optString("name") == name } ?: cand.firstOrNull { it.optString("name").contains("rowa", true) } ?: cand.singleOrNull()
+            if (pick != null) {
+                val nh = pick.optString("host")
+                Log.d("TV found at new address $nh → reconnecting")
+                runOnUiThread { connectTv(nh, if (name.startsWith("TV ") || name == h) pick.optString("name") else name) }
+                return@execute
+            }
+            Log.d("no other TV with an open remote/ADB port found")
+        }
+        phase = "noports"; doctor = null; push(); runDoctor(h)
     }
+    private val rescued = mutableSetOf<String>()
 
     /** send TV traffic over Wi-Fi even when Android prefers mobile data (Wi-Fi "without internet") */
     @Volatile private var wifiOk = true
@@ -317,7 +337,7 @@ class MainActivity : AppCompatActivity() {
             if (curHost == host) { prefs.edit().remove("cur").apply(); atv.disconnect(); adb.disconnect(); mode = ""; phase = "" }
             push()
         }
-        @JavascriptInterface fun reconnect() = runOnUiThread { if (curHost.isNotEmpty()) connectTv(curHost, nameOf(curHost), save = false) }
+        @JavascriptInterface fun reconnect() = runOnUiThread { rescued.clear(); if (curHost.isNotEmpty()) connectTv(curHost, nameOf(curHost), save = false) }
         @JavascriptInterface fun doctor() { if (curHost.isNotEmpty()) { doctor = null; push(); runDoctor(curHost) } }
         @JavascriptInterface fun pair() { if (mode != "atv") { mode = "atv"; phase = ""; atv.host = curHost; atv.name = nameOf(curHost) }; atv.startPairing() }
         @JavascriptInterface fun code(c: String): Boolean = atv.submitCode(c)

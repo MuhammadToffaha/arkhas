@@ -706,7 +706,7 @@ function renderSetup(){
       <div class="mut" style="margin-top:6px">${t('iphint')}</div></div>`;
     B.querySelectorAll('.li .btn').forEach(b => b.addEventListener('click', () => { SU.pick = false }));
   } else if (step === 'conn') {
-    B.innerHTML = `<div style="text-align:center;margin-top:10px"><span class="spin"></span><p class="mut ltr">${esc(S.name)} · ${esc(S.host)}</p></div>${other}`;
+    B.innerHTML = `<div style="text-align:center;margin-top:10px"><span class="spin"></span><p class="mut">${S.status === 'searching' ? t('searching') + (S.scanPct >= 0 && S.scanPct < 100 ? ' ' + S.scanPct + '%' : '') : `<span class="ltr">${esc(S.name)} · ${esc(S.host)}</span>`}</p></div>${other}`;
   } else if (step === 'doc') {
     B.innerHTML = `<div class="card glass" style="margin-top:0">${doctorHtml()}</div>${other}`;
   } else if (step === 'pair') {
@@ -789,7 +789,7 @@ function doctorHtml(){
 }
 
 /* ---------- header / hero ---------- */
-const BUSY = ['connecting','probing','pairing','auth'];
+const BUSY = ['connecting','probing','pairing','auth','searching'];
 function renderTop(){
   const st = S.status;
   $('#chip').className = 'chip ' + (st === 'connected' ? 'ok' : BUSY.includes(st) || st === 'code' ? 'wait' : S.host ? 'bad' : '');
