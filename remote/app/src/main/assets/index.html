@@ -6,139 +6,161 @@
 <title>ROWA Remote</title>
 <style>
 :root{
-  --bg:#07080d;--s1:rgba(255,255,255,.045);--s2:rgba(255,255,255,.075);--s3:rgba(255,255,255,.11);--bd:rgba(255,255,255,.07);
-  --ink:#f2f4fa;--mut:#8a90a6;--acc:#ff5a1f;--acc2:#ff9a3c;--grad:linear-gradient(135deg,#ff4d1a,#ff9a3c);
-  --ok:#2bd67b;--warn:#ffb020;--bad:#ff4d5e;--r:22px;--glow:0 10px 30px -8px rgba(255,90,31,.55)
+  --bg:#05060a;--g1:rgba(255,255,255,.055);--g2:rgba(255,255,255,.085);--g3:rgba(255,255,255,.13);--bd:rgba(255,255,255,.09);--hi:rgba(255,255,255,.14);
+  --ink:#f5f6fb;--mut:#9095ab;--a1:#ff6a2b;--a2:#ff2e7e;--a3:#8b5cf6;
+  --grad:linear-gradient(135deg,#ff6a2b 0%,#ff2e7e 55%,#a855f7 100%);--grad2:linear-gradient(135deg,#ff7a3d,#ff3d7f);
+  --ok:#34e08a;--warn:#ffb83d;--bad:#ff5468;--r:28px
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}
 html,body{height:100%}
-body{margin:0;color:var(--ink);font-family:"Cairo",system-ui,"Noto Sans Arabic",sans-serif;display:flex;flex-direction:column;overflow:hidden;
-  background:radial-gradient(120% 60% at 50% -10%,rgba(255,90,31,.16),transparent 60%),radial-gradient(90% 50% at 100% 110%,rgba(120,80,255,.10),transparent 60%),var(--bg)}
+body{margin:0;color:var(--ink);font-family:"Cairo",system-ui,"Noto Sans Arabic",sans-serif;display:flex;flex-direction:column;overflow:hidden;background:var(--bg)}
+/* aurora */
+.aur{position:fixed;inset:-20%;z-index:-1;filter:blur(70px);opacity:.55;pointer-events:none}
+.aur i{position:absolute;border-radius:50%;animation:drift 22s ease-in-out infinite alternate}
+.aur i:nth-child(1){width:55vw;height:55vw;background:#ff6a2b;top:2%;left:10%}
+.aur i:nth-child(2){width:50vw;height:50vw;background:#ff2e7e;top:30%;right:0;animation-delay:-7s;opacity:.7}
+.aur i:nth-child(3){width:60vw;height:60vw;background:#6d28d9;bottom:0;left:0;animation-delay:-14s;opacity:.6}
+@keyframes drift{to{transform:translate(8vw,-6vh) scale(1.15)}}
+.aur:after{content:"";position:fixed;inset:0;background:linear-gradient(180deg,rgba(5,6,10,.35),rgba(5,6,10,.85) 45%,rgba(5,6,10,.95))}
 [hidden]{display:none!important}
 input{-webkit-user-select:text;user-select:text}
 button{font:inherit;color:inherit;border:0;background:none;padding:0;cursor:pointer}
 .i{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
-.i.f{fill:currentColor;stroke:none}
 .ltr{direction:ltr}
-/* ---------- header ---------- */
-header{display:flex;align-items:center;gap:10px;padding:12px 16px 6px}
-.chip{flex:1;min-width:0;display:flex;align-items:center;gap:10px;padding:8px 12px 8px 10px;border-radius:18px;background:var(--s1);border:1px solid var(--bd);backdrop-filter:blur(14px)}
-.tvic{width:38px;height:38px;border-radius:13px;display:grid;place-items:center;background:var(--s2);position:relative;flex:none}
-.tvic:after{content:"";position:absolute;width:10px;height:10px;border-radius:50%;bottom:-2px;inset-inline-end:-2px;background:var(--mut);border:2px solid #10121a}
-.chip.ok .tvic:after{background:var(--ok);box-shadow:0 0 10px var(--ok)}.chip.wait .tvic:after{background:var(--warn);animation:bl 1s infinite}.chip.bad .tvic:after{background:var(--bad)}
-@keyframes bl{50%{opacity:.25}}
-.chip b{display:block;font-size:15.5px;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.glass{background:var(--g1);border:1px solid var(--bd);backdrop-filter:blur(24px) saturate(140%);-webkit-backdrop-filter:blur(24px) saturate(140%);box-shadow:inset 0 1px 0 var(--hi)}
+/* header */
+header{display:flex;align-items:center;gap:10px;padding:14px 16px 6px}
+.chip{flex:1;min-width:0;display:flex;align-items:center;gap:11px;padding:9px 14px 9px 10px;border-radius:24px}
+.dot{width:40px;height:40px;border-radius:15px;display:grid;place-items:center;background:var(--g2);position:relative;flex:none}
+.dot:after{content:"";position:absolute;width:11px;height:11px;border-radius:50%;bottom:-2px;inset-inline-end:-2px;background:var(--mut);border:2.5px solid #0c0d14}
+.chip.ok .dot:after{background:var(--ok);box-shadow:0 0 12px var(--ok)}.chip.wait .dot:after{background:var(--warn);animation:bl 1s infinite}.chip.bad .dot:after{background:var(--bad)}
+@keyframes bl{50%{opacity:.2}}
+.chip b{display:block;font-size:16px;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:-.2px}
 .chip small{display:flex;gap:6px;align-items:center;color:var(--mut);font-size:11.5px;white-space:nowrap;overflow:hidden}
-.tag{font-size:10px;font-weight:800;letter-spacing:.4px;padding:1px 7px;border-radius:99px;background:var(--s3);color:var(--ink)}
-.tag.g{background:rgba(43,214,123,.15);color:var(--ok)}.tag.a{background:rgba(255,154,60,.16);color:var(--acc2)}
-.hb{width:50px;height:50px;border-radius:17px;display:grid;place-items:center;background:var(--s1);border:1px solid var(--bd);transition:transform .08s}
-.hb.pw{color:#ff6b6b;background:rgba(255,77,94,.10);border-color:rgba(255,77,94,.2)}
-.press{transform:scale(.93)!important;filter:brightness(1.3)}
-.vol{display:flex;align-items:center;gap:8px;margin:2px 18px 0;color:var(--mut);font-size:11px}
-.vol .t{flex:1;height:4px;border-radius:4px;background:var(--s2);overflow:hidden}.vol .t i{display:block;height:100%;background:var(--grad);transition:width .25s}
-/* ---------- banners ---------- */
-.ban{margin:8px 16px 0;padding:12px 14px;border-radius:18px;background:var(--s1);border:1px solid var(--bd);font-size:13.5px;display:flex;gap:10px;align-items:center}
-.ban .t{flex:1;line-height:1.45}.ban.bad{background:rgba(255,77,94,.08);border-color:rgba(255,77,94,.18)}.ban.warn{background:rgba(255,176,32,.08);border-color:rgba(255,176,32,.2)}
-/* ---------- pages ---------- */
-main{flex:1;overflow-y:auto;overflow-x:hidden;padding:6px 16px 110px;scrollbar-width:none}
+.tag{font-size:9.5px;font-weight:800;letter-spacing:.6px;padding:1px 7px;border-radius:99px;background:var(--g3);color:var(--ink)}
+.tag.g{background:rgba(52,224,138,.14);color:var(--ok)}.tag.a{background:rgba(255,184,61,.15);color:var(--warn)}
+.hb{width:52px;height:52px;border-radius:20px;display:grid;place-items:center;transition:transform .1s}
+.hb.pw{color:#ff7186;background:rgba(255,84,104,.12);border-color:rgba(255,84,104,.25)}
+.press{transform:scale(.92)!important;filter:brightness(1.35)}
+.vol{display:flex;align-items:center;gap:8px;margin:4px 20px 0;color:var(--mut);font-size:11px}
+.vol .t{flex:1;height:4px;border-radius:4px;background:var(--g2);overflow:hidden}.vol .t i{display:block;height:100%;background:var(--grad);transition:width .3s}
+.ban{margin:8px 16px 0;padding:12px 14px;border-radius:20px;font-size:13.5px;display:flex;gap:10px;align-items:center}
+.ban .t{flex:1;line-height:1.45}.ban.bad{background:rgba(255,84,104,.09);border-color:rgba(255,84,104,.22)}.ban.warn{background:rgba(255,184,61,.09);border-color:rgba(255,184,61,.24)}
+/* pages */
+main{flex:1;overflow-y:auto;overflow-x:hidden;padding:8px 16px 118px;scrollbar-width:none}
 main::-webkit-scrollbar{display:none}
-.page{display:none}.page.on{display:block;animation:fd .22s ease}
-@keyframes fd{from{opacity:0;transform:translateY(8px)}}
-.k{position:relative;border-radius:20px;background:var(--s1);border:1px solid var(--bd);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:3px;min-height:58px;font-size:20px;font-weight:700;transition:transform .08s,background .15s;touch-action:none;color:#dfe3ef}
+.page{display:none}.page.on{display:block;animation:fd .28s cubic-bezier(.2,.8,.2,1)}
+@keyframes fd{from{opacity:0;transform:translateY(10px) scale(.99)}}
+.k{position:relative;border-radius:22px;background:var(--g1);border:1px solid var(--bd);box-shadow:inset 0 1px 0 var(--hi);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:3px;min-height:60px;font-size:20px;font-weight:700;transition:transform .1s,background .15s;touch-action:none;color:#e4e7f2;backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
 .k small{font-size:10.5px;font-weight:600;color:var(--mut);line-height:1.1}
-.k.acc{background:var(--grad);border-color:transparent;color:#fff;box-shadow:var(--glow)}.k.acc small{color:#fff}
-.k.press{background:var(--s3)}
+.k.acc{background:var(--grad);border-color:transparent;color:#fff;box-shadow:0 14px 34px -10px rgba(255,46,126,.65),inset 0 1px 0 rgba(255,255,255,.3)}.k.acc small{color:#fff}
+.k.press{background:var(--g3)}
 .grid{display:grid;gap:10px;margin:12px 0}
 .g3{grid-template-columns:repeat(3,1fr)}.g4{grid-template-columns:repeat(4,1fr)}.g5{grid-template-columns:repeat(5,1fr)}
-/* d-pad */
-.pad{position:relative;width:min(80vw,310px);aspect-ratio:1;margin:14px auto 6px;border-radius:50%;
-  background:radial-gradient(circle at 50% 35%,#1d2130,#11131c 72%);border:1px solid var(--bd);
-  box-shadow:0 30px 60px -20px #000,inset 0 1px 0 rgba(255,255,255,.08),inset 0 -12px 30px rgba(0,0,0,.4)}
-.pad:before{content:"";position:absolute;inset:10px;border-radius:50%;border:1px dashed rgba(255,255,255,.05)}
-.pad .k{position:absolute;background:transparent;border:0;border-radius:50%;color:#c9cede;min-height:0}
+/* d-pad orb */
+.pad{position:relative;width:min(82vw,318px);aspect-ratio:1;margin:16px auto 8px;border-radius:50%;
+  background:radial-gradient(circle at 50% 30%,rgba(255,255,255,.10),rgba(255,255,255,.03) 60%),rgba(15,16,26,.6);border:1px solid var(--bd);
+  backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);box-shadow:0 40px 80px -30px #000,inset 0 1px 0 var(--hi),inset 0 -20px 40px rgba(0,0,0,.35)}
+.pad:before{content:"";position:absolute;inset:-3px;border-radius:50%;padding:2px;background:conic-gradient(from 210deg,transparent,rgba(255,106,43,.6),rgba(255,46,126,.6),rgba(139,92,246,.5),transparent 70%);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;opacity:.7}
+.pad .k{position:absolute;background:transparent;border:0;box-shadow:none;border-radius:50%;color:#d2d6e6;min-height:0;backdrop-filter:none}
 .pad .k .i{width:34px;height:34px;stroke-width:2.4}
-.pad .k.press{background:rgba(255,255,255,.06)}
+.pad .k.press{background:rgba(255,255,255,.07)}
 .pad .u{top:3%;left:30%;width:40%;height:28%}.pad .d{bottom:3%;left:30%;width:40%;height:28%}
 .pad .l{left:3%;top:30%;width:28%;height:40%}.pad .r{right:3%;top:30%;width:28%;height:40%}
-.pad .ok{left:31%;top:31%;width:38%;height:38%;background:var(--grad);color:#fff;font-size:18px;font-weight:900;letter-spacing:1px;box-shadow:0 12px 34px -6px rgba(255,90,31,.7),inset 0 2px 0 rgba(255,255,255,.25)}
-.pad .ok.press{transform:scale(.94);background:var(--grad)}
+.pad .ok{left:31%;top:31%;width:38%;height:38%;background:var(--grad);color:#fff;font-size:19px;font-weight:900;letter-spacing:1.5px;box-shadow:0 16px 40px -8px rgba(255,46,126,.75),inset 0 2px 0 rgba(255,255,255,.3)}
+.pad .ok.press{transform:scale(.93);background:var(--grad)}
 .side{display:grid;grid-template-columns:1fr 1.5fr 1fr;gap:10px;margin-top:12px}
-.rock{display:flex;flex-direction:column;border-radius:26px;background:var(--s1);border:1px solid var(--bd);overflow:hidden}
-.rock .k{flex:1;border:0;border-radius:0;background:transparent;min-height:62px}
-.rock .lb{text-align:center;font-size:10.5px;font-weight:800;letter-spacing:1px;color:var(--mut)}
+.rock{display:flex;flex-direction:column;border-radius:30px;overflow:hidden}
+.rock .k{flex:1;border:0;border-radius:0;background:transparent;box-shadow:none;min-height:64px;backdrop-filter:none}
+.rock .lb{text-align:center;font-size:10px;font-weight:800;letter-spacing:1.5px;color:var(--mut)}
 .mid{display:grid;grid-template-rows:1fr 1fr;gap:10px}
-/* touchpad */
-.tp{height:min(58vh,430px);border-radius:28px;position:relative;overflow:hidden;touch-action:none;display:flex;align-items:center;justify-content:center;text-align:center;color:var(--mut);font-size:13.5px;padding:24px;
-  background:radial-gradient(circle at 50% 50%,rgba(255,255,255,.04),transparent 70%),repeating-radial-gradient(circle at 50% 50%,rgba(255,255,255,.025) 0 1px,transparent 1px 34px),var(--s1);border:1px solid var(--bd)}
-.tp i{position:absolute;width:64px;height:64px;margin:-32px;border-radius:50%;background:radial-gradient(circle,rgba(255,90,31,.55),transparent 70%);pointer-events:none;transition:opacity .35s}
-/* cards */
-.card{background:var(--s1);border:1px solid var(--bd);border-radius:var(--r);padding:16px;margin:12px 0}
+.tp{height:min(58vh,430px);border-radius:32px;position:relative;overflow:hidden;touch-action:none;display:flex;align-items:center;justify-content:center;text-align:center;color:var(--mut);font-size:13.5px;padding:24px;
+  background:radial-gradient(circle at 50% 50%,rgba(255,255,255,.05),transparent 70%),repeating-radial-gradient(circle at 50% 50%,rgba(255,255,255,.03) 0 1px,transparent 1px 36px),var(--g1)}
+.tp i{position:absolute;width:70px;height:70px;margin:-35px;border-radius:50%;background:radial-gradient(circle,rgba(255,46,126,.6),transparent 70%);pointer-events:none;transition:opacity .35s}
+.card{border-radius:var(--r);padding:16px;margin:12px 0}
 .card h3{margin:0 0 10px;font-size:15px;display:flex;align-items:center;gap:8px}
 .li{display:flex;align-items:center;gap:12px;padding:11px 0;border-top:1px solid var(--bd)}
 .li:first-child{border-top:0}
 .li .t{flex:1;min-width:0}.li .t b{display:block;font-size:14.5px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.li .t small{color:var(--mut);font-size:12px}
-.btn{font-weight:800;font-size:14.5px;border-radius:15px;padding:12px 16px;background:var(--grad);color:#fff;box-shadow:var(--glow);display:inline-flex;align-items:center;justify-content:center;gap:6px}
-.btn.alt{background:var(--s2);color:var(--ink);box-shadow:none;border:1px solid var(--bd)}.btn.sm{padding:7px 12px;font-size:12.5px;border-radius:12px}
+.btn{font-weight:800;font-size:14.5px;border-radius:18px;padding:13px 16px;background:var(--grad);color:#fff;box-shadow:0 12px 30px -10px rgba(255,46,126,.6),inset 0 1px 0 rgba(255,255,255,.25);display:inline-flex;align-items:center;justify-content:center;gap:6px;transition:transform .1s}
+.btn:active{transform:scale(.97)}
+.btn.alt{background:var(--g2);color:var(--ink);box-shadow:inset 0 1px 0 var(--hi);border:1px solid var(--bd)}.btn.sm{padding:8px 12px;font-size:12.5px;border-radius:14px}
 .btn.wide{width:100%}.btn:disabled{opacity:.45}
-.inp{width:100%;font:inherit;font-size:16px;background:rgba(0,0,0,.25);color:var(--ink);border:1px solid var(--bd);border-radius:15px;padding:12px 14px;outline:none}
-.inp:focus{border-color:rgba(255,90,31,.6)}
+.inp{width:100%;font:inherit;font-size:16px;background:rgba(0,0,0,.3);color:var(--ink);border:1px solid var(--bd);border-radius:18px;padding:13px 15px;outline:none}
+.inp:focus{border-color:rgba(255,46,126,.6);box-shadow:0 0 0 4px rgba(255,46,126,.12)}
 .flex{display:flex;gap:8px;align-items:center}.flex>.inp{flex:1}
-.mut{color:var(--mut);font-size:12.5px;line-height:1.55}
-.seg{display:flex;background:rgba(0,0,0,.25);border:1px solid var(--bd);border-radius:14px;padding:3px;gap:3px}
-.seg button{flex:1;padding:8px 4px;border-radius:11px;font-size:12.5px;font-weight:700;color:var(--mut)}
+.mut{color:var(--mut);font-size:12.5px;line-height:1.6}
+.seg{display:flex;background:rgba(0,0,0,.3);border:1px solid var(--bd);border-radius:16px;padding:3px;gap:3px}
+.seg button{flex:1;padding:9px 4px;border-radius:13px;font-size:12.5px;font-weight:700;color:var(--mut)}
 .seg button.on{background:var(--grad);color:#fff}
-.sw{position:relative;display:inline-block;width:48px;height:28px;flex:none}
-.sw input{opacity:0;width:0;height:0}.sw i{position:absolute;inset:0;border-radius:14px;background:var(--s3);transition:.2s}
-.sw i:before{content:"";position:absolute;width:22px;height:22px;top:3px;inset-inline-start:3px;border-radius:50%;background:#fff;transition:.2s}
+.sw{position:relative;display:inline-block;width:50px;height:30px;flex:none}
+.sw input{opacity:0;width:0;height:0}.sw i{position:absolute;inset:0;border-radius:15px;background:var(--g3);transition:.2s}
+.sw i:before{content:"";position:absolute;width:24px;height:24px;top:3px;inset-inline-start:3px;border-radius:50%;background:#fff;transition:.2s;box-shadow:0 2px 6px #0005}
 .sw input:checked+i{background:var(--grad)}.sw input:checked+i:before{transform:translateX(20px)}[dir=rtl] .sw input:checked+i:before{transform:translateX(-20px)}
 .badges{display:flex;gap:4px;flex-wrap:wrap;margin-top:3px}
-.bar{height:5px;border-radius:5px;background:var(--s2);overflow:hidden;margin-top:10px}.bar i{display:block;height:100%;background:var(--grad);transition:width .3s}
-/* doctor */
+.bar{height:5px;border-radius:5px;background:var(--g2);overflow:hidden;margin-top:10px}.bar i{display:block;height:100%;background:var(--grad);transition:width .3s}
 .doc{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0}
-.doc div{background:rgba(0,0,0,.22);border-radius:14px;padding:9px 10px;font-size:12.5px;display:flex;gap:6px;align-items:center}
+.doc div{background:rgba(0,0,0,.25);border-radius:16px;padding:9px 10px;font-size:12.5px;display:flex;gap:6px;align-items:center}
 .doc .y{color:var(--ok)}.doc .n{color:var(--bad)}
-.steps{margin:8px 0 0;padding-inline-start:20px;font-size:13px;line-height:1.7}
-/* apps */
+.steps{margin:8px 0 0;padding-inline-start:20px;font-size:13px;line-height:1.75}
 .apps{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}
-.app{background:var(--s1);border:1px solid var(--bd);border-radius:20px;padding:16px 6px 12px;text-align:center;transition:transform .08s}
+.app{border-radius:24px;padding:16px 6px 12px;text-align:center;transition:transform .1s}
 .app:active{transform:scale(.95)}
 .app .e{font-size:30px;line-height:1.1}.app b{display:block;font-size:12.5px;margin-top:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.app.add{border-style:dashed;background:transparent;color:var(--mut)}
+.app.add{border-style:dashed;background:transparent;color:var(--mut);box-shadow:none}
 .tools{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
-.tool{background:var(--s1);border:1px solid var(--bd);border-radius:20px;padding:14px;text-align:start;display:flex;gap:10px;align-items:center}
-.tool .ic{width:40px;height:40px;border-radius:13px;display:grid;place-items:center;background:var(--grad);color:#fff;flex:none}
+.tool{border-radius:24px;padding:14px;text-align:start;display:flex;gap:10px;align-items:center}
+.tool .ic{width:42px;height:42px;border-radius:15px;display:grid;place-items:center;background:var(--grad);color:#fff;flex:none}
 .tool b{font-size:13.5px;display:block}.tool small{color:var(--mut);font-size:11px}
 .pk .t b{font-family:ui-monospace,monospace;font-size:12.5px;font-weight:600;direction:ltr;text-align:start}
-.cl{min-height:42px;border-radius:15px;border:0}
-/* nav */
-nav{position:fixed;left:12px;right:12px;bottom:12px;display:grid;grid-template-columns:repeat(5,1fr);background:rgba(18,20,30,.78);backdrop-filter:blur(20px);border:1px solid var(--bd);border-radius:24px;padding:7px;box-shadow:0 20px 40px -10px #000;z-index:10}
-nav button{display:flex;flex-direction:column;align-items:center;gap:2px;color:var(--mut);padding:7px 0 5px;border-radius:17px;transition:.15s}
+.cl{min-height:44px;border-radius:18px;border:0}
+nav{position:fixed;left:14px;right:14px;bottom:14px;display:grid;grid-template-columns:repeat(5,1fr);border-radius:30px;padding:7px;z-index:10;background:rgba(18,19,30,.6)}
+nav .ind{position:absolute;top:7px;bottom:7px;border-radius:23px;background:var(--g3);transition:left .3s cubic-bezier(.3,1.3,.5,1),right .3s cubic-bezier(.3,1.3,.5,1);box-shadow:inset 0 1px 0 var(--hi)}
+nav button{position:relative;display:flex;flex-direction:column;align-items:center;gap:2px;color:var(--mut);padding:8px 0 6px;border-radius:23px;transition:color .2s}
 nav button small{font-size:10.5px;font-weight:700}
-nav button.on{color:#fff;background:var(--s2)}nav button.on .i{color:var(--acc2)}
-/* sheets */
-.scrim{position:fixed;inset:0;z-index:29;background:rgba(0,0,0,.55);backdrop-filter:blur(3px);animation:fdi .2s}
+nav button.on{color:#fff}nav button.on .i{color:#ff6f9c}
+.scrim{position:fixed;inset:0;z-index:29;background:rgba(0,0,0,.5);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);animation:fdi .2s}
 @keyframes fdi{from{opacity:0}}
-.sheet{position:fixed;inset-inline:0;bottom:0;z-index:30;background:#121520;border-top:1px solid var(--bd);border-radius:28px 28px 0 0;padding:10px 18px 22px;box-shadow:0 -20px 50px #000;animation:up .25s cubic-bezier(.2,.9,.3,1);max-height:88vh;overflow-y:auto}
-.sheet:before{content:"";display:block;width:40px;height:4px;border-radius:4px;background:var(--s3);margin:0 auto 14px}
+.sheet{position:fixed;inset-inline:0;bottom:0;z-index:30;background:rgba(18,19,30,.92);backdrop-filter:blur(30px);-webkit-backdrop-filter:blur(30px);border-top:1px solid var(--bd);border-radius:32px 32px 0 0;padding:10px 18px 24px;box-shadow:0 -20px 60px #000;animation:up .3s cubic-bezier(.2,.9,.3,1);max-height:88vh;overflow-y:auto}
+.sheet:before{content:"";display:block;width:42px;height:5px;border-radius:5px;background:var(--g3);margin:0 auto 14px}
 @keyframes up{from{transform:translateY(60%);opacity:.3}}
 .sheet h3{margin:0 0 8px;font-size:17px}
-.pop{position:fixed;inset:0;z-index:40;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;padding:24px}
-.popbox{background:#151925;border:1px solid var(--bd);border-radius:26px;padding:22px 18px 16px;max-width:340px;width:100%;text-align:center;animation:pin .28s cubic-bezier(.2,1.4,.4,1)}
+.pop{position:fixed;inset:0;z-index:60;background:rgba(0,0,0,.6);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:24px}
+.popbox{border-radius:30px;padding:24px 18px 16px;max-width:340px;width:100%;text-align:center;animation:pin .3s cubic-bezier(.2,1.4,.4,1);background:rgba(22,23,36,.92)}
 .popbox .e{font-size:44px;line-height:1.1}.popbox b{display:block;font-size:18px;margin:8px 0 4px}
 .popb{display:flex;gap:8px;margin-top:16px}.popb .btn{flex:1}
 @keyframes pin{from{transform:scale(.85);opacity:0}}
-.code{font-family:ui-monospace,monospace;font-size:32px;letter-spacing:12px;text-align:center;text-transform:uppercase;direction:ltr;padding:14px}
+.code{font-family:ui-monospace,monospace;font-size:34px;letter-spacing:12px;text-align:center;text-transform:uppercase;direction:ltr;padding:16px}
 .shake{animation:sh .35s}@keyframes sh{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
 .credit{text-align:center;color:var(--mut);font-size:12px;margin:20px 0 6px;opacity:.8}
-.shot{width:100%;border-radius:14px;border:1px solid var(--bd);display:block;background:#000;min-height:120px}
-.spin{width:22px;height:22px;border-radius:50%;border:3px solid var(--s3);border-top-color:var(--acc);animation:rot .8s linear infinite;display:inline-block;vertical-align:middle}
+.shot{width:100%;border-radius:16px;border:1px solid var(--bd);display:block;background:#000;min-height:120px}
+.spin{width:22px;height:22px;border-radius:50%;border:3px solid var(--g3);border-top-color:#ff3d7f;animation:rot .8s linear infinite;display:inline-block;vertical-align:middle}
+.spin.s{width:14px;height:14px;border-width:2px}
 @keyframes rot{to{transform:rotate(360deg)}}
+/* ---------- first-time setup ---------- */
+#setup{position:fixed;inset:0;z-index:50;display:flex;flex-direction:column;padding:18px 20px 22px;overflow-y:auto;background:radial-gradient(90% 45% at 50% 18%,rgba(255,46,126,.28),transparent 70%),radial-gradient(80% 40% at 0% 100%,rgba(139,92,246,.22),transparent 70%),radial-gradient(70% 35% at 100% 70%,rgba(255,106,43,.16),transparent 70%),#06070c}
+.sTop{display:flex;align-items:center;justify-content:space-between}
+.sTop .brand{font-weight:900;font-size:15px;letter-spacing:.5px;display:flex;gap:8px;align-items:center}
+.sTop .brand i{width:26px;height:26px;border-radius:9px;background:var(--grad);display:grid;place-items:center;font-style:normal;font-size:14px}
+.prog{display:flex;gap:6px;margin:18px 0 6px}.prog i{flex:1;height:5px;border-radius:5px;background:var(--g2);transition:background .4s}.prog i.on{background:var(--grad)}
+.hero{display:grid;place-items:center;margin:20px 0 10px;position:relative;height:150px}
+.hero .tv{width:150px;height:96px;border-radius:18px;border:3px solid rgba(255,255,255,.75);position:relative;display:grid;place-items:center;background:rgba(255,255,255,.04);box-shadow:0 0 60px -10px rgba(255,46,126,.6),inset 0 0 30px rgba(255,46,126,.15)}
+.hero .tv:after{content:"";position:absolute;bottom:-16px;width:50px;height:5px;border-radius:5px;background:rgba(255,255,255,.6)}
+.hero .ring{position:absolute;width:150px;height:150px;border-radius:50%;border:2px solid rgba(255,46,126,.45);animation:ping 2.2s cubic-bezier(0,0,.2,1) infinite}
+.hero .ring:nth-child(2){animation-delay:.7s}.hero .ring:nth-child(3){animation-delay:1.4s}
+@keyframes ping{from{transform:scale(.6);opacity:1}to{transform:scale(1.9);opacity:0}}
+.hero.still .ring{display:none}
+.hero .big{font-size:40px}
+#setup h1{font-size:27px;line-height:1.2;margin:8px 0 6px;letter-spacing:-.4px;text-align:center}
+#setup .lead{color:var(--mut);font-size:14px;line-height:1.6;text-align:center;margin:0 auto 16px;max-width:340px}
+#setup .body{flex:1}
 </style>
 </head>
 <body>
+<div class="aur"><i></i><i></i><i></i></div>
 <svg width="0" height="0" style="position:absolute">
  <symbol id="i-power" viewBox="0 0 24 24"><path d="M12 2v9"/><path d="M18.4 6.6a9 9 0 1 1-12.8 0"/></symbol>
- <symbol id="i-kb" viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2.5"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M7 14h10"/></symbol>
+ <symbol id="i-kb" viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="3"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M7 14h10"/></symbol>
  <symbol id="i-up" viewBox="0 0 24 24"><path d="m6 15 6-6 6 6"/></symbol>
  <symbol id="i-down" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
  <symbol id="i-left" viewBox="0 0 24 24"><path d="m15 6-6 6 6 6"/></symbol>
@@ -170,19 +192,28 @@ nav button.on{color:#fff;background:var(--s2)}nav button.on .i{color:var(--acc2)
  <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-2.6-6.4L21 8"/><path d="M21 3v5h-5"/></symbol>
 </svg>
 
+<!-- ✨ first-time setup: find → connect → pair → done -->
+<div id="setup" hidden>
+  <div class="sTop"><div class="brand"><i>📺</i>ROWA Remote</div><button class="btn sm alt" id="sLang"></button></div>
+  <div class="prog"><i></i><i></i><i></i><i></i></div>
+  <div class="hero" id="sHero"><div class="ring"></div><div class="ring"></div><div class="ring"></div><div class="tv"><span class="big" id="sIcon">🔍</span></div></div>
+  <h1 id="sTitle"></h1>
+  <p class="lead" id="sLead"></p>
+  <div class="body" id="sBody"></div>
+</div>
+
 <header>
-  <div class="chip" id="chip">
-    <div class="tvic"><svg class="i"><use href="#i-tv"/></svg></div>
+  <div class="chip glass" id="chip">
+    <div class="dot"><svg class="i"><use href="#i-tv"/></svg></div>
     <div style="min-width:0;flex:1"><b id="tvName">ROWA</b><small><span id="tvSub"></span><span class="tag" id="tvTag" hidden></span></small></div>
   </div>
-  <button class="hb" id="kbBtn" aria-label="keyboard"><svg class="i"><use href="#i-kb"/></svg></button>
-  <button class="hb pw k" data-k="26" data-long aria-label="power"><svg class="i"><use href="#i-power"/></svg></button>
+  <button class="hb glass" id="kbBtn" aria-label="keyboard"><svg class="i"><use href="#i-kb"/></svg></button>
+  <button class="hb glass pw k" data-k="26" data-long aria-label="power"><svg class="i"><use href="#i-power"/></svg></button>
 </header>
 <div class="vol" id="vol" hidden><svg class="i" style="width:15px;height:15px"><use href="#i-voldn"/></svg><div class="t"><i id="volI"></i></div><span id="volN"></span></div>
-<div class="ban" id="ban" hidden><span id="banE" style="font-size:20px">📡</span><div class="t" id="banT"></div><button class="btn sm alt" id="banB"></button></div>
+<div class="ban glass" id="ban" hidden><span id="banE" style="font-size:20px">📡</span><div class="t" id="banT"></div><button class="btn sm alt" id="banB"></button></div>
 
 <main>
-  <!-- 🎮 remote -->
   <section class="page on" id="p-remote">
     <div id="hero"></div>
     <div class="grid g4 ltr">
@@ -204,7 +235,7 @@ nav button.on{color:#fff;background:var(--s2)}nav button.on .i{color:var(--acc2)
       <button class="k" data-k="82"><svg class="i"><use href="#i-menu"/></svg><small data-t="menu"></small></button>
     </div>
     <div class="side ltr">
-      <div class="rock">
+      <div class="rock glass">
         <button class="k" data-k="24" data-rep><svg class="i"><use href="#i-volup"/></svg></button>
         <div class="lb">VOL</div>
         <button class="k" data-k="25" data-rep><svg class="i"><use href="#i-voldn"/></svg></button>
@@ -213,7 +244,7 @@ nav button.on{color:#fff;background:var(--s2)}nav button.on .i{color:var(--acc2)
         <button class="k" data-k="164"><svg class="i"><use href="#i-mute"/></svg><small data-t="mute"></small></button>
         <button class="k acc" data-k="85"><svg class="i"><use href="#i-pp"/></svg><small data-t="play"></small></button>
       </div>
-      <div class="rock">
+      <div class="rock glass">
         <button class="k" data-k="166" data-rep><svg class="i"><use href="#i-up"/></svg></button>
         <div class="lb">CH</div>
         <button class="k" data-k="167" data-rep><svg class="i"><use href="#i-down"/></svg></button>
@@ -228,9 +259,8 @@ nav button.on{color:#fff;background:var(--s2)}nav button.on .i{color:var(--acc2)
     </div>
   </section>
 
-  <!-- 🖐️ touchpad -->
   <section class="page" id="p-touch">
-    <div class="tp" id="tp"><span data-t="tphint"></span></div>
+    <div class="tp glass" id="tp"><span data-t="tphint"></span></div>
     <div class="grid g4 ltr">
       <button class="k" data-k="4" data-long><svg class="i"><use href="#i-back"/></svg><small data-t="back"></small></button>
       <button class="k" data-k="3" data-long><svg class="i"><use href="#i-home"/></svg><small data-t="home"></small></button>
@@ -239,7 +269,6 @@ nav button.on{color:#fff;background:var(--s2)}nav button.on .i{color:var(--acc2)
     </div>
   </section>
 
-  <!-- 🔢 keys -->
   <section class="page" id="p-keys">
     <div class="grid g3 ltr" id="num"></div>
     <div class="grid g4 ltr">
@@ -251,19 +280,17 @@ nav button.on{color:#fff;background:var(--s2)}nav button.on .i{color:var(--acc2)
     <div class="grid g4 ltr" id="extra"></div>
   </section>
 
-  <!-- 📺 apps -->
   <section class="page" id="p-apps">
     <div class="mut" data-t="appshint"></div>
     <div class="apps" id="apps"></div>
     <div class="tools">
-      <button class="tool" id="tMgr"><div class="ic"><svg class="i"><use href="#i-broom"/></svg></div><div><b data-t="mgr"></b><small data-t="mgrS"></small></div></button>
-      <button class="tool" id="tShot"><div class="ic"><svg class="i"><use href="#i-cam"/></svg></div><div><b data-t="shotT"></b><small data-t="shotS"></small></div></button>
+      <button class="tool glass" id="tMgr"><div class="ic"><svg class="i"><use href="#i-broom"/></svg></div><div><b data-t="mgr"></b><small data-t="mgrS"></small></div></button>
+      <button class="tool glass" id="tShot"><div class="ic"><svg class="i"><use href="#i-cam"/></svg></div><div><b data-t="shotT"></b><small data-t="shotS"></small></div></button>
     </div>
   </section>
 
-  <!-- ⚙️ settings -->
   <section class="page" id="p-set">
-    <div class="card">
+    <div class="card glass">
       <h3>📺 <span data-t="tvs"></span></h3>
       <div id="tvList"></div>
       <div class="bar" id="scanBar" hidden><i id="scanBarI"></i></div>
@@ -273,19 +300,20 @@ nav button.on{color:#fff;background:var(--s2)}nav button.on .i{color:var(--acc2)
       </div>
       <div class="flex" style="margin-top:10px">
         <input class="inp ltr" id="ip" inputmode="decimal" placeholder="192.168.1.50">
-        <button class="btn" id="ipBtn">➕</button>
+        <button class="btn" id="ipBtn">＋</button>
       </div>
       <div class="mut" style="margin-top:6px" data-t="iphint"></div>
+      <button class="btn alt wide sm" id="setupAgain" style="margin-top:10px">✨ <span data-t="setupAgain"></span></button>
     </div>
-    <div class="card">
+    <div class="card glass">
       <h3>🔌 <span data-t="method"></span></h3>
       <div class="seg" id="seg"><button data-m="auto" data-t="mAuto"></button><button data-m="atv">Google</button><button data-m="adb">ADB</button></div>
       <div class="mut" style="margin-top:8px" data-t="methodS"></div>
       <button class="btn wide" id="wizBtn" style="margin-top:12px">⚡ <span data-t="wizT"></span></button>
       <div class="flex" style="margin-top:10px"><button class="btn alt sm" id="pairBtn" style="flex:1">🔗 <span data-t="pairagain"></span></button><button class="btn alt sm" id="keyBtn" style="flex:1">🔑 <span data-t="newkey"></span></button></div>
     </div>
-    <div class="card" id="prefs"></div>
-    <div class="card">
+    <div class="card glass" id="prefs"></div>
+    <div class="card glass">
       <h3>🔄 <span data-t="updates"></span></h3>
       <div class="li"><div class="t"><b id="verT"></b><small id="verS"></small></div><button class="btn sm" id="upBtn"></button></div>
       <div class="bar" id="upBar" hidden><i id="upBarI"></i></div>
@@ -296,7 +324,8 @@ nav button.on{color:#fff;background:var(--s2)}nav button.on .i{color:var(--acc2)
   </section>
 </main>
 
-<nav id="nav">
+<nav id="nav" class="glass">
+  <span class="ind" id="ind"></span>
   <button data-p="remote" class="on"><svg class="i"><use href="#i-remote"/></svg><small data-t="t_remote"></small></button>
   <button data-p="touch"><svg class="i"><use href="#i-touch"/></svg><small data-t="t_touch"></small></button>
   <button data-p="keys"><svg class="i"><use href="#i-hash"/></svg><small data-t="t_keys"></small></button>
@@ -305,29 +334,22 @@ nav button.on{color:#fff;background:var(--s2)}nav button.on .i{color:var(--acc2)
 </nav>
 
 <div class="scrim" id="scrim" hidden></div>
-<!-- ⌨️ keyboard -->
 <div class="sheet" id="kb" hidden>
   <h3>⌨️ <span data-t="kbtitle"></span></h3>
   <input class="inp" id="kbIn" dir="auto" autocomplete="off" autocapitalize="off" spellcheck="false">
   <div class="grid g4 ltr" style="margin-bottom:0">
-    <button class="k" data-k="67">⌫</button>
-    <button class="k" id="kbClr">🧹</button>
-    <button class="k acc" data-k="66">↵</button>
-    <button class="k" id="kbX">✕</button>
+    <button class="k" data-k="67">⌫</button><button class="k" id="kbClr">🧹</button><button class="k acc" data-k="66">↵</button><button class="k" id="kbX">✕</button>
   </div>
   <div class="mut" style="margin-top:8px" id="kbHint"></div>
 </div>
-<!-- 🔗 pairing -->
 <div class="sheet" id="pr" hidden></div>
-<!-- ➕ add app -->
 <div class="sheet" id="addApp" hidden>
   <h3>➕ <span data-t="addapp"></span></h3>
-  <div class="flex"><input class="inp" id="aE" style="max-width:72px;text-align:center" value="📺"><input class="inp" id="aN" data-ph="appname"></div>
+  <div class="flex"><input class="inp" id="aE" style="max-width:74px;text-align:center" value="📺"><input class="inp" id="aN" data-ph="appname"></div>
   <input class="inp ltr" id="aP" style="margin-top:8px" placeholder="com.example.app  ·  https://…">
   <button class="btn alt wide" id="aCur" style="margin-top:8px" hidden></button>
   <div class="flex" style="margin-top:12px"><button class="btn alt" id="aX" style="flex:1">✕</button><button class="btn" id="aOk" style="flex:2">💾</button></div>
 </div>
-<!-- 🧹 manager -->
 <div class="sheet" id="mgr" hidden>
   <h3>🧹 <span data-t="mgr"></span></h3>
   <div class="mut" data-t="mgrHint"></div>
@@ -335,21 +357,16 @@ nav button.on{color:#fff;background:var(--s2)}nav button.on .i{color:var(--acc2)
   <div class="seg" id="pkSeg" style="margin-bottom:6px"><button data-f="user" class="on" data-t="fUser"></button><button data-f="sys" data-t="fSys"></button><button data-f="off" data-t="fOff"></button></div>
   <div id="pkList"></div>
 </div>
-<!-- 📸 screen -->
 <div class="sheet" id="shotS" hidden>
   <h3>📸 <span data-t="shotT"></span></h3>
   <div id="shotBox"></div>
   <div class="flex" style="margin-top:12px"><button class="btn alt" id="shotX" style="flex:1">✕</button><button class="btn" id="shotR" style="flex:2"><svg class="i" style="width:18px;height:18px"><use href="#i-refresh"/></svg></button></div>
 </div>
-
-<!-- 📋 log -->
 <div class="sheet" id="logS" hidden>
   <h3>📋 <span data-t="logT"></span></h3>
-  <pre id="logBox" class="ltr" style="white-space:pre-wrap;word-break:break-all;font-size:11px;line-height:1.5;background:rgba(0,0,0,.3);border:1px solid var(--bd);border-radius:14px;padding:10px;max-height:52vh;overflow:auto;-webkit-user-select:text;user-select:text;margin:0"></pre>
+  <pre id="logBox" class="ltr" style="white-space:pre-wrap;word-break:break-all;font-size:11px;line-height:1.5;background:rgba(0,0,0,.35);border:1px solid var(--bd);border-radius:16px;padding:10px;max-height:52vh;overflow:auto;-webkit-user-select:text;user-select:text;margin:0"></pre>
   <div class="flex" style="margin-top:12px"><button class="btn alt" id="logX" style="flex:1">✕</button><button class="btn alt" id="logR" style="flex:1"><svg class="i" style="width:18px;height:18px"><use href="#i-refresh"/></svg></button><button class="btn" id="logSh" style="flex:2">📤 <span data-t="share"></span></button></div>
 </div>
-
-<!-- ⚡ ADB auto-setup -->
 <div class="sheet" id="wiz" hidden>
   <h3>⚡ <span data-t="wizT"></span> <span class="mut" id="wizStep" style="font-size:12px"></span></h3>
   <div id="wizBody" style="font-size:14px;line-height:1.65"></div>
@@ -361,20 +378,18 @@ nav button.on{color:#fff;background:var(--s2)}nav button.on .i{color:var(--acc2)
       <button class="k" data-k="21" data-rep><svg class="i"><use href="#i-left"/></svg></button>
       <button class="k acc" data-k="23">OK</button>
       <button class="k" data-k="22" data-rep><svg class="i"><use href="#i-right"/></svg></button>
-      <span></span>
-      <button class="k" data-k="20" data-rep><svg class="i"><use href="#i-down"/></svg></button>
-      <span></span>
+      <span></span><button class="k" data-k="20" data-rep><svg class="i"><use href="#i-down"/></svg></button><span></span>
     </div>
   </div>
   <div id="wizBtns" class="flex" style="margin-top:14px;flex-wrap:wrap"></div>
 </div>
-
-<div class="pop" id="upPop" hidden><div class="popbox">
+<div class="pop" id="upPop" hidden><div class="popbox glass">
   <div class="e">🆕</div><b id="upPopT"></b><div class="mut" id="upPopS"></div>
   <div class="popb"><button class="btn alt" id="upLater"></button><button class="btn" id="upNow"></button></div>
 </div></div>
 
 <script>
+
 const R = window.Rowa || {state:()=>JSON.stringify({status:'idle',tvs:[],found:[],lang:'ar',version:'dev',haptic:true,volKeys:true,autoKb:true,autoUpdate:true,method:'auto'}),
   key(){},keyDown(){},keyUp(){},repeat(){},text(){},clearText(){},launch(){},scan(){},use(){},forget(){},reconnect(){},doctor(){},pair(){},code(){return true},cancelPair(){},resetKey(){},setPref(){},packages(){},pkg(){},shot(){},probeAdb(){},adbConnect(){},log(){return ''},shareLog(){},checkUpdate(){},installUpdate(){},open(){}};
 const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
@@ -406,8 +421,7 @@ const T = {
   wizT:'تفعيل ADB أوتوماتيك',wizStepN:'خطوة',yes:'أيوه ✅',no:'لأ',cont:'كمّل',start:'ابدأ',skip:'بعدين',again:'جرّب تاني',close:'تمام',tap8:'اضغط Build ×8',working:'التطبيق بيحرّك التلفزيون… ماتلمسش الريموت',
   w0:'التطبيق هيفتح إعدادات التلفزيون ويفعّل <b>Developer options</b> و<b>USB debugging</b> لوحده. هيسألك بس "شايف كذا؟" في كام خطوة.<br><br>📺 خلّي شاشة التلفزيون شغالة وبص عليها.',
   wOffer:'🎉 اتصلنا! عايز نفعّل ADB كمان؟ بيفتح: إدارة تطبيقات التلفزيون، صورة الشاشة، ويخلّي الريموت يشتغل حتى لو خدمة Google وقفت.',
-  w1q:'على التلفزيون ظهرت صفحة <b>About / حول</b> (فيها Model, Version, Build)؟',
-  w1m:'افتح الإعدادات بالأسهم دي: <b>Device Preferences / تفضيلات الجهاز ← About / حول</b>، وبعدين اضغط "كمّل".',
+  w1q_:' <b>About / حول</b> (فيها Model, Version, Build)؟',
   w2q:'التلفزيون كتب <b>"You are now a developer"</b> أو <b>"already a developer"</b>؟',
   w2m:'حط التحديد على <b>Build</b> بالأسهم، واضغط "اضغط Build ×8".',
   w3q:'ظهرت صفحة <b>Developer options / خيارات المطور</b>؟',
@@ -418,6 +432,11 @@ const T = {
   w5c:'<span class="spin" style="width:14px;height:14px;border-width:2px"></span> بيتصل بـ ADB…',
   w6:'✅ <b>ADB جاهز!</b> إدارة تطبيقات التلفزيون وصورة الشاشة شغالين. ولو خدمة Google وقعت، التطبيق هيكمّل بـ ADB لوحده.',
   logT:'سجل الاتصال',logS:'ابعته لي لو فيه مشكلة',share:'مشاركة',z0:'<b>أعد تشغيل التلفزيون</b> (افصل الكهربا 30 ثانية ورجّعها) — بيصلّح خدمة الريموت لما تعلّق.',
+  sFindT:'يلا نوصّل التلفزيون',sFindL:'الموبايل والتلفزيون على نفس الواي فاي، وشاشة التلفزيون شغالة.',sConnT:'بنتصل…',sConnL:'بنكلّم التلفزيون، ثواني.',
+  sPairT:'شوف شاشة التلفزيون',sPairL:'ظهر كود من 6 حروف. اكتبه هنا.',sPairWait:'بيطلب الكود من التلفزيون…',sDoneT:'كله تمام! 🎉',sDoneL:'الريموت جاهز. التطبيق هيتصل لوحده كل مرة.',
+  sGo:'ابدأ استخدام الريموت',sOther:'تلفزيون تاني',sAuthT:'وافق على التلفزيون',sDocT:'محتاجين خطوة صغيرة',sDocL:'التلفزيون ظاهر على الشبكة بس مش راضي يتحكم فيه.',sSkip:'تخطي',
+  setupAgain:'إعداد الاتصال من الأول',sAdbOpt:'⚡ فعّل ADB كمان (اختياري)',
+  w1m:'فتحنا الإعدادات على التلفزيون. بالأسهم هنا روح لـ <b>Device Preferences / تفضيلات الجهاز ← About / حول</b>، وبعدين اضغط "كمّل".',
   filter:'دوّر…',fUser:'متثبتة',fSys:'نظام',fOff:'متوقفة',open:'فتح',disable:'إيقاف',enable:'تشغيل',uninstall:'حذف',needAdb:'محتاج ADB مفعّل على التلفزيون — افتح "فحص الاتصال" في الإعدادات.',loading:'بيحمّل…',sure:'متأكد؟'},
  en:{t_remote:'Remote',t_touch:'Touch',t_keys:'Keys',t_apps:'Apps',t_set:'Settings',input:'Input',tvset:'Settings',allapps:'Apps',search:'Search',back:'Back',home:'Home',menu:'Menu',mute:'Mute',play:'Play',
   tphint:'Swipe to move · tap = OK · long-press = options',appshint:'Tap to open on the TV · long-press to remove',tvs:'TVs',pairagain:'Pair again',iphint:'TV IP: TV Settings → Network & Internet → your Wi-Fi',
@@ -445,8 +464,7 @@ const T = {
   wizT:'Auto-enable ADB',wizStepN:'Step',yes:'Yes ✅',no:'No',cont:'Continue',start:'Start',skip:'Later',again:'Try again',close:'Done',tap8:'Press Build ×8',working:'The app is driving the TV… don\'t touch the remote',
   w0:'The app opens the TV settings and turns on <b>Developer options</b> and <b>USB debugging</b> by itself. It only asks "do you see X?" at a few steps.<br><br>📺 Keep the TV screen on and watch it.',
   wOffer:'🎉 Connected! Turn on ADB too? It unlocks the TV app manager, screenshots, and keeps the remote working even if the Google service fails.',
-  w1q:'Does the TV show the <b>About</b> page (Model, Version, Build)?',
-  w1m:'Use these arrows: <b>Device Preferences → About</b>, then tap Continue.',
+  w1q_:' the <b>About</b> page (Model, Version, Build)?',
   w2q:'Did the TV say <b>"You are now a developer"</b> or <b>"already a developer"</b>?',
   w2m:'Highlight <b>Build</b> with the arrows, then tap "Press Build ×8".',
   w3q:'Do you see the <b>Developer options</b> page?',
@@ -457,6 +475,11 @@ const T = {
   w5c:'<span class="spin" style="width:14px;height:14px;border-width:2px"></span> Connecting ADB…',
   w6:'✅ <b>ADB ready!</b> TV app manager and screenshots work. If the Google service ever drops, the app carries on with ADB.',
   logT:'Connection log',logS:'Send it to me if something fails',share:'Share',z0:'<b>Restart the TV</b> (unplug power 30 s, plug back) — fixes a stuck remote service.',
+  sFindT:'Let\'s connect your TV',sFindL:'Phone and TV on the same Wi-Fi, TV screen on.',sConnT:'Connecting…',sConnL:'Talking to the TV, a few seconds.',
+  sPairT:'Look at the TV',sPairL:'A 6-character code appeared. Type it here.',sPairWait:'Asking the TV for a code…',sDoneT:'All set! 🎉',sDoneL:'The remote is ready. It reconnects by itself every time.',
+  sGo:'Start using the remote',sOther:'Another TV',sAuthT:'Accept on the TV',sDocT:'One small step',sDocL:'The TV is on the network but won\'t accept control yet.',sSkip:'Skip',
+  setupAgain:'Run connection setup again',sAdbOpt:'⚡ Also turn on ADB (optional)',
+  w1m:'Settings is open on the TV. With these arrows go to <b>Device Preferences → About</b>, then tap Continue.',
   filter:'Search…',fUser:'Installed',fSys:'System',fOff:'Disabled',open:'Open',disable:'Disable',enable:'Enable',uninstall:'Remove',needAdb:'Needs ADB on the TV — open "Check connection" in Settings.',loading:'Loading…',sure:'Sure?'}
 };
 let S = JSON.parse(R.state()), L = S.lang || 'ar';
@@ -522,7 +545,10 @@ $('#extra').innerHTML = EXTRA.map(([e,n,k]) => `<button class="k" data-k="${k}">
 
 /* ---------- nav ---------- */
 let page = 'remote';
-function go(p){ page = p; $$('#nav button').forEach(b => b.classList.toggle('on', b.dataset.p === p)); $$('.page').forEach(s => s.classList.toggle('on', s.id === 'p-' + p)); $('main').scrollTop = 0; if (p === 'set') renderSet() }
+function moveInd(){ const b = $(`#nav button[data-p="${page}"]`), n = $('#nav'); if (!b) return; const r = b.getBoundingClientRect(), q = n.getBoundingClientRect();
+  $('#ind').style.left = (r.left - q.left) + 'px'; $('#ind').style.right = (q.right - r.right) + 'px' }
+addEventListener('resize', moveInd);
+function go(p){ page = p; $$('#nav button').forEach(b => b.classList.toggle('on', b.dataset.p === p)); moveInd(); $$('.page').forEach(s => s.classList.toggle('on', s.id === 'p-' + p)); $('main').scrollTop = 0; if (p === 'set') renderSet() }
 $$('#nav button').forEach(b => b.onclick = () => go(b.dataset.p));
 
 /* ---------- sheets ---------- */
@@ -610,13 +636,10 @@ function busy(){ wizShow(W.step, `<p class="mut"><span class="spin" style="width
 function wizStop(){ W.run++; clearInterval(W.timer); W.timer = null }
 function wizOpen(offer){ wizStop(); if (S.adbTools) return wizShow(6, `<p>${t('w6')}</p>`, [[t('close'), () => closeSheets()]], false); wizShow(0, offer ? `<p>${t('wOffer')}</p><p class="mut">${t('w0')}</p>` : `<p>${t('w0')}</p>`,
   [[t('start'), () => w1()], [t('skip'), () => { R.setPref('wiz', 'later'); wizStop(); closeSheets() }, true]]) }
-// 1 · open About (deep link first, menus as fallback)
+// 1 · open Settings with the Settings key; the user steers to About (menus differ per TV)
 async function w1(){ W.my = ++W.run; busy();
-  R.key(3); await sleep(1500);
-  R.launch('intent:#Intent;action=android.settings.DEVICE_INFO_SETTINGS;end'); await sleep(3000);
+  R.key(3); await sleep(1500); R.key(176); await sleep(2200);
   if (W.run !== W.my) return;
-  wizShow(1, `<p>${t('w1q')}</p>`, [[t('yes'), () => w2()], [t('no'), () => w1manual(), true]]) }
-async function w1manual(){ W.my = ++W.run; R.key(176); await sleep(1800); if (W.run !== W.my) return;
   wizShow(1, `<p>${t('w1m')}</p>`, [[t('cont'), () => w2()]], true) }
 // 2 · tap Build ×8 (Build is the last row of About)
 async function w2(auto = true){ W.my = ++W.run; busy();
@@ -624,13 +647,9 @@ async function w2(auto = true){ W.my = ++W.run; busy();
   await sleep(400); await press(23, 8, 380); await sleep(1200);
   if (W.run !== W.my) return;
   wizShow(2, `<p>${t('w2q')}</p>`, [[t('yes'), () => w3()], [t('no'), () => wizShow(2, `<p>${t('w2m')}</p>`, [[t('tap8'), () => w2(false)]], true), true]]) }
-// 3 · open Developer options
+// 3 · Developer options: back to Device Preferences, it sits at the bottom of the list
 async function w3(){ W.my = ++W.run; busy();
-  R.launch('intent:#Intent;action=android.settings.APPLICATION_DEVELOPMENT_SETTINGS;end'); await sleep(3000);
-  if (W.run !== W.my) return;
-  wizShow(3, `<p>${t('w3q')}</p>`, [[t('yes'), () => w4()], [t('no'), () => w3menu(), true]]) }
-async function w3menu(){ W.my = ++W.run; busy();
-  await press(4, 1); await sleep(1200); await press(20, 30, 110); await sleep(300); await press(23, 1); await sleep(2200);
+  await press(4, 1); await sleep(1300); await press(20, 30, 110); await sleep(300); await press(23, 1); await sleep(2200);
   if (W.run !== W.my) return;
   wizShow(3, `<p>${t('w3q')}</p>`, [[t('yes'), () => w4()], [t('no'), () => wizShow(3, `<p>${t('w3m')}</p>`, [[t('cont'), () => w4()]], true), true]]) }
 // 4 · user flips USB debugging; app watches port 5555
@@ -653,10 +672,76 @@ $('#wizBtn').onclick = () => wizOpen(false);
 function showLog(){ $('#logBox').textContent = R.log() || '—'; openSheet('#logS'); const b = $('#logBox'); b.scrollTop = b.scrollHeight }
 $('#logBtn').onclick = showLog; $('#logR').onclick = showLog; $('#logX').onclick = closeSheets; $('#logSh').onclick = () => R.shareLog();
 
+
+/* ---------- ✨ first-time setup: find → connect → pair → done ---------- */
+let SU = {force: false, pick: false, autoPaired: '', step: ''};
+const setupOn = () => SU.force || S.setup !== 'done';
+function sStep(){
+  if (!S.host || SU.pick) return 'find';
+  const st = S.status;
+  if (st === 'connected') return 'done';
+  if (st === 'code') return 'code';
+  if (st === 'needpair' || st === 'pairing' || st === 'paired') return 'pair';
+  if (st === 'auth') return 'auth';
+  if (st === 'noports' || st === 'unreachable') return 'doc';
+  return 'conn';
+}
+function renderSetup(){
+  const on = setupOn(); $('#setup').hidden = !on; if (!on) return;
+  const step = sStep(), first = step !== SU.step; SU.step = step;
+  const idx = {find: 1, conn: 2, doc: 2, pair: 3, code: 3, auth: 3, done: 4}[step];
+  $$('.prog i').forEach((e, i) => e.classList.toggle('on', i < idx));
+  $('#sLang').textContent = L === 'ar' ? 'EN' : 'ع';
+  const hero = $('#sHero'), still = step === 'done' || step === 'doc';
+  hero.classList.toggle('still', still);
+  $('#sIcon').textContent = {find: '🔍', conn: '📡', doc: '🩺', pair: '🔗', code: '🔢', auth: '✋', done: '✅'}[step];
+  const T2 = {find: ['sFindT','sFindL'], conn: ['sConnT','sConnL'], doc: ['sDocT','sDocL'], pair: ['sPairT', S.status === 'needpair' ? 'sPairWait' : 'sPairWait'], code: ['sPairT','sPairL'], auth: ['sAuthT','authT'], done: ['sDoneT','sDoneL']}[step];
+  $('#sTitle').textContent = t(T2[0]); $('#sLead').textContent = t(T2[1]);
+  const other = `<button class="btn alt wide" style="margin-top:10px" onclick="SU.pick=true;R.scan();renderSetup()">📺 ${t('sOther')}</button>`;
+  const B = $('#sBody');
+  if (step === 'find') {
+    B.innerHTML = `<div class="card glass" style="margin-top:0">${foundList()}
+      ${S.scanning ? `<div class="bar"><i style="width:${Math.max(5, S.scanPct)}%"></i></div>` : `<button class="btn alt wide" style="margin-top:12px" onclick="R.scan()">${t('scan')}</button>`}
+      <div class="flex" style="margin-top:10px"><input class="inp ltr" id="ip3" inputmode="decimal" placeholder="192.168.1.50"><button class="btn" onclick="SU.pick=false;manualIp('#ip3')">＋</button></div>
+      <div class="mut" style="margin-top:6px">${t('iphint')}</div></div>`;
+    B.querySelectorAll('.li .btn').forEach(b => b.addEventListener('click', () => { SU.pick = false }));
+  } else if (step === 'conn') {
+    B.innerHTML = `<div style="text-align:center;margin-top:10px"><span class="spin"></span><p class="mut ltr">${esc(S.name)} · ${esc(S.host)}</p></div>${other}`;
+  } else if (step === 'doc') {
+    B.innerHTML = `<div class="card glass" style="margin-top:0">${doctorHtml()}</div>${other}`;
+  } else if (step === 'pair') {
+    // do it for the user: TV doesn't know this phone yet → ask for the code right away (once per TV)
+    if (S.status === 'needpair' && SU.autoPaired !== S.host && S.error !== 'badcode') { SU.autoPaired = S.host; setTimeout(() => R.pair(), 300) }
+    const failed = S.status === 'needpair' && (SU.autoPaired === S.host);
+    B.innerHTML = `<div style="text-align:center;margin-top:6px">${failed ? `<p>${S.error === 'badcode' ? t('prBad') : t('prNeedS')}</p><button class="btn wide" onclick="R.pair()">🔗 ${t('prStart')}</button>
+        <button class="btn alt wide" style="margin-top:10px" onclick="R.setPref('method','adb')">${t('prAdb')}</button>` : `<span class="spin"></span>`}</div>${other}`;
+  } else if (step === 'code') {
+    if (first || !$('#sCode')) {
+      B.innerHTML = `<input class="inp code glass" id="sCode" maxlength="6" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="••••••">
+        <div class="mut" id="sCodeErr" style="margin-top:10px;min-height:22px;text-align:center"></div>
+        <button class="btn wide" id="sCodeOk" style="margin-top:6px">🔗 ${t('pairNow')}</button>${other}`;
+      const i = $('#sCode'); setTimeout(() => i.focus(), 120);
+      const send = () => { const v = i.value.trim().toUpperCase(); if (v.length !== 6) return;
+        if (!R.code(v)) { $('#sCodeErr').textContent = t('prBad'); i.classList.remove('shake'); void i.offsetWidth; i.classList.add('shake'); i.select() }
+        else $('#sCodeErr').innerHTML = `<span class="spin s"></span> ${t('prWait')}` };
+      i.addEventListener('input', () => { i.value = i.value.toUpperCase().replace(/[^0-9A-F]/g, ''); if (i.value.length === 6) send() });
+      $('#sCodeOk').onclick = send;
+    }
+  } else if (step === 'auth') {
+    B.innerHTML = `<div style="text-align:center"><span class="spin"></span></div>${other}`;
+  } else if (step === 'done') {
+    B.innerHTML = `<button class="btn wide" onclick="finishSetup()">${t('sGo')}</button>
+      ${S.mode === 'atv' && !S.adbTools ? `<button class="btn alt wide" style="margin-top:10px" onclick="finishSetup();wizOpen(false)">${t('sAdbOpt')}</button>` : ''}`;
+  }
+}
+function finishSetup(){ SU.force = false; SU.pick = false; R.setPref('setup', 'done'); S.setup = 'done'; renderSetup(); render(); moveInd() }
+$('#sLang').onclick = () => { L = L === 'ar' ? 'en' : 'ar'; R.setPref('lang', L); applyLang(); SU.step = ''; render(); renderApps() };
+$('#setupAgain').onclick = () => { SU.force = true; SU.step = ''; SU.autoPaired = ''; renderSetup() };
+
 /* ---------- pairing ---------- */
 let prHidden = false, lastStatus = '';
 function renderPair(){
-  const st = S.status, show = S.mode === 'atv' && ['needpair','pairing','code','paired'].includes(st) && !prHidden;
+  const st = S.status, show = !setupOn() && S.mode === 'atv' && ['needpair','pairing','code','paired'].includes(st) && !prHidden;
   $('#pr').hidden = !show;
   if (!show) { if (SHEETS.every(s => $(s).hidden)) $('#scrim').hidden = true; return }
   $('#scrim').hidden = false;
@@ -774,7 +859,7 @@ $('#keyBtn').onclick = () => { if (confirm(t('newkeyhint') + '?')) { prHidden = 
 /* ---------- update pop-up (once per open) ---------- */
 let popShown = false;
 function renderPop(){
-  if (popShown || !S.update) return; popShown = true;
+  if (popShown || !S.update || setupOn()) return; popShown = true;
   $('#upPopT').textContent = `${t('newVer')} 1.0.${S.latest}`; $('#upPopS').textContent = `${t('current')}: ${S.version}`;
   $('#upLater').textContent = t('later'); $('#upNow').textContent = t('updateNow'); $('#upPop').hidden = false;
 }
@@ -787,8 +872,8 @@ function render(){
     if (S.status === 'needpair' && lastStatus !== 'code' && lastStatus !== 'pairing') prHidden = false;
     if (S.status !== 'code' && $('#codeIn')) $('#pr').innerHTML = '';
   }
-  renderTop(); renderPair(); if (page === 'set') renderSet(); renderPop(); wizState();
-  if (S.status === 'connected' && S.mode === 'atv' && !S.wiz && !render._probed) { render._probed = 1; setTimeout(() => R.probeAdb(), 1500) }
+  renderTop(); renderSetup(); renderPair(); if (page === 'set') renderSet(); renderPop(); wizState();
+  if (!setupOn() && S.status === 'connected' && S.mode === 'atv' && !S.wiz && !render._probed) { render._probed = 1; setTimeout(() => R.probeAdb(), 1500) }
   const a = JSON.stringify(S.apps); if (a !== render._apps) { render._apps = a; renderApps() }
   lastStatus = S.status;
 }
@@ -800,7 +885,8 @@ window.rowaBack = () => {
   if (page !== 'remote') { go('remote'); return true }
   return false;
 };
-applyLang(); bindKeys(); render();
+applyLang(); bindKeys(); render(); setTimeout(moveInd, 50);
+
 </script>
 </body>
 </html>

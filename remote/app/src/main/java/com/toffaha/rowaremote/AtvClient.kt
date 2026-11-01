@@ -47,6 +47,7 @@ class AtvClient(private val ctx: Context, private val onChange: () -> Unit, priv
     /** called when the TV never answered on 6466 (twice) — MainActivity then tries ADB / shows the check */
     @Volatile var onGiveUp: (() -> Unit)? = null
     private var everConnected = false
+    private var activeFeatures = FEATURES
 
     private var gen = 0
     private var sock: Socket? = null
@@ -132,11 +133,12 @@ class AtvClient(private val ctx: Context, private val onChange: () -> Unit, priv
                 Log.d("google: TV hello features=$supported model=${c.msg(2)?.str(1)} vendor=${c.msg(2)?.str(2)} ver=${c.msg(2)?.str(6)}")
                 c.msg(2)?.let { tvModel = it.str(1); tvVendor = it.str(2) }
                 val active = if (supported != 0) FEATURES and supported else FEATURES
+                activeFeatures = active
                 send(PB().msg(1, PB().int(1, active).msg(2, PB().int(3, 1).str(4, "1").str(5, "atvremote").str(6, "1.0.0"))))
                 everConnected = true
                 set("connected")
             }
-            m.has(2) -> send(PB().msg(2, PB().int(1, FEATURES)))                  // remote_set_active
+            m.has(2) -> send(PB().msg(2, PB().int(1, activeFeatures)))            // remote_set_active: echo the agreed set
             m.has(8) -> send(PB().msg(9, PB().int(1, m.msg(8)?.int(1) ?: 0)))     // ping → pong
             m.has(20) -> {                                                          // ime key inject: current app + text field
                 val k = m.msg(20)!!
@@ -178,7 +180,11 @@ class AtvClient(private val ctx: Context, private val onChange: () -> Unit, priv
     }
 
     /** open an app: "market://launch?id=<package>" or an app link like https://www.netflix.com/title */
-    fun launch(link: String) { if (connected && link.isNotBlank()) send(PB().msg(90, PB().str(1, link))) }
+    fun launch(link: String) {
+        // intent:/custom schemes can crash some TVs' remote service → only Play Store and web links
+        if (connected && (link.startsWith("market://") || link.startsWith("https://") || link.startsWith("http://"))) send(PB().msg(90, PB().str(1, link)))
+        else Log.d("google: skipped launch link $link")
+    }
 
     // ---------------- pairing (port 6467, "polo" protocol) ----------------
 
