@@ -290,6 +290,7 @@ nav button.on{color:#fff;background:var(--s2)}nav button.on .i{color:var(--acc2)
       <div class="li"><div class="t"><b id="verT"></b><small id="verS"></small></div><button class="btn sm" id="upBtn"></button></div>
       <div class="bar" id="upBar" hidden><i id="upBarI"></i></div>
       <div class="li"><div class="t"><b>🌐 <span data-t="lang"></span></b></div><button class="btn sm alt" id="langBtn"></button></div>
+      <div class="li"><div class="t"><b>📋 <span data-t="logT"></span></b><small data-t="logS"></small></div><button class="btn sm alt" id="logBtn">👁️</button></div>
     </div>
     <div class="credit">Designed by Muhammad Toffaha · <span id="credV"></span></div>
   </section>
@@ -341,6 +342,13 @@ nav button.on{color:#fff;background:var(--s2)}nav button.on .i{color:var(--acc2)
   <div class="flex" style="margin-top:12px"><button class="btn alt" id="shotX" style="flex:1">✕</button><button class="btn" id="shotR" style="flex:2"><svg class="i" style="width:18px;height:18px"><use href="#i-refresh"/></svg></button></div>
 </div>
 
+<!-- 📋 log -->
+<div class="sheet" id="logS" hidden>
+  <h3>📋 <span data-t="logT"></span></h3>
+  <pre id="logBox" class="ltr" style="white-space:pre-wrap;word-break:break-all;font-size:11px;line-height:1.5;background:rgba(0,0,0,.3);border:1px solid var(--bd);border-radius:14px;padding:10px;max-height:52vh;overflow:auto;-webkit-user-select:text;user-select:text;margin:0"></pre>
+  <div class="flex" style="margin-top:12px"><button class="btn alt" id="logX" style="flex:1">✕</button><button class="btn alt" id="logR" style="flex:1"><svg class="i" style="width:18px;height:18px"><use href="#i-refresh"/></svg></button><button class="btn" id="logSh" style="flex:2">📤 <span data-t="share"></span></button></div>
+</div>
+
 <!-- ⚡ ADB auto-setup -->
 <div class="sheet" id="wiz" hidden>
   <h3>⚡ <span data-t="wizT"></span> <span class="mut" id="wizStep" style="font-size:12px"></span></h3>
@@ -368,7 +376,7 @@ nav button.on{color:#fff;background:var(--s2)}nav button.on .i{color:var(--acc2)
 
 <script>
 const R = window.Rowa || {state:()=>JSON.stringify({status:'idle',tvs:[],found:[],lang:'ar',version:'dev',haptic:true,volKeys:true,autoKb:true,autoUpdate:true,method:'auto'}),
-  key(){},keyDown(){},keyUp(){},repeat(){},text(){},clearText(){},launch(){},scan(){},use(){},forget(){},reconnect(){},doctor(){},pair(){},code(){return true},cancelPair(){},resetKey(){},setPref(){},packages(){},pkg(){},shot(){},probeAdb(){},adbConnect(){},checkUpdate(){},installUpdate(){},open(){}};
+  key(){},keyDown(){},keyUp(){},repeat(){},text(){},clearText(){},launch(){},scan(){},use(){},forget(){},reconnect(){},doctor(){},pair(){},code(){return true},cancelPair(){},resetKey(){},setPref(){},packages(){},pkg(){},shot(){},probeAdb(){},adbConnect(){},log(){return ''},shareLog(){},checkUpdate(){},installUpdate(){},open(){}};
 const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
 
 const T = {
@@ -409,6 +417,7 @@ const T = {
   w5:'📺 على التلفزيون ظهرت رسالة <b>Allow USB debugging?</b> — علّم <b>Always allow from this computer</b> واضغط <b>OK</b> (بالأسهم هنا أو بالريموت العادي).',
   w5c:'<span class="spin" style="width:14px;height:14px;border-width:2px"></span> بيتصل بـ ADB…',
   w6:'✅ <b>ADB جاهز!</b> إدارة تطبيقات التلفزيون وصورة الشاشة شغالين. ولو خدمة Google وقعت، التطبيق هيكمّل بـ ADB لوحده.',
+  logT:'سجل الاتصال',logS:'ابعته لي لو فيه مشكلة',share:'مشاركة',z0:'<b>أعد تشغيل التلفزيون</b> (افصل الكهربا 30 ثانية ورجّعها) — بيصلّح خدمة الريموت لما تعلّق.',
   filter:'دوّر…',fUser:'متثبتة',fSys:'نظام',fOff:'متوقفة',open:'فتح',disable:'إيقاف',enable:'تشغيل',uninstall:'حذف',needAdb:'محتاج ADB مفعّل على التلفزيون — افتح "فحص الاتصال" في الإعدادات.',loading:'بيحمّل…',sure:'متأكد؟'},
  en:{t_remote:'Remote',t_touch:'Touch',t_keys:'Keys',t_apps:'Apps',t_set:'Settings',input:'Input',tvset:'Settings',allapps:'Apps',search:'Search',back:'Back',home:'Home',menu:'Menu',mute:'Mute',play:'Play',
   tphint:'Swipe to move · tap = OK · long-press = options',appshint:'Tap to open on the TV · long-press to remove',tvs:'TVs',pairagain:'Pair again',iphint:'TV IP: TV Settings → Network & Internet → your Wi-Fi',
@@ -447,6 +456,7 @@ const T = {
   w5:'📺 The TV shows <b>Allow USB debugging?</b> — tick <b>Always allow from this computer</b> and press <b>OK</b> (arrows here or the normal remote).',
   w5c:'<span class="spin" style="width:14px;height:14px;border-width:2px"></span> Connecting ADB…',
   w6:'✅ <b>ADB ready!</b> TV app manager and screenshots work. If the Google service ever drops, the app carries on with ADB.',
+  logT:'Connection log',logS:'Send it to me if something fails',share:'Share',z0:'<b>Restart the TV</b> (unplug power 30 s, plug back) — fixes a stuck remote service.',
   filter:'Search…',fUser:'Installed',fSys:'System',fOff:'Disabled',open:'Open',disable:'Disable',enable:'Enable',uninstall:'Remove',needAdb:'Needs ADB on the TV — open "Check connection" in Settings.',loading:'Loading…',sure:'Sure?'}
 };
 let S = JSON.parse(R.state()), L = S.lang || 'ar';
@@ -516,7 +526,7 @@ function go(p){ page = p; $$('#nav button').forEach(b => b.classList.toggle('on'
 $$('#nav button').forEach(b => b.onclick = () => go(b.dataset.p));
 
 /* ---------- sheets ---------- */
-const SHEETS = ['#kb','#addApp','#mgr','#shotS','#wiz'];
+const SHEETS = ['#kb','#addApp','#mgr','#shotS','#wiz','#logS'];
 function openSheet(id){ SHEETS.forEach(s => $(s).hidden = s !== id); $('#scrim').hidden = false }
 function closeSheets(){ if (!$('#wiz').hidden && typeof wizStop === 'function') { wizStop(); W.step = -1 } SHEETS.forEach(s => $(s).hidden = true); $('#scrim').hidden = !!$('#pr').hidden; $('#kbIn').blur() }
 $('#scrim').onclick = () => { if (!$('#pr').hidden && S.status !== 'pairing') { prHidden = true; if (S.status === 'code') R.cancelPair(); renderPair() } closeSheets() };
@@ -640,6 +650,8 @@ function wizState(){
   }
 }
 $('#wizBtn').onclick = () => wizOpen(false);
+function showLog(){ $('#logBox').textContent = R.log() || '—'; openSheet('#logS'); const b = $('#logBox'); b.scrollTop = b.scrollHeight }
+$('#logBtn').onclick = showLog; $('#logR').onclick = showLog; $('#logX').onclick = closeSheets; $('#logSh').onclick = () => R.shareLog();
 
 /* ---------- pairing ---------- */
 let prHidden = false, lastStatus = '';
@@ -683,12 +695,12 @@ function doctorHtml(){
   if (!d.sameNet) advice = `<p>${t('aNet')}</p>`;
   else if (!d.ping) advice = `<p>${t('aPing')}</p>`;
   else if (d.adb && !d.atv) advice = `<p>${t('aAdbOk')}</p><button class="btn wide" onclick="R.setPref('method','adb')">${t('useAdb')}</button>`;
-  else if (!d.atv && !d.adb && (d.atvState === 'timeout' || d.adbState === 'timeout') && d.atvState !== 'refused') advice = `<p>${t('aSleep')}</p><ol class="steps"><li>${t('z1')}</li><li>${t('z2')}</li><li>${t('z3')}</li><li>${t('z4')}</li></ol><ol class="steps" start="5"><li>${t('s2')}</li><li>${t('s3')}</li></ol>`;
+  else if (!d.atv && !d.adb && (d.atvState === 'timeout' || d.adbState === 'timeout') && d.atvState !== 'refused') advice = `<p>${t('aSleep')}</p><ol class="steps"><li>${t('z0')}</li><li>${t('z1')}</li><li>${t('z2')}</li><li>${t('z3')}</li><li>${t('z4')}</li></ol><ol class="steps" start="6"><li>${t('s2')}</li><li>${t('s3')}</li></ol>`;
   else if (!d.atv && !d.adb) advice = `<p>${old ? t('aOld') + '<br>' : ''}${t('aShut')}</p><ol class="steps"><li>${t('s1')}</li><li>${t('s2')}</li><li>${t('s3')}</li><li>${t('s4')}</li></ol>`;
   else advice = d.adb ? `<button class="btn alt wide" onclick="R.setPref('method','adb')">${t('useAdb')}</button>` : '';
   return `<div class="doc ltr">${yn(true, t('dPhone') + ' ' + esc(d.phone || '?'))}${yn(d.sameNet, t('dSame'))}${yn(d.ping, t('dPing'))}${yn(d.atv, t('dAtv') + ' 6466')}${yn(d.pair, t('dPair') + ' 6467')}${yn(d.adb, t('dAdb') + ' 5555')}</div>
     <div style="font-size:13.5px;line-height:1.6">${advice}</div>
-    <button class="btn alt wide" style="margin-top:10px" onclick="R.reconnect()">🔄 ${t('retry')}</button>`;
+    <div class="flex" style="margin-top:10px"><button class="btn alt" style="flex:2" onclick="R.reconnect()">🔄 ${t('retry')}</button><button class="btn alt" style="flex:1" onclick="showLog()">📋</button></div>`;
 }
 
 /* ---------- header / hero ---------- */

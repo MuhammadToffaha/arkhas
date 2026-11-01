@@ -57,7 +57,7 @@ class AtvClient(private val ctx: Context, private val onChange: () -> Unit, priv
     private var fieldCounter = 0
     private val writer = Executors.newSingleThreadExecutor()
 
-    private fun set(s: String, e: String = "") { status = s; error = e; onChange() }
+    private fun set(s: String, e: String = "") { if (s != status || e != error) Log.d("google: $s${if (e.isNotEmpty()) " ($e)" else ""}"); status = s; error = e; onChange() }
 
     private fun open(port: Int, readTimeout: Int): SSLSocket {
         // cheap TVs nap their Wi-Fi: a ping wakes the radio, then a patient connect
@@ -104,6 +104,7 @@ class AtvClient(private val ctx: Context, private val onChange: () -> Unit, priv
             }
         } catch (e: Exception) {
             if (g != gen) return
+            Log.d("google: link ended reached=$reached configured=$configured ${e.javaClass.simpleName}: ${e.message}")
             synchronized(this) { sock = null; out = null }
             when {
                 // TV answered but dropped us before configuring → it doesn't trust this phone yet
@@ -115,7 +116,7 @@ class AtvClient(private val ctx: Context, private val onChange: () -> Unit, priv
                 }
                 wanted -> {
                     set("offline", if (configured) "reconnecting" else (e.message ?: "unreachable"))
-                    Thread.sleep(minOf(10_000L, 1500L * (attempt + 1)))
+                    Thread.sleep(minOf(15_000L, 3000L * (attempt + 1)))
                     if (g == gen && wanted) { set("connecting"); runRemote(g, attempt + 1) }
                 }
                 else -> set("offline", e.message ?: "")
@@ -128,6 +129,7 @@ class AtvClient(private val ctx: Context, private val onChange: () -> Unit, priv
             m.has(1) -> {   // remote_configure: TV says hello + what it supports
                 val c = m.msg(1)!!
                 val supported = c.int(1)
+                Log.d("google: TV hello features=$supported model=${c.msg(2)?.str(1)} vendor=${c.msg(2)?.str(2)} ver=${c.msg(2)?.str(6)}")
                 c.msg(2)?.let { tvModel = it.str(1); tvVendor = it.str(2) }
                 val active = if (supported != 0) FEATURES and supported else FEATURES
                 send(PB().msg(1, PB().int(1, active).msg(2, PB().int(3, 1).str(4, "1").str(5, "atvremote").str(6, "1.0.0"))))
@@ -150,7 +152,7 @@ class AtvClient(private val ctx: Context, private val onChange: () -> Unit, priv
                 val v = m.msg(50)!!
                 volMax = v.int(6).takeIf { it > 0 } ?: 100; volLevel = v.int(7); muted = v.bool(8); onChange()
             }
-            m.has(3) -> { error = "TV error"; onChange() }
+            m.has(3) -> { Log.d("google: TV sent error"); error = "TV error"; onChange() }
         }
     }
 

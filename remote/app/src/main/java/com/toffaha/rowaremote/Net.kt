@@ -20,6 +20,25 @@ object Net {
         Socket().use { it.connect(InetSocketAddress(host, port), timeout) }; "open"
     } catch (e: java.net.SocketTimeoutException) { "timeout" } catch (e: java.net.ConnectException) { "refused" } catch (e: Exception) { "timeout" }
 
+    /**
+     * Google remote ports get a real TLS handshake + clean close, never a bare TCP open/close:
+     * some TVs' remote service jams after a few half-open connections and then stops answering at all.
+     */
+    fun tls(ctx: android.content.Context, host: String, port: Int, timeout: Int): String {
+        val plain = Socket()
+        return try {
+            plain.connect(InetSocketAddress(host, port), timeout)
+            try {
+                (Cert.ssl(ctx).socketFactory.createSocket(plain, host, port, true) as javax.net.ssl.SSLSocket).use {
+                    it.soTimeout = 6000; it.startHandshake()
+                }
+            } catch (_: Exception) { runCatching { plain.close() } }
+            "open"
+        } catch (e: java.net.SocketTimeoutException) { runCatching { plain.close() }; "timeout" }
+        catch (e: java.net.ConnectException) { runCatching { plain.close() }; "refused" }
+        catch (e: Exception) { runCatching { plain.close() }; "timeout" }
+    }
+
     /** phone's own Wi-Fi IPv4 */
     fun localIp(): String? = runCatching {
         NetworkInterface.getNetworkInterfaces().toList()
@@ -32,7 +51,7 @@ object Net {
     data class Hit(val host: String, val atv: Boolean, val adb: Boolean, val cast: Boolean)
 
     /** probe every address of the /24 for the remote (6466), ADB (5555) and Cast (8009) ports */
-    fun scan(onHit: (Hit) -> Unit, onProgress: (Int) -> Unit) {
+    fun scan(ctx: android.content.Context, onHit: (Hit) -> Unit, onProgress: (Int) -> Unit) {
         val me = localIp() ?: return
         val base = me.substringBeforeLast('.')
         val pool = Executors.newFixedThreadPool(48)
@@ -41,7 +60,10 @@ object Net {
             val h = "$base.$i"
             if (h == me) { done.incrementAndGet(); continue }
             pool.execute {
-                val atv = open(h, ATV, 450); val adb = open(h, ADB, 450)
+                val adb = open(h, ADB, 450)
+                // only knock on 6466 (with TLS) if the address is alive at all
+                val alive = adb || runCatching { InetAddress.getByName(h).isReachable(350) }.getOrDefault(false)
+                val atv = alive && tls(ctx, h, ATV, 600) == "open"
                 val cast = if (atv || adb) open(h, CAST, 450) else false
                 if (atv || adb) onHit(Hit(h, atv, adb, cast))
                 val d = done.incrementAndGet(); if (d % 16 == 0) onProgress(d * 100 / 254)
@@ -51,15 +73,15 @@ object Net {
     }
 
     /** 🩺 what works and what doesn't between this phone and the TV */
-    fun doctor(host: String): Map<String, Any> {
+    fun doctor(ctx: android.content.Context, host: String): Map<String, Any> {
         val me = localIp() ?: ""
         val sameNet = me.isNotEmpty() && host.substringBeforeLast('.') == me.substringBeforeLast('.')
         val ping = runCatching { InetAddress.getByName(host).isReachable(2500) }.getOrDefault(false)
-        val a = state(host, ATV, 4000); val p = state(host, ATV_PAIR, 4000)
+        val a = tls(ctx, host, ATV, 4000); val p = tls(ctx, host, ATV_PAIR, 4000)
         val d = state(host, ADB, 4000); val c = state(host, CAST, 3000)
         val answered = ping || listOf(a, p, d, c).any { it != "timeout" }
         return mapOf("phone" to me, "host" to host, "sameNet" to sameNet, "ping" to answered,
             "atv" to (a == "open"), "pair" to (p == "open"), "adb" to (d == "open"), "cast" to (c == "open"),
-            "atvState" to a, "adbState" to d)
+            "atvState" to a, "adbState" to d).also { Log.d("doctor $host: ping=$ping 6466=$a 6467=$p 5555=$d 8009=$c phone=$me") }
     }
 }

@@ -98,17 +98,25 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private val ui = android.os.Handler(android.os.Looper.getMainLooper())
+    private val linger = Runnable { Log.d("left app 3 min → disconnect"); atv.disconnect(); adb.disconnect() }
+    private fun cancelLinger() = ui.removeCallbacks(linger)
+
     override fun onStart() {
         super.onStart()
         visible = true; InstallReceiver.foreground = true
+        cancelLinger()
         val cur = prefs.getString("cur", "") ?: ""
+        val st = status()
+        if (cur.isNotEmpty() && (live || st == "connecting" || st == "pairing" || st == "code" || st == "auth")) { push(); return }
         if (cur.isNotEmpty()) connectTv(cur, nameOf(cur), save = false) else scan()
     }
 
     override fun onStop() {
         super.onStop()
         visible = false; InstallReceiver.foreground = false
-        atv.disconnect(); adb.disconnect(); finder.finish()
+        finder.finish()
+        ui.postDelayed(linger, 3 * 60_000L)
     }
 
     // ---------------- connection ----------------
@@ -118,28 +126,22 @@ class MainActivity : AppCompatActivity() {
     private fun connectTv(host: String, name: String, save: Boolean = true) {
         if (host.isBlank()) return
         if (save) saveTv(host, name)
+        cancelLinger()
         atv.disconnect(); adb.disconnect()
         atv.host = host; atv.name = name; adb.host = host; adb.name = name
-        mode = ""; phase = "probing"; doctor = null; push()
-        io.execute {
-            val m = method
-            runCatching { java.net.InetAddress.getByName(host).isReachable(1000) }   // wake a napping TV radio
-            val a = m != "adb" && (Net.open(host, Net.ATV, 3500) || Net.open(host, Net.ATV, 3500))
-            val d = !a && m != "atv" && Net.open(host, Net.ADB, 3500)
-            runOnUiThread {
-                if (curHost.isNotEmpty() && curHost != host) return@runOnUiThread
-                when {
-                    a -> { mode = "atv"; phase = ""; atv.connect(host, name) }
-                    d -> { mode = "adb"; phase = ""; adb.connect(host, name) }
-                    else -> { phase = "noports"; push(); runDoctor(host) }
-                }
-            }
-        }
+        doctor = null
+        val m = method
+        Log.d("connect $name $host method=$m")
+        // no bare port probe on 6466: go straight to the real (TLS) connection; AtvClient falls back via giveUp()
+        if (m == "adb") { mode = "adb"; phase = ""; adb.connect(host, name) }
+        else { mode = "atv"; phase = ""; atv.connect(host, name) }
+        push()
     }
 
     /** Google remote never answered → auto: try ADB; otherwise show the connection check */
     private fun giveUp() = io.execute {
         val h = curHost.ifEmpty { atv.host }
+        Log.d("google remote not answering → " + if (method == "auto") "trying ADB" else "connection check")
         if (method == "auto" && Net.open(h, Net.ADB, 4000)) runOnUiThread { mode = "adb"; phase = ""; adb.connect(h, nameOf(h)) }
         else { phase = "noports"; doctor = null; push(); runDoctor(h) }
     }
@@ -164,7 +166,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun runDoctor(host: String) = io.execute {
-        val r = Net.doctor(host)
+        val r = Net.doctor(applicationContext, host)
         doctor = JSONObject(r).put("at", System.currentTimeMillis()); push()
     }
 
@@ -204,7 +206,7 @@ class MainActivity : AppCompatActivity() {
         if (scanPct in 0..99) return
         scanPct = 0; push()
         io.execute {
-            Net.scan({ h -> if (h.adb) addFound(h.host, null, "adb"); if (h.atv) addFound(h.host, null, "atv"); if (h.cast) addFound(h.host, null, "cast"); push() },
+            Net.scan(applicationContext, { h -> if (h.adb) addFound(h.host, null, "adb"); if (h.atv) addFound(h.host, null, "atv"); if (h.cast) addFound(h.host, null, "cast"); push() },
                 { p -> scanPct = p; push() })
             scanPct = 100; push()
         }
@@ -332,6 +334,11 @@ class MainActivity : AppCompatActivity() {
             if (k == "autoUpdate") Updater.schedule(this@MainActivity)
             if (k == "method") reconnect()
             push()
+        }
+        @JavascriptInterface fun log(): String = Log.text()
+        @JavascriptInterface fun shareLog() = runOnUiThread {
+            val txt = "ROWA Remote ${BuildConfig.VERSION_NAME} · ${Build.MANUFACTURER} ${Build.MODEL} · Android ${Build.VERSION.RELEASE}\n\n" + Log.text()
+            runCatching { startActivity(Intent.createChooser(Intent(Intent.ACTION_SEND).setType("text/plain").putExtra(Intent.EXTRA_TEXT, txt), "Log")) }
         }
         // ---- ⚡ ADB auto-setup wizard helpers ----
         @JavascriptInterface fun probeAdb() = io.execute {

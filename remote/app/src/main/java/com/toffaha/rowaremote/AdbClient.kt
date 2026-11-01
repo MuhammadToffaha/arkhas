@@ -61,7 +61,7 @@ class AdbClient(private val ctx: Context, private val onChange: () -> Unit) {
         val data = ByteArrayOutputStream()
     }
 
-    private fun set(s: String, e: String = "") { status = s; error = e; onChange() }
+    private fun set(s: String, e: String = "") { if (s != status || e != error) Log.d("adb: $s${if (e.isNotEmpty()) " ($e)" else ""}"); status = s; error = e; onChange() }
 
     // ---------- key (made once, kept) ----------
     private val key: RSAPrivateCrtKey by lazy {
