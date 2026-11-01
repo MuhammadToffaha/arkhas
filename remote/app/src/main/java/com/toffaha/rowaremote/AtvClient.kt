@@ -94,7 +94,7 @@ class AtvClient(private val ctx: Context, private val onChange: () -> Unit, priv
         var configured = false
         var reached = false
         try {
-            val s = open(PORT_REMOTE, 25_000)
+            val s = open(PORT_REMOTE, 12_000)
             reached = true
             synchronized(this) { if (g != gen) { s.close(); return }; sock = s; out = s.outputStream }
             val inp = BufferedInputStream(s.inputStream)
@@ -169,7 +169,28 @@ class AtvClient(private val ctx: Context, private val onChange: () -> Unit, priv
 
     val connected get() = status == "connected"
 
-    fun key(code: Int, dir: Int = SHORT) { if (connected) send(PB().msg(10, PB().int(1, code).int(2, dir))) }
+    private val pendingKeys = java.util.concurrent.atomic.AtomicInteger(0)
+    @Volatile private var lastKeyAt = 0L
+
+    /**
+     * Keys only as SHORT presses, paced (≥160 ms apart) and never piled up: a weak TV that gets a
+     * "key down" without its "key up", or a flood of keys, freezes its whole input system.
+     */
+    fun key(code: Int, dir: Int = SHORT) {
+        if (!connected || dir != SHORT) return
+        if (pendingKeys.get() >= 2) { Log.d("google: key $code dropped (TV still busy)"); return }
+        pendingKeys.incrementAndGet()
+        val data = PB.frame(PB().msg(10, PB().int(1, code).int(2, SHORT)).toBytes())
+        writer.execute {
+            try {
+                val wait = 160 - (System.currentTimeMillis() - lastKeyAt)
+                if (wait > 0) Thread.sleep(wait)
+                out?.apply { write(data); flush() }
+                lastKeyAt = System.currentTimeMillis()
+            } catch (e: Exception) { runCatching { sock?.close() } }
+            finally { pendingKeys.decrementAndGet() }
+        }
+    }
 
     /** type into the TV's focused text box (whole field value) */
     fun text(t: String) {

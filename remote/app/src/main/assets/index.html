@@ -504,7 +504,7 @@ function bindKeys(root = document){
       e.preventDefault(); try{ b.setPointerCapture(e.pointerId) }catch(_){}
       down = true; b.classList.add('press');
       if (lng) { longOn = false; t1 = setTimeout(() => { longOn = true; R.keyDown(k) }, 450) }
-      else { R.key(k); if (rep) t1 = setTimeout(() => { t2 = setInterval(() => R.repeat(k), 120) }, 400) }
+      else { R.key(k); if (rep) t1 = setTimeout(() => { t2 = setInterval(() => R.repeat(k), 250) }, 450) }
     });
     const up = () => { if (!down) return; down = false; b.classList.remove('press'); clearTimeout(t1); clearInterval(t2);
       if (lng) { if (longOn) R.keyUp(k); else R.key(k) } };
@@ -624,7 +624,7 @@ window.onShot = b64 => { $('#shotBox').innerHTML = b64 ? `<img class="shot" src=
 /* ---------- ⚡ ADB auto-setup wizard ---------- */
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 let W = {step: -1, run: 0, polls: 0, timer: null};
-async function press(code, n = 1, gap = 160){ for (let i = 0; i < n; i++) { if (W.run !== W.my) return; R.repeat(code); await sleep(gap) } }
+async function press(code, n = 1, gap = 230){ for (let i = 0; i < n; i++) { if (W.run !== W.my) return; R.repeat(code); await sleep(gap) } }
 function wizShow(step, body, btns, pad){
   W.step = step; openSheet('#wiz');
   $('#wizStep').textContent = step > 0 && step < 6 ? `· ${t('wizStepN')} ${step}/5` : '';
@@ -643,13 +643,13 @@ async function w1(){ W.my = ++W.run; busy();
   wizShow(1, `<p>${t('w1m')}</p>`, [[t('cont'), () => w2()]], true) }
 // 2 · tap Build ×8 (Build is the last row of About)
 async function w2(auto = true){ W.my = ++W.run; busy();
-  if (auto) await press(20, 25, 110);
-  await sleep(400); await press(23, 8, 380); await sleep(1200);
+  if (auto) await press(20, 25, 230);
+  await sleep(400); await press(23, 8, 420); await sleep(1200);
   if (W.run !== W.my) return;
   wizShow(2, `<p>${t('w2q')}</p>`, [[t('yes'), () => w3()], [t('no'), () => wizShow(2, `<p>${t('w2m')}</p>`, [[t('tap8'), () => w2(false)]], true), true]]) }
 // 3 · Developer options: back to Device Preferences, it sits at the bottom of the list
 async function w3(){ W.my = ++W.run; busy();
-  await press(4, 1); await sleep(1300); await press(20, 30, 110); await sleep(300); await press(23, 1); await sleep(2200);
+  await press(4, 1); await sleep(1300); await press(20, 30, 230); await sleep(300); await press(23, 1); await sleep(2200);
   if (W.run !== W.my) return;
   wizShow(3, `<p>${t('w3q')}</p>`, [[t('yes'), () => w4()], [t('no'), () => wizShow(3, `<p>${t('w3m')}</p>`, [[t('cont'), () => w4()]], true), true]]) }
 // 4 · user flips USB debugging; app watches port 5555

@@ -224,6 +224,7 @@ class MainActivity : AppCompatActivity() {
     private fun scan() {
         runOnUiThread { finder.start() }
         if (scanPct in 0..99) return
+        if (live) { Log.d("scan: connected → mDNS only, no port probing"); return }
         scanPct = 0; push()
         io.execute {
             Net.scan(applicationContext, { h -> if (h.adb) addFound(h.host, null, "adb"); if (h.atv) addFound(h.host, null, "atv"); if (h.cast) addFound(h.host, null, "cast"); push() },
@@ -308,10 +309,11 @@ class MainActivity : AppCompatActivity() {
     inner class Bridge {
         @JavascriptInterface fun state(): String = this@MainActivity.state().toString()
         @JavascriptInterface fun key(code: Int) { this@MainActivity.key(code); buzz() }
+        /** long press: Google mode sends one normal press (no down/up pair that can get stuck); ADB does a real long press */
         @JavascriptInterface fun keyDown(code: Int) {
-            if (mode == "atv") atv.key(code, AtvClient.LONG_START) else if (mode == "adb") adb.key(code, long = true); buzz()
+            if (mode == "atv") atv.key(code) else if (mode == "adb") adb.key(code, long = true); buzz()
         }
-        @JavascriptInterface fun keyUp(code: Int) { if (mode == "atv") atv.key(code, AtvClient.LONG_END) }
+        @JavascriptInterface fun keyUp(code: Int) {}
         @JavascriptInterface fun repeat(code: Int) = this@MainActivity.key(code)
         @JavascriptInterface fun text(t: String) {
             if (mode == "adb") adb.text(t)
