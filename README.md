@@ -48,6 +48,18 @@ If `web/index.html` ever needs new native features, bump `arkhas-bridge` in it; 
 
 **Signing key**: `android/keystore/arkhas.jks` keeps every build installable over the last one. Before sharing the app with others, move it into repo secrets `ARKHAS_KEYSTORE_B64` + `ARKHAS_KEYSTORE_PASSWORD` and remove the file and fallback password from `.github/workflows/android.yml`. Keep the same key.
 
+## 📺 ROWA Remote (`remote/`)
+
+Phone → **ROWA Android TV** remote over Wi-Fi. Uses Android TV Remote v2 (same protocol as Google's TV app): no ADB, no developer options.
+
+- 🎮 D-pad + OK (long-press = options), back/home/menu, volume, channels, media keys, power
+- 🖐️ touchpad (swipe = arrows, tap = OK) · 🔢 numbers, colour keys, HDMI 1–4, input, guide, subtitles, audio track, sleep/wake…
+- ⌨️ type on the TV (opens by itself when the TV shows a keyboard) · 🔊 phone volume buttons control the TV
+- 📺 app shortcuts (YouTube, Netflix…; **📌 add the app open now** grabs any app)
+- 🔍 finds the TV on Wi-Fi (auto-picks the one named ROWA) or manual IP · 🔗 pair once: 6-character code on the TV
+
+Releases: tag `remote-vN` → `rowa-remote.apk` (never "latest"). Installed/updated from **JAMA**; also updates itself (daily silent + pop-up on open). TV side needs the built-in *Android TV Remote Service* (Google-certified Android TV).
+
 ## 📘 Why Facebook is a link, not scraped
 
 Marketplace requires login and Meta forbids automated collection (account bans). The app opens Marketplace / posts search with your query, sorted by price.

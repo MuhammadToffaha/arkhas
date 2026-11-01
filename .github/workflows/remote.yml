@@ -1,0 +1,69 @@
+name: rowa-remote-apk
+
+# 📺 ROWA Remote (phone → Android TV remote). Lives in this repo; releases are tagged remote-vN and are NEVER marked
+# "latest", so Arkhas' own updater (releases/latest) keeps seeing only Arkhas. JAMA installs/updates it by the remote-v prefix.
+on:
+  push:
+    branches: [main]
+    paths: ["remote/**", ".github/workflows/remote.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  apk:
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: remote
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.10.2"
+
+      # own run counter -> version 1.0.N, versionCode N
+      - name: Signing key (same key as Arkhas, different app id)
+        env:
+          KS_B64: ${{ secrets.ARKHAS_KEYSTORE_B64 }}
+          KS_PW: ${{ secrets.ARKHAS_KEYSTORE_PASSWORD }}
+        run: |
+          if [ -n "$KS_B64" ]; then
+            echo "$KS_B64" | base64 -d > "$RUNNER_TEMP/remote.jks"
+            echo "REMOTE_KEYSTORE=$RUNNER_TEMP/remote.jks" >> "$GITHUB_ENV"
+            echo "REMOTE_KEYSTORE_PASSWORD=$KS_PW" >> "$GITHUB_ENV"
+          else
+            echo "REMOTE_KEYSTORE=$GITHUB_WORKSPACE/android/keystore/arkhas.jks" >> "$GITHUB_ENV"
+            echo "REMOTE_KEYSTORE_PASSWORD=aUx1xb-XXA9InBr-fZ1jxs4hQ_RmVy6c" >> "$GITHUB_ENV"
+          fi
+
+      - name: Build APK
+        run: |
+          set -o pipefail
+          gradle --no-daemon assembleRelease 2>&1 | tee build.log || {
+            { grep -E "^e: |error:|Unresolved reference|Could not (resolve|find)" build.log; grep -A6 "What went wrong" build.log; } \
+              | grep -v "^> Task" | head -30 | while IFS= read -r l; do echo "::error::$l"; done
+            exit 1
+          }
+
+      - name: Rename
+        run: cp app/build/outputs/apk/release/app-release.apk "$GITHUB_WORKSPACE/rowa-remote.apk"
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: remote-v${{ github.run_number }}
+          name: ROWA Remote 1.0.${{ github.run_number }}
+          body: |
+            📺 ROWA Remote — the phone becomes the ROWA Android TV remote over Wi-Fi (D-pad, touchpad, keyboard, volume, apps, HDMI, numbers…).
+            📱 Install: from JAMA, or download rowa-remote.apk on the phone → open it → allow "install unknown apps" once.
+            🔗 First open: pick the TV → a 6-character code shows on the TV → type it once.
+            Designed by Muhammad Toffaha
+          files: rowa-remote.apk
+          make_latest: false

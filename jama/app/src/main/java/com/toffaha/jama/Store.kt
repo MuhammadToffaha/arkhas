@@ -34,6 +34,8 @@ object Store {
             "حفظ القرآن للأطفال حتى سورة يس", "Kids' Quran memorization up to Yasin"),
         ManagedApp("bonian", "com.toffaha.bonian", "bonian", "🏢", "بُنيان", "Bonian",
             "حسابات العمارة: الشهرية والمصروفات والمتأخرات", "Building fees, expenses & overdue units"),
+        ManagedApp("remote", "com.toffaha.rowaremote", "arkhas", "📺", "ريموت روا", "ROWA Remote",
+            "الموبايل ريموت لتلفزيون روا على الواي فاي", "Phone remote for the ROWA TV over Wi-Fi", tagPrefix = "remote-v"),
         ManagedApp("jama", BuildConfig.APPLICATION_ID, "arkhas", "🧩", "جاما", "JAMA",
             "مدير التطبيقات — بيثبّت ويحدّث الكل", "App manager — installs and updates everything", tagPrefix = "jama-v"),
     )

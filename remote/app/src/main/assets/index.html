@@ -1,0 +1,505 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>ROWA Remote</title>
+<style>
+:root{--bg:#0b0d12;--card:#151821;--card2:#1c2030;--ink:#eef0f6;--muted:#8b91a7;--line:#262b3b;--acc:#ff5a1f;--acc2:#ff8a3d;--grad:linear-gradient(135deg,var(--acc),var(--acc2));--ok:#22c55e;--warn:#f59e0b;--bad:#ef4444}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Cairo",system-ui,"Noto Sans Arabic",sans-serif;display:flex;flex-direction:column;overflow:hidden}
+[hidden]{display:none!important}
+input,textarea{-webkit-user-select:text;user-select:text}
+button{font:inherit;color:inherit;border:0;background:none;padding:0;touch-action:manipulation}
+/* header */
+header{display:flex;align-items:center;gap:8px;padding:10px 14px 8px}
+.who{flex:1;min-width:0;display:flex;align-items:center;gap:8px}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--muted);flex:none;box-shadow:0 0 0 4px #ffffff0d}
+.dot.ok{background:var(--ok);box-shadow:0 0 0 4px #22c55e22}.dot.wait{background:var(--warn);animation:bl 1s infinite}.dot.bad{background:var(--bad)}
+@keyframes bl{50%{opacity:.3}}
+.who b{font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.who small{display:block;color:var(--muted);font-size:11.5px;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hb{width:44px;height:44px;border-radius:14px;background:var(--card);display:flex;align-items:center;justify-content:center;font-size:20px}
+.hb.pw{background:#ef444422;color:#ff6b6b;font-size:22px}
+.hb.on,.k.on{transform:scale(.92);filter:brightness(1.35)}
+.vol{margin:0 14px 4px;height:5px;border-radius:5px;background:var(--line);overflow:hidden}
+.vol i{display:block;height:100%;background:var(--grad);transition:width .25s}
+.banner{margin:6px 14px;padding:10px 12px;border-radius:14px;background:var(--card);font-size:13.5px;display:flex;gap:10px;align-items:center}
+.banner .t{flex:1}
+.banner.bad{background:#ef444418}
+/* pages */
+main{flex:1;overflow-y:auto;overflow-x:hidden;padding:4px 14px 12px}
+.page{display:none}.page.on{display:block;animation:fd .18s}
+@keyframes fd{from{opacity:.3;transform:translateY(6px)}}
+.ltr{direction:ltr}
+.k{border-radius:18px;background:var(--card);display:flex;align-items:center;justify-content:center;flex-direction:column;font-size:22px;min-height:54px;transition:transform .06s;touch-action:none;box-shadow:inset 0 -2px 0 #00000055}
+.k small{font-size:10.5px;color:var(--muted);margin-top:1px;line-height:1.1}
+.k.acc{background:var(--grad);color:#fff}
+.row{display:grid;gap:10px;margin:10px 0}
+.r3{grid-template-columns:repeat(3,1fr)}.r4{grid-template-columns:repeat(4,1fr)}.r5{grid-template-columns:repeat(5,1fr)}
+/* d-pad */
+.pad{position:relative;width:min(78vw,300px);aspect-ratio:1;margin:8px auto 4px;border-radius:50%;background:radial-gradient(circle at 50% 40%,#232838,#151821 70%);box-shadow:0 14px 40px #0008,inset 0 2px 0 #ffffff10}
+.pad .k{position:absolute;background:transparent;box-shadow:none;font-size:30px;color:#cfd3e2;border-radius:50%}
+.pad .u{top:2%;left:33%;width:34%;height:30%}.pad .d{bottom:2%;left:33%;width:34%;height:30%}
+.pad .l{left:2%;top:33%;width:30%;height:34%}.pad .r{right:2%;top:33%;width:30%;height:34%}
+.pad .ok{left:31%;top:31%;width:38%;height:38%;background:var(--grad);color:#fff;font-size:19px;font-weight:900;box-shadow:0 8px 24px #ff5a1f55}
+.side{display:grid;grid-template-columns:1fr 1.6fr 1fr;gap:10px;margin-top:10px}
+.rock{display:grid;grid-template-rows:1fr auto 1fr;border-radius:22px;background:var(--card);overflow:hidden}
+.rock .k{border-radius:0;box-shadow:none;background:transparent;min-height:58px}
+.rock .mid{text-align:center;font-size:11px;color:var(--muted);padding:2px 0}
+.mid3{display:grid;grid-template-rows:repeat(2,1fr);gap:10px}
+/* touchpad */
+.tp{height:min(62vh,440px);border-radius:26px;background:repeating-linear-gradient(0deg,#ffffff05 0 1px,transparent 1px 28px),repeating-linear-gradient(90deg,#ffffff05 0 1px,transparent 1px 28px),var(--card);position:relative;overflow:hidden;touch-action:none;display:flex;align-items:center;justify-content:center;text-align:center;color:var(--muted);font-size:13.5px;padding:20px}
+.tp i{position:absolute;width:56px;height:56px;margin:-28px;border-radius:50%;background:#ff5a1f55;pointer-events:none;transition:opacity .3s}
+/* cards / lists */
+.card{background:var(--card);border-radius:18px;padding:14px;margin:10px 0}
+.card h3{margin:0 0 8px;font-size:15px}
+.li{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--line)}
+.li:first-of-type{border-top:0}
+.li .t{flex:1;min-width:0}.li .t b{display:block;font-size:14.5px}.li .t small{color:var(--muted);font-size:12px}
+.btn{font-weight:800;font-size:14.5px;border-radius:14px;padding:11px 14px;background:var(--grad);color:#fff}
+.btn.alt{background:var(--card2);color:var(--ink)}.btn.sm{padding:7px 11px;font-size:13px}
+.btn:disabled{opacity:.5}
+.inp{width:100%;font:inherit;font-size:16px;background:var(--card2);color:var(--ink);border:1px solid var(--line);border-radius:14px;padding:11px 12px;outline:none}
+.inp:focus{border-color:var(--acc)}
+.flex{display:flex;gap:8px;align-items:center}.flex>.inp{flex:1}
+.muted{color:var(--muted);font-size:12.5px}
+.sw{position:relative;display:inline-block;width:48px;height:28px;flex:none}
+.sw input{opacity:0;width:0;height:0}
+.sw i{position:absolute;inset:0;border-radius:14px;background:var(--line);transition:.2s}
+.sw i:before{content:"";position:absolute;width:22px;height:22px;top:3px;inset-inline-start:3px;border-radius:50%;background:#fff;transition:.2s}
+.sw input:checked+i{background:var(--grad)}
+.sw input:checked+i:before{transform:translateX(20px)}[dir=rtl] .sw input:checked+i:before{transform:translateX(-20px)}
+/* apps */
+.apps{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px}
+.app{background:var(--card);border-radius:18px;padding:14px 6px 10px;text-align:center;touch-action:manipulation}
+.app .e{font-size:30px;line-height:1.1}.app b{display:block;font-size:12.5px;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.app.add{border:2px dashed var(--line);background:transparent;color:var(--muted)}
+/* colors */
+.cl{min-height:40px;border-radius:14px}
+/* nav */
+nav{display:grid;grid-template-columns:repeat(5,1fr);background:#10131b;border-top:1px solid var(--line);padding:6px 4px 8px}
+nav button{display:flex;flex-direction:column;align-items:center;font-size:21px;color:var(--muted);padding:4px 0;border-radius:12px}
+nav button small{font-size:10.5px;margin-top:1px}
+nav button.on{color:var(--acc)}
+/* sheets & pop-ups */
+.sheet{position:fixed;inset-inline:0;bottom:0;z-index:30;background:var(--card);border-radius:24px 24px 0 0;padding:16px 16px 20px;box-shadow:0 -14px 40px #000a;animation:up .2s}
+@keyframes up{from{transform:translateY(40%);opacity:.4}}
+.sheet h3{margin:0 0 10px;font-size:16px}
+.scrim{position:fixed;inset:0;z-index:29;background:#0008}
+.pop{position:fixed;inset:0;z-index:40;background:#000a;display:flex;align-items:center;justify-content:center;padding:24px}
+.popbox{background:var(--card);border-radius:24px;padding:20px 18px 16px;max-width:340px;width:100%;text-align:center;animation:pin .25s cubic-bezier(.2,1.4,.4,1)}
+.popbox .e{font-size:44px;line-height:1.1}.popbox b{display:block;font-size:18px;margin:6px 0 4px}
+.popb{display:flex;gap:8px;margin-top:14px}.popb .btn{flex:1}
+@keyframes pin{from{transform:scale(.85);opacity:0}}
+.code{font-family:ui-monospace,monospace;font-size:30px;letter-spacing:10px;text-align:center;text-transform:uppercase;direction:ltr}
+.shake{animation:sh .35s}@keyframes sh{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+.credit{text-align:center;color:var(--muted);font-size:12px;margin:18px 0 6px;opacity:.85}
+.bar{height:5px;border-radius:5px;background:var(--line);overflow:hidden;margin-top:8px}.bar i{display:block;height:100%;background:var(--grad)}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="who"><span class="dot" id="dot"></span><div style="min-width:0"><b id="tvName">ROWA</b><small id="tvSub"></small></div></div>
+  <button class="hb" id="kbBtn" aria-label="keyboard">⌨️</button>
+  <button class="hb pw k" data-k="26" data-long aria-label="power">⏻</button>
+</header>
+<div class="vol" id="vol" hidden><i id="volI"></i></div>
+<div class="banner" id="ban" hidden><span id="banE">📡</span><div class="t" id="banT"></div><button class="btn sm alt" id="banB"></button></div>
+
+<main>
+  <!-- 🎮 remote -->
+  <section class="page on" id="p-remote">
+    <div class="card" id="noTv" hidden></div>
+    <div class="row r4 ltr">
+      <button class="k" data-k="178"><span>🔌</span><small data-t="input"></small></button>
+      <button class="k" data-k="176"><span>⚙️</span><small data-t="tvset"></small></button>
+      <button class="k" data-k="284"><span>🔲</span><small data-t="allapps"></small></button>
+      <button class="k" data-k="84"><span>🔍</span><small data-t="search"></small></button>
+    </div>
+    <div class="pad ltr">
+      <button class="k u" data-k="19" data-rep>▲</button>
+      <button class="k l" data-k="21" data-rep>◀</button>
+      <button class="k ok" data-k="23" data-long>OK</button>
+      <button class="k r" data-k="22" data-rep>▶</button>
+      <button class="k d" data-k="20" data-rep>▼</button>
+    </div>
+    <div class="row r3 ltr">
+      <button class="k" data-k="4" data-long><span>↩️</span><small data-t="back"></small></button>
+      <button class="k" data-k="3" data-long><span>🏠</span><small data-t="home"></small></button>
+      <button class="k" data-k="82"><span>☰</span><small data-t="menu"></small></button>
+    </div>
+    <div class="side ltr">
+      <div class="rock">
+        <button class="k" data-k="24" data-rep>🔊</button>
+        <div class="mid">VOL</div>
+        <button class="k" data-k="25" data-rep>🔉</button>
+      </div>
+      <div class="mid3">
+        <button class="k" data-k="164"><span>🔇</span><small data-t="mute"></small></button>
+        <button class="k acc" data-k="85"><span>⏯️</span><small style="color:#fff" data-t="play"></small></button>
+      </div>
+      <div class="rock">
+        <button class="k" data-k="166" data-rep>⬆️</button>
+        <div class="mid">CH</div>
+        <button class="k" data-k="167" data-rep>⬇️</button>
+      </div>
+    </div>
+    <div class="row r5 ltr">
+      <button class="k" data-k="88">⏮️</button>
+      <button class="k" data-k="89" data-rep>⏪</button>
+      <button class="k" data-k="86">⏹️</button>
+      <button class="k" data-k="90" data-rep>⏩</button>
+      <button class="k" data-k="87">⏭️</button>
+    </div>
+  </section>
+
+  <!-- 🖐️ touchpad -->
+  <section class="page" id="p-touch">
+    <div class="tp" id="tp"><span data-t="tphint"></span></div>
+    <div class="row r4 ltr">
+      <button class="k" data-k="4" data-long><span>↩️</span><small data-t="back"></small></button>
+      <button class="k" data-k="3" data-long><span>🏠</span><small data-t="home"></small></button>
+      <button class="k acc" data-k="85">⏯️</button>
+      <button class="k" data-k="82"><span>☰</span><small data-t="menu"></small></button>
+    </div>
+  </section>
+
+  <!-- 🔢 more keys -->
+  <section class="page" id="p-keys">
+    <div class="row r3 ltr" id="num"></div>
+    <div class="row r4 ltr">
+      <button class="k cl" data-k="183" style="background:#dc2626"></button>
+      <button class="k cl" data-k="184" style="background:#16a34a"></button>
+      <button class="k cl" data-k="185" style="background:#eab308"></button>
+      <button class="k cl" data-k="186" style="background:#2563eb"></button>
+    </div>
+    <div class="row r4 ltr" id="extra"></div>
+  </section>
+
+  <!-- 📺 apps -->
+  <section class="page" id="p-apps">
+    <div class="muted" data-t="appshint"></div>
+    <div class="apps" id="apps"></div>
+  </section>
+
+  <!-- ⚙️ settings -->
+  <section class="page" id="p-set">
+    <div class="card">
+      <h3>📺 <span data-t="tvs"></span></h3>
+      <div id="tvList"></div>
+      <div class="flex" style="margin-top:10px">
+        <button class="btn alt" id="scanBtn" style="flex:1"></button>
+        <button class="btn alt" id="pairBtn" style="flex:1">🔗 <span data-t="pairagain"></span></button>
+      </div>
+      <div class="flex" style="margin-top:10px">
+        <input class="inp ltr" id="ip" inputmode="decimal" placeholder="192.168.1.50">
+        <button class="btn" id="ipBtn">➕</button>
+      </div>
+      <div class="muted" style="margin-top:6px" data-t="iphint"></div>
+    </div>
+    <div class="card" id="prefs"></div>
+    <div class="card">
+      <h3>🔄 <span data-t="updates"></span></h3>
+      <div class="li"><div class="t"><b id="verT"></b><small id="verS"></small></div><button class="btn sm" id="upBtn"></button></div>
+      <div class="bar" id="upBar" hidden><i id="upBarI"></i></div>
+    </div>
+    <div class="card">
+      <div class="li"><div class="t"><b>🌐 <span data-t="lang"></span></b></div><button class="btn sm alt" id="langBtn"></button></div>
+      <div class="li"><div class="t"><b>🔑 <span data-t="newkey"></span></b><small data-t="newkeyhint"></small></div><button class="btn sm alt" id="keyBtn">↻</button></div>
+    </div>
+    <div class="credit">Designed by Muhammad Toffaha · <span id="credV"></span></div>
+  </section>
+</main>
+
+<nav id="nav">
+  <button data-p="remote" class="on">🎮<small data-t="t_remote"></small></button>
+  <button data-p="touch">🖐️<small data-t="t_touch"></small></button>
+  <button data-p="keys">🔢<small data-t="t_keys"></small></button>
+  <button data-p="apps">📺<small data-t="t_apps"></small></button>
+  <button data-p="set">⚙️<small data-t="t_set"></small></button>
+</nav>
+
+<!-- ⌨️ keyboard -->
+<div class="scrim" id="kbScrim" hidden></div>
+<div class="sheet" id="kb" hidden>
+  <h3>⌨️ <span data-t="kbtitle"></span></h3>
+  <input class="inp" id="kbIn" dir="auto" autocomplete="off" autocapitalize="off" spellcheck="false">
+  <div class="row r4 ltr" style="margin-bottom:0">
+    <button class="k" data-k="67">⌫</button>
+    <button class="k" id="kbClr">🧹</button>
+    <button class="k acc" data-k="66">↵</button>
+    <button class="k" id="kbX">✖</button>
+  </div>
+  <div class="muted" style="margin-top:8px" data-t="kbhint"></div>
+</div>
+
+<!-- 🔗 pairing -->
+<div class="scrim" id="prScrim" hidden></div>
+<div class="sheet" id="pr" hidden></div>
+
+<!-- ➕ add app -->
+<div class="sheet" id="addApp" hidden>
+  <h3>➕ <span data-t="addapp"></span></h3>
+  <div class="flex"><input class="inp" id="aE" style="max-width:70px;text-align:center" value="📺"><input class="inp" id="aN" data-ph="appname"></div>
+  <input class="inp ltr" id="aP" style="margin-top:8px" placeholder="com.example.app  ·  https://…">
+  <button class="btn alt" id="aCur" style="width:100%;margin-top:8px" hidden></button>
+  <div class="flex" style="margin-top:10px"><button class="btn alt" id="aX" style="flex:1">✖</button><button class="btn" id="aOk" style="flex:2">💾</button></div>
+</div>
+
+<!-- 🆕 update pop-up -->
+<div class="pop" id="upPop" hidden><div class="popbox">
+  <div class="e">🆕</div><b id="upPopT"></b><div class="muted" id="upPopS"></div>
+  <div class="popb"><button class="btn alt" id="upLater"></button><button class="btn" id="upNow"></button></div>
+</div></div>
+
+<script>
+const R = window.Rowa || {state:()=>JSON.stringify({status:'idle',tvs:[],found:[],lang:'ar',version:'dev',haptic:true,volKeys:true,autoKb:true,autoUpdate:true}),
+  key(){},keyDown(){},keyUp(){},repeat(){},text(){},launch(){},scan(){},use(){},forget(){},reconnect(){},pair(){},code(){return true},cancelPair(){},resetKey(){},setPref(){},checkUpdate(){},installUpdate(){},open(){}};
+const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
+
+const T = {
+ ar:{t_remote:'ريموت',t_touch:'لمس',t_keys:'أزرار',t_apps:'تطبيقات',t_set:'إعدادات',input:'المصدر',tvset:'إعدادات',allapps:'التطبيقات',search:'بحث',back:'رجوع',home:'الرئيسية',menu:'قائمة',mute:'كتم',play:'تشغيل',
+  tphint:'اسحب بإصبعك للتحرك 👆 · اضغط = OK · اضغط مطوّل = قائمة الخيارات',appshint:'اضغط لفتح التطبيق على التلفزيون · اضغط مطوّل للحذف',tvs:'التلفزيونات',pairagain:'ربط من جديد',iphint:'لو البحث ملقاش التلفزيون: اكتب الـ IP من إعدادات التلفزيون ← الشبكة',
+  updates:'التحديثات',lang:'اللغة',newkey:'مفتاح جديد',newkeyhint:'كل التلفزيونات هتحتاج ربط من جديد',kbtitle:'اكتب على التلفزيون',kbhint:'لازم يكون فيه خانة كتابة مفتوحة على التلفزيون (بحث مثلاً)',addapp:'إضافة تطبيق',appname:'الاسم',
+  scan:'🔍 بحث',scanning:'⏳ بيدوّر…',connected:'متصل',connecting:'جاري الاتصال…',offline:'مش متصل',needpair:'محتاج ربط',idle:'—',pairing:'بيربط…',code:'اكتب الكود',paired:'تم الربط ✅',
+  notv:'📡 مش لاقي التلفزيون — اتأكد إنه شغال وعلى نفس الواي فاي',retry:'🔄 تاني',pairNow:'🔗 ربط',findTitle:'🔍 دوّر على التلفزيون',findHint:'الموبايل والتلفزيون لازم يكونوا على نفس الواي فاي.',nothing:'لسه ملقيناش حاجة…',use:'استخدم',
+  prNeed:'🔗 اربط الموبايل بالتلفزيون (مرة واحدة بس)',prNeedS:'اضغط "ابدأ" وهيظهر كود على شاشة التلفزيون.',prStart:'ابدأ الربط',prWait:'⏳ بيكلّم التلفزيون…',prCode:'🔢 اكتب الكود اللي ظاهر على التلفزيون',prBad:'❌ الكود غلط — راجعه وجرّب تاني',prOk:'✅ تم الربط! الريموت جاهز',prFail:'⚠️ الربط اتقطع — جرّب تاني',
+  haptic:'📳 اهتزاز مع كل ضغطة',volKeys:'🔊 أزرار صوت الموبايل تتحكم في التلفزيون',keepOn:'☀️ الشاشة تفضل منورة',autoKb:'⌨️ افتح الكيبورد لوحده لما التلفزيون يطلب كتابة',autoUpdate:'🤫 تحديث تلقائي (مرة في اليوم)',
+  ver:'النسخة',latest:'آخر نسخة',uptodate:'✅ أحدث نسخة',check:'فحص',updateNow:'تحديث',later:'بعدين',newVer:'نسخة جديدة',current:'الحالية',app:'التطبيق الحالي',addCur:'📌 أضف التطبيق المفتوح دلوقتي',del:'نحذف',
+  on:'شغال',off:'مطفي',cur:'الحالي'},
+ en:{t_remote:'Remote',t_touch:'Touch',t_keys:'Keys',t_apps:'Apps',t_set:'Settings',input:'Input',tvset:'Settings',allapps:'Apps',search:'Search',back:'Back',home:'Home',menu:'Menu',mute:'Mute',play:'Play',
+  tphint:'Swipe to move 👆 · tap = OK · long-press = options menu',appshint:'Tap to open on the TV · long-press to remove',tvs:'TVs',pairagain:'Pair again',iphint:'If scan finds nothing: type the TV IP (TV Settings → Network)',
+  updates:'Updates',lang:'Language',newkey:'New key',newkeyhint:'Every TV will need pairing again',kbtitle:'Type on the TV',kbhint:'A text box must be open on the TV (e.g. search)',addapp:'Add app',appname:'Name',
+  scan:'🔍 Scan',scanning:'⏳ Scanning…',connected:'Connected',connecting:'Connecting…',offline:'Not connected',needpair:'Needs pairing',idle:'—',pairing:'Pairing…',code:'Enter code',paired:'Paired ✅',
+  notv:'📡 Can\'t reach the TV — is it on and on the same Wi-Fi?',retry:'🔄 Retry',pairNow:'🔗 Pair',findTitle:'🔍 Find your TV',findHint:'Phone and TV must be on the same Wi-Fi.',nothing:'Nothing found yet…',use:'Use',
+  prNeed:'🔗 Pair the phone with the TV (one time)',prNeedS:'Tap Start and a code appears on the TV screen.',prStart:'Start pairing',prWait:'⏳ Talking to the TV…',prCode:'🔢 Type the code shown on the TV',prBad:'❌ Wrong code — check it and try again',prOk:'✅ Paired! The remote is ready',prFail:'⚠️ Pairing dropped — try again',
+  haptic:'📳 Vibrate on every press',volKeys:'🔊 Phone volume buttons control the TV',keepOn:'☀️ Keep the screen on',autoKb:'⌨️ Open keyboard when the TV asks for text',autoUpdate:'🤫 Auto-update (once a day)',
+  ver:'Version',latest:'Latest',uptodate:'✅ Up to date',check:'Check',updateNow:'Update',later:'Later',newVer:'New version',current:'current',app:'Current app',addCur:'📌 Add the app open right now',del:'Remove',
+  on:'on',off:'off',cur:'current'}
+};
+let S = JSON.parse(R.state()), L = S.lang || 'ar';
+const t = k => (T[L] && T[L][k]) || T.en[k] || k;
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+function applyLang(){
+  document.documentElement.lang = L; document.documentElement.dir = L === 'ar' ? 'rtl' : 'ltr';
+  $$('[data-t]').forEach(e => e.textContent = t(e.dataset.t));
+  $$('[data-ph]').forEach(e => e.placeholder = t(e.dataset.ph));
+  $('#langBtn').textContent = L === 'ar' ? 'English' : 'عربي';
+}
+
+/* ---------- keys: tap · hold-to-repeat · long-press ---------- */
+function bindKeys(root = document){
+  root.querySelectorAll('[data-k]').forEach(b => {
+    if (b._b) return; b._b = 1;
+    const k = +b.dataset.k, rep = 'rep' in b.dataset, lng = 'long' in b.dataset;
+    let t1, t2, longOn = false, down = false;
+    b.addEventListener('pointerdown', e => {
+      e.preventDefault(); try{ b.setPointerCapture(e.pointerId) }catch(_){}
+      down = true; b.classList.add('on');
+      if (lng) { longOn = false; t1 = setTimeout(() => { longOn = true; R.keyDown(k) }, 450) }
+      else { R.key(k); if (rep) t1 = setTimeout(() => { t2 = setInterval(() => R.repeat(k), 110) }, 400) }
+    });
+    const up = () => { if (!down) return; down = false; b.classList.remove('on'); clearTimeout(t1); clearInterval(t2);
+      if (lng) { if (longOn) R.keyUp(k); else R.key(k) } };
+    ['pointerup','pointercancel','lostpointercapture'].forEach(ev => b.addEventListener(ev, up));
+  });
+}
+
+/* ---------- extra keys page ---------- */
+$('#num').innerHTML = [1,2,3,4,5,6,7,8,9].map(n => `<button class="k" data-k="${7+n}">${n}</button>`).join('')
+  + `<button class="k" data-k="170"><span>📺</span><small>TV</small></button><button class="k" data-k="7">0</button><button class="k" data-k="229"><span>⤺</span><small>Last</small></button>`;
+const EXTRA = [['ℹ️','Info',165],['📅','Guide',172],['💬','Subtitles',175],['🎧','Audio',222],['🎙️','Assistant',219],['🗂️','Recents',187],['🔔','Notify',83],['⚙️','Settings',176],
+  ['1️⃣','HDMI 1',243],['2️⃣','HDMI 2',244],['3️⃣','HDMI 3',245],['4️⃣','HDMI 4',246],['📡','Antenna',242],['🔌','Input',178],['🔍','Zoom',255],['📸','Screenshot',120],
+  ['⏺️','Record',130],['⏹️','Stop',86],['⎋','Esc',111],['⌫','Delete',67],['⏫','Page ↑',92],['⏬','Page ↓',93],['😴','Sleep',223],['☀️','Wake',224]];
+$('#extra').innerHTML = EXTRA.map(([e,n,k]) => `<button class="k" data-k="${k}"><span>${e}</span><small>${n}</small></button>`).join('');
+
+/* ---------- touchpad ---------- */
+(() => {
+  const tp = $('#tp'), STEP = 42; let x0, y0, moved, lt, longOn, dot;
+  tp.addEventListener('pointerdown', e => {
+    e.preventDefault(); try{ tp.setPointerCapture(e.pointerId) }catch(_){}
+    x0 = e.clientX; y0 = e.clientY; moved = false; longOn = false;
+    dot = document.createElement('i'); tp.appendChild(dot); place(e);
+    lt = setTimeout(() => { if (!moved) { longOn = true; R.keyDown(23) } }, 600);
+  });
+  const place = e => { const r = tp.getBoundingClientRect(); dot.style.left = (e.clientX - r.left) + 'px'; dot.style.top = (e.clientY - r.top) + 'px' };
+  tp.addEventListener('pointermove', e => {
+    if (x0 == null || longOn) return; place(e);
+    const dx = e.clientX - x0, dy = e.clientY - y0;
+    if (Math.max(Math.abs(dx), Math.abs(dy)) < STEP) return;
+    moved = true; clearTimeout(lt);
+    R.key(Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 22 : 21) : (dy > 0 ? 20 : 19));
+    x0 = e.clientX; y0 = e.clientY;
+  });
+  const end = () => { if (x0 == null) return; clearTimeout(lt);
+    if (longOn) R.keyUp(23); else if (!moved) R.key(23);
+    x0 = null; if (dot) { const d = dot; d.style.opacity = 0; setTimeout(() => d.remove(), 300) } };
+  ['pointerup','pointercancel'].forEach(ev => tp.addEventListener(ev, end));
+})();
+
+/* ---------- nav ---------- */
+let page = 'remote';
+function go(p){ page = p; $$('#nav button').forEach(b => b.classList.toggle('on', b.dataset.p === p)); $$('.page').forEach(s => s.classList.toggle('on', s.id === 'p-' + p)); $('main').scrollTop = 0; if (p === 'set') renderSet() }
+$$('#nav button').forEach(b => b.onclick = () => go(b.dataset.p));
+
+/* ---------- keyboard ---------- */
+let prevTxt = '', kbT;
+function openKb(txt){ $('#kb').hidden = $('#kbScrim').hidden = false; const i = $('#kbIn'); if (txt != null) { i.value = txt; prevTxt = txt } setTimeout(() => i.focus(), 60) }
+function closeKb(){ $('#kb').hidden = $('#kbScrim').hidden = true; $('#kbIn').blur() }
+$('#kbBtn').onclick = () => openKb();
+$('#kbX').onclick = closeKb; $('#kbScrim').onclick = closeKb;
+$('#kbIn').addEventListener('input', () => { clearTimeout(kbT); kbT = setTimeout(() => {
+  const v = $('#kbIn').value;
+  if (v) R.text(v); else for (let i = 0; i < Math.min(prevTxt.length, 60); i++) R.repeat(67);
+  prevTxt = v }, 120) });
+$('#kbIn').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); R.key(66) } });
+$('#kbClr').onclick = () => { for (let i = 0; i < Math.min(Math.max(prevTxt.length, 20), 60); i++) R.repeat(67); $('#kbIn').value = ''; prevTxt = '' };
+window.onIme = txt => { if (S.autoKb && $('#kb').hidden) openKb(txt) };
+
+/* ---------- apps ---------- */
+const DEF = [['▶️','YouTube','com.google.android.youtube.tv'],['🎬','Netflix','com.netflix.ninja'],['👶','YouTube Kids','com.google.android.youtube.tvkids'],['🛒','Play Store','com.android.vending'],
+  ['🎵','Spotify','com.spotify.tv.android'],['📦','Prime Video','com.amazon.amazonvideo.livingroom'],['✨','Disney+','com.disney.disneyplus'],['⚙️','Settings','com.android.tv.settings']];
+const apps = () => Array.isArray(S.apps) ? S.apps : DEF;
+const linkOf = p => p.includes('://') ? p : 'market://launch?id=' + p;
+function renderApps(){
+  $('#apps').innerHTML = apps().map(([e,n,p], i) => `<button class="app" data-i="${i}"><div class="e">${esc(e)}</div><b>${esc(n)}</b></button>`).join('')
+    + `<button class="app add" id="addBtn"><div class="e">➕</div><b>${t('addapp')}</b></button>`;
+  $$('#apps .app[data-i]').forEach(b => {
+    let lt, longOn = false;
+    b.addEventListener('pointerdown', () => { longOn = false; lt = setTimeout(() => { longOn = true; delApp(+b.dataset.i) }, 650) });
+    ['pointerup','pointercancel','pointerleave'].forEach(ev => b.addEventListener(ev, () => clearTimeout(lt)));
+    b.addEventListener('click', () => { if (!longOn) R.launch(linkOf(apps()[+b.dataset.i][2])) });
+  });
+  $('#addBtn').onclick = () => { $('#aN').value = ''; $('#aP').value = ''; $('#aE').value = '📺';
+    $('#aCur').hidden = !S.app; $('#aCur').textContent = t('addCur') + (S.app ? ' · ' + S.app : '');
+    $('#addApp').hidden = $('#kbScrim').hidden = false };
+}
+function saveApps(a){ S.apps = a; R.setPref('apps', JSON.stringify(a)); renderApps() }
+function delApp(i){ const a = apps().slice(); if (confirm(t('del') + ' ' + a[i][1] + '?')) { a.splice(i, 1); saveApps(a) } }
+$('#aCur').onclick = () => { $('#aP').value = S.app; if (!$('#aN').value) $('#aN').value = S.app.split('.').pop() };
+$('#aX').onclick = () => { $('#addApp').hidden = $('#kbScrim').hidden = true };
+$('#aOk').onclick = () => { const p = $('#aP').value.trim(); if (!p) return $('#aP').focus();
+  saveApps([...apps(), [$('#aE').value.trim() || '📺', $('#aN').value.trim() || p.split('.').pop(), p]]); $('#aX').onclick() };
+$('#kbScrim').addEventListener('click', () => { $('#addApp').hidden = true });
+
+/* ---------- pairing sheet ---------- */
+let prHidden = false, lastStatus = '', codeErr = '';
+function renderPair(){
+  const st = S.status, show = ['needpair','pairing','code','paired'].includes(st) && !prHidden;
+  $('#pr').hidden = $('#prScrim').hidden = !show;
+  if (!show) return;
+  if (st === 'code') {
+    if (!$('#codeIn')) {
+      $('#pr').innerHTML = `<h3>${t('prCode')}</h3><input class="inp code" id="codeIn" maxlength="6" autocomplete="off" autocapitalize="characters" spellcheck="false">
+        <div class="muted" id="codeErr" style="margin-top:8px;min-height:18px"></div><div class="flex" style="margin-top:6px"><button class="btn alt" id="prX" style="flex:1">✖</button><button class="btn" id="codeOk" style="flex:2">🔗</button></div>`;
+      const i = $('#codeIn'); setTimeout(() => i.focus(), 80);
+      const send = () => { const v = i.value.trim().toUpperCase(); if (v.length !== 6) return;
+        if (!R.code(v)) { $('#codeErr').textContent = t('prBad'); i.classList.remove('shake'); void i.offsetWidth; i.classList.add('shake'); i.select() }
+        else $('#codeErr').textContent = t('prWait') };
+      i.addEventListener('input', () => { i.value = i.value.toUpperCase().replace(/[^0-9A-F]/g, ''); if (i.value.length === 6) send() });
+      $('#codeOk').onclick = send; $('#prX').onclick = () => { prHidden = true; R.cancelPair(); renderPair() };
+    }
+    return;
+  }
+  const msg = st === 'paired' ? t('prOk') : st === 'pairing' ? t('prWait')
+    : (S.error === 'badcode' ? t('prBad') : (S.error && lastStatus === 'code') ? t('prFail') : '');
+  $('#pr').innerHTML = `<h3>${st === 'paired' ? t('prOk') : t('prNeed')}</h3>
+    <div class="muted">${esc(S.name || S.host)} · ${esc(S.host)}</div>
+    ${st === 'needpair' ? `<p style="margin:10px 0">${t('prNeedS')}</p>` : ''}
+    ${msg && st !== 'paired' ? `<p style="margin:8px 0">${msg}</p>` : ''}
+    ${st === 'needpair' ? `<div class="flex" style="margin-top:10px"><button class="btn alt" id="prX" style="flex:1">✖</button><button class="btn" id="prGo" style="flex:2">${t('prStart')}</button></div>` : ''}`;
+  if ($('#prGo')) $('#prGo').onclick = () => R.pair();
+  if ($('#prX')) $('#prX').onclick = () => { prHidden = true; renderPair() };
+}
+$('#prScrim').onclick = () => { if (S.status !== 'pairing') { prHidden = true; renderPair() } };
+
+/* ---------- top / banner ---------- */
+function renderTop(){
+  const st = S.status;
+  $('#dot').className = 'dot ' + (st === 'connected' ? 'ok' : (st === 'connecting' || st === 'pairing') ? 'wait' : S.host ? 'bad' : '');
+  $('#tvName').textContent = S.name || 'ROWA';
+  const sub = [t(st)]; if (st === 'connected' && S.on === false) sub.push('💤 ' + t('off')); if (S.app && st === 'connected') sub.push(S.app.split('.').pop());
+  $('#tvSub').textContent = sub.join(' · ');
+  const v = S.vol >= 0 && st === 'connected'; $('#vol').hidden = !v;
+  if (v) $('#volI').style.width = (S.muted ? 0 : Math.round(100 * S.vol / (S.volMax || 100))) + '%';
+  // banner
+  const ban = $('#ban');
+  if (S.host && (st === 'offline' || (st === 'idle' && S.host))) {
+    ban.hidden = false; ban.className = 'banner bad'; $('#banE').textContent = '📡'; $('#banT').textContent = t('notv');
+    $('#banB').textContent = t('retry'); $('#banB').onclick = () => R.reconnect();
+  } else if (st === 'needpair' && prHidden) {
+    ban.hidden = false; ban.className = 'banner'; $('#banE').textContent = '🔗'; $('#banT').textContent = t('needpair');
+    $('#banB').textContent = t('pairNow'); $('#banB').onclick = () => { prHidden = false; renderPair() };
+  } else ban.hidden = true;
+  // first run: find the TV
+  const nt = $('#noTv'); nt.hidden = !!S.host;
+  if (!S.host) nt.innerHTML = `<h3>${t('findTitle')}</h3><div class="muted">${t('findHint')}</div>${foundList()}
+    <button class="btn" style="width:100%;margin-top:10px" onclick="R.scan()" ${S.scanning ? 'disabled' : ''}>${S.scanning ? t('scanning') : t('scan')}</button>`;
+}
+function foundList(){
+  const f = S.found || [];
+  if (!f.length) return `<div class="muted" style="margin-top:8px">${S.scanning ? '⏳ ' : ''}${t('nothing')}</div>`;
+  return f.map(d => `<div class="li"><div class="t"><b>📺 ${esc(d.name)}</b><small class="ltr">${esc(d.host)}</small></div><button class="btn sm" onclick='R.use(${JSON.stringify(d.host)},${JSON.stringify(d.name)})'>${t('use')}</button></div>`).join('');
+}
+
+/* ---------- settings ---------- */
+function renderSet(){
+  const saved = S.tvs || [], hosts = new Set(saved.map(x => x.host));
+  $('#tvList').innerHTML = saved.map(d => `<div class="li"><div class="t"><b>${d.host === S.host ? '✅ ' : '📺 '}${esc(d.name)}</b><small class="ltr">${esc(d.host)}${d.host === S.host ? ' · ' + t(S.status) : ''}</small></div>
+      ${d.host === S.host ? '' : `<button class="btn sm" onclick='R.use(${JSON.stringify(d.host)},${JSON.stringify(d.name)})'>${t('use')}</button>`}
+      <button class="btn sm alt" onclick='R.forget(${JSON.stringify(d.host)})'>🗑️</button></div>`).join('')
+    + (S.found || []).filter(d => !hosts.has(d.host)).map(d => `<div class="li"><div class="t"><b>🆕 ${esc(d.name)}</b><small class="ltr">${esc(d.host)}</small></div><button class="btn sm" onclick='R.use(${JSON.stringify(d.host)},${JSON.stringify(d.name)})'>${t('use')}</button></div>`).join('')
+    || `<div class="muted">${t('nothing')}</div>`;
+  $('#scanBtn').textContent = S.scanning ? t('scanning') : t('scan'); $('#scanBtn').disabled = !!S.scanning;
+  $('#pairBtn').disabled = !S.host;
+  $('#prefs').innerHTML = ['haptic','volKeys','keepOn','autoKb','autoUpdate'].map(k =>
+    `<div class="li"><div class="t"><b style="font-weight:600">${t(k)}</b></div><label class="sw"><input type="checkbox" data-pref="${k}" ${S[k] ? 'checked' : ''}><i></i></label></div>`).join('');
+  $$('[data-pref]').forEach(c => c.onchange = () => { S[c.dataset.pref] = c.checked; R.setPref(c.dataset.pref, String(c.checked)) });
+  $('#verT').textContent = `${t('ver')} ${S.version}`;
+  const busy = S.upStatus === 'downloading' || S.upStatus === 'installing';
+  $('#verS').textContent = S.update ? `🆕 ${t('latest')}: 1.0.${S.latest}` : (S.upError ? '⚠️ ' + S.upError : S.latest ? t('uptodate') : '');
+  $('#upBtn').textContent = busy ? (S.upPct >= 0 ? S.upPct + '%' : '⏳') : S.update ? t('updateNow') : (S.upStatus === 'checking' ? '⏳' : t('check'));
+  $('#upBtn').disabled = busy; $('#upBtn').onclick = () => S.update ? R.installUpdate() : R.checkUpdate();
+  $('#upBar').hidden = !busy; $('#upBarI').style.width = Math.max(0, S.upPct) + '%';
+  $('#credV').textContent = S.version;
+}
+$('#scanBtn').onclick = () => R.scan();
+$('#pairBtn').onclick = () => { prHidden = false; R.pair() };
+$('#ipBtn').onclick = () => { const h = $('#ip').value.trim(); if (!/^\d{1,3}(\.\d{1,3}){3}$/.test(h)) return $('#ip').focus(); R.use(h, 'TV ' + h); $('#ip').value = '' };
+$('#langBtn').onclick = () => { L = L === 'ar' ? 'en' : 'ar'; R.setPref('lang', L); applyLang(); render() };
+$('#keyBtn').onclick = () => { if (confirm(t('newkeyhint') + '?')) { prHidden = false; R.resetKey() } };
+
+/* ---------- update pop-up (once per open) ---------- */
+let popShown = false;
+function renderPop(){
+  if (popShown || !S.update) return; popShown = true;
+  $('#upPopT').textContent = `${t('newVer')} 1.0.${S.latest}`; $('#upPopS').textContent = `${t('current')}: ${S.version}`;
+  $('#upLater').textContent = t('later'); $('#upNow').textContent = t('updateNow'); $('#upPop').hidden = false;
+}
+$('#upLater').onclick = () => $('#upPop').hidden = true;
+$('#upNow').onclick = () => { $('#upPop').hidden = true; R.installUpdate(); go('set') };
+
+/* ---------- state ---------- */
+function render(){
+  if (S.status !== lastStatus) { if (S.status === 'needpair' && lastStatus !== 'code' && lastStatus !== 'pairing') prHidden = false; if (S.status !== 'code' && $('#codeIn')) $('#pr').innerHTML = '' }
+  renderTop(); renderPair(); if (page === 'set') renderSet(); renderPop();
+  if (JSON.stringify(S.apps) !== renderApps._last) { renderApps._last = JSON.stringify(S.apps); renderApps() }
+  lastStatus = S.status;
+}
+window.onRowa = s => { S = s; render() };
+window.rowaBack = () => {
+  if (!$('#upPop').hidden) { $('#upPop').hidden = true; return true }
+  if (!$('#addApp').hidden) { $('#aX').onclick(); return true }
+  if (!$('#kb').hidden) { closeKb(); return true }
+  if (!$('#pr').hidden) { prHidden = true; if (S.status === 'code') R.cancelPair(); renderPair(); return true }
+  if (page !== 'remote') { go('remote'); return true }
+  return false;
+};
+applyLang(); bindKeys(); render();
+</script>
+</body>
+</html>
