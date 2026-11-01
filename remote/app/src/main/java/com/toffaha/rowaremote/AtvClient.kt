@@ -100,6 +100,7 @@ class AtvClient(private val ctx: Context, private val onChange: () -> Unit, priv
             val inp = BufferedInputStream(s.inputStream)
             while (g == gen) {
                 val m = Msg.read(inp)
+                rx(m)
                 if (m.has(1)) configured = true
                 handle(m)
             }
@@ -162,11 +163,18 @@ class AtvClient(private val ctx: Context, private val onChange: () -> Unit, priv
         }
     }
 
+    private val NAMES = mapOf(1 to "configure", 2 to "set_active", 3 to "error", 8 to "ping", 9 to "pong", 10 to "key", 20 to "ime_key", 21 to "ime_edit",
+        22 to "ime_show", 30 to "voice_begin", 40 to "start", 50 to "volume", 51 to "vol_adjust", 60 to "audio_dev", 90 to "app_link")
+    private fun hex(b: ByteArray) = b.take(48).joinToString("") { "%02x".format(it) } + if (b.size > 48) "…" else ""
+    private fun rx(m: Msg) { val k = m.keys().firstOrNull() ?: -1; Log.d("google ⬅ ${NAMES[k] ?: "field$k"} ${hex(m.raw)}") }
+    private fun tx(b: ByteArray) { val k = Msg(b).keys().firstOrNull() ?: -1; Log.d("google ➡ ${NAMES[k] ?: "field$k"} ${hex(b)}") }
+
     private fun send(b: ByteArray) {
+        tx(b)
         val data = PB.frame(b)
         writer.execute {
             try { out?.apply { write(data); flush() } }
-            catch (e: Exception) { runCatching { sock?.close() } }   // reader thread notices and reconnects
+            catch (e: Exception) { Log.d("google: write failed ${e.message}"); runCatching { sock?.close() } }   // reader thread notices and reconnects
         }
     }
     private fun send(p: PB) = send(p.toBytes())
@@ -184,7 +192,8 @@ class AtvClient(private val ctx: Context, private val onChange: () -> Unit, priv
         if (!connected || dir != SHORT) return
         if (pendingKeys.get() >= 2) { Log.d("google: key $code dropped (TV still busy)"); return }
         pendingKeys.incrementAndGet()
-        val data = PB.frame(PB().msg(10, PB().int(1, code).int(2, SHORT)).toBytes())
+        val body = PB().msg(10, PB().int(1, code).int(2, SHORT)).toBytes(); tx(body)
+        val data = PB.frame(body)
         writer.execute {
             try {
                 val wait = 160 - (System.currentTimeMillis() - lastKeyAt)

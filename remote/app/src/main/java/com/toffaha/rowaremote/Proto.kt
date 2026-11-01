@@ -30,10 +30,12 @@ class PB {
 }
 
 /** Tiny protobuf reader: field number -> values (Long for varints, ByteArray for length-delimited). */
-class Msg(b: ByteArray) {
+class Msg(val raw: ByteArray) {
     private val f = HashMap<Int, MutableList<Any>>()
+    fun keys(): List<Int> = f.keys.sorted()
 
     init {
+        val b = raw
         var i = 0
         fun v(): Long {
             var r = 0L; var s = 0
