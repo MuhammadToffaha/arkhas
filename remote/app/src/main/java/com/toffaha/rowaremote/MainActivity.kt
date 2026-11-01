@@ -51,7 +51,7 @@ class MainActivity : AppCompatActivity() {
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        atv = AtvClient(applicationContext, { push() }, { txt -> lastText = txt; adbReset(txt); js("window.onIme&&window.onIme(${JSONObject.quote(txt)})") })
+        atv = AtvClient(applicationContext, { push() }, { txt -> lastText = txt; adbReset(txt); atv.resetText(txt); js("window.onIme&&window.onIme(${JSONObject.quote(txt)})") })
         adb = AdbClient(applicationContext) { push() }
         atv.onGiveUp = { giveUp() }
         bindWifi()
@@ -316,13 +316,12 @@ class MainActivity : AppCompatActivity() {
         @JavascriptInterface fun keyUp(code: Int) {}
         @JavascriptInterface fun repeat(code: Int) = this@MainActivity.key(code)
         @JavascriptInterface fun text(t: String) {
-            if (mode == "adb") adb.text(t)
-            else if (t.isEmpty()) { for (i in 0 until minOf(lastText.length, 60)) atv.key(67) } else atv.text(t)
+            if (mode == "adb") adb.text(t) else atv.text(t)
             lastText = t
         }
         @JavascriptInterface fun clearText() {
             val n = maxOf(lastText.length, 20).coerceAtMost(80)
-            if (mode == "adb") { adb.keys(67, n); adb.resetText() } else { for (i in 0 until n) atv.key(67) }
+            if (mode == "adb") { adb.keys(67, n); adb.resetText() } else { atv.resetText("x".repeat(n)); atv.text("") }
             lastText = ""
         }
         /** ADB opens apps reliably (no Play Store needed) → use it whenever it's connected */

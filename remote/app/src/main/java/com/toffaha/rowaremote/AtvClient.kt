@@ -25,8 +25,8 @@ class AtvClient(private val ctx: Context, private val onChange: () -> Unit, priv
     companion object {
         const val PORT_REMOTE = 6466
         const val PORT_PAIR = 6467
-        // PING | KEY | IME | POWER | VOLUME | APP_LINK
-        const val FEATURES = 1 or 2 or 4 or 32 or 64 or 512
+        // PING | KEY | POWER | VOLUME | APP_LINK — no IME: keyboard sync upsets some TVs' remote service (TCL v7)
+        const val FEATURES = 1 or 2 or 32 or 64 or 512
         const val SHORT = 3; const val LONG_START = 1; const val LONG_END = 2
     }
 
@@ -94,7 +94,7 @@ class AtvClient(private val ctx: Context, private val onChange: () -> Unit, priv
         var configured = false
         var reached = false
         try {
-            val s = open(PORT_REMOTE, 12_000)
+            val s = open(PORT_REMOTE, 0)
             reached = true
             synchronized(this) { if (g != gen) { s.close(); return }; sock = s; out = s.outputStream }
             val inp = BufferedInputStream(s.inputStream)
@@ -115,10 +115,14 @@ class AtvClient(private val ctx: Context, private val onChange: () -> Unit, priv
                     set("unreachable", if (e is java.net.SocketTimeoutException) "timeout" else if (e is java.net.ConnectException) "refused" else (e.message ?: ""))
                     onGiveUp?.invoke()
                 }
+                wanted && (attempt == 0 || configured) -> {
+                    set("offline", "reconnecting")
+                    Thread.sleep(6000)   // give a struggling TV time; never hammer it
+                    if (g == gen && wanted) { set("connecting"); runRemote(g, if (configured) 0 else 1) }
+                }
                 wanted -> {
-                    set("offline", if (configured) "reconnecting" else (e.message ?: "unreachable"))
-                    Thread.sleep(minOf(15_000L, 3000L * (attempt + 1)))
-                    if (g == gen && wanted) { set("connecting"); runRemote(g, attempt + 1) }
+                    wanted = false
+                    set("offline", e.message ?: "unreachable")
                 }
                 else -> set("offline", e.message ?: "")
             }
@@ -192,12 +196,32 @@ class AtvClient(private val ctx: Context, private val onChange: () -> Unit, priv
         }
     }
 
-    /** type into the TV's focused text box (whole field value) */
-    fun text(t: String) {
-        if (!connected || t.isEmpty()) return
-        val p = t.length - 1
-        send(PB().msg(21, PB().int(1, imeCounter).int(2, fieldCounter)
-            .msg(3, PB().int(1, 1).msg(2, PB().int(1, p).int(2, p).str(3, t)))))
+    private var lastText = ""
+    fun resetText(v: String = "") { lastText = v }
+
+    /** Android keycode for a typed character (no IME needed) */
+    private fun codeOf(c: Char): Int? = when (c.lowercaseChar()) {
+        in 'a'..'z' -> 29 + (c.lowercaseChar() - 'a')
+        in '0'..'9' -> 7 + (c - '0')
+        ' ' -> 62; '.' -> 56; ',' -> 55; '-' -> 69; '@' -> 77; '/' -> 76; '\'' -> 75; '=' -> 70; '+' -> 81; ';' -> 74
+        else -> null
+    }
+
+    /** keyboard sends the whole field value → type only the difference as key presses (paced, not dropped) */
+    fun text(full: String) {
+        if (!connected) return
+        var p = 0; while (p < full.length && p < lastText.length && full[p] == lastText[p]) p++
+        val codes = List(lastText.length - p) { 67 } + full.substring(p).mapNotNull { codeOf(it) }
+        lastText = full
+        for (c in codes) {
+            val data = PB.frame(PB().msg(10, PB().int(1, c).int(2, SHORT)).toBytes())
+            writer.execute {
+                try {
+                    val wait = 90 - (System.currentTimeMillis() - lastKeyAt); if (wait > 0) Thread.sleep(wait)
+                    out?.apply { write(data); flush() }; lastKeyAt = System.currentTimeMillis()
+                } catch (_: Exception) { runCatching { sock?.close() } }
+            }
+        }
     }
 
     /** open an app: "market://launch?id=<package>" or an app link like https://www.netflix.com/title */

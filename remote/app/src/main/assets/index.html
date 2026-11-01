@@ -397,7 +397,7 @@ const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAl
 const T = {
  ar:{t_remote:'ريموت',t_touch:'لمس',t_keys:'أزرار',t_apps:'تطبيقات',t_set:'إعدادات',input:'المصدر',tvset:'إعدادات',allapps:'التطبيقات',search:'بحث',back:'رجوع',home:'الرئيسية',menu:'قائمة',mute:'كتم',play:'تشغيل',
   tphint:'اسحب بإصبعك للتحرك · اضغط = OK · ضغطة طويلة = الخيارات',appshint:'اضغط لفتح التطبيق على التلفزيون · ضغطة طويلة للحذف',tvs:'التلفزيونات',pairagain:'ربط من جديد',iphint:'الـ IP موجود في التلفزيون: الإعدادات ← الشبكة والإنترنت ← شبكتك',
-  updates:'التحديثات',lang:'اللغة',newkey:'مفتاح جديد',newkeyhint:'كل التلفزيونات هتحتاج ربط من جديد',kbtitle:'اكتب على التلفزيون',kbhintA:'لازم تكون فيه خانة كتابة مفتوحة على التلفزيون (بحث مثلاً)',kbhintD:'وضع ADB: حروف إنجليزي وأرقام بس',addapp:'إضافة تطبيق',appname:'الاسم',
+  updates:'التحديثات',lang:'اللغة',newkey:'مفتاح جديد',newkeyhint:'كل التلفزيونات هتحتاج ربط من جديد',kbtitle:'اكتب على التلفزيون',kbhintA:'لازم تكون فيه خانة كتابة مفتوحة على التلفزيون (بحث مثلاً)',kbhintD:'حروف إنجليزي وأرقام بس',addapp:'إضافة تطبيق',appname:'الاسم',
   scan:'🔍 دوّر على التلفزيون',scanning:'بيدوّر…',connected:'متصل',connecting:'بيتصل…',probing:'بيفحص التلفزيون…',noports:'مش قادر يدخل',offline:'مش متصل',needpair:'محتاج ربط',idle:'مش متصل',pairing:'بيربط…',code:'اكتب الكود',paired:'تم الربط',auth:'وافق على التلفزيون',
   retry:'تاني',pairNow:'ربط',findTitle:'🔍 بندوّر على التلفزيون',findHint:'الموبايل والتلفزيون لازم يكونوا على نفس الواي فاي. لو ملقيناش حاجة اكتب الـ IP تحت.',nothing:'لسه ملقيناش حاجة…',use:'اتصل',
   prNeed:'🔗 اربط الموبايل بالتلفزيون (مرة واحدة)',prNeedS:'اضغط "ابدأ" وهيظهر كود من 6 حروف على شاشة التلفزيون.',prStart:'ابدأ الربط',prWait:'بيكلّم التلفزيون…',prCode:'🔢 اكتب الكود اللي على التلفزيون',prBad:'❌ الكود غلط — راجعه وجرّب تاني',prOk:'✅ تم الربط! الريموت جاهز',prFail:'⚠️ الربط اتقطع — جرّب تاني',prAdb:'🔧 جرّب طريقة ADB بدل كده',
@@ -440,7 +440,7 @@ const T = {
   filter:'دوّر…',fUser:'متثبتة',fSys:'نظام',fOff:'متوقفة',open:'فتح',disable:'إيقاف',enable:'تشغيل',uninstall:'حذف',needAdb:'محتاج ADB مفعّل على التلفزيون — افتح "فحص الاتصال" في الإعدادات.',loading:'بيحمّل…',sure:'متأكد؟'},
  en:{t_remote:'Remote',t_touch:'Touch',t_keys:'Keys',t_apps:'Apps',t_set:'Settings',input:'Input',tvset:'Settings',allapps:'Apps',search:'Search',back:'Back',home:'Home',menu:'Menu',mute:'Mute',play:'Play',
   tphint:'Swipe to move · tap = OK · long-press = options',appshint:'Tap to open on the TV · long-press to remove',tvs:'TVs',pairagain:'Pair again',iphint:'TV IP: TV Settings → Network & Internet → your Wi-Fi',
-  updates:'Updates',lang:'Language',newkey:'New key',newkeyhint:'Every TV will need pairing again',kbtitle:'Type on the TV',kbhintA:'A text box must be open on the TV (e.g. search)',kbhintD:'ADB mode: English letters and numbers only',addapp:'Add app',appname:'Name',
+  updates:'Updates',lang:'Language',newkey:'New key',newkeyhint:'Every TV will need pairing again',kbtitle:'Type on the TV',kbhintA:'A text box must be open on the TV (e.g. search)',kbhintD:'English letters and numbers only',addapp:'Add app',appname:'Name',
   scan:'🔍 Find my TV',scanning:'Scanning…',connected:'Connected',connecting:'Connecting…',probing:'Checking the TV…',noports:'Can\'t get in',offline:'Not connected',needpair:'Needs pairing',idle:'Not connected',pairing:'Pairing…',code:'Enter code',paired:'Paired',auth:'Accept on TV',
   retry:'Retry',pairNow:'Pair',findTitle:'🔍 Looking for your TV',findHint:'Phone and TV must be on the same Wi-Fi. Nothing found? Type the IP below.',nothing:'Nothing found yet…',use:'Connect',
   prNeed:'🔗 Pair the phone with the TV (one time)',prNeedS:'Tap Start and a 6-character code appears on the TV.',prStart:'Start pairing',prWait:'Talking to the TV…',prCode:'🔢 Type the code shown on the TV',prBad:'❌ Wrong code — check it and try again',prOk:'✅ Paired! The remote is ready',prFail:'⚠️ Pairing dropped — try again',prAdb:'🔧 Try ADB instead',
@@ -559,7 +559,7 @@ $('#scrim').onclick = () => { if (!$('#pr').hidden && S.status !== 'pairing') { 
 
 /* ---------- keyboard ---------- */
 let kbT;
-function openKb(txt){ openSheet('#kb'); const i = $('#kbIn'); if (txt != null) i.value = txt; $('#kbHint').textContent = S.mode === 'adb' ? t('kbhintD') : t('kbhintA'); setTimeout(() => i.focus(), 80) }
+function openKb(txt){ openSheet('#kb'); const i = $('#kbIn'); if (txt != null) i.value = txt; $('#kbHint').textContent = t('kbhintA') + ' · ' + t('kbhintD'); setTimeout(() => i.focus(), 80) }
 $('#kbBtn').onclick = () => openKb();
 $('#kbX').onclick = closeSheets;
 $('#kbIn').addEventListener('input', () => { clearTimeout(kbT); kbT = setTimeout(() => R.text($('#kbIn').value), 140) });
