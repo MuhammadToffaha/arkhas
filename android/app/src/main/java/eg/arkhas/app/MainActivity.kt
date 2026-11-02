@@ -81,6 +81,9 @@ class MainActivity : AppCompatActivity() {
      */
     private var rootView: View? = null
 
+    /** 🔎 Lens sheet -> page: the (JSON-quoted) HTML of the Lens results the user was looking at */
+    fun lensPage(quotedHtml: String) { web.evaluateJavascript("window.__lensPage&&window.__lensPage($quotedHtml)", null) }
+
     private fun keepClearOfNotch(root: View) {
         rootView = root
         val dark = (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES

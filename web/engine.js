@@ -254,6 +254,9 @@
     const qAll = new Set([query, ...(variants || [])].flatMap((v) => tokens(v)));
     const extraTier = [...tWords].filter((w) => TIER.has(w) && !qAll.has(w) && ![...equivalents(w)].some((e) => qAll.has(e)));
     const words = Math.round(best.score * 1000) / 1000;
+    // a model number / code in the query ("a55", "520bt", "15", "sm-a556") must be in the title, or it is another product
+    const missCode = best.miss.filter((t) => /\d/.test(t));
+    if (missCode.length && Object.keys(qs).length === 0) return { tier: -1, score: 0, why: "model " + missCode.join(",") + " missing", miss: best.miss };
     let tier = 2;
     if (words >= 0.999 && !specUnknown && !extraTier.length) tier = 0;
     else if (words >= 0.8) tier = 1;
@@ -290,15 +293,18 @@
       o.flags = o.flags || [];
       if (m.tier === -1 || m.score < minRelevance) continue;
       if (m.extraTier && m.extraTier.length) o.flags.push("other-model");
+      // accessories (case, cover, charger…) for a product search are noise: hidden, not just flagged
+      if (isAccessory(query, o.title)) continue;
       kept.push(o);
     }
-    for (const o of kept) if (isAccessory(query, o.title)) o.flags.push("possible-accessory");
     const core = kept.filter((o) => o.match === 0 && !o.flags.length).map((o) => o.price).sort((a, b) => a - b);
     if (core.length >= 4) {
       const mid = core.length >> 1;
       const med = core.length % 2 ? core[mid] : (core[mid - 1] + core[mid]) / 2;
       for (const o of kept) if (o.price < med * 0.3 && !o.flags.includes("suspiciously-cheap")) o.flags.push("suspiciously-cheap");
     }
+    // loose matches only when nothing better exists
+    if (kept.some((o) => o.match <= 1)) for (let i = kept.length - 1; i >= 0; i--) if (kept[i].match === 2) kept.splice(i, 1);
     const bad = (o) => o.flags.some((f) => f !== "other-model");
     kept.sort((a, b) => bad(a) - bad(b) || a.match - b.match || a.price - b.price);
     return { kept, hidden: pool.length - kept.length };
@@ -578,6 +584,9 @@
   const qLang = (q) => (isArabic(q) ? "ar" : "en");
 
   /** One query per store (halves the requests): stores that handle both languages get the original text. */
+  const BEAUTY_RE = /makeup|make up|cosmetic|lipstick|lip |gloss|mascara|eyeliner|eyeshadow|foundation|concealer|primer|blush|bronzer|highlighter|serum|cleanser|toner|moisturi[sz]er|sunscreen|spf|cream|lotion|perfume|parfum|fragrance|eau de|shampoo|conditioner|hair mask|hair oil|nail|skincare|skin care|face wash|mask|retinol|niacinamide|hyaluronic|vitamin c|body mist|deodorant|مكياج|ميكب|روج|احمر شفاه|ماسكرا|ايلاينر|كريم|سيروم|لوشن|برفان|بارفان|عطر|شامبو|بلسم|صن بلوك|واقي شمس|غسول|تونر|مرطب|فاونديشن|كونسيلر|بلاشر|هايلايتر|طلاء اضافر|مانيكير|سكين كير|بشره|شعر/i;
+  const isBeautyQuery = (q) => BEAUTY_RE.test(normalize(q)) || BEAUTY_RE.test(String(q).toLowerCase());
+
   function storeQuery(store, variants) {
     const want = store.lang || "both";
     if (want === "both") return [qLang(variants[0]), variants[0]];
@@ -859,9 +868,11 @@
    */
   async function search(rawQuery, opts) {
     const query = cleanQuery(rawQuery);
-    const opt = Object.assign({ minRelevance: 0.6, maxPerSource: 20, city: "cairo", timeout: 10000, renderTimeout: 18000,
-      cacheMs: 15 * 60 * 1000 }, opts);
-    const stores = (opt.stores || []).filter((s) => s.enabled !== false);
+    const opt = Object.assign({ minRelevance: 0.75, maxPerSource: 20, city: "cairo", timeout: 7000, renderTimeout: 12000,
+      cacheMs: 30 * 60 * 1000, settleMs: 2500 }, opts);
+    // shop-type routing: beauty shops only answer beauty searches (fewer requests, less noise)
+    const beautyQ = isBeautyQuery(query);
+    const stores = (opt.stores || []).filter((s) => s.enabled !== false && (!s.category || s.category !== "beauty" || beautyQ));
     const key = normalize(query) + "|" + stores.map((s) => s.name).join(",") + "|" + (opt.serpKey ? 1 : 0);
     const hit = CACHE.get(key);
     if (hit && Date.now() - hit.t < opt.cacheMs) {
@@ -897,7 +908,10 @@
       } });
     }
 
-    await Promise.all(jobs.map(async (j) => {
+    // finish when every store answered, or once most did and the slow rest had a short grace period
+    let doneN = 0, release;
+    const mostly = new Promise((r) => { release = r; });
+    const work = Promise.all(jobs.map(async (j) => {
       const t0 = Date.now();
       try {
         const { q, offers } = await j.run();
@@ -907,8 +921,11 @@
         sources.push({ source: j.name, ok: false, count: 0, ms: Date.now() - t0, error: String((e && e.message) || e).slice(0, 160) });
       }
       if (opt.onProgress) opt.onProgress(snapshot());
+      doneN++;
+      if (doneN >= Math.ceil(jobs.length * 0.8)) setTimeout(release, opt.settleMs);
     }));
-    await variantsP;
+    await Promise.race([work, mostly]);
+    await Promise.race([variantsP, new Promise((r) => setTimeout(r, 300))]);
     const r = snapshot();
     if (sources.some((s) => s.count)) CACHE.set(key, { t: Date.now(), r });
     if (CACHE.size > 50) CACHE.delete(CACHE.keys().next().value);

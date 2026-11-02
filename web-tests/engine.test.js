@@ -77,9 +77,9 @@ test("relevance cross-language", () => {
 test("rank: real product beats case", () => {
   const { kept, hidden } = E.rank("iphone 15", [mk("Silicone Case For iPhone 15", 150), mk("Apple iPhone 15 128GB", 41999),
     mk("Apple iPhone 15 128GB", 40500, "T"), mk("Samsung Galaxy A15", 7499)]);
-  assert.equal(hidden, 1);
+  assert.equal(hidden, 2);                                        // the case is hidden now, Galaxy A15 too
   assert.equal(kept[0].price, 40500);
-  assert.ok(kept.at(-1).flags.includes("possible-accessory"));
+  assert.ok(!kept.some((o) => /case/i.test(o.title)));
   assert.deepEqual(E.top(kept).map((o) => o.price), [40500, 41999]);
 });
 

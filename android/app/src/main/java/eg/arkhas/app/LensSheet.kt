@@ -25,7 +25,15 @@ class LensSheet(private val act: MainActivity, root: FrameLayout) {
         }
         val t = TextView(act).apply { text = "🔎 Google Lens"; setTextColor(Color.WHITE); textSize = 16f; setPadding(24, 0, 0, 0) }
         val close = Button(act).apply { text = "✕"; setTextColor(Color.parseColor("#FF2D63")); setBackgroundColor(Color.WHITE); setOnClickListener { hide() } }
+        // 🛒 read the product names on this Lens page and compare their prices in the Egyptian shops
+        val compare = Button(act).apply {
+            text = "🛒 قارن الأسعار"; isAllCaps = false; setTextColor(Color.WHITE); setBackgroundColor(Color.parseColor("#C2185B"))
+            setOnClickListener {
+                web.evaluateJavascript("document.documentElement.outerHTML") { html -> hide(); act.lensPage(html ?: "\"\"") }
+            }
+        }
         bar.addView(t, LinearLayout.LayoutParams(0, -2, 1f))
+        bar.addView(compare, LinearLayout.LayoutParams(-2, -2).apply { marginEnd = 12 })
         bar.addView(close, LinearLayout.LayoutParams(-2, -2))
         sheet.addView(bar, LinearLayout.LayoutParams(-1, -2))
         sheet.addView(web, LinearLayout.LayoutParams(-1, 0, 1f))

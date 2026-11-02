@@ -287,3 +287,17 @@ test("🔎 Google Lens results → product names → search (photo without reada
   assert.equal(JSON.stringify(w.__searched), JSON.stringify(["jbl tune 520bt headphones"]));
   assert.match(w.document.querySelector("#ph_q button").textContent, /🔎 jbl tune 520bt/);
 });
+
+test("🎯 accuracy: other models / accessories / loose matches are dropped; ⚡ beauty shops only for beauty searches", async () => {
+  const mk = (t, p) => ({ title: t, price: p, url: "https://x/" + encodeURIComponent(t), source: "S" });
+  const { kept } = E.rank("samsung a55", [mk("Samsung Galaxy A55 5G 256GB", 17999), mk("Samsung Galaxy A35 5G", 12999),
+    mk("Samsung Galaxy A55 Silicone Case", 199), mk("Samsung Galaxy S24", 39999), mk("Galaxy A55 Screen Protector", 99)]);
+  assert.deepEqual(kept.map((o) => o.price), [17999]);
+  const asked = [];
+  const stores = [{ name: "Shop", type: "shopify", base_url: "https://a.com" }, { name: "Beauty", type: "shopify", base_url: "https://b.com", category: "beauty" }];
+  await E.search("samsung tv", { stores, fetcher: async (u) => { asked.push(u); return "{}"; }, timeout: 50 });
+  assert.ok(asked.every((u) => !u.includes("b.com")));
+  asked.length = 0;
+  await E.search("loreal serum", { stores, fetcher: async (u) => { asked.push(u); return "{}"; }, timeout: 50 });
+  assert.ok(asked.some((u) => u.includes("b.com")));
+});
