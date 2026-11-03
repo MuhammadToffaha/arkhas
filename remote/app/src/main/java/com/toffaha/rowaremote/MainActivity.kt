@@ -348,7 +348,7 @@ class MainActivity : AppCompatActivity() {
             .put("keepOn", prefs.getBoolean("keepOn", false)).put("autoKb", prefs.getBoolean("autoKb", true))
             .put("autoUpdate", Updater.auto(this)).put("lang", prefs.getString("lang", "ar"))
             .put("apps", runCatching { JSONArray(prefs.getString("apps", null)) }.getOrNull() ?: JSONObject.NULL)
-            .put("wiz", prefs.getString("wiz", "")).put("setup", prefs.getString("setup", "")).put("phone", Net.localIp() ?: "").put("wifi", wifiOk)
+            .put("wiz", prefs.getString("wiz", "")).put("setup", prefs.getString("setup", "")).put("svcUpd", prefs.getString("svcUpd", "")).put("phone", Net.localIp() ?: "").put("wifi", wifiOk)
             .put("version", BuildConfig.VERSION_NAME).put("code", BuildConfig.VERSION_CODE)
             .put("latest", Updater.latestCode).put("update", Updater.hasUpdate()).put("notes", Updater.notes)
             .put("upStatus", Updater.status).put("upPct", Updater.pct).put("upError", Updater.error)
@@ -398,7 +398,7 @@ class MainActivity : AppCompatActivity() {
             val e = prefs.edit()
             when (k) {
                 "haptic", "volKeys", "keepOn", "autoKb", "autoUpdate" -> e.putBoolean(k, v == "true")
-                "lang", "apps", "method", "wiz", "setup" -> e.putString(k, v)
+                "lang", "apps", "method", "wiz", "setup", "svcUpd" -> e.putString(k, v)
                 else -> return
             }
             e.apply()

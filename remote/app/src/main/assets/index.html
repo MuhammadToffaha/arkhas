@@ -312,6 +312,7 @@ nav button.on{color:#fff}nav button.on .i{color:#ff6f9c}
       <div class="seg" id="seg"><button data-m="auto" data-t="mAuto"></button><button data-m="tcl">TCL</button><button data-m="atv">Google</button><button data-m="adb">ADB</button></div>
       <div class="mut" style="margin-top:8px" data-t="methodS"></div>
       <button class="btn alt wide sm" id="unblkBtn" style="margin-top:10px">🛡️ <span data-t="unblk"></span></button>
+      <button class="btn alt wide" id="svcBtn" style="margin-top:10px">🔄 <span data-t="svcT"></span></button>
       <button class="btn wide" id="wizBtn" style="margin-top:12px">⚡ <span data-t="wizT"></span></button>
       <div class="flex" style="margin-top:10px"><button class="btn alt sm" id="pairBtn" style="flex:1">🔗 <span data-t="pairagain"></span></button><button class="btn alt sm" id="keyBtn" style="flex:1">🔑 <span data-t="newkey"></span></button></div>
     </div>
@@ -387,6 +388,24 @@ nav button.on{color:#fff}nav button.on .i{color:#ff6f9c}
   </div>
   <div id="wizBtns" class="flex" style="margin-top:14px;flex-wrap:wrap"></div>
 </div>
+<!-- 🔄 update the TV's remote service -->
+<div class="sheet" id="svc" hidden>
+  <h3>🔄 <span data-t="svcT"></span></h3>
+  <div id="svcBody" style="font-size:14px;line-height:1.65"></div>
+  <div id="svcPad" hidden>
+    <div class="grid g3 ltr" style="margin:12px 0 0">
+      <button class="k" data-k="4"><svg class="i"><use href="#i-back"/></svg></button>
+      <button class="k" data-k="19" data-rep><svg class="i"><use href="#i-up"/></svg></button>
+      <button class="k" data-k="3"><svg class="i"><use href="#i-home"/></svg></button>
+      <button class="k" data-k="21" data-rep><svg class="i"><use href="#i-left"/></svg></button>
+      <button class="k acc" data-k="23">OK</button>
+      <button class="k" data-k="22" data-rep><svg class="i"><use href="#i-right"/></svg></button>
+      <span></span><button class="k" data-k="20" data-rep><svg class="i"><use href="#i-down"/></svg></button><span></span>
+    </div>
+  </div>
+  <div id="svcBtns" class="flex" style="margin-top:14px;flex-wrap:wrap"></div>
+</div>
+
 <div class="pop" id="upPop" hidden><div class="popbox glass">
   <div class="e">🆕</div><b id="upPopT"></b><div class="mut" id="upPopS"></div>
   <div class="popb"><button class="btn alt" id="upLater"></button><button class="btn" id="upNow"></button></div>
@@ -402,7 +421,7 @@ const T = {
  ar:{t_remote:'ريموت',t_touch:'لمس',t_keys:'أزرار',t_apps:'تطبيقات',t_set:'إعدادات',input:'المصدر',tvset:'إعدادات',allapps:'التطبيقات',search:'بحث',back:'رجوع',home:'الرئيسية',menu:'قائمة',mute:'كتم',play:'تشغيل',
   tphint:'اسحب بإصبعك للتحرك · اضغط = OK · ضغطة طويلة = الخيارات',appshint:'اضغط لفتح التطبيق على التلفزيون · ضغطة طويلة للحذف',tvs:'التلفزيونات',pairagain:'ربط من جديد',iphint:'الـ IP موجود في التلفزيون: الإعدادات ← الشبكة والإنترنت ← شبكتك',
   updates:'التحديثات',lang:'اللغة',newkey:'مفتاح جديد',newkeyhint:'كل التلفزيونات هتحتاج ربط من جديد',kbtitle:'اكتب على التلفزيون',kbhintA:'لازم تكون فيه خانة كتابة مفتوحة على التلفزيون (بحث مثلاً)',kbhintD:'حروف إنجليزي وأرقام بس',addapp:'إضافة تطبيق',appname:'الاسم',
-  scan:'🔍 دوّر على التلفزيون',scanning:'بيدوّر…',searching:'بيدوّر على التلفزيون (يمكن الـ IP اتغيّر)…',recovering:'التلفزيون بيرجع… استنى',recT:'التلفزيون قفل الاتصال وغالباً بيعيد تشغيل نفسه. التطبيق هيحاول لوحده كل شوية لمدة 4 دقايق — ماتفصلش حاجة.',gaveT:'التلفزيون مارجعش. افصل كهربا التلفزيون دقيقة ورجّعها، وبعدين اضغط "تاني".',frozen:'خدمة الريموت في التلفزيون واقفة',frzT:'🧊 خدمة الريموت في التلفزيون واقفة',frzL:'التلفزيون بيرد على الشبكة بس خدمة الريموت فيه معلّقة من مرة قبل كده. ده مش من التطبيق ومفيش برنامج يقدر يصحّيها من بره.',frz1:'افصل فيشة كهربا التلفزيون من الحيطة (مش زرار الستاند باي).',frz2:'استنى <b>دقيقة كاملة</b>، ورجّعها.',frz3:'استنى لحد ما الشاشة الرئيسية تظهر خالص (حوالي دقيقة).',frz4:'اضغط "تاني" هنا. النسخة دي بتقفل الأزرار اللي كانت بتعلّقه.',tclNo:'الزرار ده مش موجود في قناة TCL.',tclKb:'⚠️ الكتابة مش متاحة في وضع TCL. استخدم الأسهم و OK على كيبورد التلفزيون.',openPorts:'الخدمات المفتوحة على التلفزيون',connected:'متصل',connecting:'بيتصل…',probing:'بيفحص التلفزيون…',noports:'مش قادر يدخل',offline:'مش متصل',needpair:'محتاج ربط',idle:'مش متصل',pairing:'بيربط…',code:'اكتب الكود',paired:'تم الربط',auth:'وافق على التلفزيون',
+  scan:'🔍 دوّر على التلفزيون',scanning:'بيدوّر…',searching:'بيدوّر على التلفزيون (يمكن الـ IP اتغيّر)…',recovering:'التلفزيون بيرجع… استنى',recT:'التلفزيون قفل الاتصال وغالباً بيعيد تشغيل نفسه. التطبيق هيحاول لوحده كل شوية لمدة 4 دقايق — ماتفصلش حاجة.',gaveT:'التلفزيون مارجعش. افصل كهربا التلفزيون دقيقة ورجّعها، وبعدين اضغط "تاني".',frozen:'خدمة الريموت في التلفزيون واقفة',frzT:'🧊 خدمة الريموت في التلفزيون واقفة',frzL:'التلفزيون بيرد على الشبكة بس خدمة الريموت فيه معلّقة من مرة قبل كده. ده مش من التطبيق ومفيش برنامج يقدر يصحّيها من بره.',frz1:'افصل فيشة كهربا التلفزيون من الحيطة (مش زرار الستاند باي).',frz2:'استنى <b>دقيقة كاملة</b>، ورجّعها.',frz3:'استنى لحد ما الشاشة الرئيسية تظهر خالص (حوالي دقيقة).',frz4:'اضغط "تاني" هنا. النسخة دي بتقفل الأزرار اللي كانت بتعلّقه.',tclNo:'الزرار ده مش موجود في قناة TCL.',tclKb:'⚠️ الكتابة مش متاحة في وضع TCL. استخدم الأسهم و OK على كيبورد التلفزيون.',openPorts:'الخدمات المفتوحة على التلفزيون',svcT:'تحديث خدمة ريموت التلفزيون',svcOffer:'🎉 اتصلنا! خدمة الريموت في التلفزيون ده ممكن تكون قديمة، وده من أسباب التعليق. نحدّثها دلوقتي؟',svcHow:'هنفتح صفحة <b>Android TV Remote Service</b> في Play Store على التلفزيون. لما تظهر، اضغط <b>OK</b> على زرار <b>Update / تحديث</b> بالأسهم هنا.',svcOpen:'📲 افتح على التلفزيون',svcOpened:'✅ اتبعت. على التلفزيون: الأسهم لحد <b>Update</b> ← <b>OK</b>.<br>لو مكتوب <b>Open / فتح</b> بدل Update يبقى الخدمة محدّثة خلاص.<br><br>⚠️ وقت التحديث الاتصال هيقطع ثواني ويرجع لوحده.',svcDone:'خلصت ✅',svcLater:'بعدين',svcNo:'⚠️ مش متصل بالتلفزيون دلوقتي.',connected:'متصل',connecting:'بيتصل…',probing:'بيفحص التلفزيون…',noports:'مش قادر يدخل',offline:'مش متصل',needpair:'محتاج ربط',idle:'مش متصل',pairing:'بيربط…',code:'اكتب الكود',paired:'تم الربط',auth:'وافق على التلفزيون',
   retry:'تاني',pairNow:'ربط',findTitle:'🔍 بندوّر على التلفزيون',findHint:'الموبايل والتلفزيون لازم يكونوا على نفس الواي فاي. لو ملقيناش حاجة اكتب الـ IP تحت.',nothing:'لسه ملقيناش حاجة…',use:'اتصل',
   prNeed:'🔗 اربط الموبايل بالتلفزيون (مرة واحدة)',prNeedS:'اضغط "ابدأ" وهيظهر كود من 6 حروف على شاشة التلفزيون.',prStart:'ابدأ الربط',prWait:'بيكلّم التلفزيون…',prCode:'🔢 اكتب الكود اللي على التلفزيون',prBad:'❌ الكود غلط — راجعه وجرّب تاني',prOk:'✅ تم الربط! الريموت جاهز',prFail:'⚠️ الربط اتقطع — جرّب تاني',prAdb:'🔧 جرّب طريقة ADB بدل كده',
   authT:'📺 على التلفزيون ظهرت رسالة "Allow debugging" — علّم "Always allow" واضغط OK بالريموت العادي.',
@@ -447,7 +466,7 @@ const T = {
  en:{t_remote:'Remote',t_touch:'Touch',t_keys:'Keys',t_apps:'Apps',t_set:'Settings',input:'Input',tvset:'Settings',allapps:'Apps',search:'Search',back:'Back',home:'Home',menu:'Menu',mute:'Mute',play:'Play',
   tphint:'Swipe to move · tap = OK · long-press = options',appshint:'Tap to open on the TV · long-press to remove',tvs:'TVs',pairagain:'Pair again',iphint:'TV IP: TV Settings → Network & Internet → your Wi-Fi',
   updates:'Updates',lang:'Language',newkey:'New key',newkeyhint:'Every TV will need pairing again',kbtitle:'Type on the TV',kbhintA:'A text box must be open on the TV (e.g. search)',kbhintD:'English letters and numbers only',addapp:'Add app',appname:'Name',
-  scan:'🔍 Find my TV',scanning:'Scanning…',searching:'Looking for the TV (IP may have changed)…',recovering:'TV coming back… wait',recT:'The TV dropped the link and is probably restarting itself. The app retries quietly for up to 4 minutes — don\'t unplug anything.',gaveT:'The TV didn\'t come back. Unplug the TV for 1 minute, plug back, then tap Retry.',frozen:'TV remote service frozen',frzT:'🧊 The TV\'s remote service is frozen',frzL:'The TV answers on the network, but its remote service is stuck from an earlier session. This isn\'t the app, and no app can wake it from outside.',frz1:'Pull the TV\'s power plug from the wall (not the standby button).',frz2:'Wait <b>one full minute</b>, plug it back.',frz3:'Wait until the home screen is fully up (about a minute).',frz4:'Tap Retry here. This version blocks the keys that froze it.',tclNo:'This key isn\'t available on the TCL channel.',tclKb:'⚠️ Typing isn\'t available in TCL mode. Use the arrows and OK on the TV\'s on-screen keyboard.',openPorts:'Open services on the TV',connected:'Connected',connecting:'Connecting…',probing:'Checking the TV…',noports:'Can\'t get in',offline:'Not connected',needpair:'Needs pairing',idle:'Not connected',pairing:'Pairing…',code:'Enter code',paired:'Paired',auth:'Accept on TV',
+  scan:'🔍 Find my TV',scanning:'Scanning…',searching:'Looking for the TV (IP may have changed)…',recovering:'TV coming back… wait',recT:'The TV dropped the link and is probably restarting itself. The app retries quietly for up to 4 minutes — don\'t unplug anything.',gaveT:'The TV didn\'t come back. Unplug the TV for 1 minute, plug back, then tap Retry.',frozen:'TV remote service frozen',frzT:'🧊 The TV\'s remote service is frozen',frzL:'The TV answers on the network, but its remote service is stuck from an earlier session. This isn\'t the app, and no app can wake it from outside.',frz1:'Pull the TV\'s power plug from the wall (not the standby button).',frz2:'Wait <b>one full minute</b>, plug it back.',frz3:'Wait until the home screen is fully up (about a minute).',frz4:'Tap Retry here. This version blocks the keys that froze it.',tclNo:'This key isn\'t available on the TCL channel.',tclKb:'⚠️ Typing isn\'t available in TCL mode. Use the arrows and OK on the TV\'s on-screen keyboard.',openPorts:'Open services on the TV',svcT:'Update TV Remote Service',svcOffer:'🎉 Connected! This TV\'s remote service may be outdated, which is a common cause of freezing. Update it now?',svcHow:'We open the <b>Android TV Remote Service</b> page in the TV\'s Play Store. When it shows, press <b>OK</b> on <b>Update</b> using the arrows here.',svcOpen:'📲 Open on TV',svcOpened:'✅ Sent. On the TV: arrows to <b>Update</b> → <b>OK</b>.<br>If it says <b>Open</b> instead of Update, the service is already up to date.<br><br>⚠️ While it updates, the link drops for a few seconds and comes back by itself.',svcDone:'Done ✅',svcLater:'Later',svcNo:'⚠️ Not connected to the TV right now.',connected:'Connected',connecting:'Connecting…',probing:'Checking the TV…',noports:'Can\'t get in',offline:'Not connected',needpair:'Needs pairing',idle:'Not connected',pairing:'Pairing…',code:'Enter code',paired:'Paired',auth:'Accept on TV',
   retry:'Retry',pairNow:'Pair',findTitle:'🔍 Looking for your TV',findHint:'Phone and TV must be on the same Wi-Fi. Nothing found? Type the IP below.',nothing:'Nothing found yet…',use:'Connect',
   prNeed:'🔗 Pair the phone with the TV (one time)',prNeedS:'Tap Start and a 6-character code appears on the TV.',prStart:'Start pairing',prWait:'Talking to the TV…',prCode:'🔢 Type the code shown on the TV',prBad:'❌ Wrong code — check it and try again',prOk:'✅ Paired! The remote is ready',prFail:'⚠️ Pairing dropped — try again',prAdb:'🔧 Try ADB instead',
   authT:'📺 The TV shows "Allow debugging" — tick "Always allow" and press OK with the normal remote.',
@@ -567,7 +586,7 @@ function go(p){ page = p; $$('#nav button').forEach(b => b.classList.toggle('on'
 $$('#nav button').forEach(b => b.onclick = () => go(b.dataset.p));
 
 /* ---------- sheets ---------- */
-const SHEETS = ['#kb','#addApp','#mgr','#shotS','#wiz','#logS'];
+const SHEETS = ['#kb','#addApp','#mgr','#shotS','#wiz','#logS','#svc'];
 function openSheet(id){ SHEETS.forEach(s => $(s).hidden = s !== id); $('#scrim').hidden = false }
 function closeSheets(){ if (!$('#wiz').hidden && typeof wizStop === 'function') { wizStop(); W.step = -1 } SHEETS.forEach(s => $(s).hidden = true); $('#scrim').hidden = !!$('#pr').hidden; $('#kbIn').blur() }
 $('#scrim').onclick = () => { if (!$('#pr').hidden && S.status !== 'pairing') { prHidden = true; if (S.status === 'code') R.cancelPair(); renderPair() } closeSheets() };
@@ -748,13 +767,34 @@ function renderSetup(){
   } else if (step === 'auth') {
     B.innerHTML = `<div style="text-align:center"><span class="spin"></span></div>${other}`;
   } else if (step === 'done') {
-    B.innerHTML = `<button class="btn wide" onclick="finishSetup()">${t('sGo')}</button>
+    B.innerHTML = `${S.mode === 'atv' && S.svcUpd !== 'done' ? `<button class="btn wide" style="margin-bottom:10px" onclick="finishSetup();svcOpen(true)">🔄 ${t('svcT')}</button>` : ''}<button class="btn ${S.mode === 'atv' && S.svcUpd !== 'done' ? 'alt ' : ''}wide" onclick="finishSetup()">${t('sGo')}</button>
       ${S.mode === 'atv' && !S.adbTools ? `<button class="btn alt wide" style="margin-top:10px" onclick="finishSetup();wizOpen(false)">${t('sAdbOpt')}</button>` : ''}`;
   }
 }
 function finishSetup(){ SU.force = false; SU.pick = false; R.setPref('setup', 'done'); S.setup = 'done'; renderSetup(); render(); moveInd() }
 $('#sLang').onclick = () => { L = L === 'ar' ? 'en' : 'ar'; R.setPref('lang', L); applyLang(); SU.step = ''; render(); renderApps() };
 $('#setupAgain').onclick = () => { SU.force = true; SU.step = ''; SU.autoPaired = ''; renderSetup() };
+
+
+/* ---------- 🔄 update the TV's Android TV Remote Service via the TV's Play Store ---------- */
+const SVC_LINK = 'market://details?id=com.google.android.tv.remote.service';
+function svcOpen(offer){
+  openSheet('#svc'); $('#svcPad').hidden = true;
+  $('#svcBody').innerHTML = `${offer ? `<p>${t('svcOffer')}</p>` : ''}<p class="mut">${t('svcHow')}</p>`;
+  $('#svcBtns').innerHTML = '';
+  const go = document.createElement('button'); go.className = 'btn'; go.style.flex = '2'; go.textContent = t('svcOpen');
+  go.onclick = () => {
+    if (S.status !== 'connected') { $('#svcBody').innerHTML += `<p>${t('svcNo')}</p>`; return }
+    R.key(3); setTimeout(() => R.launch(SVC_LINK), 1200);
+    $('#svcBody').innerHTML = `<p>${t('svcOpened')}</p>`; $('#svcPad').hidden = false; bindKeys($('#svcPad'));
+    $('#svcBtns').innerHTML = ''; const d = document.createElement('button'); d.className = 'btn wide'; d.textContent = t('svcDone');
+    d.onclick = () => { R.setPref('svcUpd', 'done'); S.svcUpd = 'done'; closeSheets() }; $('#svcBtns').appendChild(d);
+  };
+  const later = document.createElement('button'); later.className = 'btn alt'; later.style.flex = '1'; later.textContent = t('svcLater');
+  later.onclick = () => { R.setPref('svcUpd', 'later'); S.svcUpd = 'later'; closeSheets() };
+  $('#svcBtns').append(later, go);
+}
+$('#svcBtn').onclick = () => svcOpen(false);
 
 /* ---------- pairing ---------- */
 let prHidden = false, lastStatus = '';
@@ -899,7 +939,8 @@ function render(){
     if (S.status !== 'code' && $('#codeIn')) $('#pr').innerHTML = '';
   }
   markBlocked(); renderTop(); renderSetup(); renderPair(); if (page === 'set') renderSet(); renderPop(); wizState();
-  if (!setupOn() && S.status === 'connected' && S.mode === 'atv' && !S.wiz && !render._probed) { render._probed = 1; setTimeout(() => R.probeAdb(), 1500) }
+  if (!setupOn() && S.status === 'connected' && S.mode === 'atv' && !S.svcUpd && !render._svc && SHEETS.every(x => $(x).hidden)) { render._svc = 1; setTimeout(() => svcOpen(true), 800) }
+  if (!setupOn() && S.status === 'connected' && S.mode === 'atv' && S.svcUpd && !S.wiz && !render._probed) { render._probed = 1; setTimeout(() => R.probeAdb(), 1500) }
   const a = JSON.stringify(S.apps); if (a !== render._apps) { render._apps = a; renderApps() }
   lastStatus = S.status;
 }
