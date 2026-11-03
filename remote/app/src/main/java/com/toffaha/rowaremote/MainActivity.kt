@@ -30,6 +30,8 @@ import kotlin.concurrent.thread
  * Two ways in, picked automatically: Google TV remote protocol (port 6466, pair with a code)
  * or ADB over Wi-Fi (port 5555, "Allow debugging" once). The doctor explains whatever is blocked.
  */
+private val TCL_RISKY = listOf(176, 178, 170, 172, 165, 175, 222, 229, 242, 243, 244, 245, 246, 255, 223, 224, 83, 219, 120, 130, 187)
+
 class MainActivity : AppCompatActivity() {
     private lateinit var web: WebView
     private lateinit var atv: AtvClient
@@ -53,7 +55,18 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         atv = AtvClient(applicationContext, { push() }, { txt -> lastText = txt; adbReset(txt); atv.resetText(txt); js("window.onIme&&window.onIme(${JSONObject.quote(txt)})") })
         adb = AdbClient(applicationContext) { push() }
+        Log.init(applicationContext)
         atv.onGiveUp = { giveUp() }
+        // 🛡️ TCL: keys that open TCL's own overlay menus (settings, source, guide, info…) knock over its remote
+        // service / the whole TV when injected from a phone → off by default on TCL, user can re-enable
+        atv.onHello = { vendor ->
+            if (vendor.contains("TCL", true) && !prefs.getBoolean("tclSafe", false)) {
+                atv.blocked.addAll(TCL_RISKY)
+                prefs.edit().putBoolean("tclSafe", true).putString("blocked", atv.blocked.joinToString(",")).apply()
+                Log.d("TCL detected → overlay keys disabled: ${TCL_RISKY.joinToString(",")}")
+                push()
+            }
+        }
         // 🛡️ keys that crash this TV's remote service (176 Settings proven on TCL v7) + whatever we learn later
         atv.blocked.addAll((prefs.getString("blocked", "176") ?: "176").split(",").mapNotNull { it.trim().toIntOrNull() })
         atv.onBlockedLearned = { k -> prefs.edit().putString("blocked", atv.blocked.joinToString(",")).apply(); js("window.onBlocked&&window.onBlocked($k)"); push() }
@@ -111,7 +124,7 @@ class MainActivity : AppCompatActivity() {
         cancelLinger()
         val cur = prefs.getString("cur", "") ?: ""
         val st = status()
-        if (cur.isNotEmpty() && (live || st == "connecting" || st == "pairing" || st == "code" || st == "auth")) { push(); return }
+        if (cur.isNotEmpty() && (live || st == "connecting" || st == "recovering" || st == "pairing" || st == "code" || st == "auth")) { push(); return }
         if (cur.isNotEmpty()) connectTv(cur, nameOf(cur), save = false) else scan()
     }
 

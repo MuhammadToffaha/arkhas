@@ -32,7 +32,7 @@ class AtvClient(private val ctx: Context, private val onChange: () -> Unit, priv
 
     @Volatile var host = ""
     @Volatile var name = ""
-    /** idle · connecting · connected · needpair · pairing · code · paired · offline */
+    /** idle · connecting · connected · recovering · needpair · pairing · code · paired · offline */
     @Volatile var status = "idle"
     @Volatile var error = ""
     @Volatile var isOn: Boolean? = null
@@ -47,6 +47,10 @@ class AtvClient(private val ctx: Context, private val onChange: () -> Unit, priv
     /** called when the TV never answered on 6466 (twice) — MainActivity then tries ADB / shows the check */
     @Volatile var onGiveUp: (() -> Unit)? = null
     private var everConnected = false
+    /** after a drop: keep trying quietly until this time (TV may be restarting itself) */
+    @Volatile private var recoverUntil = 0L
+    /** called once per session with the TV vendor (MainActivity applies TCL-safe keys) */
+    @Volatile var onHello: ((String) -> Unit)? = null
     private var activeFeatures = FEATURES
 
     private var gen = 0
@@ -77,7 +81,7 @@ class AtvClient(private val ctx: Context, private val onChange: () -> Unit, priv
         sock = null; out = null; pairSock = null; pairOut = null
     }
 
-    fun disconnect() { wanted = false; closeAll(); if (status != "needpair") set("idle") }
+    fun disconnect() { wanted = false; recoverUntil = 0; closeAll(); if (status != "needpair") set("idle") }
 
     /** connect to the remote port; tells the UI "needpair" if the TV doesn't know this phone yet */
     fun connect(h: String = host, n: String = name) {
@@ -113,7 +117,15 @@ class AtvClient(private val ctx: Context, private val onChange: () -> Unit, priv
                 onBlockedLearned?.invoke(lastSentKey)
             }
             synchronized(this) { sock = null; out = null }
+            val now = System.currentTimeMillis()
+            if (configured) recoverUntil = now + 240_000
             when {
+                // 🔁 link was working, then dropped → quiet, spaced reconnects for up to 4 min (no hammering)
+                wanted && everConnected && now < recoverUntil -> {
+                    set("recovering", if (configured) "dropped" else "waiting")
+                    Thread.sleep(if (configured) 8000 else 15_000)
+                    if (g == gen && wanted) runRemote(g, 0)
+                }
                 // TV answered but dropped us before configuring → it doesn't trust this phone yet
                 !configured && (reached || e is SSLException) -> { wanted = false; set("needpair") }
                 !everConnected && attempt >= 1 -> {
@@ -128,7 +140,7 @@ class AtvClient(private val ctx: Context, private val onChange: () -> Unit, priv
                 }
                 wanted -> {
                     wanted = false
-                    set("offline", e.message ?: "unreachable")
+                    set("offline", if (everConnected) "gaveup" else (e.message ?: "unreachable"))
                 }
                 else -> set("offline", e.message ?: "")
             }
@@ -145,8 +157,9 @@ class AtvClient(private val ctx: Context, private val onChange: () -> Unit, priv
                 val active = if (supported != 0) FEATURES and supported else FEATURES
                 activeFeatures = active
                 send(PB().msg(1, PB().int(1, active).msg(2, PB().int(3, 1).str(4, "1").str(5, "atvremote").str(6, "1.0.0"))))
-                everConnected = true
+                everConnected = true; recoverUntil = 0
                 set("connected")
+                onHello?.invoke(c.msg(2)?.str(2) ?: "")
             }
             m.has(2) -> send(PB().msg(2, PB().int(1, activeFeatures)))            // remote_set_active: echo the agreed set
             m.has(8) -> send(PB().msg(9, PB().int(1, m.msg(8)?.int(1) ?: 0)))     // ping → pong
