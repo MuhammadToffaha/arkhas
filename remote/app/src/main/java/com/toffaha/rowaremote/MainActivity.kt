@@ -36,6 +36,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var web: WebView
     private lateinit var atv: AtvClient
     private lateinit var adb: AdbClient
+    private lateinit var tcl: TclClient
     private lateinit var finder: Finder
     private val io = Executors.newFixedThreadPool(3)
     private val prefs by lazy { Updater.prefs(this) }
@@ -55,11 +56,13 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         atv = AtvClient(applicationContext, { push() }, { txt -> lastText = txt; adbReset(txt); atv.resetText(txt); js("window.onIme&&window.onIme(${JSONObject.quote(txt)})") })
         adb = AdbClient(applicationContext) { push() }
+        tcl = TclClient { push() }
         Log.init(applicationContext)
         atv.onGiveUp = { giveUp() }
         // 🛡️ TCL: keys that open TCL's own overlay menus (settings, source, guide, info…) knock over its remote
         // service / the whole TV when injected from a phone → off by default on TCL, user can re-enable
         atv.onHello = { vendor ->
+            if (atv.host !in knownGood) prefs.edit().putString("good", (knownGood + atv.host).joinToString(",")).apply()
             if (vendor.contains("TCL", true) && !prefs.getBoolean("tclSafe", false)) {
                 atv.blocked.addAll(TCL_RISKY)
                 prefs.edit().putBoolean("tclSafe", true).putString("blocked", atv.blocked.joinToString(",")).apply()
@@ -115,7 +118,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private val ui = android.os.Handler(android.os.Looper.getMainLooper())
-    private val linger = Runnable { Log.d("left app 3 min → disconnect"); atv.disconnect(); adb.disconnect() }
+    private val linger = Runnable { Log.d("left app 3 min → disconnect"); atv.disconnect(); adb.disconnect(); tcl.disconnect() }
     private fun cancelLinger() = ui.removeCallbacks(linger)
 
     override fun onStart() {
@@ -143,14 +146,31 @@ class MainActivity : AppCompatActivity() {
         if (host.isBlank()) return
         if (save) saveTv(host, name)
         cancelLinger()
-        atv.disconnect(); adb.disconnect()
-        atv.host = host; atv.name = name; adb.host = host; adb.name = name
+        atv.disconnect(); adb.disconnect(); tcl.disconnect()
+        atv.host = host; atv.name = name; adb.host = host; adb.name = name; tcl.host = host; tcl.name = name
         doctor = null
         val m = method
         Log.d("connect $name $host method=$m")
-        // no bare port probe on 6466: go straight to the real (TLS) connection; AtvClient falls back via giveUp()
-        if (m == "adb") { mode = "adb"; phase = ""; adb.connect(host, name) }
-        else { mode = "atv"; phase = ""; atv.connect(host, name) }
+        when (m) {
+            "adb" -> { mode = "adb"; phase = ""; adb.connect(host, name) }
+            "tcl" -> { mode = "tcl"; phase = ""; tcl.connect(host, name) }
+            "atv" -> { mode = "atv"; phase = ""; atv.connect(host, name) }
+            else -> {
+                // 📺 auto: TCL's own channel (4123) first — on TCL-platform sets like ROWA it never touches the
+                // Google remote service that freezes. No 6466 probing (that service is fragile).
+                mode = ""; phase = "probing"; push()
+                io.execute {
+                    val t = Net.open(host, TclClient.PORT, 2500)
+                    Log.d("auto: TCL port 4123 ${if (t) "open → TCL mode" else "closed → Google remote"}")
+                    runOnUiThread {
+                        if (curHost.isNotEmpty() && curHost != host) return@runOnUiThread
+                        phase = ""
+                        if (t) { mode = "tcl"; tcl.connect(host, name) } else { mode = "atv"; atv.connect(host, name) }
+                        push()
+                    }
+                }
+            }
+        }
         push()
     }
 
@@ -158,7 +178,15 @@ class MainActivity : AppCompatActivity() {
     private fun giveUp() = io.execute {
         val h = curHost.ifEmpty { atv.host }
         Log.d("google remote not answering → " + if (method == "auto") "trying ADB" else "connection check")
+        if (method == "auto" && Net.open(h, TclClient.PORT, 3000)) { Log.d("→ TCL port 4123 open, using TCL mode"); runOnUiThread { mode = "tcl"; phase = ""; tcl.connect(h, nameOf(h)) }; return@execute }
         if (method == "auto" && Net.open(h, Net.ADB, 4000)) { runOnUiThread { mode = "adb"; phase = ""; adb.connect(h, nameOf(h)) }; return@execute }
+        // 🧊 TV answers ping but 6466 swallows the connection (timeout, not refused) = its remote service is frozen
+        //    from an earlier session. Only a power cut clears it → say so right away, no 1-minute search.
+        val pingOk = runCatching { java.net.InetAddress.getByName(h).isReachable(2000) }.getOrDefault(false)
+        if (pingOk && atv.error == "timeout" && (h in knownGood || h == curHost)) {
+            Log.d("TV $h answers ping but port 6466 is silent → TV remote service frozen (needs power cut)")
+            phase = "frozen"; doctor = null; push(); runDoctor(h); return@execute
+        }
         // 🔀 the TV may have a new IP after a restart (router gave .7 to another device) → look for it and follow
         if (!rescued.contains(h)) {
             rescued.add(h)
@@ -181,6 +209,7 @@ class MainActivity : AppCompatActivity() {
         phase = "noports"; doctor = null; push(); runDoctor(h)
     }
     private val rescued = mutableSetOf<String>()
+    private val knownGood: Set<String> get() = (prefs.getString("good", "") ?: "").split(",").filter { it.isNotBlank() }.toSet()
 
     /** send TV traffic over Wi-Fi even when Android prefers mobile data (Wi-Fi "without internet") */
     @Volatile private var wifiOk = true
@@ -207,9 +236,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun status(): String = phase.ifEmpty {
-        when (mode) { "atv" -> atv.status; "adb" -> adb.status; else -> "idle" }
+        when (mode) { "atv" -> atv.status; "adb" -> adb.status; "tcl" -> tcl.status; else -> "idle" }
     }
-    private val live get() = (mode == "atv" && atv.connected) || (mode == "adb" && adb.connected)
+    private val live get() = (mode == "atv" && atv.connected) || (mode == "adb" && adb.connected) || (mode == "tcl" && tcl.connected)
 
     // ---------------- discovery ----------------
     private fun addFound(host: String, name: String?, kind: String) {
@@ -263,7 +292,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     // ---------------- actions ----------------
-    private fun key(code: Int) { if (mode == "atv") atv.key(code) else if (mode == "adb") adb.key(code) }
+    private fun key(code: Int) { when (mode) { "atv" -> atv.key(code); "adb" -> adb.key(code); "tcl" -> tcl.key(code) } }
     private fun adbReset(v: String) { adb.resetText(v) }
 
     private fun keepOn() {
@@ -302,11 +331,12 @@ class MainActivity : AppCompatActivity() {
         val st = status()
         return JSONObject()
             .put("status", st).put("mode", mode).put("method", method)
-            .put("error", if (mode == "adb") adb.error else atv.error)
+            .put("error", when (mode) { "adb" -> adb.error; "tcl" -> tcl.error; else -> atv.error })
             .put("host", curHost.ifEmpty { atv.host }).put("name", nameOf(curHost).takeIf { curHost.isNotEmpty() } ?: "")
             .put("on", if (mode == "atv") (atv.isOn ?: JSONObject.NULL) else JSONObject.NULL)
             .put("vol", if (mode == "atv") atv.volLevel else -1).put("volMax", atv.volMax).put("muted", atv.muted)
             .put("app", if (mode == "adb") adb.app else atv.app)
+            .put("tclKeys", JSONArray(TclClient.KEYS.keys.toList()))
             .put("blocked", JSONArray(if (mode == "atv") atv.blocked.toList() else emptyList<Int>()))
             .put("adbTools", adb.connected).put("adbStatus", adb.status)
             .put("doctor", doctor ?: JSONObject.NULL)
@@ -328,7 +358,7 @@ class MainActivity : AppCompatActivity() {
         @JavascriptInterface fun key(code: Int) { this@MainActivity.key(code); buzz() }
         /** long press: Google mode sends one normal press (no down/up pair that can get stuck); ADB does a real long press */
         @JavascriptInterface fun keyDown(code: Int) {
-            if (mode == "atv") atv.key(code) else if (mode == "adb") adb.key(code, long = true); buzz()
+            when (mode) { "atv" -> atv.key(code); "adb" -> adb.key(code, long = true); "tcl" -> tcl.key(code) }; buzz()
         }
         @JavascriptInterface fun keyUp(code: Int) {}
         @JavascriptInterface fun repeat(code: Int) = this@MainActivity.key(code)
@@ -352,7 +382,7 @@ class MainActivity : AppCompatActivity() {
             val a = tvs(); val out = JSONArray()
             for (i in 0 until a.length()) if (a.getJSONObject(i).optString("host") != host) out.put(a.getJSONObject(i))
             prefs.edit().putString("tvs", out.toString()).apply()
-            if (curHost == host) { prefs.edit().remove("cur").apply(); atv.disconnect(); adb.disconnect(); mode = ""; phase = "" }
+            if (curHost == host) { prefs.edit().remove("cur").apply(); atv.disconnect(); adb.disconnect(); tcl.disconnect(); mode = ""; phase = "" }
             push()
         }
         @JavascriptInterface fun reconnect() = runOnUiThread { rescued.clear(); if (curHost.isNotEmpty()) connectTv(curHost, nameOf(curHost), save = false) }

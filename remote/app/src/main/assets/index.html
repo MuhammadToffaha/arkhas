@@ -309,7 +309,7 @@ nav button.on{color:#fff}nav button.on .i{color:#ff6f9c}
     </div>
     <div class="card glass">
       <h3>🔌 <span data-t="method"></span></h3>
-      <div class="seg" id="seg"><button data-m="auto" data-t="mAuto"></button><button data-m="atv">Google</button><button data-m="adb">ADB</button></div>
+      <div class="seg" id="seg"><button data-m="auto" data-t="mAuto"></button><button data-m="tcl">TCL</button><button data-m="atv">Google</button><button data-m="adb">ADB</button></div>
       <div class="mut" style="margin-top:8px" data-t="methodS"></div>
       <button class="btn alt wide sm" id="unblkBtn" style="margin-top:10px">🛡️ <span data-t="unblk"></span></button>
       <button class="btn wide" id="wizBtn" style="margin-top:12px">⚡ <span data-t="wizT"></span></button>
@@ -402,13 +402,13 @@ const T = {
  ar:{t_remote:'ريموت',t_touch:'لمس',t_keys:'أزرار',t_apps:'تطبيقات',t_set:'إعدادات',input:'المصدر',tvset:'إعدادات',allapps:'التطبيقات',search:'بحث',back:'رجوع',home:'الرئيسية',menu:'قائمة',mute:'كتم',play:'تشغيل',
   tphint:'اسحب بإصبعك للتحرك · اضغط = OK · ضغطة طويلة = الخيارات',appshint:'اضغط لفتح التطبيق على التلفزيون · ضغطة طويلة للحذف',tvs:'التلفزيونات',pairagain:'ربط من جديد',iphint:'الـ IP موجود في التلفزيون: الإعدادات ← الشبكة والإنترنت ← شبكتك',
   updates:'التحديثات',lang:'اللغة',newkey:'مفتاح جديد',newkeyhint:'كل التلفزيونات هتحتاج ربط من جديد',kbtitle:'اكتب على التلفزيون',kbhintA:'لازم تكون فيه خانة كتابة مفتوحة على التلفزيون (بحث مثلاً)',kbhintD:'حروف إنجليزي وأرقام بس',addapp:'إضافة تطبيق',appname:'الاسم',
-  scan:'🔍 دوّر على التلفزيون',scanning:'بيدوّر…',searching:'بيدوّر على التلفزيون (يمكن الـ IP اتغيّر)…',recovering:'التلفزيون بيرجع… استنى',recT:'التلفزيون قفل الاتصال وغالباً بيعيد تشغيل نفسه. التطبيق هيحاول لوحده كل شوية لمدة 4 دقايق — ماتفصلش حاجة.',gaveT:'التلفزيون مارجعش. افصل كهربا التلفزيون دقيقة ورجّعها، وبعدين اضغط "تاني".',connected:'متصل',connecting:'بيتصل…',probing:'بيفحص التلفزيون…',noports:'مش قادر يدخل',offline:'مش متصل',needpair:'محتاج ربط',idle:'مش متصل',pairing:'بيربط…',code:'اكتب الكود',paired:'تم الربط',auth:'وافق على التلفزيون',
+  scan:'🔍 دوّر على التلفزيون',scanning:'بيدوّر…',searching:'بيدوّر على التلفزيون (يمكن الـ IP اتغيّر)…',recovering:'التلفزيون بيرجع… استنى',recT:'التلفزيون قفل الاتصال وغالباً بيعيد تشغيل نفسه. التطبيق هيحاول لوحده كل شوية لمدة 4 دقايق — ماتفصلش حاجة.',gaveT:'التلفزيون مارجعش. افصل كهربا التلفزيون دقيقة ورجّعها، وبعدين اضغط "تاني".',frozen:'خدمة الريموت في التلفزيون واقفة',frzT:'🧊 خدمة الريموت في التلفزيون واقفة',frzL:'التلفزيون بيرد على الشبكة بس خدمة الريموت فيه معلّقة من مرة قبل كده. ده مش من التطبيق ومفيش برنامج يقدر يصحّيها من بره.',frz1:'افصل فيشة كهربا التلفزيون من الحيطة (مش زرار الستاند باي).',frz2:'استنى <b>دقيقة كاملة</b>، ورجّعها.',frz3:'استنى لحد ما الشاشة الرئيسية تظهر خالص (حوالي دقيقة).',frz4:'اضغط "تاني" هنا. النسخة دي بتقفل الأزرار اللي كانت بتعلّقه.',tclNo:'الزرار ده مش موجود في قناة TCL.',tclKb:'⚠️ الكتابة مش متاحة في وضع TCL. استخدم الأسهم و OK على كيبورد التلفزيون.',connected:'متصل',connecting:'بيتصل…',probing:'بيفحص التلفزيون…',noports:'مش قادر يدخل',offline:'مش متصل',needpair:'محتاج ربط',idle:'مش متصل',pairing:'بيربط…',code:'اكتب الكود',paired:'تم الربط',auth:'وافق على التلفزيون',
   retry:'تاني',pairNow:'ربط',findTitle:'🔍 بندوّر على التلفزيون',findHint:'الموبايل والتلفزيون لازم يكونوا على نفس الواي فاي. لو ملقيناش حاجة اكتب الـ IP تحت.',nothing:'لسه ملقيناش حاجة…',use:'اتصل',
   prNeed:'🔗 اربط الموبايل بالتلفزيون (مرة واحدة)',prNeedS:'اضغط "ابدأ" وهيظهر كود من 6 حروف على شاشة التلفزيون.',prStart:'ابدأ الربط',prWait:'بيكلّم التلفزيون…',prCode:'🔢 اكتب الكود اللي على التلفزيون',prBad:'❌ الكود غلط — راجعه وجرّب تاني',prOk:'✅ تم الربط! الريموت جاهز',prFail:'⚠️ الربط اتقطع — جرّب تاني',prAdb:'🔧 جرّب طريقة ADB بدل كده',
   authT:'📺 على التلفزيون ظهرت رسالة "Allow debugging" — علّم "Always allow" واضغط OK بالريموت العادي.',
   haptic:'📳 اهتزاز مع كل ضغطة',volKeys:'🔊 أزرار صوت الموبايل تتحكم في التلفزيون',keepOn:'☀️ الشاشة تفضل منورة',autoKb:'⌨️ افتح الكيبورد لوحده لما التلفزيون يطلب كتابة',autoUpdate:'🤫 تحديث تلقائي (مرة في اليوم)',
   ver:'النسخة',latest:'آخر نسخة',uptodate:'✅ أحدث نسخة',check:'فحص',updateNow:'تحديث',later:'بعدين',newVer:'نسخة جديدة',current:'الحالية',addCur:'📌 أضف التطبيق المفتوح دلوقتي',del:'نحذف',off:'مطفي',
-  method:'طريقة الاتصال',mAuto:'تلقائي',methodS:'تلقائي = يجرّب Google TV Remote الأول، ولو مش موجود يستخدم ADB.',doctor:'فحص الاتصال',
+  method:'طريقة الاتصال',mAuto:'تلقائي',methodS:'تلقائي = قناة TCL الأول (الأنسب لتلفزيونات روا)، وبعدين Google، وبعدين ADB.',doctor:'فحص الاتصال',
   docT:'🩺 فحص الاتصال',dPhone:'الموبايل',dSame:'نفس الشبكة',dPing:'التلفزيون بيرد',dAtv:'Google Remote',dAdb:'ADB',dPair:'الربط',
   aNet:'الموبايل والتلفزيون على شبكتين مختلفين. وصّل الاتنين على نفس الواي فاي (مش شبكة الضيوف) وجرّب تاني.',
   aPing:'التلفزيون مش بيرد على الـ IP ده. اتأكد إنه شغال، وراجع الـ IP من إعدادات التلفزيون ← الشبكة. لو الراوتر فيه "AP isolation" اقفله.',
@@ -447,13 +447,13 @@ const T = {
  en:{t_remote:'Remote',t_touch:'Touch',t_keys:'Keys',t_apps:'Apps',t_set:'Settings',input:'Input',tvset:'Settings',allapps:'Apps',search:'Search',back:'Back',home:'Home',menu:'Menu',mute:'Mute',play:'Play',
   tphint:'Swipe to move · tap = OK · long-press = options',appshint:'Tap to open on the TV · long-press to remove',tvs:'TVs',pairagain:'Pair again',iphint:'TV IP: TV Settings → Network & Internet → your Wi-Fi',
   updates:'Updates',lang:'Language',newkey:'New key',newkeyhint:'Every TV will need pairing again',kbtitle:'Type on the TV',kbhintA:'A text box must be open on the TV (e.g. search)',kbhintD:'English letters and numbers only',addapp:'Add app',appname:'Name',
-  scan:'🔍 Find my TV',scanning:'Scanning…',searching:'Looking for the TV (IP may have changed)…',recovering:'TV coming back… wait',recT:'The TV dropped the link and is probably restarting itself. The app retries quietly for up to 4 minutes — don\'t unplug anything.',gaveT:'The TV didn\'t come back. Unplug the TV for 1 minute, plug back, then tap Retry.',connected:'Connected',connecting:'Connecting…',probing:'Checking the TV…',noports:'Can\'t get in',offline:'Not connected',needpair:'Needs pairing',idle:'Not connected',pairing:'Pairing…',code:'Enter code',paired:'Paired',auth:'Accept on TV',
+  scan:'🔍 Find my TV',scanning:'Scanning…',searching:'Looking for the TV (IP may have changed)…',recovering:'TV coming back… wait',recT:'The TV dropped the link and is probably restarting itself. The app retries quietly for up to 4 minutes — don\'t unplug anything.',gaveT:'The TV didn\'t come back. Unplug the TV for 1 minute, plug back, then tap Retry.',frozen:'TV remote service frozen',frzT:'🧊 The TV\'s remote service is frozen',frzL:'The TV answers on the network, but its remote service is stuck from an earlier session. This isn\'t the app, and no app can wake it from outside.',frz1:'Pull the TV\'s power plug from the wall (not the standby button).',frz2:'Wait <b>one full minute</b>, plug it back.',frz3:'Wait until the home screen is fully up (about a minute).',frz4:'Tap Retry here. This version blocks the keys that froze it.',tclNo:'This key isn\'t available on the TCL channel.',tclKb:'⚠️ Typing isn\'t available in TCL mode. Use the arrows and OK on the TV\'s on-screen keyboard.',connected:'Connected',connecting:'Connecting…',probing:'Checking the TV…',noports:'Can\'t get in',offline:'Not connected',needpair:'Needs pairing',idle:'Not connected',pairing:'Pairing…',code:'Enter code',paired:'Paired',auth:'Accept on TV',
   retry:'Retry',pairNow:'Pair',findTitle:'🔍 Looking for your TV',findHint:'Phone and TV must be on the same Wi-Fi. Nothing found? Type the IP below.',nothing:'Nothing found yet…',use:'Connect',
   prNeed:'🔗 Pair the phone with the TV (one time)',prNeedS:'Tap Start and a 6-character code appears on the TV.',prStart:'Start pairing',prWait:'Talking to the TV…',prCode:'🔢 Type the code shown on the TV',prBad:'❌ Wrong code — check it and try again',prOk:'✅ Paired! The remote is ready',prFail:'⚠️ Pairing dropped — try again',prAdb:'🔧 Try ADB instead',
   authT:'📺 The TV shows "Allow debugging" — tick "Always allow" and press OK with the normal remote.',
   haptic:'📳 Vibrate on every press',volKeys:'🔊 Phone volume buttons control the TV',keepOn:'☀️ Keep the screen on',autoKb:'⌨️ Open keyboard when the TV asks for text',autoUpdate:'🤫 Auto-update (once a day)',
   ver:'Version',latest:'Latest',uptodate:'✅ Up to date',check:'Check',updateNow:'Update',later:'Later',newVer:'New version',current:'current',addCur:'📌 Add the app open right now',del:'Remove',off:'off',
-  method:'Connection method',mAuto:'Auto',methodS:'Auto = Google TV Remote first, ADB if that is missing.',doctor:'Check connection',
+  method:'Connection method',mAuto:'Auto',methodS:'Auto = TCL channel first (best for ROWA sets), then Google, then ADB.',doctor:'Check connection',
   docT:'🩺 Connection check',dPhone:'Phone',dSame:'Same network',dPing:'TV answers',dAtv:'Google Remote',dAdb:'ADB',dPair:'Pairing',
   aNet:'Phone and TV are on different networks. Put both on the same Wi-Fi (not a guest network) and retry.',
   aPing:'The TV doesn\'t answer at this IP. Is it on? Check the IP in TV Settings → Network. If the router has "AP isolation", turn it off.',
@@ -510,7 +510,7 @@ function bindKeys(root = document){
     let t1, t2, longOn = false, down = false;
     b.addEventListener('pointerdown', e => {
       e.preventDefault(); try{ b.setPointerCapture(e.pointerId) }catch(_){}
-      if ((S.blocked || []).includes(k)) { toast(t('blk')); return }
+      if (keyOff(k)) { toast(S.mode === 'tcl' && !(S.blocked || []).includes(k) ? t('tclNo') : t('blk')); return }
       down = true; b.classList.add('press');
       if (lng) { longOn = false; t1 = setTimeout(() => { longOn = true; R.keyDown(k) }, 450) }
       else { R.key(k); if (rep) t1 = setTimeout(() => { t2 = setInterval(() => R.repeat(k), 250) }, 450) }
@@ -555,7 +555,8 @@ $('#extra').innerHTML = EXTRA.map(([e,n,k]) => `<button class="k" data-k="${k}">
 /* ---------- 🛡️ blocked keys ---------- */
 let toastT;
 function toast(msg){ const e = $('#toast'); e.textContent = msg; e.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => e.hidden = true, 5000) }
-function markBlocked(){ const bl = S.blocked || []; $$('[data-k]').forEach(b => b.classList.toggle('blk', bl.includes(+b.dataset.k))) }
+function keyOff(k){ return (S.blocked || []).includes(k) || (S.mode === 'tcl' && S.tclKeys && !S.tclKeys.includes(k)) }
+function markBlocked(){ $$('[data-k]').forEach(b => b.classList.toggle('blk', keyOff(+b.dataset.k))) }
 window.onBlocked = k => toast(t('blkNew'));
 /* ---------- nav ---------- */
 let page = 'remote';
@@ -573,7 +574,7 @@ $('#scrim').onclick = () => { if (!$('#pr').hidden && S.status !== 'pairing') { 
 
 /* ---------- keyboard ---------- */
 let kbT;
-function openKb(txt){ openSheet('#kb'); const i = $('#kbIn'); if (txt != null) i.value = txt; $('#kbHint').textContent = t('kbhintA') + ' · ' + t('kbhintD'); setTimeout(() => i.focus(), 80) }
+function openKb(txt){ openSheet('#kb'); const i = $('#kbIn'); if (txt != null) i.value = txt; $('#kbHint').textContent = S.mode === 'tcl' ? t('tclKb') : t('kbhintA') + ' · ' + t('kbhintD'); setTimeout(() => i.focus(), 80) }
 $('#kbBtn').onclick = () => openKb();
 $('#kbX').onclick = closeSheets;
 $('#kbIn').addEventListener('input', () => { clearTimeout(kbT); kbT = setTimeout(() => R.text($('#kbIn').value), 140) });
@@ -699,7 +700,7 @@ function sStep(){
   if (st === 'code') return 'code';
   if (st === 'needpair' || st === 'pairing' || st === 'paired') return 'pair';
   if (st === 'auth') return 'auth';
-  if (st === 'noports' || st === 'unreachable') return 'doc';
+  if (st === 'noports' || st === 'unreachable' || st === 'frozen') return 'doc';
   return 'conn';
 }
 function renderSetup(){
@@ -713,6 +714,7 @@ function renderSetup(){
   $('#sIcon').textContent = {find: '🔍', conn: '📡', doc: '🩺', pair: '🔗', code: '🔢', auth: '✋', done: '✅'}[step];
   const T2 = {find: ['sFindT','sFindL'], conn: ['sConnT','sConnL'], doc: ['sDocT','sDocL'], pair: ['sPairT', S.status === 'needpair' ? 'sPairWait' : 'sPairWait'], code: ['sPairT','sPairL'], auth: ['sAuthT','authT'], done: ['sDoneT','sDoneL']}[step];
   $('#sTitle').textContent = t(T2[0]); $('#sLead').textContent = t(T2[1]);
+  if (S.status === 'frozen') { $('#sTitle').textContent = t('frozen'); $('#sLead').textContent = ''; $('#sIcon').textContent = '🧊' }
   const other = `<button class="btn alt wide" style="margin-top:10px" onclick="SU.pick=true;R.scan();renderSetup()">📺 ${t('sOther')}</button>`;
   const B = $('#sBody');
   if (step === 'find') {
@@ -787,7 +789,11 @@ function renderPair(){
 }
 
 /* ---------- doctor ---------- */
+function frozenHtml(){ return `<p style="margin:0 0 6px"><b>${t('frzT')}</b></p><p class="mut" style="margin:0 0 8px">${t('frzL')}</p>
+  <ol class="steps"><li>${t('frz1')}</li><li>${t('frz2')}</li><li>${t('frz3')}</li><li>${t('frz4')}</li></ol>
+  <div class="flex" style="margin-top:12px"><button class="btn" style="flex:2" onclick="R.reconnect()">🔄 ${t('retry')}</button><button class="btn alt" style="flex:1" onclick="showLog()">📋</button></div>` }
 function doctorHtml(){
+  if (S.status === 'frozen') return frozenHtml();
   const d = S.doctor;
   if (!d) return `<p class="mut"><span class="spin"></span> ${t('probing')}</p>`;
   const yn = (ok, label) => `<div><span class="${ok ? 'y' : 'n'}">${ok ? '✔' : '✖'}</span>${label}</div>`;
@@ -812,7 +818,7 @@ function renderTop(){
   $('#tvName').textContent = S.name || 'ROWA TV';
   const sub = [t(st)]; if (st === 'connected' && S.on === false) sub.push('💤 ' + t('off')); if (S.app && st === 'connected') sub.push(S.app.split('.').pop());
   $('#tvSub').textContent = sub.join(' · ');
-  const tag = $('#tvTag'); tag.hidden = !S.mode; tag.textContent = S.mode === 'adb' ? 'ADB' : 'GOOGLE'; tag.className = 'tag ' + (S.mode === 'adb' ? 'a' : 'g');
+  const tag = $('#tvTag'); tag.hidden = !S.mode; tag.textContent = S.mode === 'adb' ? 'ADB' : S.mode === 'tcl' ? 'TCL' : 'GOOGLE'; tag.className = 'tag ' + (S.mode === 'adb' ? 'a' : 'g');
   const v = S.vol >= 0 && st === 'connected'; $('#vol').hidden = !v;
   if (v) { $('#volI').style.width = (S.muted ? 0 : Math.round(100 * S.vol / (S.volMax || 100))) + '%'; $('#volN').textContent = S.muted ? '🔇' : S.vol }
   // banner
@@ -831,7 +837,7 @@ function renderTop(){
   if (!S.host) hero.innerHTML = `<div class="card"><h3>${t('findTitle')}</h3><div class="mut">${t('findHint')}</div>${foundList()}
       ${S.scanning ? `<div class="bar"><i style="width:${Math.max(5, S.scanPct)}%"></i></div>` : `<button class="btn wide" style="margin-top:12px" onclick="R.scan()">${t('scan')}</button>`}
       <div class="flex" style="margin-top:10px"><input class="inp ltr" id="ip2" inputmode="decimal" placeholder="192.168.1.50"><button class="btn" onclick="manualIp('#ip2')">➕</button></div></div>`;
-  else if (st === 'noports' || st === 'probing') hero.innerHTML = `<div class="card"><h3>${t('docT')}</h3>${st === 'probing' ? `<p class="mut"><span class="spin"></span> ${t('probing')}</p>` : doctorHtml()}</div>`;
+  else if (st === 'noports' || st === 'probing' || st === 'frozen') hero.innerHTML = `<div class="card"><h3>${t('docT')}</h3>${st === 'probing' ? `<p class="mut"><span class="spin"></span> ${t('probing')}</p>` : doctorHtml()}</div>`;
   else hero.innerHTML = '';
 }
 function badges(d){ return `<div class="badges">${d.atv ? '<span class="tag g">GOOGLE</span>' : ''}${d.adb ? '<span class="tag a">ADB</span>' : ''}${d.cast ? '<span class="tag">CAST</span>' : ''}${d.old ? '<span class="tag">OLD</span>' : ''}</div>` }
