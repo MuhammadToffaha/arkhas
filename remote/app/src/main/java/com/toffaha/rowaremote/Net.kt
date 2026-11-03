@@ -72,6 +72,27 @@ object Net {
         pool.shutdown(); pool.awaitTermination(40, TimeUnit.SECONDS); onProgress(100)
     }
 
+    /**
+     * 🔎 Which TV-control services does this set run? Plain TCP knock on known vendor ports
+     * (never 6466/6467 — Google's remote service is fragile). open = listening, refused = not there.
+     */
+    val VENDOR_PORTS = linkedMapOf(
+        4123 to "TCL nScreen", 4124 to "TCL", 5978 to "TCL", 6550 to "TCL", 6553 to "TCL", 9999 to "TCL/misc", 10002 to "TCL",
+        56789 to "TCL/UPnP", 56790 to "UPnP desc", 49152 to "UPnP/DLNA", 8008 to "Cast HTTP", 8009 to "Cast", 8443 to "Cast TLS",
+        5555 to "ADB", 1925 to "Philips", 1926 to "Philips", 8001 to "Samsung", 8002 to "Samsung", 3000 to "LG", 3001 to "LG",
+        36669 to "Hisense", 7345 to "MagiConnect", 8080 to "HTTP alt", 80 to "HTTP", 9080 to "Sony/HTTP", 1900 to "SSDP",
+        5000 to "AirPlay/misc", 7000 to "AirPlay", 8060 to "Roku", 9197 to "DIAL", 55000 to "Samsung legacy")
+    fun portScan(host: String): Map<Int, String> {
+        val pool = Executors.newFixedThreadPool(16)
+        val res = java.util.concurrent.ConcurrentHashMap<Int, String>()
+        for (p in VENDOR_PORTS.keys) pool.execute { res[p] = state(host, p, 1500) }
+        pool.shutdown(); pool.awaitTermination(15, TimeUnit.SECONDS)
+        val open = res.filterValues { it == "open" }.keys.sorted()
+        val silent = res.filterValues { it == "timeout" }.keys.sorted()
+        Log.d("ports $host open=${open.joinToString(",") { "$it(${VENDOR_PORTS[it]})" }.ifEmpty { "none" }} silent=${silent.joinToString(",").ifEmpty { "none" }}")
+        return res
+    }
+
     /** 🩺 what works and what doesn't between this phone and the TV */
     fun doctor(ctx: android.content.Context, host: String): Map<String, Any> {
         val me = localIp() ?: ""

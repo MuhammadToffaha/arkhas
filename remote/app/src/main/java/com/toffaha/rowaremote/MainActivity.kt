@@ -233,6 +233,9 @@ class MainActivity : AppCompatActivity() {
     private fun runDoctor(host: String) = io.execute {
         val r = Net.doctor(applicationContext, host)
         doctor = JSONObject(r).put("at", System.currentTimeMillis()); push()
+        val ports = Net.portScan(host)
+        val open = ports.filterValues { it == "open" }.keys.sorted().map { "$it ${Net.VENDOR_PORTS[it]}" }
+        doctor?.put("ports", JSONArray(open)); push()
     }
 
     private fun status(): String = phase.ifEmpty {
