@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="brand">#FF5A1F</color>
-    <color name="bg">#0B0D12</color>
+    <color name="brand">#7C5CFF</color>
+    <color name="bg">#F3F5FB</color>
     <style name="Theme.Rowa" parent="Theme.AppCompat.NoActionBar">
         <item name="colorPrimary">@color/brand</item>
         <item name="colorPrimaryDark">@color/bg</item>

@@ -80,7 +80,7 @@ class MainActivity : AppCompatActivity() {
         web = WebView(this).apply {
             settings.javaScriptEnabled = true
             settings.domStorageEnabled = true
-            setBackgroundColor(0xFF07080D.toInt())
+            setBackgroundColor(0xFFF3F5FB.toInt())
             addJavascriptInterface(Bridge(), "Rowa")
             webViewClient = object : WebViewClient() {
                 override fun shouldOverrideUrlLoading(view: WebView, req: WebResourceRequest): Boolean {
@@ -89,10 +89,10 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
-        root.setBackgroundColor(0xFF07080D.toInt())
+        root.setBackgroundColor(0xFFF3F5FB.toInt())
         root.addView(web, FrameLayout.LayoutParams(-1, -1))
         setContentView(root)
-        WindowCompat.getInsetsController(window, root).apply { isAppearanceLightStatusBars = false; isAppearanceLightNavigationBars = false }
+        WindowCompat.getInsetsController(window, root).apply { isAppearanceLightStatusBars = true; isAppearanceLightNavigationBars = true }
         ViewCompat.setOnApplyWindowInsetsListener(root) { v, insets ->
             val b = insets.getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout())
             v.setPadding(b.left, b.top, b.right, b.bottom); WindowInsetsCompat.CONSUMED
