@@ -74,7 +74,10 @@ class MainActivity : AppCompatActivity() {
         atv.blocked.addAll((prefs.getString("blocked", "176") ?: "176").split(",").mapNotNull { it.trim().toIntOrNull() })
         atv.onBlockedLearned = { k -> prefs.edit().putString("blocked", atv.blocked.joinToString(",")).apply(); js("window.onBlocked&&window.onBlocked($k)"); push() }
         bindWifi()
-        finder = Finder(this, { n, h, kind -> addFound(h, n, kind); push() }, { push() })
+        finder = Finder(this, { n, h, kind, txt ->
+            // 🔑 the remote service announces the TV's Bluetooth MAC → base for Wake-on-LAN
+            txt["bt"]?.let { Wol.norm(it) }?.let { if (prefs.getString("bt_$h", "") != it) { prefs.edit().putString("bt_$h", it).apply(); Log.d("mDNS: TV $h bt=$it"); if (!live && h == curHost) wake(h) } }
+            addFound(h, n, kind); push() }, { push() })
 
         val root = FrameLayout(this)
         web = WebView(this).apply {
@@ -142,8 +145,19 @@ class MainActivity : AppCompatActivity() {
     private val method get() = prefs.getString("method", "auto") ?: "auto"
     private val curHost get() = prefs.getString("cur", "") ?: ""
 
+    /** ⚡ MACs to wake: typed (router) first, else announced BT MAC ± 2 */
+    private fun wakeMacs(host: String): List<String> {
+        val typed = prefs.getString("mac_$host", "") ?: ""
+        val bt = prefs.getString("bt_$host", "") ?: ""
+        return if (Wol.norm(typed) != null) Wol.around(typed, 0) + (if (bt.isNotEmpty()) Wol.around(bt) else emptyList())
+               else if (bt.isNotEmpty()) Wol.around(bt) else emptyList()
+    }
+    private fun wake(host: String) { val m = wakeMacs(host); if (m.isNotEmpty()) io.execute { Wol.send(m, host) } }
+
     private fun connectTv(host: String, name: String, save: Boolean = true) {
         if (host.isBlank()) return
+        wake(host)
+        if ((prefs.getString("bt_$host", "") ?: "").isEmpty()) runOnUiThread { finder.start(12) }
         if (save) saveTv(host, name)
         cancelLinger()
         atv.disconnect(); adb.disconnect(); tcl.disconnect()
@@ -184,7 +198,15 @@ class MainActivity : AppCompatActivity() {
         //    from an earlier session. Only a power cut clears it → say so right away, no 1-minute search.
         val pingOk = runCatching { java.net.InetAddress.getByName(h).isReachable(2000) }.getOrDefault(false)
         if (pingOk && atv.error == "timeout" && (h in knownGood || h == curHost)) {
-            Log.d("TV $h answers ping but port 6466 is silent → TV remote service frozen (needs power cut)")
+            val macs = wakeMacs(h)
+            if (h !in woke && macs.isNotEmpty()) {
+                woke.add(h)
+                Log.d("TV $h pings but Google ports are firewalled → standby/Doze. Wake-on-LAN, then retry")
+                phase = "waking"; push()
+                Wol.send(macs, h); Thread.sleep(8000)
+                runOnUiThread { connectTv(h, nameOf(h), save = false) }; return@execute
+            }
+            Log.d("TV $h answers ping but port 6466 is silent → asleep (standby) or service frozen")
             phase = "frozen"; doctor = null; push(); runDoctor(h); return@execute
         }
         // 🔀 the TV may have a new IP after a restart (router gave .7 to another device) → look for it and follow
@@ -209,6 +231,7 @@ class MainActivity : AppCompatActivity() {
         phase = "noports"; doctor = null; push(); runDoctor(h)
     }
     private val rescued = mutableSetOf<String>()
+    private val woke = mutableSetOf<String>()
     private val knownGood: Set<String> get() = (prefs.getString("good", "") ?: "").split(",").filter { it.isNotBlank() }.toSet()
 
     /** send TV traffic over Wi-Fi even when Android prefers mobile data (Wi-Fi "without internet") */
@@ -231,8 +254,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun runDoctor(host: String) = io.execute {
+        wake(host)
         val r = Net.doctor(applicationContext, host)
-        doctor = JSONObject(r).put("at", System.currentTimeMillis()); push()
+        doctor = JSONObject(r).put("at", System.currentTimeMillis()).put("mac", prefs.getString("mac_$host", "")).put("bt", prefs.getString("bt_$host", "")); push()
         val ports = Net.portScan(host)
         val open = ports.filterValues { it == "open" }.keys.sorted().map { "$it ${Net.VENDOR_PORTS[it]}" }
         doctor?.put("ports", JSONArray(open)); push()
@@ -339,6 +363,7 @@ class MainActivity : AppCompatActivity() {
             .put("on", if (mode == "atv") (atv.isOn ?: JSONObject.NULL) else JSONObject.NULL)
             .put("vol", if (mode == "atv") atv.volLevel else -1).put("volMax", atv.volMax).put("muted", atv.muted)
             .put("app", if (mode == "adb") adb.app else atv.app)
+            .put("mac", prefs.getString("mac_$curHost", "")).put("bt", prefs.getString("bt_$curHost", ""))
             .put("tclKeys", JSONArray(TclClient.KEYS.keys.toList()))
             .put("blocked", JSONArray(if (mode == "atv") atv.blocked.toList() else emptyList<Int>()))
             .put("adbTools", adb.connected).put("adbStatus", adb.status)
@@ -388,7 +413,7 @@ class MainActivity : AppCompatActivity() {
             if (curHost == host) { prefs.edit().remove("cur").apply(); atv.disconnect(); adb.disconnect(); tcl.disconnect(); mode = ""; phase = "" }
             push()
         }
-        @JavascriptInterface fun reconnect() = runOnUiThread { rescued.clear(); if (curHost.isNotEmpty()) connectTv(curHost, nameOf(curHost), save = false) }
+        @JavascriptInterface fun reconnect() = runOnUiThread { rescued.clear(); woke.clear(); if (curHost.isNotEmpty()) connectTv(curHost, nameOf(curHost), save = false) }
         @JavascriptInterface fun doctor() { if (curHost.isNotEmpty()) { doctor = null; push(); runDoctor(curHost) } }
         @JavascriptInterface fun pair() { if (mode != "atv") { mode = "atv"; phase = ""; atv.host = curHost; atv.name = nameOf(curHost) }; atv.startPairing() }
         @JavascriptInterface fun code(c: String): Boolean = atv.submitCode(c)
@@ -433,6 +458,13 @@ class MainActivity : AppCompatActivity() {
             val png = if (ensureAdb()) adb.screenshot() else null
             js("window.onShot&&window.onShot(${if (png == null) "null" else "'" + Base64.encodeToString(png, Base64.NO_WRAP) + "'"})")
         }
+        @JavascriptInterface fun setMac(m: String): Boolean {
+            val h = curHost; if (h.isEmpty()) return false
+            val n = Wol.norm(m) ?: return m.isBlank().also { if (it) prefs.edit().remove("mac_$h").apply() }
+            prefs.edit().putString("mac_$h", n).apply(); Log.d("MAC for $h set to $n"); push(); return true
+        }
+        @JavascriptInterface fun wakeNow() { val h = curHost; if (h.isEmpty()) return
+            io.execute { Wol.send(wakeMacs(h), h); Thread.sleep(6000); runOnUiThread { rescued.clear(); connectTv(h, nameOf(h), save = false) } } }
         @JavascriptInterface fun unblock() { atv.blocked.clear(); prefs.edit().putString("blocked", "").apply(); push() }
         @JavascriptInterface fun checkUpdate() = io.execute { Updater.check(this@MainActivity); push() }
         @JavascriptInterface fun installUpdate() {

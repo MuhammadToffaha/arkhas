@@ -12,7 +12,7 @@ import java.util.concurrent.ConcurrentLinkedQueue
  * 🔍 mDNS: Android TVs announce "_androidtvremote2._tcp" (current remote service).
  * "_androidtvremote._tcp" = old service (needs an update on the TV), "_googlecast._tcp" = Chromecast built-in.
  */
-class Finder(ctx: Context, private val onFound: (name: String, host: String, kind: String) -> Unit, private val onDone: () -> Unit) {
+class Finder(ctx: Context, private val onFound: (name: String, host: String, kind: String, txt: Map<String, String>) -> Unit, private val onDone: () -> Unit) {
     private val nsd = ctx.getSystemService(Context.NSD_SERVICE) as NsdManager
     private val wifi = ctx.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
     private var lock: WifiManager.MulticastLock? = null
@@ -46,7 +46,8 @@ class Finder(ctx: Context, private val onFound: (name: String, host: String, kin
                 override fun onServiceResolved(i: NsdServiceInfo) {
                     resolving = false
                     val name = if (kind == "cast") (i.attributes["fn"]?.toString(Charsets.UTF_8) ?: i.serviceName) else i.serviceName
-                    i.host?.hostAddress?.takeIf { !it.contains(':') }?.let { onFound(name, it, kind) }
+                    val txt = runCatching { i.attributes.mapValues { (_, v) -> v?.toString(Charsets.UTF_8) ?: "" } }.getOrDefault(emptyMap())
+                    i.host?.hostAddress?.takeIf { !it.contains(':') }?.let { onFound(name, it, kind, txt) }
                     next()
                 }
             })
