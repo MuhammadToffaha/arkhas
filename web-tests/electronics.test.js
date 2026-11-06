@@ -301,3 +301,28 @@ test("🎯 accuracy: other models / accessories / loose matches are dropped; ⚡
   await E.search("loreal serum", { stores, fetcher: async (u) => { asked.push(u); return "{}"; }, timeout: 50 });
   assert.ok(asked.some((u) => u.includes("b.com")));
 });
+
+test("➕ products are added to the list one store at a time while searching (list open, new ones flash)", async () => {
+  const W = new URL("../web/", import.meta.url);
+  const html = readFileSync(new URL("index.html", W), "utf8").replace('<script src="engine.js"></script>', () => `<script>${readFileSync(new URL("engine.js", W), "utf8")}</script>`);
+  const dom = new JSDOM(html, { runScripts: "dangerously", url: "https://app.local/", pretendToBeVisual: true });
+  const w = dom.window; await new Promise((r) => setTimeout(r, 50));
+  w.eval(`STORES = [{ name: "A" }, { name: "B" }, { name: "C" }]; isOn = () => true;`);
+  const mk = (i, s) => ({ title: "JBL Tune 520BT " + i, price: 1000 + i, url: "https://" + s + "/" + i, source: s, match: 0, flags: [] });
+  let step, release;
+  w.Arkhas.search = (q, o) => new Promise((res) => {
+    const snap = (offers, n) => ({ query: q, variants: [q], offers, top3: offers.slice(0, 3), links: [], sources: Array.from({ length: n }, (_, k) => ({ source: "S" + k, ok: true, count: 1, ms: 1 })), total: 3 });
+    const a = [1, 2, 3, 4].map((i) => mk(i, "a")), b = [5, 6].map((i) => mk(i, "b"));
+    step = (n) => o.onProgress(n === 1 ? snap(a, 1) : snap([...a, ...b], 2));
+    release = () => res(snap([...a, ...b], 3));
+  });
+  const p = w.eval(`run("jbl")`);
+  step(1); await new Promise((r) => setTimeout(r, 40));
+  const count = () => w.document.querySelectorAll("#out .pc:not(.skel), #out .row").length;
+  assert.equal(count(), 4);
+  assert.ok(w.document.querySelector("#allres").open, "list is open while searching");
+  step(2); await new Promise((r) => setTimeout(r, 40));
+  assert.equal(count(), 6);
+  assert.equal(w.document.querySelectorAll("#out .row.fresh").length, 2, "the 2 new products flash in");
+  release(); await p;
+});
