@@ -390,6 +390,8 @@
     },
     "events": {
       "pages": [
+        "https://www.amazon.eg/s?k=11.11+deals&rh=p_8%3A30-&language=en_AE",
+        "https://www.amazon.eg/-/en/singles-day",
         "https://www.amazon.eg/-/en/white-friday",
         "https://www.amazon.eg/s?k=white+friday+deals&rh=p_8%3A30-&language=en_AE",
         "https://www.amazon.eg/s?k=white+friday&rh=p_8%3A50-&language=en_AE"
@@ -682,6 +684,8 @@
     "link_cards": true,
     "events": {
       "pages": [
+        "https://www.noon.com/egypt-en/11-11/",
+        "https://www.noon.com/egypt-en/yellow-friday-sale-eg/",
         "https://www.noon.com/egypt-en/yellow-friday/",
         "https://www.noon.com/egypt-en/yellow-friday-deals/",
         "https://www.noon.com/egypt-en/yellow-friday-sale/",
@@ -709,6 +713,8 @@
     "product_base": "https://btech.com/en",
     "events": {
       "pages": [
+        "https://btech.com/en/collection/black-friday-offers",
+        "https://btech.com/ar/collection/black-friday-offers",
         "https://btech.com/en/black-friday"
       ]
     }
