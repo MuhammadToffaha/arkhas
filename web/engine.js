@@ -525,13 +525,13 @@
     .replace(/<[^>]+>/g, "").trim();
   const offer = (store, o) => Object.assign({ source: store.name, via: store.type, old_price: null, image: null }, o);
 
-  const MAGENTO_Q = (q) => `{products(search:${JSON.stringify(q)},pageSize:20){items{name url_key url_suffix small_image{url} ` +
+  const MAGENTO_Q = (q) => `{products(search:${JSON.stringify(q)},pageSize:40){items{name url_key url_suffix small_image{url} ` +
     `price_range{minimum_price{final_price{value} regular_price{value}}}}}}`;
 
   const ADAPTERS = {
     // Shopify predictive search — Dream 2000, Compumarts, Kimo Store, Tradeline …
     shopify: {
-      url: (s, q) => `${s.base_url}/search/suggest.json?q=${enc(q)}&resources[type]=product&resources[limit]=10`,
+      url: (s, q) => `${s.base_url}/search/suggest.json?q=${enc(q)}&resources[type]=product&resources[limit]=10&resources[options][unavailable_products]=hide`,
       parse: (d, s) => ((d.resources && d.resources.results && d.resources.results.products) || [])
         .filter((p) => p.available !== false)
         .map((p) => offer(s, { title: decode(p.title), price: parsePrice(p.price), old_price: parsePrice(p.compare_at_price_max),
@@ -539,7 +539,7 @@
     },
     // WooCommerce Store API — WordPress shops
     woo: {
-      url: (s, q) => `${s.base_url}/wp-json/wc/store/v1/products?search=${enc(q)}&per_page=20`,
+      url: (s, q) => `${s.base_url}/wp-json/wc/store/v1/products?search=${enc(q)}&per_page=40`,
       parse: (d, s) => (Array.isArray(d) ? d : []).filter((p) => p.is_in_stock !== false).map((p) => {
         const pr = p.prices || {}, div = Math.pow(10, pr.currency_minor_unit ?? 2);
         return offer(s, { title: decode(p.name), price: parsePrice(+pr.price / div), old_price: parsePrice(+pr.regular_price / div),
@@ -566,7 +566,7 @@
     },
     // PrestaShop 1.7+ search controller in AJAX mode — Cairo Sales …
     prestashop: {
-      url: (s, q) => `${s.base_url}${s.path ?? "/en"}/search?controller=search&s=${enc(q)}&ajax=1&resultsPerPage=20`,
+      url: (s, q) => `${s.base_url}${s.path ?? "/en"}/search?controller=search&s=${enc(q)}&ajax=1&resultsPerPage=40`,
       parse: (d, s) => (d.products || []).map((p) => offer(s, { title: decode(p.name),
         price: parsePrice(p.price_amount ?? p.price), old_price: parsePrice(p.regular_price_amount),
         url: p.url || p.link, image: (p.cover && ((p.cover.medium && p.cover.medium.url) || (p.cover.small && p.cover.small.url))) || null })),
@@ -596,6 +596,17 @@
 
   async function htmlSearch(store, q, lang, fetcher, opt) {
     const url = buildUrl(store, q, lang);
+    // 🔬 deep search: stores with "search_pages" also load page 2, 3… at the same time (a failed extra page is ignored)
+    const pages = Math.min(store.search_pages || 1, opt.deep === false ? 1 : 4);
+    if (pages > 1 && !store.render) {
+      const urls = [url, ...Array.from({ length: pages - 1 }, (_, i) => url + (url.includes("?") ? "&" : "?") + (store.page_param || "page") + "=" + (i + 2))];
+      const res = await Promise.allSettled(urls.map((u) => withTimeout(fetcher(u, { lang }), opt.timeout)
+        .then((h) => parse(h, store, opt.DOMParser, opt.maxPerSource))));
+      if (res[0].status === "rejected") throw res[0].reason;
+      const seen = new Set();
+      return res.filter((r) => r.status === "fulfilled").flatMap((r) => r.value)
+        .filter((o) => { const k = productId(o.url); if (seen.has(k)) return false; seen.add(k); return true; });
+    }
     if (store.render) {
       const wait = store.wait || (store.item || "").split(",")[0] || null;
       return parse(await withTimeout(fetcher(url, { lang, render: true, wait }), opt.renderTimeout), store, opt.DOMParser, opt.maxPerSource);
@@ -747,7 +758,7 @@
   // as soon as a store starts its sale, without knowing the URLs in advance.
   const EVENT_RE = /black[\s_-]?friday|white[\s_-]?friday|yellow[\s_-]?friday|blue[\s_-]?friday|cyber[\s_-]?monday|singles?[\s_-]?day|\b11[.\s_-]11\b|الجمع[ةه] (البيضاء|البيضا|الصفراء|السوداء)|بلاك ?فر[اي]?يداي|وايت ?فرايداي|يلو ?فرايداي|سايبر ?منداي/i;
 
-  async function findEventPages(store, fetcher, DOMParserImpl, max = 4) {
+  async function findEventPages(store, fetcher, DOMParserImpl, max = 6) {
     const cfg = store.events || {};
     const home = cfg.home || store.base_url;
     const out = [];
@@ -766,6 +777,19 @@
         if (out.length >= max) break;
       }
     } catch (_) { /* home page did not load */ }
+    // one level deeper: the campaign landing page links to its own category pages ("Black Friday – Phones", "– TVs"…)
+    if (out.length && out.length < max + 4 && !(store.render || cfg.render)) {
+      try {
+        const html = await withTimeout(fetcher(out[0], { lang: "en" }), 12000);
+        const P = DOMParserImpl || root.DOMParser;
+        const doc = new P().parseFromString(html, "text/html");
+        for (const a of doc.querySelectorAll("a[href]")) {
+          const href = a.getAttribute("href") || "";
+          if (EVENT_RE.test(decodeURIComponent(href).replace(/[-_/]/g, " "))) add(href);
+          if (out.length >= max + 4) break;
+        }
+      } catch (_) { /* landing page did not load */ }
+    }
     for (const u of cfg.pages || []) if (out.length < max + 2) add(u);   // known campaign URLs (tried, may 404 out of season)
     return out;
   }
@@ -868,7 +892,7 @@
    */
   async function search(rawQuery, opts) {
     const query = cleanQuery(rawQuery);
-    const opt = Object.assign({ minRelevance: 0.75, maxPerSource: 20, city: "cairo", timeout: 7000, renderTimeout: 12000,
+    const opt = Object.assign({ minRelevance: 0.75, maxPerSource: 48, city: "cairo", timeout: 7000, renderTimeout: 12000,
       cacheMs: 30 * 60 * 1000, settleMs: 2500 }, opts);
     // shop-type routing: beauty shops only answer beauty searches (fewer requests, less noise)
     const beautyQ = isBeautyQuery(query);

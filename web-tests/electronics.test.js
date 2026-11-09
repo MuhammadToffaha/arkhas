@@ -326,3 +326,59 @@ test("➕ products are added to the list one store at a time while searching (li
   assert.equal(w.document.querySelectorAll("#out .row.fresh").length, 2, "the 2 new products flash in");
   release(); await p;
 });
+
+test("🔬 deep search: big marketplaces load 3 result pages at once and merge them", async () => {
+  const card = (i) => `<div data-component-type="s-search-result"><a class="a-link-normal" href="/dp/B0AAAAAA${String(i).padStart(2, "0")}"><h2><span>JBL Tune 520BT model ${i}</span></h2></a>
+    <span class="a-price"><span class="a-offscreen">EGP ${1000 + i}</span></span></div>`;
+  const asked = [];
+  const r = await E.search("jbl tune 520bt", { stores: [S["Amazon.eg"]], DOMParser, fetcher: async (u) => {
+    asked.push(u); const pg = +(u.match(/[?&]page=(\d)/) || [0, 1])[1];
+    if (pg === 3) throw new Error("blocked");                       // a failed extra page is ignored
+    return [1, 2, 3].map((k) => card(pg * 10 + k)).join("") + card(99);   // card 99 repeats on every page
+  } });
+  assert.equal(asked.length, 3);
+  assert.equal(r.offers.length, 7);
+});
+
+test("🖤 Black Friday first: home banner, default tab in season, campaign stores' other big discounts included", async () => {
+  const W = new URL("../web/", import.meta.url);
+  const html = readFileSync(new URL("index.html", W), "utf8").replace('<script src="engine.js"></script>', () => `<script>${readFileSync(new URL("engine.js", W), "utf8")}</script>`);
+  const dom = new JSDOM(html, { runScripts: "dangerously", url: "https://app.local/" });
+  const w = dom.window; await new Promise((r) => setTimeout(r, 50));
+  w.eval(`STORES = ${readFileSync(new URL("stores.json", W), "utf8")}; getHide().clear();`);
+  w.eval(`const mk = (i, s, pct, tag) => ({ title: "x" + i, price: 100 - pct, old_price: 100, pct, url: "https://x/" + i, source: s, tag });
+    dealsData = { deals: [mk(1, "Jumia", 0, "bf"), mk(2, "Jumia", 45), mk(3, "Jumia", 12), mk(4, "B.TECH", 60)], sources: [], total: 2, at: Date.now() };
+    rangeTouched = false; dealRange = ""; renderDeals(true);`);
+  // campaign item + Jumia's 45% deal; not the 12% one, not B.TECH (no live campaign there)
+  const season = w.eval("inSeason()");
+  w.eval(`dealRange = "bf"; renderDeals(true);`);
+  assert.equal(w.document.querySelectorAll("#d_out .dc").length, 2);
+  assert.equal(w.document.querySelectorAll("#d_out .bfb").length, 2);
+  w.eval(`$("#out").innerHTML = ""; renderHome();`);
+  assert.equal(!!w.document.querySelector("#bfhero"), season);
+  assert.equal(w.document.querySelectorAll("#home .cats button").length, 12);
+  // recent searches
+  w.eval(`addRecent("iphone 15"); addRecent("samsung a55"); addRecent("iphone 15"); renderHome();`);
+  assert.equal([...w.document.querySelectorAll("#home .recents button")].map((b) => b.textContent).join("|"), "iphone 15|samsung a55");
+});
+
+test("⚡ deals list: 40 cards first, the rest on demand; saved list shows at once while refreshing", async () => {
+  const W = new URL("../web/", import.meta.url);
+  const html = readFileSync(new URL("index.html", W), "utf8").replace('<script src="engine.js"></script>', () => `<script>${readFileSync(new URL("engine.js", W), "utf8")}</script>`);
+  const dom = new JSDOM(html, { runScripts: "dangerously", url: "https://app.local/" });
+  const w = dom.window; await new Promise((r) => setTimeout(r, 50));
+  w.eval(`STORES = [{ name: "Jumia", deals: { kind: "html", urls: [] } }]; isOn = () => true; getHide().clear();
+    const mk = (i) => ({ title: "x" + i, price: 40, old_price: 100, pct: 60, url: "https://x/" + i, source: "Jumia" });
+    dealsData = { deals: Array.from({ length: 100 }, (_, i) => mk(i)), sources: [], total: 1, at: Date.now() - 3 * 3600 * 1000 };
+    rangeTouched = true; dealRange = "r5070";
+    let finish; Arkhas.deals = (o) => new Promise((res) => { finish = () => res({ deals: [mk(1000)], sources: [], total: 1, at: Date.now() }); });
+    Arkhas.findEventPages = async () => []; window.__finish = () => finish();`);
+  const p = w.eval("loadDeals(false)");
+  await new Promise((r) => setTimeout(r, 30));
+  assert.equal(w.document.querySelectorAll("#d_out .dc").length, 40, "old list visible while the new one loads");
+  w.document.querySelector("#d_more").click();
+  await new Promise((r) => setTimeout(r, 10));
+  assert.equal(w.document.querySelectorAll("#d_out .dc").length, 80);
+  w.__finish(); await p;
+  assert.equal(w.document.querySelectorAll("#d_out .dc").length, 1);
+});

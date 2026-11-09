@@ -391,9 +391,11 @@
     "events": {
       "pages": [
         "https://www.amazon.eg/-/en/white-friday",
-        "https://www.amazon.eg/deals?language=en_AE"
+        "https://www.amazon.eg/s?k=white+friday+deals&rh=p_8%3A30-&language=en_AE",
+        "https://www.amazon.eg/s?k=white+friday&rh=p_8%3A50-&language=en_AE"
       ]
-    }
+    },
+    "search_pages": 3
   },
   {
     "name": "Jumia",
@@ -549,13 +551,21 @@
     "events": {
       "pages": [
         "https://www.jumia.com.eg/mlp-black-friday/",
-        "https://www.jumia.com.eg/black-friday/"
+        "https://www.jumia.com.eg/black-friday/",
+        "https://www.jumia.com.eg/mlp-black-friday-deals/",
+        "https://www.jumia.com.eg/mlp-black-friday-phones-tablets/",
+        "https://www.jumia.com.eg/mlp-black-friday-electronics/",
+        "https://www.jumia.com.eg/mlp-black-friday-appliances/",
+        "https://www.jumia.com.eg/mlp-black-friday-fashion/",
+        "https://www.jumia.com.eg/mlp-black-friday-health-beauty/",
+        "https://www.jumia.com.eg/catalog/?q=black+friday"
       ]
-    }
+    },
+    "search_pages": 3
   },
   {
     "name": "Noon",
-    "search_url": "https://www.noon.com/egypt-en/search/?q={q}",
+    "search_url": "https://www.noon.com/egypt-en/search/?q={q}&limit=50",
     "search_url_ar": "https://www.noon.com/egypt-ar/search/?q={q}",
     "base_url": "https://www.noon.com",
     "lang": "both",
@@ -673,7 +683,9 @@
     "events": {
       "pages": [
         "https://www.noon.com/egypt-en/yellow-friday/",
-        "https://www.noon.com/egypt-en/yellow-friday-deals/"
+        "https://www.noon.com/egypt-en/yellow-friday-deals/",
+        "https://www.noon.com/egypt-en/yellow-friday-sale/",
+        "https://www.noon.com/egypt-en/electronics-and-mobiles/yellow-friday/"
       ],
       "wait": "a[href*=\"/p/\"]"
     }
@@ -855,7 +867,8 @@
     "image": "img.product-image-photo@src",
     "deals": {
       "kind": "magento"
-    }
+    },
+    "events": {}
   },
   {
     "name": "Hyper One",
