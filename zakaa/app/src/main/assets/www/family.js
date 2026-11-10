@@ -6,13 +6,25 @@
 
   // 🎭 charades: act the word, the others guess. Kids see the English word too.
   const CATS = [
-    { id: 'animals', name: 'حيوانات', icon: '🦁', words: W('🐱|قطة|Cat,🐶|كلب|Dog,🦁|أسد|Lion,🐘|فيل|Elephant,🐒|قرد|Monkey,🐍|ثعبان|Snake,🐸|ضفدعة|Frog,🐧|بطريق|Penguin,🦒|زرافة|Giraffe,🐰|أرنب|Rabbit,🐔|فرخة|Chicken,🐟|سمكة|Fish,🐢|سلحفاة|Turtle,🦘|كنغر|Kangaroo,🐊|تمساح|Crocodile,🦆|بطة|Duck,🐴|حصان|Horse,🐝|نحلة|Bee,🦋|فراشة|Butterfly,🐫|جمل|Camel') },
-    { id: 'food', name: 'أكل', icon: '🍕', words: W('🍭|مصاصة|Lollipop,🍕|بيتزا|Pizza,🍌|موزة|Banana,🍦|آيس كريم|Ice cream,🍝|مكرونة|Pasta,🥚|بيضة|Egg,🍉|بطيخة|Watermelon,🥕|جزرة|Carrot,🍿|فشار|Popcorn,🍔|برجر|Burger,🍋|لمونة|Lemon,🍫|شوكولاتة|Chocolate,🥛|لبن|Milk,🍞|عيش|Bread,🍎|تفاحة|Apple,🧅|بصلة|Onion,🍯|عسل|Honey,🥤|عصير|Juice') },
-    { id: 'things', name: 'حاجات', icon: '🎒', words: W('☂️|شمسية|Umbrella,📱|موبايل|Phone,🔑|مفتاح|Key,⏰|منبّه|Alarm clock,🪥|فرشة سنان|Toothbrush,👓|نضارة|Glasses,✂️|مقص|Scissors,🎈|بالونة|Balloon,📖|كتاب|Book,🪞|مراية|Mirror,🧹|مقشة|Broom,🚲|عجلة|Bicycle,🎸|جيتار|Guitar,📷|كاميرا|Camera,🧢|كاب|Cap,🪜|سلم|Ladder,🔦|كشاف|Flashlight,🧦|شراب|Socks') },
-    { id: 'jobs', name: 'شغلانات', icon: '👩‍🚒', words: W('👨‍⚕️|دكتور|Doctor,👩‍🏫|مدرّسة|Teacher,👨‍🍳|طبّاخ|Chef,👩‍🚒|رجل مطافي|Firefighter,👮|ظابط|Police officer,👨‍✈️|طيّار|Pilot,👩‍🌾|فلاّح|Farmer,🧑‍🎨|رسّام|Painter,👷|مهندس|Engineer,🧑‍🚀|رائد فضاء|Astronaut,💇|حلاّق|Barber,🚕|سوّاق|Driver,⚽|لاعب كورة|Footballer,📸|مصوّر|Photographer,🧑‍🔧|ميكانيكي|Mechanic,🦷|دكتور سنان|Dentist') },
-    { id: 'actions', name: 'أفعال', icon: '🏃', words: W('😴|بينام|Sleeping,🏃|بيجري|Running,🏊|بيعوم|Swimming,🍽️|بياكل|Eating,😂|بيضحك|Laughing,😭|بيعيّط|Crying,🧗|بيتسلّق|Climbing,🪥|بيغسل سنانه|Brushing teeth,📖|بيقرا|Reading,✍️|بيكتب|Writing,🤸|بينط|Jumping,🚿|بيستحمّى|Showering,🧹|بيكنس|Sweeping,🎣|بيصطاد|Fishing,🥶|بردان|Feeling cold,🤧|بيعطس|Sneezing,🚗|بيسوق|Driving,👋|بيسلّم|Waving') },
-    { id: 'sports', name: 'رياضة ولعب', icon: '⚽', words: W('⚽|كورة قدم|Football,🏀|سلة|Basketball,🎾|تنس|Tennis,🏓|بينج بونج|Ping-pong,🥊|ملاكمة|Boxing,🚴|ركوب عجل|Cycling,⛷️|تزحلق|Skiing,🏋️|رفع أثقال|Weightlifting,🤿|غطس|Diving,🪁|طيارة ورق|Kite,🎯|نيشان|Darts,🏹|رمي السهم|Archery,🛹|سكيت بورد|Skateboard,🤾|نط الحبل|Jump rope,♟️|شطرنج|Chess,🎳|بولينج|Bowling') }
+    { id: 'animals', d: 1, name: 'حيوانات', icon: '🦁', words: W('🐱|قطة|Cat,🐶|كلب|Dog,🦁|أسد|Lion,🐘|فيل|Elephant,🐒|قرد|Monkey,🐍|ثعبان|Snake,🐸|ضفدعة|Frog,🐧|بطريق|Penguin,🦒|زرافة|Giraffe,🐰|أرنب|Rabbit,🐔|فرخة|Chicken,🐟|سمكة|Fish,🐢|سلحفاة|Turtle,🦘|كنغر|Kangaroo,🐊|تمساح|Crocodile,🦆|بطة|Duck,🐴|حصان|Horse,🐝|نحلة|Bee,🦋|فراشة|Butterfly,🐫|جمل|Camel') },
+    { id: 'food', d: 1, name: 'أكل', icon: '🍕', words: W('🍭|مصاصة|Lollipop,🍕|بيتزا|Pizza,🍌|موزة|Banana,🍦|آيس كريم|Ice cream,🍝|مكرونة|Pasta,🥚|بيضة|Egg,🍉|بطيخة|Watermelon,🥕|جزرة|Carrot,🍿|فشار|Popcorn,🍔|برجر|Burger,🍋|لمونة|Lemon,🍫|شوكولاتة|Chocolate,🥛|لبن|Milk,🍞|عيش|Bread,🍎|تفاحة|Apple,🧅|بصلة|Onion,🍯|عسل|Honey,🥤|عصير|Juice') },
+    { id: 'things', d: 2, name: 'حاجات', icon: '🎒', words: W('☂️|شمسية|Umbrella,📱|موبايل|Phone,🔑|مفتاح|Key,⏰|منبّه|Alarm clock,🪥|فرشة سنان|Toothbrush,👓|نضارة|Glasses,✂️|مقص|Scissors,🎈|بالونة|Balloon,📖|كتاب|Book,🪞|مراية|Mirror,🧹|مقشة|Broom,🚲|عجلة|Bicycle,🎸|جيتار|Guitar,📷|كاميرا|Camera,🧢|كاب|Cap,🪜|سلم|Ladder,🔦|كشاف|Flashlight,🧦|شراب|Socks') },
+    { id: 'jobs', d: 3, name: 'شغلانات', icon: '👩‍🚒', words: W('👨‍⚕️|دكتور|Doctor,👩‍🏫|مدرّسة|Teacher,👨‍🍳|طبّاخ|Chef,👩‍🚒|رجل مطافي|Firefighter,👮|ظابط|Police officer,👨‍✈️|طيّار|Pilot,👩‍🌾|فلاّح|Farmer,🧑‍🎨|رسّام|Painter,👷|مهندس|Engineer,🧑‍🚀|رائد فضاء|Astronaut,💇|حلاّق|Barber,🚕|سوّاق|Driver,⚽|لاعب كورة|Footballer,📸|مصوّر|Photographer,🧑‍🔧|ميكانيكي|Mechanic,🦷|دكتور سنان|Dentist') },
+    { id: 'actions', d: 2, name: 'أفعال', icon: '🏃', words: W('😴|بينام|Sleeping,🏃|بيجري|Running,🏊|بيعوم|Swimming,🍽️|بياكل|Eating,😂|بيضحك|Laughing,😭|بيعيّط|Crying,🧗|بيتسلّق|Climbing,🪥|بيغسل سنانه|Brushing teeth,📖|بيقرا|Reading,✍️|بيكتب|Writing,🤸|بينط|Jumping,🚿|بيستحمّى|Showering,🧹|بيكنس|Sweeping,🎣|بيصطاد|Fishing,🥶|بردان|Feeling cold,🤧|بيعطس|Sneezing,🚗|بيسوق|Driving,👋|بيسلّم|Waving') },
+    { id: 'sports', d: 3, name: 'رياضة ولعب', icon: '⚽', words: W('⚽|كورة قدم|Football,🏀|سلة|Basketball,🎾|تنس|Tennis,🏓|بينج بونج|Ping-pong,🥊|ملاكمة|Boxing,🚴|ركوب عجل|Cycling,⛷️|تزحلق|Skiing,🏋️|رفع أثقال|Weightlifting,🤿|غطس|Diving,🪁|طيارة ورق|Kite,🎯|نيشان|Darts,🏹|رمي السهم|Archery,🛹|سكيت بورد|Skateboard,🤾|نط الحبل|Jump rope,♟️|شطرنج|Chess,🎳|بولينج|Bowling') },
+    { id: 'feel', d: 4, name: 'مشاعر', icon: '😮', words: W('😄|فرحان|Happy,😢|زعلان|Sad,😱|خايف|Scared,😮|متفاجئ|Surprised,😡|غضبان|Angry,😳|مكسوف|Shy,🥱|نعسان|Sleepy,😒|زهقان|Bored,🤤|جعان|Hungry,🥵|حرّان|Feeling hot,😫|تعبان|Tired,😎|واثق من نفسه|Confident,🤔|محتار|Confused,🤢|قرفان|Disgusted') },
+    { id: 'places', d: 4, name: 'أماكن', icon: '🏥', words: W('✈️|مطار|Airport,🏥|مستشفى|Hospital,🏫|مدرسة|School,🛒|سوبر ماركت|Supermarket,🦓|جنينة حيوانات|Zoo,🎡|ملاهي|Amusement park,📚|مكتبة|Library,🏖️|شط البحر|Beach,🍳|مطبخ|Kitchen,🚉|محطة قطر|Train station,🏟️|استاد|Stadium,🕌|مسجد|Mosque,🏜️|صحرا|Desert,🎪|سيرك|Circus') },
+    { id: 'scenes', d: 5, name: 'مشاهد', icon: '🎬', words: W('🐱|قطة بتجري ورا فار|A cat chasing a mouse,🐘|دكتور بيكشف على فيل|A doctor examining an elephant,🪁|بيطيّر طيارة ورق|Flying a kite,🧑‍🚀|رائد فضاء ماشي على القمر|An astronaut walking on the moon,🍝|بياكل مكرونة سخنة أوي|Eating very hot pasta,🚗|بيغسل العربية|Washing the car,🐒|قرد بيقشّر موزة|A monkey peeling a banana,👓|بيدوّر على نضارته|Looking for his glasses,🎪|ماشي على حبل|Walking on a tightrope,🐫|راكب جمل|Riding a camel,⏰|صحي متأخر على المدرسة|Waking up late for school,🐧|بطريق بيتزحلق على التلج|A penguin sliding on ice,🎒|شايل شنطة تقيلة|Carrying a heavy bag,🦁|أسد بيغسل سنانه|A lion brushing its teeth,🤳|بيتصوّر سيلفي|Taking a selfie,🌧️|ماشي في المطر من غير شمسية|Walking in the rain without an umbrella,🥞|طبّاخ بيقلّب بانكيك|A chef flipping a pancake,🖌️|بيدهن الحيطة|Painting the wall,🐟|صيّاد سمكته هربت|A fisherman whose fish got away,🧊|بيمشي على أرض بتزحلق|Walking on a slippery floor') }
   ];
+
+  // 🪜 charades levels: easy → extreme, each player has his own progress
+  const CH_TIERS = ['سهل', 'متوسط', 'صعب', 'صعب جداً', 'خارق'];
+  const CH_RULES = ['مثّل براحتك، والأصوات مسموحة 🔊', 'ممنوع الكلام، بس الأصوات مسموحة', 'ممنوع الكلام وممنوع الأصوات 🤫', 'مشاعر وأماكن… ومن غير أي صوت!', 'مشهد كامل! مثّله حتة حتة 🎬'];
+  const CH_MAX = 15;
+  const CH_LEVELS = Array.from({ length: CH_MAX }, (_, i) => {
+    const t = Math.floor(i / 3), k = i % 3;
+    return { lvl: i + 1, tier: t, d: t + 1, sec: [[90, 90, 75], [75, 75, 60], [60, 60, 60], [60, 60, 50], [50, 45, 45]][t][k], goal: (t === 0 ? 3 : 4) + k };
+  });
 
   // 💡 ideas: ~20 minutes together, with things already at home
   const TYPES = [
@@ -117,6 +129,22 @@
   function ideaOfDay(date) { const d = Math.floor(new Date(date + 'T00:00:00Z').getTime() / 86400000); return IDEAS[((d % IDEAS.length) + IDEAS.length) % IDEAS.length]; }
   const ideas = (type, mood) => IDEAS.filter(i => (!type || type === 'all' || i.t === type) && (!mood || mood === 'all' || i.mood === mood));
 
-  const api = { CATS, TYPES, IDEAS, deck, ideaOfDay, ideas };
+  /** words for a level: this level's difficulty first, then the easier ones if the family is very fast */
+  function levelDeck(lvl, r) {
+    const d = CH_LEVELS[lvl - 1].d, of = k => CATS.filter(c => c.d === k).reduce((a, c) => a.concat(c.words), []);
+    return shuffle(r || Math.random, of(d)).concat(d > 1 ? shuffle(r || Math.random, of(d - 1)) : []);
+  }
+  /** 0 = not passed. goal → ⭐, goal+2 → ⭐⭐, goal+4 → ⭐⭐⭐ */
+  function chStars(lvl, score) { const g = CH_LEVELS[lvl - 1].goal; return score >= g + 4 ? 3 : score >= g + 2 ? 2 : score >= g ? 1 : 0; }
+  const chStart = age => (age >= 9 ? 3 : age >= 8 ? 2 : 1);
+  function chUnlocked(kid) { let top = 0; const p = kid.ch || {}; for (const l in p) if (p[l] > 0) top = Math.max(top, Number(l)); return Math.min(CH_MAX, Math.max(chStart(kid.age), top + 1)); }
+  /** first pass = +1 hint 💡 for the puzzles, first ⭐⭐⭐ = one more */
+  function chPass(kid, lvl, s) {
+    if (!kid.ch) kid.ch = {}; const prev = kid.ch[lvl] || 0, gained = s > 0 ? (prev === 0 ? 1 : 0) + (s === 3 && prev < 3 ? 1 : 0) : 0;
+    kid.ch[lvl] = Math.max(prev, s); kid.hints = (kid.hints || 0) + gained;
+    return { first: prev === 0 && s > 0, gained, best: kid.ch[lvl] };
+  }
+
+  const api = { CATS, TYPES, IDEAS, deck, ideaOfDay, ideas, CH_TIERS, CH_RULES, CH_MAX, CH_LEVELS, levelDeck, chStars, chStart, chUnlocked, chPass };
   if (typeof module !== 'undefined' && module.exports) module.exports = api; else root.ZF = api;
 })(this);

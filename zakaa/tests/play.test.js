@@ -78,7 +78,29 @@ async function robot({ game, lvl, useHint }) {
   // 1b) 👨‍👧‍👦 family time: charades round + activity ideas
   await p.evaluate(() => { App.unpop(); App.go('who'); });
   await p.locator('#v-who .fam').click();
-  ok(await p.locator('.cats button').count() === 7, 'charades: 6 categories + mix');
+  ok(await p.locator('.cats button').count() === 10, 'free play: 9 categories + mix');
+  // 🪜 levels per player: the 6-year-old starts at 1, the 9-year-old at 3
+  await p.evaluate(() => App.famSet('kid', 'k3'));
+  ok(await p.locator('#fBody .lv button').count() === 15 && await p.locator('#fBody .lv button.lock').count() === 14, '6-year-old: charades level 1 open, 14 locked');
+  await p.evaluate(() => App.famSet('kid', 'k1'));
+  ok(await p.locator('#fBody .lv button.lock').count() === 12, '9-year-old: 3 charades levels open');
+  await p.evaluate(() => { App.famSet('kid', 'k3'); App.chLevel(2); });
+  ok(!(await p.evaluate(() => document.getElementById('popBg').classList.contains('show'))), 'locked charades level does not open');
+  await p.evaluate(() => App.chLevel(1));
+  ok((await p.textContent('#pop')).includes('3 كلمات') && (await p.textContent('#pop')).includes('90 ثانية'), 'level card shows goal and time');
+  const h0 = await p.evaluate(() => JSON.parse(localStorage.zakaa).kids[2].hints);
+  await p.evaluate(() => { App.unpop(); App.startCharades(null, 4, 1); }); await p.waitForTimeout(2700);
+  ok((await p.textContent('#chTime')).includes('0/3'), 'goal counter on the card');
+  for (let i = 0; i < 3; i++) await p.locator('.ch-btns .yes').click();
+  ok((await p.textContent('#chTime')).includes('3/3'), 'counter moves');
+  await p.waitForFunction(() => !document.getElementById('chOv').classList.contains('show') && document.getElementById('popBg').classList.contains('show'), null, { timeout: 9000 });
+  ok(await p.locator('#pop .stars span.on').count() === 1 && (await p.textContent('#pop')).includes('+1 💡'), 'reaching the goal = 1 star + a hint');
+  ok(await p.evaluate(h => { const k = JSON.parse(localStorage.zakaa).kids[2]; return k.ch[1] === 1 && k.hints === h + 1; }, h0), 'level saved for that player only');
+  ok(await p.locator('#fBody .lv button.lock').count() === 13, 'charades level 2 unlocked');
+  await p.evaluate(() => { App.unpop(); App.startCharades(null, 3, 2); });
+  await p.waitForFunction(() => !document.getElementById('chOv').classList.contains('show') && document.getElementById('popBg').classList.contains('show'), null, { timeout: 9000 });
+  ok(await p.locator('#pop .stars span.on').count() === 0 && (await p.textContent('#pop')).includes('جرّبوا تاني') && await p.locator('#fBody .lv button.lock').count() === 13, 'missing the goal = no star, nothing unlocked');
+  await p.evaluate(() => App.unpop());
   await p.evaluate(() => App.startCharades('food', 4));
   await p.waitForTimeout(2700);
   const w1 = await p.textContent('#chAr'), en1 = await p.textContent('#chEn');

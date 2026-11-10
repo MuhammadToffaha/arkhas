@@ -37,7 +37,7 @@
 
   function load() {
     let raw = ''; try { raw = N.load(); } catch (e) {} try { S = L.migrate(raw ? JSON.parse(raw) : null); } catch (e) { S = L.newState(); }
-    if (!S.family || typeof S.family !== 'object') S.family = {}; S.family.done = S.family.done || {}; S.family.fav = S.family.fav || {}; S.family.best = S.family.best || 0;
+    if (!S.family || typeof S.family !== 'object') S.family = {}; S.family.done = S.family.done || {}; S.family.fav = S.family.fav || {}; S.family.best = S.family.best || 0; S.kids.forEach(k => { if (!k.ch || typeof k.ch !== 'object') k.ch = {}; });
   }
   function save() { try { N.save(JSON.stringify(S)); } catch (e) {} }
   function toast(t) { const el = $('toast'); el.textContent = t; el.classList.add('show'); clearTimeout(toast.h); toast.h = setTimeout(() => el.classList.remove('show'), 2400); }
@@ -350,20 +350,32 @@
 
   // ---------- 🏡 family time: charades + ideas to do together ----------
   const F = window.ZF;
-  let famTab = 'char', famFrom = 'who', chCat = 'mix', chSec = 60, ch = null, idType = 'all';
+  let famTab = 'char', famFrom = 'who', chCat = 'mix', chSec = 60, ch = null, idType = 'all', famKidId = '', freeOpen = false;
+  const famKid = () => S.kids.find(k => k.id === famKidId) || S.kids.find(k => k.id === S.current) || S.kids[0];
   const mmss = t => String(Math.floor(t / 60)).padStart(2, '0') + ':' + String(t % 60).padStart(2, '0');
   function family(tab) { if (tab) famTab = tab; famFrom = $('v-home').classList.contains('on') ? 'home' : $('v-who').classList.contains('on') ? 'who' : famFrom; go('family'); }
-  function famSet(k, v) { if (k === 'tab') famTab = v; if (k === 'cat') chCat = v; if (k === 'sec') chSec = v; if (k === 'type') idType = v; renderFamily(); }
+  function famSet(k, v) { if (k === 'tab') famTab = v; if (k === 'cat') chCat = v; if (k === 'sec') chSec = v; if (k === 'type') idType = v; if (k === 'kid') famKidId = v; if (k === 'cat' || k === 'sec') freeOpen = true; renderFamily(); }
   function renderFamily() {
     $('fTabs').innerHTML = [['char', '🎭 مثّل الكلمة'], ['ideas', '💡 أفكار نعملها']].map(([id, n]) => `<button class="${famTab === id ? 'on' : ''}" onclick="App.famSet('tab','${id}')">${n}</button>`).join('');
     if (famTab === 'char') {
-      $('fBody').innerHTML = `<div class="lbl">اختاروا نوع الكلمات</div>
+      const k = famKid(), open = F.chUnlocked(k), ICON = ['🌱', '🌿', '🔥', '⚡', '👑'];
+      $('fBody').innerHTML = `<div class="lbl">مين اللي هيخمّن؟</div>
+        <div class="chips">${S.kids.map(x => `<button class="${x.id === k.id ? 'on' : ''}" onclick="App.famSet('kid','${x.id}')">${x.av} ${esc(x.name)}</button>`).join('')}</div>
+        <div class="lbl">🪜 مستويات ${esc(k.name)} <span style="color:var(--mute);font-size:14px">⭐ ${Object.values(k.ch || {}).reduce((p, q) => p + q, 0)} من ${F.CH_MAX * 3}</span></div>
+        ${F.CH_TIERS.map((name, t) => `<div class="tier">${ICON[t]} ${name}<i></i></div><div class="lv" style="grid-template-columns:repeat(3,1fr)">` + [0, 1, 2].map(j => {
+          const n = t * 3 + j + 1, st = (k.ch || {})[n] || 0, cls = st ? 'done' : n <= open ? (n === open ? 'open' : '') : 'lock';
+          return `<button style="aspect-ratio:1.5" class="${cls}" onclick="App.chLevel(${n})">${n <= open ? n : '🔒'}<small>${st ? '⭐'.repeat(st) : ''}</small></button>`;
+        }).join('') + '</div>').join('')}
+        <details class="free"><summary>🎲 لعب حر (من غير مستويات)</summary>
+        <div class="lbl" style="margin-top:12px">اختاروا نوع الكلمات</div>
         <div class="cats">${[{ id: 'mix', name: 'كله مع بعض', icon: '🎲' }].concat(F.CATS).map(c => `<button class="${chCat === c.id ? 'on' : ''}" onclick="App.famSet('cat','${c.id}')"><i>${c.icon}</i>${c.name}</button>`).join('')}</div>
         <div class="lbl">الوقت</div>
         <div class="chips">${[30, 60, 90, 120].map(t => `<button class="${chSec === t ? 'on' : ''}" onclick="App.famSet('sec',${t})">${t} ثانية</button>`).join('')}</div>
         <button class="btn" onclick="App.startCharades()">▶️ يلا نبدأ</button>
-        ${S.family.best ? `<p style="text-align:center;font-weight:800;margin:14px 0 0">🏆 أحسن رقم للعيلة: ${S.family.best} كلمة</p>` : ''}
-        <div class="howto"><b>إزاي نلعب؟</b><br>1️⃣ واحد يمسك الموبايل بالعرض على راسه، والشاشة للباقيين.<br>2️⃣ الباقي يمثّلوا الكلمة من غير كلام، وهو يخمّن.<br>3️⃣ عرفها؟ دوسوا <b>✅ صح</b>. صعبة؟ <b>⏭️ تخطّي</b>.<br>🇬🇧 كل كلمة مكتوبة عربي وإنجليزي… قولوها بالاتنين!</div>`;
+        ${S.family.best ? `<p style="text-align:center;font-weight:800;margin:14px 0 0">🏆 أحسن رقم للعيلة: ${S.family.best} كلمة</p>` : ''}</details>
+        <div class="howto"><b>إزاي نلعب؟</b><br>1️⃣ اللي هيخمّن يمسك الموبايل بالعرض على راسه، والشاشة للباقيين.<br>2️⃣ الباقي يمثّلوا الكلمة، وهو يخمّن.<br>3️⃣ عرفها؟ دوسوا <b>✅ صح</b>. صعبة؟ <b>⏭️ تخطّي</b>.<br>🪜 جمّعوا الكلمات المطلوبة قبل ما الوقت يخلص عشان تفتحوا المستوى اللي بعده.<br>🇬🇧 كل كلمة مكتوبة عربي وإنجليزي… قولوها بالاتنين!</div>`;
+      if (freeOpen) document.querySelector('details.free').open = true;
+      document.querySelector('details.free').ontoggle = e => { freeOpen = e.target.open; };
     } else {
       const day = F.ideaOfDay(today()), list = F.ideas(idType), doneN = Object.keys(S.family.done).length;
       const col = t => F.TYPES.find(x => x.id === t).c;
@@ -389,34 +401,56 @@
     save(); renderFamily(); idea(id);
   }
 
-  function startCharades(cat, sec) {
-    clearTimers(); if (cat) chCat = cat; if (sec) chSec = sec;
-    ch = { deck: F.deck(chCat), i: 0, left: chSec, ok: [], skip: [], on: false };
-    $('chOv').className = 'ch-ov show'; $('chTime').textContent = mmss(ch.left); $('chAr').textContent = 'استعدّوا…'; $('chEn').textContent = '';
+  function chLevel(n) {
+    const k = famKid(); if (n > F.chUnlocked(k)) return toast('🔒 عدّوا المستوى اللي قبله الأول');
+    const lv = F.CH_LEVELS[n - 1], kinds = F.CATS.filter(c => c.d === lv.d).map(c => c.icon + ' ' + c.name).join(' + ');
+    pop(`<div class="big">${k.av}</div><h3>مستوى ${n} • ${F.CH_TIERS[lv.tier]}</h3><p style="margin:0;color:var(--mute)">${esc(k.name)} هو اللي هيخمّن</p>
+      <div class="tip" style="margin-top:12px">🎯 المطلوب: <b>${lv.goal} كلمات</b> في <b>${lv.sec} ثانية</b><br>⭐⭐ ${lv.goal + 2} كلمات • ⭐⭐⭐ ${lv.goal + 4} كلمات<br>🗂️ ${kinds}<br>📏 ${F.CH_RULES[lv.tier]}</div>
+      <button class="btn" onclick="App.unpop();App.startCharades(null,null,${n})">▶️ يلا نبدأ</button>
+      <button class="btn ghost" style="margin-top:12px" onclick="App.unpop()">رجوع</button>`);
+  }
+  /** free play: (cat, sec). A level: (null, null, lvl) — sec may be forced by the tests. */
+  function startCharades(cat, sec, lvl) {
+    clearTimers(); if (!lvl) { if (cat) chCat = cat; if (sec) chSec = sec; }
+    const lv = lvl ? F.CH_LEVELS[lvl - 1] : null;
+    ch = { deck: lv ? F.levelDeck(lvl) : F.deck(chCat), i: 0, left: lv ? (sec || lv.sec) : chSec, ok: [], skip: [], on: false, lvl: lvl || 0, kid: lv ? famKid().id : '' };
+    $('chOv').className = 'ch-ov show'; $('chTime').textContent = mmss(ch.left) + (lv ? '  •  🎯 0/' + lv.goal : ''); $('chAr').textContent = 'استعدّوا…'; $('chEn').textContent = '';
     [3, 2, 1].forEach((n, k) => later(() => { $('chEmoji').textContent = n; tone(440, 0.15); }, k * 800));
     later(() => { ch.on = true; chCard(); later(chTick, 1000); }, 2400);
   }
+  const chHud = () => { $('chTime').textContent = mmss(Math.max(0, ch.left)) + (ch.lvl ? '  •  🎯 ' + ch.ok.length + '/' + F.CH_LEVELS[ch.lvl - 1].goal : ''); };
   function chCard() { const w = ch.deck[ch.i]; $('chEmoji').textContent = w.e; $('chAr').textContent = w.ar; $('chEn').textContent = w.en; }
   function chMark(good) {
     if (!ch || !ch.on) return;
     (good ? ch.ok : ch.skip).push(ch.deck[ch.i]); if (good) sfx.ok(); else sfx.tap();
     const ov = $('chOv'); ov.className = 'ch-ov show ' + (good ? 'good' : 'skip'); setTimeout(() => { if (ch) ov.className = 'ch-ov show'; }, 220);
-    ch.i++; if (ch.i >= ch.deck.length) return chEnd(); chCard();
+    ch.i++; chHud(); if (ch.i >= ch.deck.length) return chEnd(); chCard();
   }
   function chTick() {
     if (!ch || !ch.on) return;
-    ch.left--; $('chTime').textContent = mmss(Math.max(0, ch.left));
+    ch.left--; chHud();
     if (ch.left <= 0) return chEnd();
     if (ch.left <= 5) tone(700, 0.08);
     later(chTick, 1000);
   }
   function chEnd() {
     const r = ch; clearTimers(); ch = null; $('chOv').className = 'ch-ov';
+    const row = (w, m) => `<div>${m} ${w.e} ${w.ar}<span>${w.en}</span></div>`;
+    const list = r.ok.length + r.skip.length ? `<div class="res">${r.ok.map(w => row(w, '✅')).join('')}${r.skip.map(w => row(w, '⏭️')).join('')}</div>` : '';
+    if (r.lvl) {                                                 // a level of one player
+      const k = S.kids.find(x => x.id === r.kid), lv = F.CH_LEVELS[r.lvl - 1], st = F.chStars(r.lvl, r.ok.length), res = F.chPass(k, r.lvl, st), last = r.lvl >= F.CH_MAX;
+      save(); renderFamily(); if (st) { sfx.win(); confetti(); } else sfx.bad();
+      return pop(`<div class="stars">${[1, 2, 3].map(i => `<span class="${i <= st ? 'on' : ''}">⭐</span>`).join('')}</div>
+        <h3>${st ? (st === 3 ? 'ممتاز يا ' : 'برافو يا ') + esc(k.name) + '!' : 'قرّبت يا ' + esc(k.name) + '!'}</h3>
+        <p>${r.ok.length} كلمة صح من ${lv.goal} مطلوبين${st ? '' : ' — جرّبوا تاني 💪'}</p>
+        ${res.gained ? `<div class="gift">+${res.gained} 💡 تلميح هدية للألغاز</div>` : ''}
+        ${st && !last && F.CH_LEVELS[r.lvl].tier !== lv.tier ? `<p>🚀 فتحت مرحلة «${F.CH_TIERS[lv.tier + 1]}»</p>` : st && last ? '<p>🏆 خلّصت كل مستويات التمثيل!</p>' : ''}${list}
+        ${st && !last ? `<button class="btn" onclick="App.unpop();App.chLevel(${r.lvl + 1})">المستوى اللي بعده ◀</button>` : ''}
+        <div class="row2" style="margin-top:12px"><button class="btn ghost" onclick="App.unpop();App.startCharades(null,null,${r.lvl})">🔁 تاني</button><button class="btn ghost" onclick="App.unpop()">📋 المستويات</button></div>`);
+    }
     const best = r.ok.length > S.family.best; if (best) { S.family.best = r.ok.length; save(); }
     sfx.win(); if (r.ok.length) confetti();
-    const row = (w, m) => `<div>${m} ${w.e} ${w.ar}<span>${w.en}</span></div>`;
-    pop(`<div class="big">${r.ok.length ? '🎉' : '😅'}</div><h3>${r.ok.length} كلمة صح!</h3>${best ? '<div class="gift">🏆 رقم قياسي جديد للعيلة</div>' : ''}
-      ${r.ok.length + r.skip.length ? `<div class="res">${r.ok.map(w => row(w, '✅')).join('')}${r.skip.map(w => row(w, '⏭️')).join('')}</div>` : ''}
+    pop(`<div class="big">${r.ok.length ? '🎉' : '😅'}</div><h3>${r.ok.length} كلمة صح!</h3>${best ? '<div class="gift">🏆 رقم قياسي جديد للعيلة</div>' : ''}${list}
       <div class="row2"><button class="btn" onclick="App.unpop();App.startCharades()">🔁 جولة تانية</button><button class="btn ghost" onclick="App.unpop();App.famSet()">تمام</button></div>`);
   }
   function chStop() { clearTimers(); ch = null; $('chOv').className = 'ch-ov'; }
@@ -458,7 +492,7 @@
   window.App = {
     go, pickKid, editKid, saveKid, askReset, doReset, openGame, play, hint, quit, unpop, settings, setSound, pref, checkNow,
     onUpdate, showUpdate, doUpdate, onProgress, onInstallMsg,
-    family, famSet, idea, ideaMark, startCharades, chMark, chStop,
+    family, famSet, idea, ideaMark, startCharades, chLevel, chMark, chStop,
     locked() { toast('🔒 عدّي المستوى اللي قبله الأول'); },
     back() {
       if ($('chOv').classList.contains('show')) { chStop(); return true; }

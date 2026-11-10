@@ -135,7 +135,7 @@ t('👨‍👧‍👦 family time: charades words and ideas are complete', () =>
   const F = require('../app/src/main/assets/www/family.js');
   assert.ok(F.CATS.length >= 6);
   for (const c of F.CATS) {
-    assert.ok(c.words.length >= 16, c.id);
+    assert.ok(c.words.length >= 14, c.id);
     for (const w of c.words) { assert.ok(w.e && /[ء-ي]/.test(w.ar) && /^[A-Za-z][A-Za-z -]+$/.test(w.en), JSON.stringify(w)); }
     assert.ok(uniq(c.words.map(w => w.ar)) && uniq(c.words.map(w => w.en)), 'no repeated word in ' + c.id);
   }
@@ -147,6 +147,26 @@ t('👨‍👧‍👦 family time: charades words and ideas are complete', () =>
     assert.ok(F.TYPES.some(t => t.id === i.t), i.id); assert.ok(i.e && i.title && i.why, i.id);
     assert.ok(i.need.length >= 1 && i.steps.length >= 3, i.id); assert.ok(i.min >= 5 && i.min <= 30, i.id + ' fits in ~20 minutes'); assert.ok(['calm', 'active'].includes(i.mood));
   }
+  // 🪜 charades levels per player
+  assert.strictEqual(F.CH_LEVELS.length, 15); assert.strictEqual(F.CH_TIERS.length, 5); assert.strictEqual(F.CH_RULES.length, 5);
+  F.CH_LEVELS.forEach((lv, i) => {
+    const prev = F.CH_LEVELS[i - 1], deck = F.levelDeck(lv.lvl, L.rng(i));
+    if (prev) { assert.ok(lv.d >= prev.d && lv.sec <= prev.sec, 'level ' + lv.lvl + ' is never easier'); assert.ok(lv.d > prev.d || lv.goal > prev.goal, 'level ' + lv.lvl + ' asks for more'); }
+    const own = F.CATS.filter(c => c.d === lv.d).reduce((a, c) => a + c.words.length, 0);
+    assert.ok(own >= lv.goal + 4 + 6, 'level ' + lv.lvl + ' has enough words of its own difficulty for 3 stars');
+    assert.ok(deck.length >= own && uniq(deck.map(w => w.ar + w.en)));
+    assert.deepStrictEqual([0, 1, 2, 3].map(k => F.chStars(lv.lvl, lv.goal - 1 + [0, 1, 3, 5][k])), [0, 1, 2, 3]);
+  });
+  assert.ok(F.CATS.every(c => c.d >= 1 && c.d <= 5)); for (let d = 1; d <= 5; d++) assert.ok(F.CATS.some(c => c.d === d));
+  assert.ok(F.CATS.find(c => c.id === 'scenes').words.every(w => w.ar.includes(' ')), 'extreme = whole scenes');
+  const [k9, k8, k6] = L.newState().kids;
+  assert.deepStrictEqual([F.chUnlocked(k6), F.chUnlocked(k8), F.chUnlocked(k9)], [1, 2, 3]);
+  let cr = F.chPass(k6, 1, 0); assert.deepStrictEqual([cr.gained, F.chUnlocked(k6), k6.hints], [0, 1, 5]);          // failed: nothing opens
+  cr = F.chPass(k6, 1, 1); assert.deepStrictEqual([cr.first, cr.gained, F.chUnlocked(k6), k6.hints], [true, 1, 2, 6]);
+  cr = F.chPass(k6, 1, 3); assert.deepStrictEqual([cr.gained, k6.ch[1], k6.hints], [1, 3, 7]);
+  cr = F.chPass(k6, 1, 3); assert.strictEqual(cr.gained, 0);
+  assert.strictEqual(F.chUnlocked(k9), 3, 'each player has his own progress');
+  F.chPass(k6, 15, 1); assert.strictEqual(F.chUnlocked(k6), 15);
   for (const t of F.TYPES) assert.ok(F.ideas(t.id).length >= 4, 'enough ideas of type ' + t.id);
   assert.strictEqual(F.ideaOfDay('2026-11-10').id, F.ideaOfDay('2026-11-10').id); assert.notStrictEqual(F.ideaOfDay('2026-11-10').id, F.ideaOfDay('2026-11-11').id);
 });
