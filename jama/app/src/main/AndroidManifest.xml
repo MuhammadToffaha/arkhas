@@ -16,6 +16,7 @@
         <package android:name="com.toffaha.qurangarden" />
         <package android:name="com.toffaha.bonian" />
         <package android:name="com.toffaha.rowaremote" />
+        <package android:name="com.toffaha.zakaa" />
     </queries>
 
     <application

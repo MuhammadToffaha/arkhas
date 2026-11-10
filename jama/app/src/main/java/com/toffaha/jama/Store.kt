@@ -36,6 +36,8 @@ object Store {
             "حسابات العمارة: الشهرية والمصروفات والمتأخرات", "Building fees, expenses & overdue units"),
         ManagedApp("remote", "com.toffaha.rowaremote", "arkhas", "📺", "ريموت روا", "ROWA Remote",
             "الموبايل ريموت لتلفزيون روا على الواي فاي", "Phone remote for the ROWA TV over Wi-Fi", tagPrefix = "remote-v"),
+        ManagedApp("zakaa", "com.toffaha.zakaa", "arkhas", "🧠", "ذكاء", "Zakaa",
+            "ألغاز وحاجات ذكية للأطفال — 320 مستوى", "Smart puzzles for kids — 320 levels", tagPrefix = "zakaa-v"),
         ManagedApp("jama", BuildConfig.APPLICATION_ID, "arkhas", "🧩", "جاما", "JAMA",
             "مدير التطبيقات — بيثبّت ويحدّث الكل", "App manager — installs and updates everything", tagPrefix = "jama-v"),
     )

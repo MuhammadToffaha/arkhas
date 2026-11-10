@@ -70,7 +70,7 @@ jobs:
           tag_name: jama-v${{ github.run_number }}
           name: JAMA 1.0.${{ github.run_number }}
           body: |
-            🧩 JAMA — app manager for Arkhas, Halal Scanner, English for Boudy & Anoos, Quran Garden, بُنيان (Bonian) and ROWA Remote.
+            🧩 JAMA — app manager for Arkhas, Halal Scanner, English for Boudy & Anoos, Quran Garden, بُنيان (Bonian), ROWA Remote and ذكاء (Zakaa).
             📱 Install: download jama.apk on the phone → open it → allow "install unknown apps" once.
             Designed by Muhammad Toffaha
           files: jama.apk
