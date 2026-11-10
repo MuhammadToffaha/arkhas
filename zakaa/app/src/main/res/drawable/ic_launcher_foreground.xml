@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 💡 light bulb with a puzzle spark: "smart things to fix" -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp" android:height="108dp" android:viewportWidth="108" android:viewportHeight="108">
+    <path android:fillColor="#FFB703" android:pathData="M54,28a19,19 0,0 0,-11 34.5c2,1.6 3,3.6 3,5.5v2h16v-2c0,-1.9 1,-3.9 3,-5.5A19,19 0,0 0,54 28z" />
+    <path android:fillColor="#FFFFFF" android:pathData="M46,73h16v4h-16zM48,79h12v3a3,3 0,0 1,-3 3h-6a3,3 0,0 1,-3 -3z" />
+    <path android:fillColor="#FFF3C9" android:pathData="M47,40a9,9 0,0 1,7 -5v3a6,6 0,0 0,-4.500 3.500z" />
+    <path android:fillColor="#FFFFFF" android:pathData="M53,20h2v5h-2zM31,46h5v2h-5zM72,46h5v2h-5zM36.500,30.900l1.400,-1.400 3.500,3.500 -1.400,1.400zM66.600,33l3.500,-3.500 1.400,1.400 -3.500,3.500z" />
+</vector>
