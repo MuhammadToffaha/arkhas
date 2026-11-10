@@ -35,7 +35,10 @@
   const later = (f, ms) => { const h = setTimeout(f, ms); timers.push(h); return h; };
   const clearTimers = () => { timers.forEach(clearTimeout); timers = []; };
 
-  function load() { let raw = ''; try { raw = N.load(); } catch (e) {} try { S = L.migrate(raw ? JSON.parse(raw) : null); } catch (e) { S = L.newState(); } }
+  function load() {
+    let raw = ''; try { raw = N.load(); } catch (e) {} try { S = L.migrate(raw ? JSON.parse(raw) : null); } catch (e) { S = L.newState(); }
+    if (!S.family || typeof S.family !== 'object') S.family = {}; S.family.done = S.family.done || {}; S.family.fav = S.family.fav || {}; S.family.best = S.family.best || 0;
+  }
   function save() { try { N.save(JSON.stringify(S)); } catch (e) {} }
   function toast(t) { const el = $('toast'); el.textContent = t; el.classList.add('show'); clearTimeout(toast.h); toast.h = setTimeout(() => el.classList.remove('show'), 2400); }
   function pop(html) { $('pop').innerHTML = html; $('popBg').classList.add('show'); }
@@ -60,10 +63,10 @@
   // ---------- navigation ----------
   function go(v) {
     clearTimers(); ctl = null;
-    for (const x of ['who', 'home', 'levels', 'play']) $('v-' + x).classList.toggle('on', x === v);
-    const g = GAMES[game]; document.documentElement.style.setProperty('--c', v === 'who' || v === 'home' || !g ? '#7c5cff' : g.c);
-    document.documentElement.style.setProperty('--cd', v === 'who' || v === 'home' || !g ? '#5a3fd6' : g.cd);
-    if (v === 'who') renderWho(); if (v === 'home') renderHome(); if (v === 'levels') renderLevels();
+    for (const x of ['who', 'home', 'levels', 'play', 'family']) $('v-' + x).classList.toggle('on', x === v);
+    const g = GAMES[game]; const plain = v === 'who' || v === 'home' || v === 'family' || !g; document.documentElement.style.setProperty('--c', plain ? '#7c5cff' : g.c);
+    document.documentElement.style.setProperty('--cd', plain ? '#5a3fd6' : g.cd);
+    if (v === 'who') renderWho(); if (v === 'home') renderHome(); if (v === 'levels') renderLevels(); if (v === 'family') renderFamily();
     window.scrollTo(0, 0);
   }
 
@@ -345,6 +348,79 @@
     }
   };
 
+  // ---------- 🏡 family time: charades + ideas to do together ----------
+  const F = window.ZF;
+  let famTab = 'char', famFrom = 'who', chCat = 'mix', chSec = 60, ch = null, idType = 'all';
+  const mmss = t => String(Math.floor(t / 60)).padStart(2, '0') + ':' + String(t % 60).padStart(2, '0');
+  function family(tab) { if (tab) famTab = tab; famFrom = $('v-home').classList.contains('on') ? 'home' : $('v-who').classList.contains('on') ? 'who' : famFrom; go('family'); }
+  function famSet(k, v) { if (k === 'tab') famTab = v; if (k === 'cat') chCat = v; if (k === 'sec') chSec = v; if (k === 'type') idType = v; renderFamily(); }
+  function renderFamily() {
+    $('fTabs').innerHTML = [['char', '🎭 مثّل الكلمة'], ['ideas', '💡 أفكار نعملها']].map(([id, n]) => `<button class="${famTab === id ? 'on' : ''}" onclick="App.famSet('tab','${id}')">${n}</button>`).join('');
+    if (famTab === 'char') {
+      $('fBody').innerHTML = `<div class="lbl">اختاروا نوع الكلمات</div>
+        <div class="cats">${[{ id: 'mix', name: 'كله مع بعض', icon: '🎲' }].concat(F.CATS).map(c => `<button class="${chCat === c.id ? 'on' : ''}" onclick="App.famSet('cat','${c.id}')"><i>${c.icon}</i>${c.name}</button>`).join('')}</div>
+        <div class="lbl">الوقت</div>
+        <div class="chips">${[30, 60, 90, 120].map(t => `<button class="${chSec === t ? 'on' : ''}" onclick="App.famSet('sec',${t})">${t} ثانية</button>`).join('')}</div>
+        <button class="btn" onclick="App.startCharades()">▶️ يلا نبدأ</button>
+        ${S.family.best ? `<p style="text-align:center;font-weight:800;margin:14px 0 0">🏆 أحسن رقم للعيلة: ${S.family.best} كلمة</p>` : ''}
+        <div class="howto"><b>إزاي نلعب؟</b><br>1️⃣ واحد يمسك الموبايل بالعرض على راسه، والشاشة للباقيين.<br>2️⃣ الباقي يمثّلوا الكلمة من غير كلام، وهو يخمّن.<br>3️⃣ عرفها؟ دوسوا <b>✅ صح</b>. صعبة؟ <b>⏭️ تخطّي</b>.<br>🇬🇧 كل كلمة مكتوبة عربي وإنجليزي… قولوها بالاتنين!</div>`;
+    } else {
+      const day = F.ideaOfDay(today()), list = F.ideas(idType), doneN = Object.keys(S.family.done).length;
+      const col = t => F.TYPES.find(x => x.id === t).c;
+      $('fBody').innerHTML = `<button class="today" onclick="App.idea('${day.id}')"><i>${day.e}</i><span><small>⭐ فكرة النهارده • ${day.min} دقيقة</small><b>${day.title}</b></span></button>
+        <div class="chips">${[{ id: 'all', name: 'الكل', icon: '✨' }, { id: 'fav', name: 'المفضلة', icon: '❤️' }].concat(F.TYPES).map(t => `<button class="${idType === t.id ? 'on' : ''}" onclick="App.famSet('type','${t.id}')">${t.icon} ${t.name}</button>`).join('')}</div>
+        <div class="ideas">${(idType === 'fav' ? F.IDEAS.filter(i => S.family.fav[i.id]) : list).map(i => `<button class="idea" style="background:${col(i.t)}" onclick="App.idea('${i.id}')">
+          <i>${i.e}</i>${S.family.done[i.id] ? '<span class="tick">✅</span>' : ''}<b>${i.title}</b><small>⏱️ ${i.min} دقيقة • ${i.mood === 'calm' ? '😌 هادية' : '⚡ حركة'}</small></button>`).join('') || '<p style="grid-column:1/-1;text-align:center;font-weight:700;color:var(--mute)">لسه مفيش مفضلة. افتح أي فكرة ودوس ❤️</p>'}</div>
+        <p style="text-align:center;font-weight:800;color:var(--mute);margin-top:16px">عملتوا ${doneN} من ${F.IDEAS.length} فكرة 👏</p>`;
+    }
+  }
+  function idea(id) {
+    const i = F.IDEAS.find(x => x.id === id), t = F.TYPES.find(x => x.id === i.t), d = S.family.done[id], f = S.family.fav[id];
+    pop(`<div class="big">${i.e}</div><h3>${i.title}</h3><p style="color:var(--mute);margin:0">${t.icon} ${t.name} • ⏱️ ${i.min} دقيقة</p>
+      <div class="det"><h4>🧺 هنحتاج</h4><ul>${i.need.map(n => `<li>${n}</li>`).join('')}</ul>
+      <h4>👣 الخطوات</h4><ol>${i.steps.map(n => `<li>${n}</li>`).join('')}</ol>
+      <div class="why">🧠 <b>ليه؟</b> ${i.why}</div>${i.safe ? `<div class="safe">⚠️ ${i.safe}</div>` : ''}</div>
+      <div class="row2" style="margin-top:16px"><button class="btn" style="${d ? 'background:var(--good);box-shadow:0 6px 0 #17875a' : ''}" onclick="App.ideaMark('${id}','done')">${d ? '✅ عملناها' : '☑️ عملناها؟'}</button>
+      <button class="btn ghost" onclick="App.ideaMark('${id}','fav')">${f ? '❤️ في المفضلة' : '🤍 مفضلة'}</button></div>
+      <button class="btn ghost" style="margin-top:12px" onclick="App.unpop()">رجوع</button>`);
+  }
+  function ideaMark(id, k) {
+    if (S.family[k][id]) delete S.family[k][id]; else { S.family[k][id] = 1; if (k === 'done') { sfx.win(); confetti(); } }
+    save(); renderFamily(); idea(id);
+  }
+
+  function startCharades(cat, sec) {
+    clearTimers(); if (cat) chCat = cat; if (sec) chSec = sec;
+    ch = { deck: F.deck(chCat), i: 0, left: chSec, ok: [], skip: [], on: false };
+    $('chOv').className = 'ch-ov show'; $('chTime').textContent = mmss(ch.left); $('chAr').textContent = 'استعدّوا…'; $('chEn').textContent = '';
+    [3, 2, 1].forEach((n, k) => later(() => { $('chEmoji').textContent = n; tone(440, 0.15); }, k * 800));
+    later(() => { ch.on = true; chCard(); later(chTick, 1000); }, 2400);
+  }
+  function chCard() { const w = ch.deck[ch.i]; $('chEmoji').textContent = w.e; $('chAr').textContent = w.ar; $('chEn').textContent = w.en; }
+  function chMark(good) {
+    if (!ch || !ch.on) return;
+    (good ? ch.ok : ch.skip).push(ch.deck[ch.i]); if (good) sfx.ok(); else sfx.tap();
+    const ov = $('chOv'); ov.className = 'ch-ov show ' + (good ? 'good' : 'skip'); setTimeout(() => { if (ch) ov.className = 'ch-ov show'; }, 220);
+    ch.i++; if (ch.i >= ch.deck.length) return chEnd(); chCard();
+  }
+  function chTick() {
+    if (!ch || !ch.on) return;
+    ch.left--; $('chTime').textContent = mmss(Math.max(0, ch.left));
+    if (ch.left <= 0) return chEnd();
+    if (ch.left <= 5) tone(700, 0.08);
+    later(chTick, 1000);
+  }
+  function chEnd() {
+    const r = ch; clearTimers(); ch = null; $('chOv').className = 'ch-ov';
+    const best = r.ok.length > S.family.best; if (best) { S.family.best = r.ok.length; save(); }
+    sfx.win(); if (r.ok.length) confetti();
+    const row = (w, m) => `<div>${m} ${w.e} ${w.ar}<span>${w.en}</span></div>`;
+    pop(`<div class="big">${r.ok.length ? '🎉' : '😅'}</div><h3>${r.ok.length} كلمة صح!</h3>${best ? '<div class="gift">🏆 رقم قياسي جديد للعيلة</div>' : ''}
+      ${r.ok.length + r.skip.length ? `<div class="res">${r.ok.map(w => row(w, '✅')).join('')}${r.skip.map(w => row(w, '⏭️')).join('')}</div>` : ''}
+      <div class="row2"><button class="btn" onclick="App.unpop();App.startCharades()">🔁 جولة تانية</button><button class="btn ghost" onclick="App.unpop();App.famSet()">تمام</button></div>`);
+  }
+  function chStop() { clearTimers(); ch = null; $('chOv').className = 'ch-ov'; }
+
   // ---------- ⚙️ settings & 🎁 updates ----------
   const prefOn = (k, d) => String(N.getPref(k, d)) === 'true';
   function settings() {
@@ -364,7 +440,7 @@
     let u = null; try { u = json ? JSON.parse(json) : null; } catch (e) {}
     App._upd = u && u.code > Number(N.versionCode()) ? u : null;
     if (App._upd) {
-      const inGame = $('v-play').classList.contains('on');                       // never interrupt a puzzle
+      const inGame = $('v-play').classList.contains('on') || $('chOv').classList.contains('show');                       // never interrupt a puzzle
       if (App._manual || (!inGame && String(N.getPref('seen', '')) !== String(App._upd.code))) showUpdate();
     } else if (App._manual) toast('✅ عندك أحدث نسخة ' + N.version());
     App._manual = false;
@@ -382,9 +458,12 @@
   window.App = {
     go, pickKid, editKid, saveKid, askReset, doReset, openGame, play, hint, quit, unpop, settings, setSound, pref, checkNow,
     onUpdate, showUpdate, doUpdate, onProgress, onInstallMsg,
+    family, famSet, idea, ideaMark, startCharades, chMark, chStop,
     locked() { toast('🔒 عدّي المستوى اللي قبله الأول'); },
     back() {
+      if ($('chOv').classList.contains('show')) { chStop(); return true; }
       if ($('popBg').classList.contains('show')) { unpop(); return true; }
+      if ($('v-family').classList.contains('on')) { go(famFrom === 'home' && kid ? 'home' : 'who'); return true; }
       if ($('v-play').classList.contains('on')) { quit(); return true; }
       if ($('v-levels').classList.contains('on')) { go('home'); return true; }
       if ($('v-home').classList.contains('on')) { go('who'); return true; }

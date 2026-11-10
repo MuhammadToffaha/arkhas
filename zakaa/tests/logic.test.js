@@ -131,4 +131,24 @@ t('⭐ stars, 💡 hints, 🔓 unlocks', () => {
   assert.strictEqual(L.migrate(null).kids.length, 3); assert.deepStrictEqual(L.migrate({ kids: [{ id: 'a', name: 'x' }] }).kids[0].prog, {});
 });
 
+t('👨‍👧‍👦 family time: charades words and ideas are complete', () => {
+  const F = require('../app/src/main/assets/www/family.js');
+  assert.ok(F.CATS.length >= 6);
+  for (const c of F.CATS) {
+    assert.ok(c.words.length >= 16, c.id);
+    for (const w of c.words) { assert.ok(w.e && /[ء-ي]/.test(w.ar) && /^[A-Za-z][A-Za-z -]+$/.test(w.en), JSON.stringify(w)); }
+    assert.ok(uniq(c.words.map(w => w.ar)) && uniq(c.words.map(w => w.en)), 'no repeated word in ' + c.id);
+  }
+  const mix = F.deck('mix', L.rng(1)); assert.strictEqual(mix.length, F.CATS.reduce((a, c) => a + c.words.length, 0)); assert.ok(mix.length >= 100);
+  assert.strictEqual(F.deck('food', L.rng(1)).length, F.CATS.find(c => c.id === 'food').words.length);
+  assert.notDeepStrictEqual(F.deck('food', L.rng(1)), F.deck('food', L.rng(2)));
+  assert.ok(F.IDEAS.length >= 24); assert.ok(uniq(F.IDEAS.map(i => i.id)));
+  for (const i of F.IDEAS) {
+    assert.ok(F.TYPES.some(t => t.id === i.t), i.id); assert.ok(i.e && i.title && i.why, i.id);
+    assert.ok(i.need.length >= 1 && i.steps.length >= 3, i.id); assert.ok(i.min >= 5 && i.min <= 30, i.id + ' fits in ~20 minutes'); assert.ok(['calm', 'active'].includes(i.mood));
+  }
+  for (const t of F.TYPES) assert.ok(F.ideas(t.id).length >= 4, 'enough ideas of type ' + t.id);
+  assert.strictEqual(F.ideaOfDay('2026-11-10').id, F.ideaOfDay('2026-11-10').id); assert.notStrictEqual(F.ideaOfDay('2026-11-10').id, F.ideaOfDay('2026-11-11').id);
+});
+
 console.log(`\n🎉 ${n} test groups passed — ${L.GAME_IDS.length} games × ${L.MAX} levels`);

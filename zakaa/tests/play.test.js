@@ -74,6 +74,29 @@ async function robot({ game, lvl, useHint }) {
   ok((await p.textContent('#pop')).includes('Designed by Muhammad Toffaha'), 'credit line in settings');
   await p.evaluate(() => App.onUpdate(JSON.stringify({ code: 9, name: 'x', notes: '', url: 'u' })));
   ok((await p.textContent('#pop')).includes('1.0.9'), 'update pop-up');
+
+  // 1b) 👨‍👧‍👦 family time: charades round + activity ideas
+  await p.evaluate(() => { App.unpop(); App.go('who'); });
+  await p.locator('#v-who .fam').click();
+  ok(await p.locator('.cats button').count() === 7, 'charades: 6 categories + mix');
+  await p.evaluate(() => App.startCharades('food', 4));
+  await p.waitForTimeout(2700);
+  const w1 = await p.textContent('#chAr'), en1 = await p.textContent('#chEn');
+  ok(/[ء-ي]/.test(w1) && /[A-Za-z]/.test(en1), 'charades card shows Arabic + English: ' + w1 + ' / ' + en1);
+  await p.locator('.ch-btns .yes').click(); await p.locator('.ch-btns .yes').click(); await p.locator('.ch-btns button').first().click();
+  ok((await p.textContent('#chAr')) !== w1, 'next word after a tap');
+  await p.waitForFunction(() => !document.getElementById('chOv').classList.contains('show') && document.getElementById('popBg').classList.contains('show'), null, { timeout: 9000 });
+  const res = await p.textContent('#pop');
+  ok(res.includes('2 كلمة صح') && res.includes('رقم قياسي') && res.includes(w1), 'round ends on time with score + word list');
+  await p.evaluate(() => { App.unpop(); App.famSet('tab', 'ideas'); });
+  ok(await p.locator('.idea').count() >= 24 && await p.locator('.today').count() === 1, 'ideas list + idea of the day');
+  await p.evaluate(() => App.famSet('type', 'sci')); ok(await p.locator('.idea').count() === 8, 'filter by type');
+  await p.locator('.idea').first().click();
+  ok((await p.textContent('#pop')).includes('الخطوات') && (await p.textContent('#pop')).includes('ليه؟'), 'idea shows materials, steps and why');
+  await p.evaluate(() => App.ideaMark('volcano', 'done'));
+  ok(await p.evaluate(() => JSON.parse(localStorage.zakaa).family.done.volcano === 1), 'done idea is saved');
+  await p.evaluate(() => { App.unpop(); App.startCharades('mix', 30); }); await p.waitForTimeout(300);
+  ok(await p.evaluate(() => App.back()) && !(await p.evaluate(() => document.getElementById('chOv').classList.contains('show'))), 'back button stops a round');
   await p.close();
 
   // 2) the robot wins every game at every difficulty, with 3 stars
