@@ -198,11 +198,13 @@ input:focus{border-color:var(--accent);box-shadow:0 0 0 4px var(--glow)}
 .sw input:checked+i{background:var(--grad)}
 .sheet>div{border-radius:26px 26px 0 0}
 [hidden]{display:none!important}
+.megab.flb{background:linear-gradient(120deg,#ff6a2b,#ff2d75);color:#fff}
 /* ===== 🖤 Black Friday + 11.11 section ===== */
 .frihero{display:flex;align-items:center;justify-content:space-between;gap:10px;color:#fff;border-radius:22px;padding:16px;margin:10px 0 8px;
   background:linear-gradient(120deg,#0b0b0f,#2a1a00 55%,#b8860b);box-shadow:0 8px 24px #0000003a}
 .frihero b{display:block;font-size:20px}.frihero span{font-size:12.5px;opacity:.9}
-.frihero button{flex:none;width:46px;height:46px;border-radius:50%;border:0;background:#ffd60a;color:#111;font-size:22px;font-weight:900}
+.frihero button{flex:none;display:flex;flex-direction:column;align-items:center;gap:1px;min-width:74px;min-height:56px;padding:6px 10px;border-radius:16px;border:0;background:#ffd60a;color:#111;font:inherit;font-size:12px;font-weight:800}
+.frihero button b{font-size:22px;line-height:1;display:inline-block}.frihero button:disabled b{animation:spin 1s linear infinite}
 .frihero button:disabled{opacity:.5}
 .fsec{margin-top:18px}
 .fsec h3{display:flex;align-items:center;gap:8px;margin:0 0 8px;font-size:16px}
@@ -354,7 +356,7 @@ html,body{overflow-x:hidden}
   <section id="friView" hidden>
     <div class="frihero">
       <div><b id="bf_title"></b><span id="bf_count"></span></div>
-      <button type="button" id="bf_refresh" aria-label="refresh">↻</button>
+      <button type="button" id="bf_refresh" aria-label="refresh"><b>↻</b><span id="bf_ref_l"></span></button>
     </div>
     <div class="bar" id="bf_bar" hidden><i></i></div>
     <div class="muted" id="bf_sub"></div>
@@ -503,7 +505,7 @@ const readConfig = async (name) => (N ? N.readConfig(name) : (await fetch(name))
 const T = {
   ar: { tag: "أرخص سعر في مصر", go: "ابحث", ph: "اكتب المنتج… مثال: ايفون 15 برو", hint: "نبحث في المتاجر المصرية بالعربي والإنجليزي ونجيب لك أرخص 3",
     top: "🏆 أرخص 3 أسعار", all: "كل العروض ({n})", fb: "📘 فيسبوك والمستعمل", searched: "بحثنا عن:", none: "مفيش نتائج مطابقة لسه…",
-    noneDone: "مفيش نتائج مطابقة. جرّب اسم أدق.", src: "حالة المتاجر", langLbl: "🌐 اللغة", themeLbl: "🎨 شكل التطبيق", autoUpd: "🤫 تحديث تلقائي صامت", autoUpdD: "يدوّر على نسخة جديدة كل يوم وينزّلها ويثبّتها لوحده على الواي فاي. أول مرة أندرويد هيطلب موافقة واحدة، وبعدها من غير أسئلة (أندرويد 12+).", storesHint: "آخر بحث: عدد النتائج من كل متجر", navSearch: "بحث", navStatus: "المتاجر", navGear: "الإعدادات", acc: "إكسسوار؟", cheap: "سعر مريب", rMega: "🟡 ميجا ديلز نون", rBf: "🖤 بلاك فرايداي", bfShort: "الجمعة", bfNone: "🖤 عروض الجمعة البيضاء/الصفراء/السوداء لسه ما بدأتش في المتاجر — هتظهر هنا لوحدها أول ما تبدأ (عادةً من ~20 نوفمبر). اضغط ↻ للتحديث.", sAll: "الكل", liveHdr: "بندوّر… {done}/{all} متجر ردّ · لقينا {n} عرض من {s} متجر", liveMore: "⏳ بتتحدّث لحد ما الباقي يرد", sExact: "✓ مطابق بس", sDisc: "🏷️ عليه خصم", sBig: "🏪 أمازون/نون/جوميا", sCheap: "⬇️ الأرخص", sPct: "🔥 أكبر خصم", sNone: "مفيش نتايج بالفلتر ده — جرّب فلتر تاني", rElec: "📱 عروض الإلكترونيات", rBeauty: "💄 كوزماتكس وتجميل", mega: "ميجا", rAll: "كل الخصومات", r30: "30%+", r5070: "🔥 50–70%", r70: "70%+", rNone: "مفيش عروض في النطاق ده — جرّب نطاق تاني", alTitle: "🔔 تنبيهات الخصومات الكبيرة", alDesc: "إشعار على الموبايل لما يظهر خصم كبير جديد — حتى والتطبيق مقفول",
+    noneDone: "مفيش نتائج مطابقة. جرّب اسم أدق.", src: "حالة المتاجر", langLbl: "🌐 اللغة", themeLbl: "🎨 شكل التطبيق", autoUpd: "🤫 تحديث تلقائي صامت", autoUpdD: "يدوّر على نسخة جديدة كل يوم وينزّلها ويثبّتها لوحده على الواي فاي. أول مرة أندرويد هيطلب موافقة واحدة، وبعدها من غير أسئلة (أندرويد 12+).", storesHint: "آخر بحث: عدد النتائج من كل متجر", navSearch: "بحث", navStatus: "المتاجر", navGear: "الإعدادات", acc: "إكسسوار؟", cheap: "سعر مريب", rMega: "🟡 ميجا ديلز نون", rHot: "🔥 فلاش سيل + 70%+", rFlash: "⚡ كل الفلاش سيل", flashShort: "فلاش", rBf: "🖤 بلاك فرايداي", bfShort: "الجمعة", bfNone: "🖤 عروض الجمعة البيضاء/الصفراء/السوداء لسه ما بدأتش في المتاجر — هتظهر هنا لوحدها أول ما تبدأ (عادةً من ~20 نوفمبر). اضغط ↻ للتحديث.", sAll: "الكل", liveHdr: "بندوّر… {done}/{all} متجر ردّ · لقينا {n} عرض من {s} متجر", liveMore: "⏳ بتتحدّث لحد ما الباقي يرد", sExact: "✓ مطابق بس", sDisc: "🏷️ عليه خصم", sBig: "🏪 أمازون/نون/جوميا", sCheap: "⬇️ الأرخص", sPct: "🔥 أكبر خصم", sNone: "مفيش نتايج بالفلتر ده — جرّب فلتر تاني", rElec: "📱 عروض الإلكترونيات", rBeauty: "💄 كوزماتكس وتجميل", mega: "ميجا", rAll: "كل الخصومات", r30: "30%+", r5070: "🔥 50–70%", r70: "70%+", rNone: "مفيش عروض في النطاق ده — جرّب نطاق تاني", alTitle: "🔔 تنبيهات الخصومات الكبيرة", alDesc: "إشعار على الموبايل لما يظهر خصم كبير جديد — حتى والتطبيق مقفول",
     alMin: "أقل خصم", alStores: "المتاجر", alMega: "🟡 ميجا ديلز نون كمان", alEvery: "افحص كل", alHours: "{h} ساعة", alTest: "🔍 افحص دلوقتي",
     alTesting: "جاري الفحص في الخلفية… هيوصلك إشعار لو فيه جديد", alLast: "آخر فحص {t}: {f} عرض، {n} جديد", alErr: "آخر فحص {t}: فشل ({e})",
     alNever: "لسه مفيش فحص", alTo: "ابعت العروض الجديدة على", alNotify: "🔔 إشعار على الموبايل", tgOn: "✈️ جروب تليجرام (تلقائي بالكامل)",
@@ -523,7 +525,7 @@ const T = {
     city: "مدينة فيسبوك ماركت بليس", stores: "المتاجر", saveBtn: "حفظ", ver: "نسخة", hidden: "تم إخفاء {n} نتيجة غير مطابقة" },
   en: { tag: "Best price in Egypt", go: "Search", ph: "Product… e.g. iphone 15 pro", hint: "Searching Egyptian stores in Arabic & English — top 3 cheapest",
     top: "🏆 Top 3 prices", all: "All offers ({n})", fb: "📘 Facebook & used", searched: "Searched:", none: "No matches yet…",
-    noneDone: "No matching results. Try a more specific name.", src: "Store status", langLbl: "🌐 Language", themeLbl: "🎨 App theme", autoUpd: "🤫 Silent auto-update", autoUpdD: "Checks every day and installs new versions by itself on Wi-Fi. Android asks once the first time, then no more prompts (Android 12+).", storesHint: "Last search: results per store", navSearch: "Search", navStatus: "Stores", navGear: "Settings", acc: "accessory?", cheap: "suspicious price", rMega: "🟡 Noon Mega Deals", rBf: "🖤 Black Friday", bfShort: "Friday", bfNone: "🖤 White / Yellow / Black Friday hasn't started in the stores yet — the deals appear here by themselves once it does (usually from ~20 Nov). Tap ↻ to refresh.", sAll: "All", liveHdr: "Searching… {done}/{all} stores answered · {n} offers from {s} stores so far", liveMore: "⏳ updating as more stores answer", sExact: "✓ Exact only", sDisc: "🏷️ Discounted", sBig: "🏪 Amazon/noon/Jumia", sCheap: "⬇️ Cheapest", sPct: "🔥 Biggest discount", sNone: "No results with this filter — try another", rElec: "📱 Electronics offers", rBeauty: "💄 Cosmetics & beauty", mega: "MEGA", rAll: "All discounts", r30: "30%+", r5070: "🔥 50–70%", r70: "70%+", rNone: "No deals in this range — try another one", alTitle: "🔔 Big discount alerts", alDesc: "Phone notification when a new big discount appears — even with the app closed",
+    noneDone: "No matching results. Try a more specific name.", src: "Store status", langLbl: "🌐 Language", themeLbl: "🎨 App theme", autoUpd: "🤫 Silent auto-update", autoUpdD: "Checks every day and installs new versions by itself on Wi-Fi. Android asks once the first time, then no more prompts (Android 12+).", storesHint: "Last search: results per store", navSearch: "Search", navStatus: "Stores", navGear: "Settings", acc: "accessory?", cheap: "suspicious price", rMega: "🟡 Noon Mega Deals", rHot: "🔥 Flash sales + 70%+", rFlash: "⚡ All flash sales", flashShort: "Flash", rBf: "🖤 Black Friday", bfShort: "Friday", bfNone: "🖤 White / Yellow / Black Friday hasn't started in the stores yet — the deals appear here by themselves once it does (usually from ~20 Nov). Tap ↻ to refresh.", sAll: "All", liveHdr: "Searching… {done}/{all} stores answered · {n} offers from {s} stores so far", liveMore: "⏳ updating as more stores answer", sExact: "✓ Exact only", sDisc: "🏷️ Discounted", sBig: "🏪 Amazon/noon/Jumia", sCheap: "⬇️ Cheapest", sPct: "🔥 Biggest discount", sNone: "No results with this filter — try another", rElec: "📱 Electronics offers", rBeauty: "💄 Cosmetics & beauty", mega: "MEGA", rAll: "All discounts", r30: "30%+", r5070: "🔥 50–70%", r70: "70%+", rNone: "No deals in this range — try another one", alTitle: "🔔 Big discount alerts", alDesc: "Phone notification when a new big discount appears — even with the app closed",
     alMin: "Minimum discount", alStores: "Stores", alMega: "🟡 Noon Mega Deals too", alEvery: "Check every", alHours: "{h} h", alTest: "🔍 Check now",
     alTesting: "Checking in the background… you'll get a notification if there's something new", alLast: "Last check {t}: {f} deals, {n} new", alErr: "Last check {t}: failed ({e})",
     alNever: "No check yet", alTo: "Send new deals to", alNotify: "🔔 Phone notification", tgOn: "✈️ Telegram group (fully automatic)",
@@ -557,7 +559,7 @@ function applyLang() {
   try { renderHome(); } catch (_) { /* first call happens before the home code is ready */ }
   $("#s_lang").textContent = t.langLbl; $("#s_theme").textContent = t.themeLbl;
   for (const b of document.querySelectorAll("#langseg button")) b.classList.toggle("on", b.dataset.l === L);
-  $("#l_fri").textContent = t.navFri; $("#bf_title").textContent = t.friTitle;
+  $("#l_fri").textContent = t.navFri; $("#bf_title").textContent = t.friTitle; $("#bf_ref_l").textContent = t.refresh;
   try { $("#nav_fri").hidden = !inSeason(); if (!$("#friView").hidden) renderFri(); } catch (_) {}
   $("#l_promo").textContent = t.navPromo; $("#p_title").textContent = t.promoTitle; $("#p_q").placeholder = t.promoQ;
   $("#l_fav").textContent = t.navFav; $("#f_title").textContent = t.favTitle;
@@ -1046,12 +1048,14 @@ let dealHide = null;   // stores unticked in the dropdown (remembered)
 const getHide = () => { if (!dealHide) { try { dealHide = new Set(JSON.parse(pref("dealHide", "[]"))); } catch (_) { dealHide = new Set(); } } return dealHide; };
 const saveHide = () => setPref("dealHide", JSON.stringify([...getHide()]));
 let dealRange = null;   // read from prefs on first use; default 50–70%
-const RANGES = { bf: [0, 100], mega: [0, 100], elec: [10, 100], beauty: [10, 100], all: [10, 100], r30: [30, 100], r5070: [50, 70], r70: [70, 100] };
+const RANGES = { hot: [0, 100], flash: [0, 100], bf: [0, 100], mega: [0, 100], elec: [10, 100], beauty: [10, 100], all: [10, 100], r30: [30, 100], r5070: [50, 70], r70: [70, 100] };
 const inSeason = () => { const d = new Date(), m = d.getMonth(); return m === 10 || (m === 11 && d.getDate() <= 5); };
 let bfStores = new Set();
 const isEv = (o) => o.tag === "bf" || o.tag === "1111";
 const isBf = (o) => isEv(o) || (bfStores.has(o.source) && o.pct >= 30);
-const inR = (o, k) => k === "bf" ? isBf(o) : k === "mega" ? o.tag === "mega" : k === "elec" ? o.cat === "electronics" && (o.pct >= 10 || o.tag === "mega") : k === "beauty" ? o.cat === "beauty" && (o.pct >= 10 || o.tag === "mega") : o.pct >= RANGES[k][0] && o.pct <= RANGES[k][1];
+// 🔥 "hot" = every flash-sale product (flash / mega / Friday / 11.11 pages) + everything 70% off or more
+const isFlash = (o) => o.tag === "flash" || o.tag === "daily" || o.tag === "mega" || isEv(o);
+const inR = (o, k) => k === "hot" ? isFlash(o) || o.pct >= 70 : k === "flash" ? isFlash(o) : k === "bf" ? isBf(o) : k === "mega" ? o.tag === "mega" : k === "elec" ? o.cat === "electronics" && (o.pct >= 10 || o.tag === "mega") : k === "beauty" ? o.cat === "beauty" && (o.pct >= 10 || o.tag === "mega") : o.pct >= RANGES[k][0] && o.pct <= RANGES[k][1];
 const DEALS_TTL = 60 * 60 * 1000;   // reuse fetched deals for 1 hour
 
 function showView(v) {
@@ -1076,10 +1080,9 @@ function renderDeals(done = true) {
     : fmt(t.dealsLoading, { done: d.sources.length, all: d.total });
   bfStores = new Set(d.deals.filter(isEv).map((o) => o.source));
   const bfN = d.deals.filter(isBf).length;
-  if (!dealRange) dealRange = RANGES[pref("dealRange")] ? pref("dealRange") : "r5070";
+  if (!dealRange) dealRange = "hot";      // always opens on: all flash sales + 70%+
   // 🖤 in the season the Friday deals come first (until you pick another filter yourself)
-  if (!rangeTouched && inSeason() && bfN) dealRange = "bf";
-  $("#d_range").innerHTML = [...(bfN || inSeason() ? [["bf", t.rBf]] : []), ["r5070", t.r5070], ["elec", t.rElec], ["beauty", t.rBeauty], ["mega", t.rMega], ["r70", t.r70], ["r30", t.r30], ["all", t.rAll]]
+  $("#d_range").innerHTML = [["hot", t.rHot], ["r70", t.r70], ["flash", t.rFlash], ...(bfN || inSeason() ? [["bf", t.rBf]] : []), ["r5070", t.r5070], ["elec", t.rElec], ["beauty", t.rBeauty], ["mega", t.rMega], ["r70", t.r70], ["r30", t.r30], ["all", t.rAll]]
     .map(([k, n]) => `<button data-r="${k}" class="${dealRange === k ? "on" : ""}${k === "mega" ? " mega" : ""}${k === "bf" ? " bf" : ""}${k === "beauty" ? " beauty" : ""}">${n} · ${d.deals.filter((o) => inR(o, k)).length}</button>`).join("");
   const inRange = d.deals.filter((o) => inR(o, dealRange));
   const sorts = [["pct", t.sortPct], ["save", t.sortSave], ["price", t.sortPrice]];
@@ -1105,7 +1108,7 @@ function renderDeals(done = true) {
     QUICK.map(([n, lbl]) => `<button data-q="${esc(n)}" class="${(n ? one === n : shown.length === names.length) ? "on" : ""}">${lbl} · ${n ? counts[n] || 0 : inRange.length}</button>`).join("");
   $("#d_all").textContent = t.selAll; $("#d_none").textContent = t.selNone;
   let list = inRange.filter((o) => !hide.has(o.source));
-  if ((dealRange === "r70" || dealRange === "elec" || dealRange === "bf" || dealRange === "beauty") && dealSort === "pct") list = list.slice().sort((a, b) => b.pct - a.pct || a.price - b.price);
+  if ((dealRange === "hot" || dealRange === "flash" || dealRange === "r70" || dealRange === "elec" || dealRange === "bf" || dealRange === "beauty") && dealSort === "pct") list = list.slice().sort((a, b) => b.pct - a.pct || a.price - b.price);
   const by = { pct: (a, b) => b.pct - a.pct, save: (a, b) => (b.old_price - b.price) - (a.old_price - a.price), price: (a, b) => a.price - b.price };
   list = list.slice().sort(by[dealSort]);
   const allN = list.length;
@@ -1120,7 +1123,7 @@ function renderDeals(done = true) {
     const m = document.getElementById("d_more");
     if (!m) { if (allN > list.length) { $("#d_out").insertAdjacentHTML("beforeend", `<button type="button" id="d_more">${fmt(t.more, { n: allN - list.length })}</button>`); watchMore(); } }
   }, 0);
-  $("#d_out").innerHTML = `<div class="dg">${list.map((o) => `<a class="dc${o.tag === "mega" ? " is-mega" : ""}" href="${esc(o.url)}">${o.pct ? `<span class="off">-${o.pct}%</span>` : ""}${o.tag === "mega" ? `<span class="megab">🟡 ${t.mega}</span>` : ""}${isBf(o) ? `<span class="megab bfb">🖤 ${t.bfShort}</span>` : ""}${heart(o)}<button type="button" class="share" data-u="${esc(o.url)}" aria-label="WhatsApp">📤</button>${cartBtn(o)}${img(o)}
+  $("#d_out").innerHTML = `<div class="dg">${list.map((o) => `<a class="dc${o.tag === "mega" ? " is-mega" : ""}" href="${esc(o.url)}">${o.pct ? `<span class="off">-${o.pct}%</span>` : ""}${o.tag === "mega" ? `<span class="megab">🟡 ${t.mega}</span>` : ""}${isBf(o) ? `<span class="megab bfb">🖤 ${t.bfShort}</span>` : (o.tag === "flash" || o.tag === "daily") ? `<span class="megab flb">⚡ ${t.flashShort}</span>` : ""}${heart(o)}<button type="button" class="share" data-u="${esc(o.url)}" aria-label="WhatsApp">📤</button>${cartBtn(o)}${img(o)}
     <div class="ttl">${esc(o.title)}</div><div class="p">${money(o.price)}</div>${o.old_price && o.old_price > o.price ? `<div class="old">${money(o.old_price)}</div>` : ""}
     <div class="src">${esc(o.source)}</div></a>`).join("")}</div>`;
 }

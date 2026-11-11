@@ -13,7 +13,7 @@ object Net {
     /** search requests: always have free workers */
     val pool = Executors.newFixedThreadPool(16)
     /** background pages (deals, campaign pages): their own small pool, so they can never block a search */
-    val lowPool = Executors.newFixedThreadPool(6)
+    val lowPool = Executors.newFixedThreadPool(12)
 
     fun get(url: String, lang: String, json: Boolean): String {
         var target = url

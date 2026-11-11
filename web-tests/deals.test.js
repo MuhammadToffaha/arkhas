@@ -73,7 +73,9 @@ test("deals: % off computed, non-sale / sold-out / tiny discounts dropped, bigge
   assert.ok(t.some((x) => x[0] === "Cairo Sales" && x[1] === 30));
   assert.ok(t.some((x) => x[0] === "Dubai Phone" && x[1] === 20));
   assert.ok(t.some((x) => x[0] === "El Nekhely" && x[1] === 20));
-  assert.ok(!r.deals.some((o) => /Kettle|Mouse|Sold out/.test(o.title)));
+  assert.ok(!r.deals.some((o) => /Mouse|Sold out/.test(o.title)));
+  // ⚡ a flash-sale page item is kept whatever its % (the user wants every flash-sale product); elsewhere tiny discounts drop
+  assert.ok(r.deals.filter((o) => /Kettle/.test(o.title)).every((o) => o.tag === "flash"));
   for (let i = 1; i < r.deals.length; i++) assert.ok(r.deals[i - 1].pct >= r.deals[i].pct);
   assert.equal(r.sources.find((x) => x.source === "Amazon.eg").error, "timeout");
   assert.equal(r.deals.find((o) => o.source === "Dream 2000").url, "https://dream2000.com/products/hp-victus-15");
@@ -98,9 +100,11 @@ test("UI: ⚡ tab shows deal cards, sorting and store filter", async () => {
   assert.equal(doc.querySelector("#searchView").hidden, true);
   const until = async (f) => { const t = Date.now(); while (!f()) { if (Date.now() - t > 15000) throw new Error("timeout"); await new Promise((r) => setTimeout(r, 20)); } };
   await until(() => doc.querySelector("#d_bar").hidden && doc.querySelectorAll(".dc").length >= 1);
-  // default range = 50–70%: only the 50% Jumia deal
-  assert.equal(doc.querySelector("#d_range button.on").dataset.r, "r5070");
-  assert.deepEqual([...doc.querySelectorAll(".dc .off")].map((x) => x.textContent), ["-50%"]);
+  // default range = 🔥 every flash-sale product + everything 70%+ : here the Jumia flash page items, biggest first
+  assert.equal(doc.querySelector("#d_range button.on").dataset.r, "hot");
+  const cards = [...doc.querySelectorAll(".dc")];
+  assert.equal(cards[0].querySelector(".off").textContent, "-50%");
+  assert.ok(cards.every((c) => c.querySelector(".flb") || parseInt(c.querySelector(".off").textContent.slice(1)) >= 70), "only ⚡ flash items or 70%+");
   [...doc.querySelectorAll("#d_range button")].find((b) => b.dataset.r === "all").click();
   assert.ok(doc.querySelectorAll(".dc").length >= 5);
   assert.equal(prefs.dealRange, "all");
@@ -151,7 +155,7 @@ test("70%+ chip shows every deal from 70% up (70, 75, 77, 88), biggest first; Am
   const html = readFileSync(new URL("index.html", W), "utf8").replace('<script src="engine.js"></script>', () => `<script>${readFileSync(new URL("engine.js", W), "utf8")}</script>`);
   const mk = (n, p, o) => `<article class="prd"><a class="core" href="/${n}.html"><h3 class="name">${n} item</h3><div class="prc">EGP ${p}</div><div class="old">EGP ${o}</div></a></article>`;
   const page = mk("a70", 300, 1000) + mk("b75", 250, 1000) + mk("c77", 230, 1000) + mk("d88", 120, 1000) + mk("e60", 400, 1000) + mk("f50", 500, 1000);
-  const prefs = { dealRange: "r70" };
+  const prefs = {};
   const dom = new JSDOM(html, { runScripts: "dangerously", url: "file:///x/index.html", beforeParse(win) {
     win.Native = { fetch(id, url) { setTimeout(() => win.__native(id, url.includes("jumia.com.eg/flash") , url.includes("jumia.com.eg/flash") ? page : "HTTP 404"), 3); },
       getPref: (k) => prefs[k] || "", setPref: (k, v) => { prefs[k] = v; }, readConfig: (n) => readFileSync(new URL(n, W), "utf8"),
@@ -162,6 +166,7 @@ test("70%+ chip shows every deal from 70% up (70, 75, 77, 88), biggest first; Am
   doc.querySelector("#nav_deals").click();
   const until = async (f) => { const t = Date.now(); while (!f()) { if (Date.now() - t > 8000) throw new Error("timeout"); await new Promise((r) => setTimeout(r, 20)); } };
   await until(() => doc.querySelector("#d_bar").hidden && doc.querySelectorAll(".dc").length);
+  [...doc.querySelectorAll("#d_range button")].find((b) => b.dataset.r === "r70").click();
   assert.deepEqual([...doc.querySelectorAll(".dc .off")].map((x) => x.textContent), ["-88%", "-77%", "-75%", "-70%"]);
 });
 

@@ -114,7 +114,7 @@
   // 🚦 The phone has a small number of network workers. Loading deals means hundreds of pages; without a limit they
   // fill the queue and a search started meanwhile waits behind them until it times out ("stuck").
   // So: deal pages go through a gate (few at a time) and stand still while a search is running.
-  const TRAFFIC = { searching: 0, active: 0, max: 6, waiters: [] };
+  const TRAFFIC = { searching: 0, active: 0, max: 14, waiters: [] };
   const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   async function gate(fn) {
     while (TRAFFIC.searching > 0 || TRAFFIC.active >= TRAFFIC.max) await sleep(TRAFFIC.searching > 0 ? 250 : 60);
@@ -808,7 +808,7 @@
   }
 
   async function deals(opts) {
-    const opt = Object.assign({ minPct: 10, perStore: 60, perCat: 150, pool: 6, renderPool: 3, timeout: 12000, renderTimeout: 20000 }, opts);
+    const opt = Object.assign({ minPct: 10, perStore: 300, perCat: 300, pool: 8, renderPool: 3, timeout: 12000, renderTimeout: 20000 }, opts);
     let stores = (opt.stores || []).filter((s) => s.enabled !== false && s.deals);
     if (opt.filters) stores = stores.filter((s) => opt.filters[s.name]);
     if (opt.onlyEvents) stores = [];          // 🖤 the Friday section loads just the campaign pages (fast)

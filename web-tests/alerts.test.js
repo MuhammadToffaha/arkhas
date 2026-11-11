@@ -80,7 +80,7 @@ test("background mode: only alert stores are fetched, deals >= min + Noon mega h
   await until(() => calls.some((c) => c[0] === "done"), 8000);
   const done = calls.find((c) => c[0] === "done")[1];
   assert.deepEqual(done.deals.map((d) => [d.source, d.title, d.pct, d.tag]).sort(),
-    [["Jumia", "Air Fryer XL", 70, null], ["Noon", "Smart Watch", 0, "mega"]].sort());
+    [["Jumia", "Air Fryer XL", 70, "flash"], ["Noon", "Smart Watch", 0, "mega"]].sort());
   const fetched = calls.filter((c) => c[0] === "fetch").map((c) => c[1]);
   assert.ok(!fetched.some((u) => u.includes("amazon")), "Amazon not selected -> not fetched");
   assert.ok(!fetched.some((u) => u.includes("api.github.com")), "no update check in background");
