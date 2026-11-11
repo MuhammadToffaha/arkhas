@@ -71,8 +71,31 @@ class MainActivity : AppCompatActivity() {
         AutoUpdate.schedule(this)   // 🤫 silent auto-update (Settings switch)
         web.loadUrl(WebFiles.indexUrl(this))
 
-        // newest UI / store rules from GitHub -> used from next start
-        thread { runCatching { WebFiles.update(this) } }
+        syncWeb()
+    }
+
+    private var lastWebSync = 0L
+
+    /**
+     * 🔄 Keep the app up to date without a new APK: fetch the newest UI / store rules / campaign pages from GitHub
+     * at start and whenever the app comes back after 2 h+. If something changed and the user is idle on the home
+     * screen, the page reloads itself right away (otherwise the new files are used from the next start).
+     */
+    private fun syncWeb() {
+        lastWebSync = System.currentTimeMillis()
+        thread {
+            val changed = runCatching { WebFiles.update(this) }.getOrDefault(false)
+            if (changed) runOnUiThread {
+                web.evaluateJavascript("window.__canReload?window.__canReload():false") { ok ->
+                    if (ok == "true") web.loadUrl(WebFiles.indexUrl(this))
+                }
+            }
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (lastWebSync > 0 && System.currentTimeMillis() - lastWebSync > 2 * 3600 * 1000) syncWeb()
     }
 
     /**
@@ -129,7 +152,7 @@ class MainActivity : AppCompatActivity() {
                 val wait = o.optString("wait").ifBlank { null }
                 runOnUiThread { renderers.minBy { it.load }.render(url, wait) { ok, html -> reply(ok, html) } }
             } else {
-                Net.pool.execute {
+                (if (o.optBoolean("low")) Net.lowPool else Net.pool).execute {
                     try { reply(true, Net.get(url, lang, o.optBoolean("json"))) }
                     catch (e: Exception) { reply(false, e.message ?: e.javaClass.simpleName) }
                 }

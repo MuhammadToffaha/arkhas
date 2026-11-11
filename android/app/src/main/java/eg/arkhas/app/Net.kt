@@ -10,7 +10,10 @@ object Net {
     const val DESKTOP_UA =
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0 Safari/537.36"
 
-    val pool = Executors.newFixedThreadPool(12)
+    /** search requests: always have free workers */
+    val pool = Executors.newFixedThreadPool(16)
+    /** background pages (deals, campaign pages): their own small pool, so they can never block a search */
+    val lowPool = Executors.newFixedThreadPool(6)
 
     fun get(url: String, lang: String, json: Boolean): String {
         var target = url

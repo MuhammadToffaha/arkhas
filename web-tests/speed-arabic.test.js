@@ -114,7 +114,7 @@ test("one query per store, slow store times out, fast results arrive first, cach
   assert.equal(st["Jumia"].error, "timeout");
   assert.equal(st["Compumarts"].query, "jabra headphones", "English-only store gets the translation");
   assert.equal(st["Dream 2000"].query, "سماعة جبرا", "bilingual store gets the original");
-  assert.equal(seen.filter((u) => u.includes("jumia")).length, 3, "one query per store (deep search: 3 result pages), not one per language");
+  assert.equal(seen.filter((u) => u.includes("jumia")).length, 2, "one query per store (deep search: 2 result pages), not one per language");
 
   const n = seen.length;
   const again = await E.search("سماعة جبرا", { stores, fetcher, DOMParser, timeout: 300, cacheMs: 60000 });

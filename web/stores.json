@@ -394,10 +394,12 @@
         "https://www.amazon.eg/-/en/singles-day",
         "https://www.amazon.eg/-/en/white-friday",
         "https://www.amazon.eg/s?k=white+friday+deals&rh=p_8%3A30-&language=en_AE",
-        "https://www.amazon.eg/s?k=white+friday&rh=p_8%3A50-&language=en_AE"
+        "https://www.amazon.eg/s?k=white+friday&rh=p_8%3A50-&language=en_AE",
+        "https://www.amazon.eg/s?k=11.11&rh=p_8%3A50-&language=en_AE",
+        "https://www.amazon.eg/s?k=singles+day+deals&rh=p_8%3A30-&language=en_AE"
       ]
     },
-    "search_pages": 3
+    "search_pages": 2
   },
   {
     "name": "Jumia",
@@ -560,10 +562,12 @@
         "https://www.jumia.com.eg/mlp-black-friday-appliances/",
         "https://www.jumia.com.eg/mlp-black-friday-fashion/",
         "https://www.jumia.com.eg/mlp-black-friday-health-beauty/",
-        "https://www.jumia.com.eg/catalog/?q=black+friday"
+        "https://www.jumia.com.eg/catalog/?q=black+friday",
+        "https://www.jumia.com.eg/mlp-11-11/",
+        "https://www.jumia.com.eg/mlp-singles-day/"
       ]
     },
-    "search_pages": 3
+    "search_pages": 2
   },
   {
     "name": "Noon",
@@ -689,7 +693,9 @@
         "https://www.noon.com/egypt-en/yellow-friday/",
         "https://www.noon.com/egypt-en/yellow-friday-deals/",
         "https://www.noon.com/egypt-en/yellow-friday-sale/",
-        "https://www.noon.com/egypt-en/electronics-and-mobiles/yellow-friday/"
+        "https://www.noon.com/egypt-en/electronics-and-mobiles/yellow-friday/",
+        "https://www.noon.com/egypt-en/11-11-sale/",
+        "https://www.noon.com/egypt-en/singles-day/"
       ],
       "wait": "a[href*=\"/p/\"]"
     }

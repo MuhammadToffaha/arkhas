@@ -111,6 +111,17 @@
     return v;
   }
 
+  // 🚦 The phone has a small number of network workers. Loading deals means hundreds of pages; without a limit they
+  // fill the queue and a search started meanwhile waits behind them until it times out ("stuck").
+  // So: deal pages go through a gate (few at a time) and stand still while a search is running.
+  const TRAFFIC = { searching: 0, active: 0, max: 6, waiters: [] };
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+  async function gate(fn) {
+    while (TRAFFIC.searching > 0 || TRAFFIC.active >= TRAFFIC.max) await sleep(TRAFFIC.searching > 0 ? 250 : 60);
+    TRAFFIC.active++;
+    try { return await fn(); } finally { TRAFFIC.active--; }
+  }
+
   function withTimeout(p, ms, label = "timeout") {
     let t;
     return Promise.race([p, new Promise((_, rej) => { t = setTimeout(() => rej(new Error(label)), ms); })]).finally(() => clearTimeout(t));
@@ -758,6 +769,8 @@
   // as soon as a store starts its sale, without knowing the URLs in advance.
   const EVENT_RE = /black[\s_-]?friday|white[\s_-]?friday|yellow[\s_-]?friday|blue[\s_-]?friday|cyber[\s_-]?monday|singles?[\s_-]?day|\b11[.\s_-]11\b|الجمع[ةه] (البيضاء|البيضا|الصفراء|السوداء)|بلاك ?فر[اي]?يداي|وايت ?فرايداي|يلو ?فرايداي|سايبر ?منداي/i;
 
+  const EVENT_1111 = /11[.\s_-]?11|singles?[\s_+-]?day|double[\s_-]?11|عيد العزاب/i;
+
   async function findEventPages(store, fetcher, DOMParserImpl, max = 6) {
     const cfg = store.events || {};
     const home = cfg.home || store.base_url;
@@ -798,11 +811,12 @@
     const opt = Object.assign({ minPct: 10, perStore: 60, perCat: 150, pool: 6, renderPool: 3, timeout: 12000, renderTimeout: 20000 }, opts);
     let stores = (opt.stores || []).filter((s) => s.enabled !== false && s.deals);
     if (opt.filters) stores = stores.filter((s) => opt.filters[s.name]);
+    if (opt.onlyEvents) stores = [];          // 🖤 the Friday section loads just the campaign pages (fast)
     if (opt.events) for (const [name, urls] of Object.entries(opt.events)) {
       const base = (opt.stores || []).find((x) => x.name === name);
       if (!base || !urls || !urls.length) continue;
       stores.push(Object.assign({}, base, { deals: { kind: "html", render: !!base.render || /noon|carrefour/i.test(name),
-        wait: base.wait || (base.deals && base.deals.wait) || null, urls: urls.map((url) => ({ url, tag: "bf" })) } }));
+        wait: base.wait || (base.deals && base.deals.wait) || null, urls: urls.map((url) => ({ url, tag: EVENT_1111.test(decodeURIComponent(url)) ? "1111" : "bf" })) } }));
     }
     const soldBy = opt.filters || opt.soldBy || {};
     stores = stores.map((s) => {
@@ -832,12 +846,12 @@
         let got;
         if (feed.json) {
           if (feed.urls) {   // several JSON pages (e.g. one per category word); keep whatever answers
-            const res = await Promise.allSettled(feed.urls(s).map((u) => withTimeout(opt.fetcher(u, { json: true, lang: "en" }), opt.timeout)
+            const res = await Promise.allSettled(feed.urls(s).map((u) => gate(() => withTimeout(opt.fetcher(u, { json: true, lang: "en", low: true }), opt.timeout))
               .then((t) => feed.parse(JSON.parse(t), s))));
             const ok = res.filter((x) => x.status === "fulfilled");
             if (!ok.length) throw res[0].reason;
             got = ok.flatMap((x) => x.value);
-          } else got = feed.parse(JSON.parse(await withTimeout(opt.fetcher(feed.url(s), { json: true, lang: "en" }), opt.timeout)), s);
+          } else got = feed.parse(JSON.parse(await gate(() => withTimeout(opt.fetcher(feed.url(s), { json: true, lang: "en", low: true }), opt.timeout))), s);
         } else {
           const sel = Object.assign({}, s, s.deals);   // deals page may need its own selectors
           const opts = s.deals.render ? { render: true, wait: sel.wait || (sel.item || "").split(",")[0] || null, lang: "en" } : { lang: "en" };
@@ -852,7 +866,7 @@
               const u = typeof p === "string" ? p : p.url, tag = typeof p === "string" ? null : p.tag || null,
                 cat = typeof p === "string" ? null : p.cat || null, bigPage = typeof p === "object" && p.big;
               try {
-                const html = await withTimeout(opt.fetcher(u, opts), s.deals.render ? opt.renderTimeout : opt.timeout);
+                const html = await gate(() => withTimeout(opt.fetcher(u, Object.assign({ low: true }, opts)), s.deals.render ? opt.renderTimeout : opt.timeout));
                 pages[i] = { status: "fulfilled", value: parse(html, sel, opt.DOMParser, 80)
                   .map((o) => Object.assign(o, tag ? { tag } : {}, cat ? { cat } : {}, bigPage ? { big: true } : {})) };
               } catch (e) { pages[i] = { status: "rejected", reason: e }; }
@@ -893,7 +907,7 @@
   async function search(rawQuery, opts) {
     const query = cleanQuery(rawQuery);
     const opt = Object.assign({ minRelevance: 0.75, maxPerSource: 48, city: "cairo", timeout: 7000, renderTimeout: 12000,
-      cacheMs: 30 * 60 * 1000, settleMs: 2500 }, opts);
+      cacheMs: 30 * 60 * 1000, settleMs: 2000, maxMs: 11000 }, opts);
     // shop-type routing: beauty shops only answer beauty searches (fewer requests, less noise)
     const beautyQ = isBeautyQuery(query);
     const stores = (opt.stores || []).filter((s) => s.enabled !== false && (!s.category || s.category !== "beauty" || beautyQ));
@@ -932,7 +946,9 @@
       } });
     }
 
-    // finish when every store answered, or once most did and the slow rest had a short grace period
+    // finish when every store answered, or once most did and the slow rest had a short grace period,
+    // and in any case after maxMs: a search must never hang
+    TRAFFIC.searching++;
     let doneN = 0, release;
     const mostly = new Promise((r) => { release = r; });
     const work = Promise.all(jobs.map(async (j) => {
@@ -946,10 +962,12 @@
       }
       if (opt.onProgress) opt.onProgress(snapshot());
       doneN++;
-      if (doneN >= Math.ceil(jobs.length * 0.8)) setTimeout(release, opt.settleMs);
+      if (doneN >= Math.ceil(jobs.length * 0.75)) setTimeout(release, opt.settleMs);
     }));
-    await Promise.race([work, mostly]);
-    await Promise.race([variantsP, new Promise((r) => setTimeout(r, 300))]);
+    try { await Promise.race([work, mostly, sleep(opt.maxMs)]); } finally { TRAFFIC.searching--; }
+    await Promise.race([variantsP, sleep(300)]);
+    // stores that did not answer in time are listed as "slow" so the status list stays complete
+    for (const j of jobs) if (!sources.some((x) => x.source === j.name)) sources.push({ source: j.name, ok: false, count: 0, ms: opt.maxMs, error: "slow" });
     const r = snapshot();
     if (sources.some((s) => s.count)) CACHE.set(key, { t: Date.now(), r });
     if (CACHE.size > 50) CACHE.delete(CACHE.keys().next().value);
@@ -1058,7 +1076,7 @@
     return names;
   }
 
-  const API = { photoQueries, barcodeNames, lensTitles, lensQueries, lensCaptcha: captcha, findStoreFilter, mergeFilter, findEventPages, EVENT_RE, normalize, tokens, isArabic, setSynonyms, equivalents, translateQuery, queryVariants, queryVariantsAsync, cleanQuery, parsePrice, ADAPTERS, DEAL_FEEDS, deals, pctOff, productId,
+  const API = { photoQueries, barcodeNames, lensTitles, lensQueries, lensCaptcha: captcha, findStoreFilter, mergeFilter, findEventPages, EVENT_RE, EVENT_1111, TRAFFIC, normalize, tokens, isArabic, setSynonyms, equivalents, translateQuery, queryVariants, queryVariantsAsync, cleanQuery, parsePrice, ADAPTERS, DEAL_FEEDS, deals, pctOff, productId,
     relevance, matchInfo, specs, rank, top, parse, parseSerp, buildUrl, serpUrl, externalLinks, search };
   if (typeof module !== "undefined" && module.exports) module.exports = API;
   else root.Arkhas = API;

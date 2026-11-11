@@ -327,7 +327,7 @@ test("➕ products are added to the list one store at a time while searching (li
   release(); await p;
 });
 
-test("🔬 deep search: big marketplaces load 3 result pages at once and merge them", async () => {
+test("🔬 deep search: big marketplaces load 2 result pages at once and merge them", async () => {
   const card = (i) => `<div data-component-type="s-search-result"><a class="a-link-normal" href="/dp/B0AAAAAA${String(i).padStart(2, "0")}"><h2><span>JBL Tune 520BT model ${i}</span></h2></a>
     <span class="a-price"><span class="a-offscreen">EGP ${1000 + i}</span></span></div>`;
   const asked = [];
@@ -336,7 +336,7 @@ test("🔬 deep search: big marketplaces load 3 result pages at once and merge t
     if (pg === 3) throw new Error("blocked");                       // a failed extra page is ignored
     return [1, 2, 3].map((k) => card(pg * 10 + k)).join("") + card(99);   // card 99 repeats on every page
   } });
-  assert.equal(asked.length, 3);
+  assert.equal(asked.length, 2);
   assert.equal(r.offers.length, 7);
 });
 
@@ -381,4 +381,48 @@ test("⚡ deals list: 40 cards first, the rest on demand; saved list shows at on
   assert.equal(w.document.querySelectorAll("#d_out .dc").length, 80);
   w.__finish(); await p;
   assert.equal(w.document.querySelectorAll("#d_out .dc").length, 1);
+});
+
+test("🚦 a search goes first: deal pages wait while it runs, and a search never hangs past its deadline", async () => {
+  const order = [];
+  const jum = Object.assign({}, S["Jumia"], { search_pages: 1, deals: { kind: "html", urls: ["https://www.jumia.com.eg/d1/", "https://www.jumia.com.eg/d2/"] } });
+  const never = { name: "Dead", type: "shopify", base_url: "https://dead.example" };
+  const fetcher = (u) => new Promise((res) => {
+    if (u.includes("dead.example")) return;                                   // never answers
+    order.push((u.includes("/d") ? "deal:" : "search:") + (E.TRAFFIC.searching ? "during" : "idle"));
+    setTimeout(() => res("<html></html>"), 30);
+  });
+  const sP = E.search("samsung tv", { stores: [jum, never], DOMParser, fetcher, maxMs: 400, timeout: 5000 });
+  const dP = E.deals({ stores: [jum], DOMParser, fetcher });
+  const t0 = Date.now();
+  const r = await sP;
+  assert.ok(Date.now() - t0 < 1500, "deadline, not the 5 s store timeout");
+  assert.ok(r.sources.some((x) => x.source === "Dead" && x.error === "slow"));
+  await dP;
+  assert.ok(order.filter((x) => x.startsWith("deal:")).every((x) => x === "deal:idle"), order.join(","));
+});
+
+test("🖤 dedicated Friday section: campaign pages only, grouped by store, 11.11 separate, store link when nothing is read", async () => {
+  const page = `<article class="prd"><a class="core" href="/tv.html"><h3 class="name">Samsung TV 55</h3><div class="prc">EGP 19,999</div><div class="old">EGP 29,999</div></a></article>`;
+  const asked = [];
+  const r = await E.deals({ stores: [S["Jumia"]], DOMParser, onlyEvents: true,
+    events: { Jumia: ["https://www.jumia.com.eg/mlp-black-friday/", "https://www.jumia.com.eg/mlp-11-11/"] },
+    fetcher: async (u) => { asked.push(u); return u.includes("11-11") ? page.replace("tv.html", "ph.html").replace("Samsung TV 55", "Redmi 13") : page; } });
+  assert.equal(asked.length, 2, "only the two campaign pages are loaded");
+  assert.deepEqual(r.deals.map((o) => o.tag).sort(), ["1111", "bf"]);
+  const W = new URL("../web/", import.meta.url);
+  const html = readFileSync(new URL("index.html", W), "utf8").replace('<script src="engine.js"></script>', () => `<script>${readFileSync(new URL("engine.js", W), "utf8")}</script>`);
+  const dom = new JSDOM(html, { runScripts: "dangerously", url: "https://app.local/" });
+  const w = dom.window; await new Promise((x) => setTimeout(x, 50));
+  w.__deals = r.deals;
+  w.eval(`friData = { deals: window.__deals, sources: [], total: 1, at: Date.now() };
+    evCache = { at: Date.now(), pages: { Jumia: ["https://www.jumia.com.eg/mlp-black-friday/"], Noon: ["https://www.noon.com/egypt-en/yellow-friday/"] } };
+    showView("fri"); renderFri();`);
+  const secs = [...w.document.querySelectorAll("#bf_out .fsec")];
+  assert.equal(secs.length, 2);
+  assert.equal(secs[0].querySelectorAll(".dc").length, 2);                      // Jumia with products first
+  assert.match(secs[1].querySelector(".empty a").getAttribute("href"), /noon\.com\/egypt-en\/yellow-friday/);   // noon: direct link
+  w.document.querySelector('#bf_kind [data-fk="1111"]').click();
+  assert.equal(w.document.querySelectorAll("#bf_out .dc").length, 1);
+  assert.match(w.document.querySelector("#bf_out .dc").textContent, /11\.11/);
 });

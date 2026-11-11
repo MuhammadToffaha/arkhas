@@ -198,6 +198,28 @@ input:focus{border-color:var(--accent);box-shadow:0 0 0 4px var(--glow)}
 .sw input:checked+i{background:var(--grad)}
 .sheet>div{border-radius:26px 26px 0 0}
 [hidden]{display:none!important}
+/* ===== 🖤 Black Friday + 11.11 section ===== */
+.frihero{display:flex;align-items:center;justify-content:space-between;gap:10px;color:#fff;border-radius:22px;padding:16px;margin:10px 0 8px;
+  background:linear-gradient(120deg,#0b0b0f,#2a1a00 55%,#b8860b);box-shadow:0 8px 24px #0000003a}
+.frihero b{display:block;font-size:20px}.frihero span{font-size:12.5px;opacity:.9}
+.frihero button{flex:none;width:46px;height:46px;border-radius:50%;border:0;background:#ffd60a;color:#111;font-size:22px;font-weight:900}
+.frihero button:disabled{opacity:.5}
+.fsec{margin-top:18px}
+.fsec h3{display:flex;align-items:center;gap:8px;margin:0 0 8px;font-size:16px}
+.fsec h3 .cntb{font-size:12px;font-weight:800;background:#111;color:#ffd60a;border-radius:999px;padding:1px 9px}
+.fsec h3 a{margin-inline-start:auto;font-size:12.5px;font-weight:700;color:var(--accent);text-decoration:none;white-space:nowrap}
+.fsec .empty{padding:14px;font-size:13px;text-align:start;background:var(--card);border-radius:16px}
+.fsec .empty a{display:inline-block;margin:6px 6px 0 0;font-weight:700;color:var(--accent);text-decoration:none}
+.hscroll{display:flex;gap:10px;overflow-x:auto;padding:2px 2px 10px;scroll-snap-type:x proximity;scrollbar-width:none}
+.hscroll::-webkit-scrollbar{display:none}
+.hscroll .dc{flex:none;width:158px;scroll-snap-align:start;content-visibility:visible}
+.hscroll .dc img,.hscroll .dc .noimg{height:112px}
+.fall{font:inherit;font-weight:800;font-size:13px;border:0;border-radius:12px;padding:8px 12px;background:var(--card);color:var(--accent);box-shadow:0 2px 8px #0000000d}
+.k1111{background:#e11d48!important;color:#fff!important}
+#bf_kind button.on{background:#111!important;color:#ffd60a;border-color:#111}
+.nav button#nav_fri.on b{background:linear-gradient(120deg,#0b0b0f,#b8860b)}
+.nav button{font-size:10.5px;min-width:0}.nav button span{white-space:nowrap}
+
 [dir=rtl] #q:placeholder-shown{direction:rtl;text-overflow:ellipsis}
 /* ===== home: Black Friday banner, recent searches, quick categories ===== */
 .bfhero{display:flex;align-items:center;gap:12px;width:100%;border:0;text-align:start;font:inherit;color:#fff;border-radius:20px;padding:14px 16px;margin:12px 0 4px;
@@ -329,6 +351,18 @@ html,body{overflow-x:hidden}
     <div id="f_out"></div>
   </section>
 
+  <section id="friView" hidden>
+    <div class="frihero">
+      <div><b id="bf_title"></b><span id="bf_count"></span></div>
+      <button type="button" id="bf_refresh" aria-label="refresh">↻</button>
+    </div>
+    <div class="bar" id="bf_bar" hidden><i></i></div>
+    <div class="muted" id="bf_sub"></div>
+    <div class="chips" id="bf_kind"></div>
+    <div class="chips" id="bf_sort"></div>
+    <div id="bf_out"></div>
+  </section>
+
   <section id="promoView" hidden>
     <div class="dh"><h2 class="dt">🎟️ <span id="p_title"></span></h2>
       <button class="dref" id="p_refresh"><b>↻</b></button></div>
@@ -370,6 +404,7 @@ html,body{overflow-x:hidden}
 <button type="button" id="topfab" aria-label="top" hidden>↑</button>
 <nav class="nav">
   <button id="nav_search" class="on"><b>🔍</b><span id="l_search"></span></button>
+  <button id="nav_fri" hidden><b>🖤</b><span id="l_fri"></span></button>
   <button id="nav_deals" class="flash"><b>⚡</b><span id="l_deals"></span></button>
   <button id="nav_promo"><b>🎟️</b><span id="l_promo"></span></button>
   <button id="nav_fav"><b>❤️<i class="cnt" id="favcnt" hidden></i></b><span id="l_fav"></span></button>
@@ -480,7 +515,7 @@ const T = {
     tgBadTok: "⚠️ الـ Token غلط — انسخه تاني من @BotFather", tgTimeout: "لسه مش لاقي الجروب — اكتب /arkhas في الجروب واضغط «دوّر على جروبي»",
     tgFind: "🔎 دوّر على جروبي", tgTest: "✉️ ابعت رسالة تجربة", tgNoChats: "مش لاقي الجروب — اكتب /arkhas في الجروب (البوت مش بيشوف الرسايل العادية) وحاول تاني",
     tgPicked: "✓ هيبعت لـ «{t}»", tgOk: "✓ الرسالة وصلت للجروب", tgErr: "⚠️ تليجرام: {e}", tgTestText: "✅ أرخص متوصل — العروض الكبيرة هتوصل هنا تلقائي",
-    tgSent: " · تليجرام: {n} اتبعت", tgFail: " · تليجرام فشل: {e}", alNever: "لسه مفيش فحص", alPerm: "⚠️ اسمح بالإشعارات للتطبيق من إعدادات الموبايل", navFav: "المفضلة", navPromo: "أكواد", hRecent: "🕘 بحثت عنه قبل كده", hClear: "مسح", hCats: "🧭 دوّر بسرعة", bfHero: "عروض بلاك فرايداي", bfHeroSub: "الجمعة البيضاء · الصفراء · السوداء من كل المتاجر", bfHeroN: "{n} عرض", bfHeroGo: "شوف العروض", dealsUpdating: "⏳ بنحدّث العروض في الخلفية… ({done}/{all})", more: "⬇️ عرض المزيد ({n})", bigOnly: "🏬 بيع المتجر نفسه بس", bigBadge: "🏬 بيع المتجر", bigFinding: "⏳ بندوّر على فلتر «بيع المتجر» في أمازون ونون وجوميا…", bigNote: "✅ = بيع المتجر نفسه · ⚠️ = شحن المتجر (مش لاقيين فلتر البيع) · ❌ = مش لاقيين", phCam: "📸 صوّر", phGal: "🖼️ من المعرض", phSheetT: "📷 دوّر بالصورة", phSheetD: "صوّر المنتج أو الباركود أو العلبة — التطبيق بيقرا الاسم والموديل ويدوّر على أرخص سعر.", phReading: "⏳ بنقرا الصورة…", phTitle: "📷 دوّرنا بالصورة", phPick: "مش هو؟ اختار كلمة تانية أو عدّل البحث:", phNone: "معرفناش المنتج من الصورة 😕 — جرّب صورة أوضح للاسم/الموديل أو الباركود، أو افتحها في Google Lens.", phLens: "🔎 Google Lens", phLensing: "🔎 بندوّر بالصورة نفسها في Google Lens…", phPickLens: "🔎 = من الصورة نفسها · 🔤 = من الكلام المكتوب. اختار الأنسب:", phLensCheck: "Google عايز يتأكد إنك مش روبوت — أكّد في الصفحة اللي فتحت، وبعدين اضغط «🛒 قارن الأسعار»", phLensOpen: "فتحنالك نتايج Google Lens للصورة — اختار المنتج واضغط «🛒 قارن الأسعار» فوق", phAgain: "📷 صورة تانية", phBarcode: "🏷️ باركود {c}", phErr: "تعذّر قراءة الصورة: {e}", promoTitle: "أكواد الخصم", promoQ: "🔎 دوّر على متجر…", promoSub: "{n} كود من {s} متجر — اتحدّثت {t}", promoNone: "مفيش أكواد دلوقتي — اضغط ↻", promoCopy: "📋 انسخ", promoCopied: "✅ اتنسخ", promoOpen: "🛒 المتجر", promoExp: "ينتهي {d}", promoUsed: "استُخدم {n} مرة", promoAll: "الكل", promoNote: "الأكواد بتتجمّع كل يوم من مواقع الكوبونات المصرية (يجني). جرّب الكود عند الدفع — بعض الأكواد للعملاء الجدد بس.", promoErr: "تعذّر تحميل الأكواد", favTitle: "المفضلة", favSub: "{n} منتج محفوظ — السعر وقت الحفظ", favEmpty: "اضغط ♥ على أي منتج عشان يتحفظ هنا", savedOn: "اتحفظ {d}", favAdded: "اتضاف للمفضلة ❤️", favRemoved: "اتشال من المفضلة", refresh: "تحديث", waBtn: "واتساب", waHead: "🔥 عروض أرخص — {d}", waInstead: "بدل", waMore: "📲 من تطبيق أرخص", refresh: "تحديث", ddAll: "كل المتاجر", ddSome: "{n} متاجر مختارة", ddOne: "{s}", selAll: "تحديد الكل", selNone: "إلغاء الكل", navDeals: "عروض", dealsTitle: "عروض فلاش", dealsSub: "أكبر الخصومات من أشهر {n} مواقع في مصر — اتحدّثت {t}", dealsLoading: "جاري جلب العروض من {done}/{all} موقع…", dealsNone: "مفيش عروض دلوقتي — اضغط ↻", sortPct: "أكبر خصم", sortPrice: "الأرخص", sortSave: "أكبر توفير", allStores: "الكل", justNow: "الآن", minAgo: "من {m} دقيقة", banner: "🎉 نسخة جديدة {v} — اضغط للتحديث", openRel: "⬇️ تنزيل {v} من GitHub", relNote: "هتتفتح صفحة التنزيل — نزّل الملف وافتحه للتثبيت. بعد كده التحديث هيكون من جوه التطبيق", upd: "🔄 التحديثات", cur: "نسختك {v}", check: "تحقق من التحديث", checking: "جاري التحقق…", latest: "عندك أحدث نسخة ✓",
+    tgSent: " · تليجرام: {n} اتبعت", tgFail: " · تليجرام فشل: {e}", alNever: "لسه مفيش فحص", alPerm: "⚠️ اسمح بالإشعارات للتطبيق من إعدادات الموبايل", navFav: "المفضلة", navPromo: "أكواد", navFri: "الجمعة", friTitle: "🖤 بلاك فرايداي و 11.11", friCount: "{n} عرض من {s} متجر", friDays: "⏳ باقي {d} يوم على الجمعة 27 نوفمبر", friToday: "🔥 النهارده البلاك فرايداي!", friAll: "الكل", friBf: "🖤 الجمعة (بيضاء/صفراء/سوداء)", fri1111: "1️⃣1️⃣ 11.11", friLoading: "⏳ بنجيب صفحات العروض من المتاجر… ({done}/{all})", friUpdated: "اتحدّثت {t} · بتتحدّث لوحدها كل ساعة", friOpen: "🔗 صفحة العرض", friNoneStore: "لسه مفيش منتجات مقروءة من {s}. افتح صفحة العرض مباشرة:", friNone: "لسه مفيش عروض مقروءة. اضغط ↻ أو افتح صفحات المتاجر:", friMore: "عرض الكل ({n})", friLess: "عرض أقل", hRecent: "🕘 بحثت عنه قبل كده", hClear: "مسح", hCats: "🧭 دوّر بسرعة", bfHero: "عروض بلاك فرايداي", bfHeroSub: "الجمعة البيضاء · الصفراء · السوداء من كل المتاجر", bfHeroN: "{n} عرض", bfHeroGo: "شوف العروض", dealsUpdating: "⏳ بنحدّث العروض في الخلفية… ({done}/{all})", more: "⬇️ عرض المزيد ({n})", bigOnly: "🏬 بيع المتجر نفسه بس", bigBadge: "🏬 بيع المتجر", bigFinding: "⏳ بندوّر على فلتر «بيع المتجر» في أمازون ونون وجوميا…", bigNote: "✅ = بيع المتجر نفسه · ⚠️ = شحن المتجر (مش لاقيين فلتر البيع) · ❌ = مش لاقيين", phCam: "📸 صوّر", phGal: "🖼️ من المعرض", phSheetT: "📷 دوّر بالصورة", phSheetD: "صوّر المنتج أو الباركود أو العلبة — التطبيق بيقرا الاسم والموديل ويدوّر على أرخص سعر.", phReading: "⏳ بنقرا الصورة…", phTitle: "📷 دوّرنا بالصورة", phPick: "مش هو؟ اختار كلمة تانية أو عدّل البحث:", phNone: "معرفناش المنتج من الصورة 😕 — جرّب صورة أوضح للاسم/الموديل أو الباركود، أو افتحها في Google Lens.", phLens: "🔎 Google Lens", phLensing: "🔎 بندوّر بالصورة نفسها في Google Lens…", phPickLens: "🔎 = من الصورة نفسها · 🔤 = من الكلام المكتوب. اختار الأنسب:", phLensCheck: "Google عايز يتأكد إنك مش روبوت — أكّد في الصفحة اللي فتحت، وبعدين اضغط «🛒 قارن الأسعار»", phLensOpen: "فتحنالك نتايج Google Lens للصورة — اختار المنتج واضغط «🛒 قارن الأسعار» فوق", phAgain: "📷 صورة تانية", phBarcode: "🏷️ باركود {c}", phErr: "تعذّر قراءة الصورة: {e}", promoTitle: "أكواد الخصم", promoQ: "🔎 دوّر على متجر…", promoSub: "{n} كود من {s} متجر — اتحدّثت {t}", promoNone: "مفيش أكواد دلوقتي — اضغط ↻", promoCopy: "📋 انسخ", promoCopied: "✅ اتنسخ", promoOpen: "🛒 المتجر", promoExp: "ينتهي {d}", promoUsed: "استُخدم {n} مرة", promoAll: "الكل", promoNote: "الأكواد بتتجمّع كل يوم من مواقع الكوبونات المصرية (يجني). جرّب الكود عند الدفع — بعض الأكواد للعملاء الجدد بس.", promoErr: "تعذّر تحميل الأكواد", favTitle: "المفضلة", favSub: "{n} منتج محفوظ — السعر وقت الحفظ", favEmpty: "اضغط ♥ على أي منتج عشان يتحفظ هنا", savedOn: "اتحفظ {d}", favAdded: "اتضاف للمفضلة ❤️", favRemoved: "اتشال من المفضلة", refresh: "تحديث", waBtn: "واتساب", waHead: "🔥 عروض أرخص — {d}", waInstead: "بدل", waMore: "📲 من تطبيق أرخص", refresh: "تحديث", ddAll: "كل المتاجر", ddSome: "{n} متاجر مختارة", ddOne: "{s}", selAll: "تحديد الكل", selNone: "إلغاء الكل", navDeals: "عروض", dealsTitle: "عروض فلاش", dealsSub: "أكبر الخصومات من أشهر {n} مواقع في مصر — اتحدّثت {t}", dealsLoading: "جاري جلب العروض من {done}/{all} موقع…", dealsNone: "مفيش عروض دلوقتي — اضغط ↻", sortPct: "أكبر خصم", sortPrice: "الأرخص", sortSave: "أكبر توفير", allStores: "الكل", justNow: "الآن", minAgo: "من {m} دقيقة", banner: "🎉 نسخة جديدة {v} — اضغط للتحديث", openRel: "⬇️ تنزيل {v} من GitHub", relNote: "هتتفتح صفحة التنزيل — نزّل الملف وافتحه للتثبيت. بعد كده التحديث هيكون من جوه التطبيق", upd: "🔄 التحديثات", cur: "نسختك {v}", check: "تحقق من التحديث", checking: "جاري التحقق…", latest: "عندك أحدث نسخة ✓",
     newVer: "نسخة جديدة {v} متاحة ({mb} ميجا)", popT: "تحديث جديد {v} 🎉", popD: "نسخة أحدث من أرخص جاهزة — حدّث دلوقتي عشان تاخد آخر المميزات.", popGo: "⬇️ حدّث الآن", popLater: "بعدين", install: "⬇️ تنزيل وتثبيت {v}", downloading: "جاري التنزيل… {p}%", installing: "افتح شاشة التثبيت واضغط تثبيت",
     perm: "اسمح لـ أرخص بتثبيت التحديثات (فتحنا لك الإعداد) ثم ارجع واضغط تثبيت تاني", webBtn: "تحديث قائمة المتاجر", webSame: "قائمة المتاجر محدّثة ✓",
     webChanged: "تم تحديث المتاجر — جاري إعادة التحميل…", updErr: "تعذّر: {e}", exact: "✓ مطابق", similar: "≈ مشابه", other: "موديل مختلف", fewExact: "لقينا {n} بس مطابقين تمامًا — الباقي مشابه", egp: "ج.م", save: "وفّر {n}",
@@ -500,7 +535,7 @@ const T = {
     tgBadTok: "⚠️ Token is wrong — copy it again from @BotFather", tgTimeout: "Group not found yet — send /arkhas in the group, then tap “Find my group”",
     tgFind: "🔎 Find my group", tgTest: "✉️ Send test message", tgNoChats: "Group not found — send /arkhas in the group (bots don't see normal messages) and try again",
     tgPicked: "✓ Will post to “{t}”", tgOk: "✓ Message arrived in the group", tgErr: "⚠️ Telegram: {e}", tgTestText: "✅ Arkhas connected — big deals will be posted here automatically",
-    tgSent: " · Telegram: {n} sent", tgFail: " · Telegram failed: {e}", alNever: "No check yet", alPerm: "⚠️ Allow notifications for the app in phone settings", navFav: "Favourites", navPromo: "Codes", hRecent: "🕘 Recent searches", hClear: "Clear", hCats: "🧭 Quick search", bfHero: "Black Friday deals", bfHeroSub: "White · Yellow · Black Friday from every store", bfHeroN: "{n} deals", bfHeroGo: "See deals", dealsUpdating: "⏳ Updating deals in the background… ({done}/{all})", more: "⬇️ Show more ({n})", bigOnly: "🏬 Sold by the store only", bigBadge: "🏬 sold by store", bigFinding: "⏳ Finding the \"sold by\" filter on Amazon, noon and Jumia…", bigNote: "✅ = sold by the store · ⚠️ = shipped by the store (no seller filter found) · ❌ = not found", phCam: "📸 Camera", phGal: "🖼️ Gallery", phSheetT: "📷 Search by photo", phSheetD: "Snap the product, its barcode or box — the app reads the name and model and finds the cheapest price.", phReading: "⏳ Reading the photo…", phTitle: "📷 Searched by photo", phPick: "Not it? Pick another phrase or edit the search:", phNone: "Could not recognise the product 😕 — try a clearer shot of the name/model or barcode, or open it in Google Lens.", phLens: "🔎 Google Lens", phLensing: "🔎 Searching the picture itself on Google Lens…", phPickLens: "🔎 = from the picture · 🔤 = from printed text. Pick the best:", phLensCheck: "Google wants a robot check — confirm on the page that opened, then tap «🛒 Compare prices»", phLensOpen: "Opened the Google Lens results for your photo — find the product and tap «🛒 Compare prices» at the top", phAgain: "📷 Another photo", phBarcode: "🏷️ Barcode {c}", phErr: "Could not read the photo: {e}", promoTitle: "Promo codes", promoQ: "🔎 Search a store…", promoSub: "{n} codes from {s} stores — updated {t}", promoNone: "No codes right now — tap ↻", promoCopy: "📋 Copy", promoCopied: "✅ Copied", promoOpen: "🛒 Store", promoExp: "Expires {d}", promoUsed: "Used {n} times", promoAll: "All", promoNote: "Codes are collected daily from Egyptian coupon sites (Yajny). Try the code at checkout — some are for new customers only.", promoErr: "Could not load codes", favTitle: "Favourites", favSub: "{n} saved items — price when saved", favEmpty: "Tap ♥ on any product to save it here", savedOn: "saved {d}", favAdded: "Added to favourites ❤️", favRemoved: "Removed from favourites", refresh: "Refresh", waBtn: "WhatsApp", waHead: "🔥 Arkhas deals — {d}", waInstead: "was", waMore: "📲 via Arkhas app", refresh: "Refresh", ddAll: "All stores", ddSome: "{n} stores selected", ddOne: "{s}", selAll: "Select all", selNone: "Clear all", navDeals: "Deals", dealsTitle: "Flash deals", dealsSub: "Biggest discounts from {n} top Egyptian sites — updated {t}", dealsLoading: "Fetching deals from {done}/{all} sites…", dealsNone: "No deals right now — tap ↻", sortPct: "Biggest % off", sortPrice: "Cheapest", sortSave: "Most saved", allStores: "All", justNow: "just now", minAgo: "{m} min ago", banner: "🎉 New version {v} — tap to update", openRel: "⬇️ Download {v} from GitHub", relNote: "The download page opens — download the file and open it to install. After this, updates happen inside the app", upd: "🔄 Updates", cur: "You have {v}", check: "Check for update", checking: "Checking…", latest: "You have the latest version ✓",
+    tgSent: " · Telegram: {n} sent", tgFail: " · Telegram failed: {e}", alNever: "No check yet", alPerm: "⚠️ Allow notifications for the app in phone settings", navFav: "Favourites", navPromo: "Codes", navFri: "Friday", friTitle: "🖤 Black Friday & 11.11", friCount: "{n} deals from {s} stores", friDays: "⏳ {d} days to Friday 27 Nov", friToday: "🔥 Black Friday is today!", friAll: "All", friBf: "🖤 Friday (White/Yellow/Black)", fri1111: "1️⃣1️⃣ 11.11", friLoading: "⏳ Loading the stores' campaign pages… ({done}/{all})", friUpdated: "Updated {t} · refreshes itself every hour", friOpen: "🔗 Campaign page", friNoneStore: "No products read from {s} yet. Open its campaign page:", friNone: "No deals read yet. Tap ↻ or open the stores' pages:", friMore: "Show all ({n})", friLess: "Show less", hRecent: "🕘 Recent searches", hClear: "Clear", hCats: "🧭 Quick search", bfHero: "Black Friday deals", bfHeroSub: "White · Yellow · Black Friday from every store", bfHeroN: "{n} deals", bfHeroGo: "See deals", dealsUpdating: "⏳ Updating deals in the background… ({done}/{all})", more: "⬇️ Show more ({n})", bigOnly: "🏬 Sold by the store only", bigBadge: "🏬 sold by store", bigFinding: "⏳ Finding the \"sold by\" filter on Amazon, noon and Jumia…", bigNote: "✅ = sold by the store · ⚠️ = shipped by the store (no seller filter found) · ❌ = not found", phCam: "📸 Camera", phGal: "🖼️ Gallery", phSheetT: "📷 Search by photo", phSheetD: "Snap the product, its barcode or box — the app reads the name and model and finds the cheapest price.", phReading: "⏳ Reading the photo…", phTitle: "📷 Searched by photo", phPick: "Not it? Pick another phrase or edit the search:", phNone: "Could not recognise the product 😕 — try a clearer shot of the name/model or barcode, or open it in Google Lens.", phLens: "🔎 Google Lens", phLensing: "🔎 Searching the picture itself on Google Lens…", phPickLens: "🔎 = from the picture · 🔤 = from printed text. Pick the best:", phLensCheck: "Google wants a robot check — confirm on the page that opened, then tap «🛒 Compare prices»", phLensOpen: "Opened the Google Lens results for your photo — find the product and tap «🛒 Compare prices» at the top", phAgain: "📷 Another photo", phBarcode: "🏷️ Barcode {c}", phErr: "Could not read the photo: {e}", promoTitle: "Promo codes", promoQ: "🔎 Search a store…", promoSub: "{n} codes from {s} stores — updated {t}", promoNone: "No codes right now — tap ↻", promoCopy: "📋 Copy", promoCopied: "✅ Copied", promoOpen: "🛒 Store", promoExp: "Expires {d}", promoUsed: "Used {n} times", promoAll: "All", promoNote: "Codes are collected daily from Egyptian coupon sites (Yajny). Try the code at checkout — some are for new customers only.", promoErr: "Could not load codes", favTitle: "Favourites", favSub: "{n} saved items — price when saved", favEmpty: "Tap ♥ on any product to save it here", savedOn: "saved {d}", favAdded: "Added to favourites ❤️", favRemoved: "Removed from favourites", refresh: "Refresh", waBtn: "WhatsApp", waHead: "🔥 Arkhas deals — {d}", waInstead: "was", waMore: "📲 via Arkhas app", refresh: "Refresh", ddAll: "All stores", ddSome: "{n} stores selected", ddOne: "{s}", selAll: "Select all", selNone: "Clear all", navDeals: "Deals", dealsTitle: "Flash deals", dealsSub: "Biggest discounts from {n} top Egyptian sites — updated {t}", dealsLoading: "Fetching deals from {done}/{all} sites…", dealsNone: "No deals right now — tap ↻", sortPct: "Biggest % off", sortPrice: "Cheapest", sortSave: "Most saved", allStores: "All", justNow: "just now", minAgo: "{m} min ago", banner: "🎉 New version {v} — tap to update", openRel: "⬇️ Download {v} from GitHub", relNote: "The download page opens — download the file and open it to install. After this, updates happen inside the app", upd: "🔄 Updates", cur: "You have {v}", check: "Check for update", checking: "Checking…", latest: "You have the latest version ✓",
     newVer: "New version {v} available ({mb} MB)", popT: "New update {v} 🎉", popD: "A newer Arkhas is ready — update now to get the latest features.", popGo: "⬇️ Update now", popLater: "Later", install: "⬇️ Download & install {v}", downloading: "Downloading… {p}%", installing: "Tap Install on the Android screen",
     perm: "Allow Arkhas to install updates (settings opened), then come back and tap install again", webBtn: "Refresh store list", webSame: "Store list is up to date ✓",
     webChanged: "Stores updated — reloading…", updErr: "Failed: {e}", exact: "✓ exact", similar: "≈ similar", other: "other model", fewExact: "Only {n} exact match(es) — the rest are similar", egp: "EGP", save: "save {n}",
@@ -522,6 +557,8 @@ function applyLang() {
   try { renderHome(); } catch (_) { /* first call happens before the home code is ready */ }
   $("#s_lang").textContent = t.langLbl; $("#s_theme").textContent = t.themeLbl;
   for (const b of document.querySelectorAll("#langseg button")) b.classList.toggle("on", b.dataset.l === L);
+  $("#l_fri").textContent = t.navFri; $("#bf_title").textContent = t.friTitle;
+  try { $("#nav_fri").hidden = !inSeason(); if (!$("#friView").hidden) renderFri(); } catch (_) {}
   $("#l_promo").textContent = t.navPromo; $("#p_title").textContent = t.promoTitle; $("#p_q").placeholder = t.promoQ;
   $("#l_fav").textContent = t.navFav; $("#f_title").textContent = t.favTitle;
   if (typeof renderFavs === "function" && !$("#favView").hidden) renderFavs();
@@ -691,7 +728,8 @@ function renderHome() {
   const t = T[L]; let h = "";
   if (inSeason()) {
     if (!dealsData) loadDealsCache();
-    const n = dealsData ? (bfStores = new Set(dealsData.deals.filter((o) => o.tag === "bf").map((o) => o.source)), dealsData.deals.filter(isBf).length) : 0;
+    if (!friData) loadFriCache();
+    const n = friData ? friData.deals.length : 0;
     h += `<button type="button" class="bfhero" id="bfhero"><span class="e">🖤</span><span style="position:relative;z-index:1"><b>${t.bfHero}</b><span>${t.bfHeroSub}</span></span>
       <span class="n">${n ? fmt(t.bfHeroN, { n }) : t.bfHeroGo}</span></button>`;
   }
@@ -703,7 +741,7 @@ function renderHome() {
   el.innerHTML = h;
 }
 $("#home").onclick = (e) => {
-  if (e.target.closest("#bfhero")) { dealRange = "bf"; rangeTouched = true; showView("deals"); loadDeals(false); return; }
+  if (e.target.closest("#bfhero")) { showView("fri"); loadFri(false); return; }
   if (e.target.closest("#h_clear")) { setPref("recent", "[]"); renderHome(); return; }
   const b = e.target.closest("[data-hq]"); if (b) run(b.dataset.hq);
 };
@@ -1011,7 +1049,8 @@ let dealRange = null;   // read from prefs on first use; default 50–70%
 const RANGES = { bf: [0, 100], mega: [0, 100], elec: [10, 100], beauty: [10, 100], all: [10, 100], r30: [30, 100], r5070: [50, 70], r70: [70, 100] };
 const inSeason = () => { const d = new Date(), m = d.getMonth(); return m === 10 || (m === 11 && d.getDate() <= 5); };
 let bfStores = new Set();
-const isBf = (o) => o.tag === "bf" || (bfStores.has(o.source) && o.pct >= 30);
+const isEv = (o) => o.tag === "bf" || o.tag === "1111";
+const isBf = (o) => isEv(o) || (bfStores.has(o.source) && o.pct >= 30);
 const inR = (o, k) => k === "bf" ? isBf(o) : k === "mega" ? o.tag === "mega" : k === "elec" ? o.cat === "electronics" && (o.pct >= 10 || o.tag === "mega") : k === "beauty" ? o.cat === "beauty" && (o.pct >= 10 || o.tag === "mega") : o.pct >= RANGES[k][0] && o.pct <= RANGES[k][1];
 const DEALS_TTL = 60 * 60 * 1000;   // reuse fetched deals for 1 hour
 
@@ -1020,6 +1059,8 @@ function showView(v) {
   $("#dealsView").hidden = v !== "deals";
   $("#favView").hidden = v !== "fav";
   $("#promoView").hidden = v !== "promo";
+  $("#friView").hidden = v !== "fri";
+  $("#nav_fri").classList.toggle("on", v === "fri");
   $("#nav_promo").classList.toggle("on", v === "promo");
   $("#nav_search").classList.toggle("on", v === "search");
   $("#nav_deals").classList.toggle("on", v === "deals");
@@ -1033,7 +1074,7 @@ function renderDeals(done = true) {
   const mins = Math.round((Date.now() - d.at) / 60000);
   $("#d_sub").textContent = done ? fmt(t.dealsSub, { n: d.total, t: mins < 1 ? t.justNow : fmt(t.minAgo, { m: mins }) })
     : fmt(t.dealsLoading, { done: d.sources.length, all: d.total });
-  bfStores = new Set(d.deals.filter((o) => o.tag === "bf").map((o) => o.source));
+  bfStores = new Set(d.deals.filter(isEv).map((o) => o.source));
   const bfN = d.deals.filter(isBf).length;
   if (!dealRange) dealRange = RANGES[pref("dealRange")] ? pref("dealRange") : "r5070";
   // 🖤 in the season the Friday deals come first (until you pick another filter yourself)
@@ -1127,6 +1168,68 @@ async function eventPages(force) {
   try { setPref("eventPages", JSON.stringify(evCache)); } catch (_) {}
   return pages;
 }
+
+// ---------- 🖤 dedicated Black Friday + 11.11 section: only the stores' campaign pages, grouped by store ----------
+let friData = null, friBusy = false, friKind = "", friSort = "pct", friOpen = new Set();
+const FRI_TTL = 60 * 60 * 1000;
+function loadFriCache() { try { const c = JSON.parse(pref("friCache", "null")); if (c && c.deals && Date.now() - c.at < 24 * 3600 * 1000) friData = c; } catch (_) {} }
+const friCard = (o, t) => `<a class="dc" href="${esc(o.url)}">${o.pct ? `<span class="off">-${o.pct}%</span>` : ""}<span class="megab bfb${o.tag === "1111" ? " k1111" : ""}">${o.tag === "1111" ? "11.11" : "🖤 " + t.bfShort}</span>${heart(o)}${img(o)}
+  <div class="ttl">${esc(o.title)}</div><div class="p">${money(o.price)}</div>${o.old_price && o.old_price > o.price ? `<div class="old">${money(o.old_price)}</div>` : ""}</a>`;
+function renderFri() {
+  const t = T[L], d = friData || { deals: [], sources: [], total: 0 };
+  const pages = (evCache && evCache.pages) || {};
+  const all = d.deals, list = all.filter((o) => !friKind || o.tag === friKind);
+  const stores = [...new Set([...Object.keys(pages), ...all.map((o) => o.source)])];
+  const days = Math.ceil((new Date(new Date().getFullYear(), 10, 27) - new Date()) / 864e5);
+  $("#bf_count").textContent = fmt(t.friCount, { n: all.length, s: new Set(all.map((o) => o.source)).size }) + (days > 0 ? " · " + fmt(t.friDays, { d: days }) : days === 0 ? " · " + t.friToday : "");
+  if (!friBusy) $("#bf_sub").textContent = d.at ? fmt(t.friUpdated, { t: new Date(d.at).toLocaleTimeString(L === "ar" ? "ar-EG-u-nu-latn" : "en-GB", { hour: "2-digit", minute: "2-digit" }) }) : "";
+  const n = (k) => all.filter((o) => !k || o.tag === k).length;
+  $("#bf_kind").innerHTML = [["", t.friAll], ["bf", t.friBf], ["1111", t.fri1111]].map(([k, l]) => `<button data-fk="${k}" class="${friKind === k ? "on" : ""}">${l} · ${n(k)}</button>`).join("");
+  $("#bf_sort").innerHTML = [["pct", t.sortPct], ["save", t.sortSave], ["price", t.sortPrice]].map(([k, l]) => `<button data-fs="${k}" class="${friSort === k ? "on" : ""}">${l}</button>`).join("");
+  const by = { pct: (a, b) => b.pct - a.pct || a.price - b.price, save: (a, b) => (b.old_price - b.price || 0) - (a.old_price - a.price || 0), price: (a, b) => a.price - b.price };
+  const links = (name) => (pages[name] || []).slice(0, 3).map((u, i) => `<a href="${esc(u)}">${t.friOpen}${i ? " " + (i + 1) : ""}</a>`).join("");
+  if (!stores.length) { $("#bf_out").innerHTML = friBusy ? `<div class="dg">${Array.from({ length: 4 }, () => `<div class="dc skel"><div class="sk1"></div><div class="sk2"></div><div class="sk3"></div></div>`).join("")}</div>` : `<div class="empty">${t.bfNone}</div>`; return; }
+  // stores with products first (most deals first), then the ones we only have a link for
+  const cnt = (name) => list.filter((o) => o.source === name).length;
+  stores.sort((a, b) => cnt(b) - cnt(a) || a.localeCompare(b));
+  $("#bf_out").innerHTML = stores.map((name) => {
+    const items = list.filter((o) => o.source === name).sort(by[friSort]);
+    const open = friOpen.has(name);
+    const head = `<h3>${esc(name)} <span class="cntb">${items.length}</span>${pages[name] ? `<a href="${esc(pages[name][0])}">${t.friOpen} ↗</a>` : ""}</h3>`;
+    if (!items.length) return friKind && !pages[name] ? "" : `<div class="fsec">${head}<div class="empty">${fmt(t.friNoneStore, { s: esc(name) })}<br>${links(name)}</div></div>`;
+    return `<div class="fsec">${head}${open ? `<div class="dg">${items.slice(0, 200).map((o) => friCard(o, t)).join("")}</div>` : `<div class="hscroll">${items.slice(0, 12).map((o) => friCard(o, t)).join("")}</div>`}
+      ${items.length > 4 ? `<button type="button" class="fall" data-fo="${esc(name)}">${open ? t.friLess : fmt(t.friMore, { n: items.length })}</button>` : ""}</div>`;
+  }).join("");
+}
+async function loadFri(force) {
+  if (!friData) loadFriCache();
+  if (!evCache) { try { const c = JSON.parse(pref("eventPages", "null")); if (c) evCache = c; } catch (_) {} }
+  renderFri();
+  if (friBusy || (!force && friData && Date.now() - friData.at < FRI_TTL)) return;
+  friBusy = true; $("#bf_bar").hidden = false; $("#bf_refresh").disabled = true;
+  const t = T[L]; let last = 0;
+  $("#bf_sub").textContent = fmt(t.friLoading, { done: 0, all: "…" });
+  try {
+    const events = await eventPages(force || !evCache || Date.now() - evCache.at > FRI_TTL);
+    renderFri();
+    const keep = friData && friData.deals.length ? friData : null;     // old list stays while the new one loads
+    const fresh = await Arkhas.deals({ stores: STORES.filter(isOn), fetcher, events, onlyEvents: true, perStore: 400, onProgress: (r) => {
+      $("#bf_bar i").style.width = Math.max(8, (100 * r.sources.length) / Math.max(1, r.total)) + "%";
+      $("#bf_sub").textContent = fmt(T[L].friLoading, { done: r.sources.length, all: r.total });
+      if (!keep && Date.now() - last > 500) { last = Date.now(); friData = r; renderFri(); }
+    } });
+    if (fresh.deals.length || !keep) friData = fresh; else friData.at = Date.now();
+    try { setPref("friCache", JSON.stringify(friData)); } catch (_) {}
+  } catch (_) { /* offline: keep what we have */ }
+  finally { friBusy = false; $("#bf_bar").hidden = true; $("#bf_refresh").disabled = false; renderFri(); renderHome(); }
+}
+$("#nav_fri").onclick = () => { showView("fri"); loadFri(false); };
+$("#bf_refresh").onclick = () => loadFri(true);
+$("#bf_kind").onclick = (e) => { const b = e.target.closest("[data-fk]"); if (b) { friKind = b.dataset.fk; renderFri(); } };
+$("#bf_sort").onclick = (e) => { const b = e.target.closest("[data-fs]"); if (b) { friSort = b.dataset.fs; renderFri(); } };
+$("#bf_out").addEventListener("click", (e) => { const b = e.target.closest("[data-fo]"); if (!b) return; friOpen.has(b.dataset.fo) ? friOpen.delete(b.dataset.fo) : friOpen.add(b.dataset.fo); renderFri(); });
+// the app may reload itself to pick up new files only when nothing is going on
+window.__canReload = () => !busy && !dealsBusy && !friBusy && !$("#out").innerHTML && !$("#sheet").classList.contains("on") && !$("#searchView").hidden;
 
 $("#nav_deals").onclick = () => { showView("deals"); loadDeals(false); };
 $("#d_refresh").onclick = () => loadDeals(true);
@@ -1335,7 +1438,7 @@ async function runBackgroundWatch() {
     image: o.image || null, source: o.source, pct: o.pct || 0, tag: o.tag || null })),
     sources: r.sources.map((s) => ({ source: s.source, count: s.count, error: s.error })) }));
 }
-window.arkhasOpen = (v) => { if (v === "deals") { showView("deals"); loadDeals(false); } };
+window.arkhasOpen = (v) => { if (v === "deals") { showView("deals"); loadDeals(false); } if (v === "fri") { showView("fri"); loadFri(false); } };
 
 // ---------- in-app update (needs app 1.0.6+; hidden on older apps) ----------
 const canUpdate = !!(N && N.checkUpdate && N.installUpdate);   // 1.0.6+: download + install inside the app
