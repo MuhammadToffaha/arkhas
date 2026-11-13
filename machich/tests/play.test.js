@@ -82,22 +82,31 @@ let failed = 0; const ok = (c, m) => { if (!c) { failed++; console.log("❌", m)
   await p.evaluate(() => App.go("leben"));
   ok((await txt()).includes("Mein Buch · 1"), "Mein Buch shows entry");
 
-  // full mock exam, everything right
+  // all 10 mock exams (5×A1 + 5×A2), everything right
   await p.evaluate(() => App.go("exam"));
-  await p.click("text=🚀 Komplette Prüfung starten");
-  const E = await p.evaluate(() => EXAM);
-  for (const t of E.lesen) { for (let k = 0; k < t.q.length; k++) await p.click(`.opt[data-k="${k}"][data-j="${t.q[k].a}"]`); await p.click("text=Abgeben ✔️"); await p.click("text=Weiter →"); }
-  for (const t of E.hoeren) { for (let k = 0; k < t.items.length; k++) { await p.click(`#pl${k}`); await p.click(`.opt[data-k="${k}"][data-j="${t.items[k].a}"]`); } await p.click("text=Abgeben ✔️"); await p.click("text=Weiter →"); }
-  for (const t of E.schreiben) { await p.fill("#extxt", t.m); await p.click("text=Abgeben ✔️"); for (const c of await p.$$(".pt")) await c.check(); await p.click("text=Bewerten & weiter →"); }
-  for (const t of E.sprechen) {
-    if (t.cards) for (let k = 0; k < t.cards.length; k++) { p._say = t.cards[k][1]; await p.click(`text=🎤 Frage stellen >> nth=${k}`); await p.waitForSelector(`#sp${k} .fb`); }
-    if (t.prompts) { p._say = t.m; await p.click("text=🎤 Sprechen (1–2 Min.)"); await p.waitForSelector("#sp-1 .fb"); }
-    if (t.lines) for (let k = 0; k < t.lines.length; k++) { p._say = t.lines[k]; await p.click(`text=🎤 Nachsprechen >> nth=${k}`); await p.waitForSelector(`#ln${k} .fb`); }
-    await p.click("text=Weiter ✔️");
+  ok((await txt()).includes("A1 · Modelltest 5") && (await txt()).includes("A2 · Modelltest 5"), "10 mocks listed");
+  const ids = await p.evaluate(() => MOCK_LIST.map(M => M.id));
+  ok(ids.length === 10, "10 mocks");
+  for (const id of ids) {
+    await p.evaluate(i => App.examStart(i, "all"), id);
+    const M = await p.evaluate(() => App._cur()), E = M.ex;
+    for (const mod of M.order) {
+      if (mod === "lesen") for (const t of E.lesen) { for (let k = 0; k < t.q.length; k++) await p.click(`.opt[data-k="${k}"][data-j="${t.q[k].a}"]`); await p.click("text=Abgeben ✔️"); ok((await p.$$("#view .en")).length > t.q.length, id + " lesen EN shown"); await p.click("text=Weiter →"); }
+      if (mod === "hoeren") for (const t of E.hoeren) { for (let k = 0; k < t.items.length; k++) { await p.click(`#pl${k}`); await p.click(`.opt[data-k="${k}"][data-j="${t.items[k].a}"]`); } await p.click("text=Abgeben ✔️"); await p.click("text=Weiter →"); }
+      if (mod === "schreiben") for (const t of E.schreiben) { await p.fill("#extxt", t.m); await p.click("text=Abgeben ✔️"); for (const c of await p.$$(".pt")) await c.check(); await p.click("text=Bewerten & weiter →"); }
+      if (mod === "sprechen") for (const t of E.sprechen) {
+        if (t.cards) for (let k = 0; k < t.cards.length; k++) { p._say = t.cards[k][1]; await p.click(`text=🎤 Frage stellen >> nth=${k}`); await p.waitForSelector(`#sp${k} .fb`); }
+        if (t.prompts) { p._say = t.m; await p.click("text=🎤 Sprechen (1–2 Min.)"); await p.waitForSelector("#sp-1 .fb"); }
+        if (t.lines) for (let k = 0; k < t.lines.length; k++) { p._say = t.lines[k]; await p.click(`text=🎤 Nachsprechen >> nth=${k}`); await p.waitForSelector(`#ln${k} .fb`); }
+        await p.click("text=Weiter ✔️");
+      }
+    }
+    const res = await p.evaluate(() => App._state().exam.slice(-1)[0]);
+    ok(res && res.id === id && res.total >= 95, id + " perfect mock scores ~100: " + JSON.stringify(res));
+    ok((await txt()).includes("Bestanden"), id + " pass screen");
   }
-  const res = await p.evaluate(() => App._state().exam.slice(-1)[0]);
-  ok(res && res.total >= 95, "perfect mock scores ~100: " + JSON.stringify(res));
-  ok((await txt()).includes("Bestanden"), "pass screen");
+  await p.evaluate(() => App.go("exam"));
+  ok((await txt()).includes("✅ 10"), "best scores shown on list");
 
   // settings
   await p.evaluate(() => App.go("settings"));

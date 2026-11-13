@@ -2,8 +2,8 @@
 const fs = require("fs"), path = require("path"), vm = require("vm");
 const www = path.join(__dirname, "../app/src/main/assets/www");
 const ctx = {}; vm.createContext(ctx);
-["days1.js", "days2.js", "days3.js", "exam.js", "en.js", "logic.js"].forEach(f => vm.runInContext(fs.readFileSync(path.join(www, f), "utf8").replace(/^var (DAYS|EXAM|L|MY_EN|EXAM_EN) =/gm, "this.$1 ="), ctx, { filename: f }));
-const { DAYS, EXAM, L, MY_EN, EXAM_EN } = ctx;
+["days1.js", "days2.js", "days3.js", "exam.js", "en.js", "mocks_a1.js", "mocks_a2.js", "logic.js"].forEach(f => vm.runInContext(fs.readFileSync(path.join(www, f), "utf8").replace(/^var (DAYS|EXAM|L|MY_EN|EXAM_EN|MOCKS|MOCK_LIST|RF|JN) =/gm, "this.$1 ="), ctx, { filename: f }));
+const { DAYS, EXAM, L, MY_EN, EXAM_EN, MOCK_LIST } = ctx;
 let fails = 0, n = 0;
 const ok = (c, m) => { n++; if (!c) { fails++; console.log("❌ " + m); } };
 
@@ -42,6 +42,25 @@ ok(EXAM.hoeren.reduce((s, t) => s + t.items.length, 0) === 20, "20 Hören items"
 ok(MY_EN.length === 30 && MY_EN.every(Boolean), "30 model-answer translations");
 EXAM.lesen.forEach((t, i) => ok(EXAM_EN.lesen[i] && EXAM_EN.lesen[i].text && EXAM_EN.lesen[i].q.length === t.q.length, "Lesen EN " + (i + 1)));
 EXAM.hoeren.forEach((t, i) => ok(EXAM_EN.hoeren[i] && EXAM_EN.hoeren[i].length === t.items.length, "Hören EN " + (i + 1)));
+
+// ---- 10 mocks ----
+ok(MOCK_LIST.length === 10 && MOCK_LIST.filter(M => M.lv === "A1").length === 5, "5 A1 + 5 A2 mocks");
+ok(new Set(MOCK_LIST.map(M => M.id)).size === 10, "unique mock ids");
+MOCK_LIST.forEach(M => {
+  const id = M.id, X = M.ex, A1 = M.lv === "A1";
+  ok(X.lesen.length === (A1 ? 3 : 4) && X.hoeren.length === (A1 ? 3 : 4) && X.schreiben.length === 2 && X.sprechen.length === 3, id + " parts");
+  M.order.forEach(m => ok(M.min[m] > 0, id + " minutes " + m));
+  X.lesen.forEach((t, i) => { ok((t.text || t.ads) && M.en.lesen[i].text && M.en.lesen[i].q.length === t.q.length, id + " lesen EN " + i); t.q.forEach(x => ok(x.q && x.a >= 0 && x.a < x.o.length, id + " lesen idx " + x.q)); });
+  X.hoeren.forEach((t, i) => { ok(M.en.hoeren[i].length === t.items.length && M.en.hoeren[i].every(Boolean), id + " hören EN " + i); t.items.forEach(x => ok(x.say && x.a >= 0 && x.a < x.o.length, id + " hören idx " + x.q)); });
+  X.schreiben.forEach(t => { ok(t.task && t.m && t.points.length >= 3, id + " schreiben"); if (id !== "a2-1") ok(t.taskEn && t.mEn, id + " schreiben EN"); });
+  X.sprechen.forEach(t => {
+    ok(t.cards || t.prompts || t.lines, id + " sprechen kind");
+    if (id === "a2-1") return;
+    if (t.cards) t.cards.forEach(c => ok(c.length === 3 && c.every(Boolean), id + " card EN " + c[0]));
+    if (t.prompts) ok(t.topicEn && t.mEn && L.words(t.m) >= 20, id + " prompts EN + long model");
+    if (t.lines) ok(t.linesEn && t.linesEn.length === t.lines.length, id + " lines EN");
+  });
+});
 
 // ---- logic ----
 ok(L.grade("Bin", ["bin"]) === "ok", "grade case");

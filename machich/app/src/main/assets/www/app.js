@@ -395,28 +395,36 @@ var App = (function () {
   function gram(i) { sub = "gram"; set("<h2>" + esc(DAYS[i].t) + "</h2>" + grammarHtml(DAYS[i]) + '<button class="btn alt" onclick="App.lesson(' + i + ',2)">✏️ Übungen dazu</button>'); }
 
   // ---------- 🏆 Prüfung ----------
-  var EX = null;
+  var EX = null, CUR = null;
   function exam() {
     stopTimer();
-    var h = '<div class="card hero"><h2>🏆 Goethe-Zertifikat A2</h2><div class="mut">Mock exam in the real format. Lesen 30′ · Hören 30′ · Schreiben 30′ · Sprechen ~15′. Pass = 60 / 100.</div></div>';
-    h += '<button class="btn gold" onclick="App.examStart(\'all\')">🚀 Komplette Prüfung starten</button>';
-    [["lesen", "📖 Lesen", 30], ["hoeren", "🎧 Hören", 30], ["schreiben", "✍️ Schreiben", 30], ["sprechen", "🗣️ Sprechen", 15]].forEach(function (m) { h += '<button class="btn alt" onclick="App.examStart(\'' + m[0] + "')\">" + m[1] + " · " + m[2] + " Min.</button>"; });
+    var h = '<div class="card hero"><h2>🏆 Modelltests A1 + A2</h2>' + E("10 mock exams in the real Goethe format") + '<div class="mut">🟢 A1 (Start Deutsch 1): Hören 20′ · Lesen 25′ · Schreiben 20′ · Sprechen 15′<br>🔵 A2: Lesen 30′ · Hören 30′ · Schreiben 30′ · Sprechen 15′<br>Pass = 60 / 100 · 🇬🇧 English after you hand in.</div></div>';
+    ["A1", "A2"].forEach(function (lv) {
+      h += '<h3 style="margin:16px 4px 4px">' + (lv === "A1" ? "🟢 A1 · Start Deutsch 1" : "🔵 A2 · Goethe-Zertifikat") + "</h3>";
+      MOCK_LIST.filter(function (M) { return M.lv === lv; }).forEach(function (M) {
+        var rs = S.exam.filter(function (e) { return (e.id || "a2-1") === M.id && e.total != null; }), best = rs.length ? Math.max.apply(null, rs.map(function (e) { return e.total; })) : null;
+        h += '<div class="card"><div class="row"><b>' + esc(M.name) + '</b><span class="tag" style="flex:none">' + (best == null ? "neu" : (best >= 60 ? "✅ " : "⚠️ ") + best + "/100") + '</span></div><button class="btn gold" onclick="App.examStart(\'' + M.id + '\',\'all\')">🚀 Komplett starten</button><div class="row">' +
+          M.order.map(function (m) { return '<button class="btn alt" style="padding:10px 0;font-size:18px" onclick="App.examStart(\'' + M.id + "','" + m + '\')">' + { lesen: "📖", hoeren: "🎧", schreiben: "✍️", sprechen: "🗣️" }[m] + "</button>"; }).join("") + "</div></div>";
+      });
+    });
     if (S.exam.length) {
       h += '<div class="card"><h3>📈 Ergebnisse</h3>' + S.exam.slice().reverse().map(function (e) {
-        return '<div class="note"><b>' + esc(e.date) + "</b> · " + (e.total != null ? e.total + " / 100 " + (e.total >= 60 ? "✅" : "⚠️") : "") + '<div class="mut sm">' + ["l:📖", "h:🎧", "s:✍️", "sp:🗣️"].map(function (x) { var p = x.split(":"); return e[p[0]] != null ? p[1] + " " + e[p[0]] + "/25" : ""; }).join("  ") + "</div></div>";
+        return '<div class="note"><b>' + esc(e.date) + "</b> · " + esc((MOCK_LIST.filter(function (M) { return M.id === (e.id || "a2-1"); })[0] || {}).name || "") + " · " + (e.total != null ? e.total + " / 100 " + (e.total >= 60 ? "✅" : "⚠️") : "") + '<div class="mut sm">' + ["l:📖", "h:🎧", "s:✍️", "sp:🗣️"].map(function (x) { var p = x.split(":"); return e[p[0]] != null ? p[1] + " " + e[p[0]] + "/25" : ""; }).join("  ") + "</div></div>";
       }).join("") + "</div>";
     }
     h += '<div class="card"><h3>💡 Tipps</h3><div class="mut sm">• Lesen: questions first, then scan.<br>• Hören: „nicht …, sondern …“ → answer after sondern.<br>• Schreiben: cover EVERY point.<br>• Sprechen: ask back „Und Sie?“, never freeze.</div></div>';
     set(h);
   }
-  function examStart(which) {
+  function examStart(id, which) {
+    if (which == null) { which = id; id = "a2-1"; }
     sub = "exam";
-    var mods = which === "all" ? ["lesen", "hoeren", "schreiben", "sprechen"] : [which];
-    EX = { mods: mods, m: 0, t: 0, res: { date: T }, plays: {} };
+    CUR = MOCK_LIST.filter(function (M) { return M.id === id; })[0] || MOCK_LIST[0]; EXAM = CUR.ex; EXAM_EN = CUR.en;
+    var mods = which === "all" ? CUR.order.slice() : [which];
+    EX = { mods: mods, m: 0, t: 0, res: { date: T, id: CUR.id }, plays: {} };
     modStart();
   }
   function modStart() {
-    var m = EX.mods[EX.m], mins = { lesen: 30, hoeren: 30, schreiben: 30, sprechen: 15 }[m];
+    var m = EX.mods[EX.m], mins = CUR.min[m];
     EX.t = 0; EX.right = 0; EX.n = 0; EX.end = Date.now() + mins * 60000; EX.sp = [];
     stopTimer(); timerId = setInterval(tick, 1000);
     teilPage();
@@ -442,12 +450,12 @@ var App = (function () {
       });
       h += '<button class="btn" onclick="App.exSubmit()">Abgeben ✔️</button>';
     } else if (m === "schreiben") {
-      h = exHead("✍️ Schreiben · " + P.teil) + '<div class="card"><div class="entry">' + esc(P.task) + '</div></div><textarea id="extxt" oninput="document.getElementById(\'exwc\').textContent=L.words(this.value)+\' Wörter (min. ' + P.min + ')\'"></textarea><div class="mut sm" id="exwc">0 Wörter</div><button class="btn" onclick="App.exWrite()">Abgeben ✔️</button><div id="exfb"></div>';
+      h = exHead("✍️ Schreiben · " + P.teil) + '<div class="card"><div class="entry">' + esc(P.task) + "</div>" + (P.taskEn ? E(P.taskEn) : "") + '</div><textarea id="extxt" oninput="document.getElementById(\'exwc\').textContent=L.words(this.value)+\' Wörter (min. ' + P.min + ')\'"></textarea><div class="mut sm" id="exwc">0 Wörter</div><button class="btn" onclick="App.exWrite()">Abgeben ✔️</button><div id="exfb"></div>';
     } else {
       h = exHead("🗣️ Sprechen · " + P.teil) + '<div class="card mut sm">' + esc(P.info) + "</div>";
       if (P.cards) P.cards.forEach(function (c, k) { h += '<div class="card"><div class="row"><b style="font-size:20px">🃏 ' + esc(c[0]) + '</b><button class="btn alt" style="flex:none;width:auto" onclick="App.exSpeak(' + k + ')">🎤 Frage stellen</button></div><div id="sp' + k + '"></div></div>'; });
-      if (P.prompts) h += '<div class="card"><h3>„' + esc(P.topic) + '“</h3><div class="chips">' + P.prompts.map(function (p) { return '<span class="chip">' + esc(p) + "</span>"; }).join("") + '</div><button class="btn alt" onclick="App.exSpeak(-1)">🎤 Sprechen (1–2 Min.)</button><div id="sp-1"></div><button class="btn alt" onclick="App.say(' + q(P.m) + ')">🔊 Beispiel hören</button></div>';
-      if (P.cal) h += '<div class="card"><h3>📅 Dein Kalender</h3>' + P.cal.map(function (c) { return '<div class="note">' + esc(c) + "</div>"; }).join("") + "</div>" + P.lines.map(function (l, k) { return '<div class="card"><div class="ex" style="border:0"><div style="flex:1" class="de">' + esc(l) + "</div>" + sayBtn(l) + '</div><button class="btn alt" onclick="App.exLine(' + k + ')">🎤 Nachsprechen</button><div id="ln' + k + '"></div></div>'; }).join("");
+      if (P.prompts) h += '<div class="card"><h3>„' + esc(P.topic) + '“</h3>' + (P.topicEn ? E(P.topicEn) : "") + '<div class="chips">' + P.prompts.map(function (p) { return '<span class="chip">' + esc(p) + "</span>"; }).join("") + '</div><button class="btn alt" onclick="App.exSpeak(-1)">🎤 Sprechen (1–2 Min.)</button><div id="sp-1"></div><button class="btn alt" onclick="App.say(' + q(P.m) + ')">🔊 Beispiel hören</button></div>';
+      if (P.cal) h += '<div class="card"><h3>📅 Dein Kalender</h3>' + P.cal.map(function (c) { return '<div class="note">' + esc(c) + "</div>"; }).join("") + "</div>" + P.lines.map(function (l, k) { return '<div class="card"><div class="ex" style="border:0"><div style="flex:1" class="de">' + esc(l) + (P.linesEn ? E(P.linesEn[k]) : "") + "</div>" + sayBtn(l) + '</div><button class="btn alt" onclick="App.exLine(' + k + ')">🎤 Nachsprechen</button><div id="ln' + k + '"></div></div>'; }).join("");
       h += '<button class="btn" onclick="App.exSpeakDone()">Weiter ✔️</button>';
     }
     set(h); tick();
@@ -484,7 +492,7 @@ var App = (function () {
     var P = EXAM.schreiben[EX.t], t = document.getElementById("extxt").value, r = L.check(t, { words: P.min }, []);
     var h = '<div class="card"><h3>✅ Hast du alle Punkte? (ehrlich ankreuzen)</h3>' + P.points.map(function (p, k) { return '<label class="note" style="display:flex;gap:8px"><input type="checkbox" class="pt"> ' + esc(p) + "</label>"; }).join("") +
       '<h3 style="margin-top:10px">🔍 Hinweise</h3>' + r.notes.map(function (n) { return '<div class="note">' + esc(n.m) + "</div>"; }).join("") +
-      '<h3 style="margin-top:10px">👀 Musterlösung</h3><div class="entry">' + esc(P.m) + '</div></div><button class="btn" onclick="App.exWriteScore(' + L.words(t) + ')">Bewerten & weiter →</button>';
+      '<h3 style="margin-top:10px">👀 Musterlösung</h3><div class="entry">' + esc(P.m) + "</div>" + (P.mEn ? E(P.mEn) : "") + '</div><button class="btn" onclick="App.exWriteScore(' + L.words(t) + ')">Bewerten & weiter →</button>';
     document.getElementById("exfb").innerHTML = h;
     document.getElementById("exfb").scrollIntoView({ behavior: "smooth" });
   }
@@ -499,7 +507,7 @@ var App = (function () {
     listen(k >= 0 ? P.cards[k][0] : P.topic, function (list) {
       var heard = list[0] || "", p = k >= 0 ? L.bestSimilarity(list, target) : Math.min(100, L.words(heard) * 3);
       EX.sp.push(p);
-      document.getElementById("sp" + k).innerHTML = '<div class="fb ' + (p >= 60 ? "ok" : "gold") + '">' + (k >= 0 ? p + "% · " : L.words(heard) + " Wörter · ") + "„" + esc(heard || "—") + "“" + (k >= 0 ? '<div class="sm" style="font-weight:400">Model: ' + esc(target) + "</div>" : "") + "</div>";
+      document.getElementById("sp" + k).innerHTML = '<div class="fb ' + (p >= 60 ? "ok" : "gold") + '">' + (k >= 0 ? p + "% · " : L.words(heard) + " Wörter · ") + "„" + esc(heard || "—") + "“" + (k >= 0 ? '<div class="sm" style="font-weight:400">Model: ' + esc(target) + (k >= 0 && P.cards[k][2] ? E(P.cards[k][2]) : "") + "</div>" : "") + "</div>";
     });
   }
   function exLine(k) {
@@ -595,7 +603,7 @@ var App = (function () {
     reset: function () { if (confirm("Wirklich alles löschen?")) { S = null; if (M) M.save(""); else localStorage.removeItem("machich"); load(); save(); go("home"); } },
     onHeard: function (json) { var l = []; try { l = JSON.parse(json); } catch (e) { } var cb = heardCb; heardCb = null; if (cb) cb(l); },
     onUpdate: onUpdate, onProgress: onProgress, onInstallMsg: onInstallMsg, closeModal: closeModal,
-    _state: function () { return S; }, _item: function () { return LS && LS.items ? LS.items[LS.i] : null; }
+    _state: function () { return S; }, _cur: function () { return CUR; }, _item: function () { return LS && LS.items ? LS.items[LS.i] : null; }
   };
 })();
 document.addEventListener("DOMContentLoaded", App.init);
