@@ -41,6 +41,7 @@ var App = (function () {
     else { var h = window.prompt("🎤 (browser) type what you said:", ""); App.onHeard(JSON.stringify(h ? [h] : [])); }
   }
   function sayBtn(t, slow) { return '<button class="say" onclick="App.say(' + q(t) + (slow ? ",1" : "") + ')">' + (slow ? "🐢" : "🔊") + "</button>"; }
+  function E(t) { return t ? '<span class="en">' + esc(t) + "</span>" : ""; }
   function bar(p) { return '<div class="bar"><i style="width:' + Math.max(0, Math.min(100, p)) + '%"></i></div>'; }
   function set(html) { V().innerHTML = html; V().scrollTop = 0; }
   function head() {
@@ -62,33 +63,34 @@ var App = (function () {
   function home() {
     var d = S.cur, D = DAYS[d], today = (S.st.days || {})[T] || 0, due = L.dueKeys(S.cards, T).length;
     var exd = pref("examDate", ""), left = exd ? L.daysBetween(T, exd) : null, pd = plannedDay();
-    var sk = skillPct(), h = "";
-    h += '<div class="card hero"><div class="mut">Tag ' + (d + 1) + " von 30 · " + esc(D.lv) + '</div><h2 style="font-size:23px;margin:4px 0">' + esc(D.t) + '</h2><div class="mut">' + esc(D.g) + "</div>" + bar(Object.keys(S.done).length * 100 / 30) +
-      '<div class="mut sm" style="margin-top:4px">' + Object.keys(S.done).length + "/30 Tage fertig" + (d < pd ? " · ⏰ plan says day " + (pd + 1) : d > pd ? " · 🚀 ahead of plan" : "") + '</div><button class="btn" style="background:#fff;color:var(--brand)" onclick="App.lesson(' + d + ')">' + (S.steps[d] ? "▶️ Weiter" : "🚀 Lektion starten") + "</button></div>";
-    h += '<div class="card"><div class="row"><div><h3>🎯 Tagesziel</h3><div class="mut">' + today + " / " + S.goal + " XP heute</div>" + bar(today * 100 / S.goal) + '</div></div></div>';
-    if (due) h += '<div class="card"><h3>🔁 ' + due + " Wörter warten</h3><div class=\"mut\">Spaced repetition keeps them in long-term memory.</div><button class=\"btn alt\" onclick=\"App.flash()\">Review starten</button></div>";
-    h += '<div class="card"><h3>✍️ Mein Leben</h3><div class="mut">' + esc(D.my.p) + '</div><button class="btn alt" onclick="App.write(' + d + ')">Über mein Leben schreiben</button></div>';
-    if (left != null) h += '<div class="card"><h3>🏆 Prüfung in ' + left + " Tagen</h3><div class=\"mut\">" + esc(exd) + "</div></div>";
-    else h += '<div class="card"><h3>📅 Prüfungstermin?</h3><div class="mut">Set your Goethe A2 date to see the countdown.</div><button class="btn alt" onclick="App.go(\'settings\')">Datum setzen</button></div>';
-    h += '<div class="card"><h3>📊 Deine Skills</h3><div class="skills">' + Object.keys(sk).map(function (k) { return '<div><div class="sm">' + k + " · " + Math.round(sk[k]) + "%</div>" + bar(sk[k]) + "</div>"; }).join("") + "</div></div>";
-    h += '<div class="card"><div class="row"><div class="mut">🔥 Bester Streak: ' + (S.st.best || 0) + " Tage</div><div class=\"mut\">🏅 Level " + L.level(S.st.xp) + "</div></div></div>";
-    set(h);
+    var sk = skillPct(), nd = Object.keys(S.done).length, h = "";
+    h += '<div class="card hero"><div class="mut">Tag ' + (d + 1) + " von 30 · " + esc(D.lv) + E("Day " + (d + 1) + " of 30") + '</div><h2 style="font-size:26px;margin:6px 0 2px;letter-spacing:-.8px">' + esc(D.t) + "</h2>" + E(D.my.p.split(/[.:]/)[0]) + '<div class="mut" style="margin-top:6px">' + esc(D.g) + "</div>" + bar(nd * 100 / 30) +
+      '<div class="mut sm" style="margin-top:4px">' + nd + "/30 Tage fertig" + (d < pd ? " · ⏰ Plan: Tag " + (pd + 1) : d > pd ? " · 🚀 vor dem Plan" : "") + E(nd + "/30 days done" + (d < pd ? " · plan says day " + (pd + 1) : d > pd ? " · ahead of plan" : "")) + '</div><button class="btn" style="background:#fff;color:#0B0D17;position:relative;z-index:1" onclick="App.lesson(' + d + ')">' + (S.steps[d] ? "▶️ Weiter" : "🚀 Lektion starten") + E(S.steps[d] ? "Continue" : "Start lesson") + "</button></div>";
+    h += '<div class="bento">';
+    h += '<div class="card"><div class="mut sm">🔥 Streak</div><div class="big-n">' + L.liveStreak(S.st, T) + '</div><div class="mut sm">Tage · best ' + (S.st.best || 0) + "</div>" + E("days in a row") + "</div>";
+    h += '<div class="card"><div class="mut sm">🎯 Tagesziel</div><div class="big-n">' + today + '<span class="mut" style="font-size:15px"> / ' + S.goal + "</span></div>" + bar(today * 100 / S.goal) + E("daily goal · XP today") + "</div>";
+    h += '<div class="card" onclick="App.flash()"><div class="mut sm">🔁 Review</div><div class="big-n">' + due + '</div><div class="mut sm">Wörter fällig</div>' + E("words due — tap") + "</div>";
+    h += '<div class="card" onclick="App.go(\'' + (left == null ? "settings" : "exam") + '\')"><div class="mut sm">🏆 Prüfung</div><div class="big-n">' + (left == null ? "–" : left) + '</div><div class="mut sm">' + (left == null ? "Datum setzen" : "Tage") + "</div>" + E(left == null ? "set exam date" : "days to the exam") + "</div>";
+    h += '<div class="card wide"><h3>✍️ Mein Leben</h3>' + E("My life — write about yourself") + '<div class="mut" style="margin-top:6px">' + esc(D.my.p) + '</div><button class="btn alt" onclick="App.write(' + d + ')">Über mein Leben schreiben' + E("Write about my life") + "</button></div>";
+    h += '<div class="card wide"><h3>📊 Deine Skills</h3>' + E("Your skills") + '<div class="skills" style="margin-top:8px">' + Object.keys(sk).map(function (k) { return '<div><div class="sm">' + k + " · " + Math.round(sk[k]) + "%</div>" + bar(sk[k]) + "</div>"; }).join("") + "</div></div>";
+    h += '<div class="card wide"><div class="row"><div class="mut">🏅 Level ' + L.level(S.st.xp) + '</div><div class="mut" style="text-align:right">⭐ ' + (S.st.xp || 0) + " XP</div></div></div>";
+    set(h + "</div>");
   }
 
   // ---------- 📅 Plan ----------
   function plan() {
-    var pd = plannedDay(), h = '<div class="card"><h2>📅 30 Tage bis A2</h2><div class="mut">Day 1 = ' + esc(S.start) + ". One lesson a day (~30 min). ✅ done · 🔵 current · dashed = exam days.</div></div><div class=\"days\">";
+    var pd = plannedDay(), h = '<div class="card"><h2>📅 30 Tage bis A2</h2>' + E("30 days to A2") + '<div class="mut">Day 1 = ' + esc(S.start) + ". One lesson a day (~30 min). ✅ done · 🔵 current · dashed = exam days.</div></div><div class=\"days\">";
     DAYS.forEach(function (D, i) {
       h += '<button class="day' + (S.done[i] ? " done" : "") + (i === S.cur ? " cur" : "") + (D.lv === "Exam" ? " ex" : "") + '" onclick="App.lesson(' + i + ')">' + (S.done[i] ? "✅" : i + 1) + "<small>" + (i === pd ? "heute" : D.lv) + "</small></button>";
     });
     h += "</div>";
-    DAYS.forEach(function (D, i) { h += '<div class="card" onclick="App.lesson(' + i + ')"><div class="row"><div><b>' + (i + 1) + ". " + esc(D.t) + '</b><div class="mut sm">' + esc(D.g) + "</div></div><div style=\"flex:none\">" + (S.done[i] ? "✅" : "›") + "</div></div></div>"; });
+    DAYS.forEach(function (D, i) { h += '<div class="card" onclick="App.lesson(' + i + ')"><div class="row"><div><b>' + (i + 1) + ". " + esc(D.t) + '</b>' + E(D.my.p.split(/[.:]/)[0]) + '<div class="mut sm">' + esc(D.g) + "</div></div><div style=\"flex:none\">" + (S.done[i] ? "✅" : "›") + "</div></div></div>"; });
     set(h);
   }
 
   // ---------- 📖 Lesson: words → grammar → practice → speak → write ----------
   var LS = null;
-  var STEPS = ["📚 Wörter", "📐 Grammatik", "✏️ Übungen", "🗣️ Sprechen", "✍️ Mein Leben"];
+  var STEPS = ["📚 Wörter", "📐 Grammatik", "✏️ Übungen", "🗣️ Sprechen", "✍️ Mein Leben"], STEPS_EN = ["Words", "Grammar", "Exercises", "Speaking", "My life"];
   function lesson(i, step) {
     S.cur = i; drillDone = null; save();
     LS = { d: i, step: step != null ? step : (S.steps[i] || 0) };
@@ -96,7 +98,7 @@ var App = (function () {
   }
   function stepHead() {
     var D = DAYS[LS.d];
-    return '<div class="steps">' + STEPS.map(function (s, k) { return "<i" + (k <= LS.step ? ' class="on"' : "") + "></i>"; }).join("") + '</div><div class="mut sm">Tag ' + (LS.d + 1) + " · " + STEPS[LS.step] + "</div><h2 style=\"margin:2px 0 6px\">" + esc(D.t) + "</h2>";
+    return '<div class="steps">' + STEPS.map(function (s, k) { return "<i" + (k <= LS.step ? ' class="on"' : "") + "></i>"; }).join("") + '</div><div class="mut sm">Tag ' + (LS.d + 1) + " · " + STEPS[LS.step] + " · " + STEPS_EN[LS.step] + "</div><h2 style=\"margin:2px 0 0\">" + esc(D.t) + "</h2>" + E(D.my.p.split(/[.:]/)[0]) + '<div style="height:8px"></div>';
   }
   function runStep() {
     S.steps[LS.d] = LS.step; save();
@@ -111,16 +113,16 @@ var App = (function () {
         '<div class="ex"><div style="flex:1"><div class="de">' + esc(w[2]) + '</div><div class="mut sm">' + esc(w[3]) + "</div></div>" + sayBtn(w[2]) + sayBtn(w[2], 1) + "</div></div>";
     });
     save();
-    set(h + '<button class="btn" onclick="App.next()">Weiter → Grammatik</button>');
+    set(h + '<button class="btn" onclick="App.next()">Weiter → Grammatik' + E("Next → grammar") + '</button>');
   }
   function grammarHtml(D) {
     var h = '<div class="card"><span class="tag">' + esc(D.lv) + '</span><h3 style="margin-top:6px">📐 ' + esc(D.g) + "</h3><div>" + esc(D.x) + "</div>";
     if (D.tab) h += '<table class="g">' + D.tab.map(function (r) { return "<tr>" + r.map(function (c) { return "<td>" + esc(c) + "</td>"; }).join("") + "</tr>"; }).join("") + "</table>";
-    h += "</div><div class=\"card\"><h3>💬 Beispiele</h3>" + D.eg.map(function (e) { return '<div class="ex"><div style="flex:1"><div class="de">' + esc(e[0]) + '</div><div class="mut sm">' + esc(e[1]) + "</div></div>" + sayBtn(e[0]) + "</div>"; }).join("") + "</div>";
+    h += "</div><div class=\"card\"><h3>💬 Beispiele</h3>" + E("Examples") + D.eg.map(function (e) { return '<div class="ex"><div style="flex:1"><div class="de">' + esc(e[0]) + '</div><div class="mut sm">' + esc(e[1]) + "</div></div>" + sayBtn(e[0]) + "</div>"; }).join("") + "</div>";
     h += '<div class="card"><a class="mut" href="#" onclick="App.yt(' + q(D.g) + ');return false">📺 Video zu „' + esc(D.g) + '" auf YouTube</a></div>';
     return h;
   }
-  function stepGrammar() { set(stepHead() + grammarHtml(DAYS[LS.d]) + '<button class="btn" onclick="App.next()">Weiter → Übungen</button>'); }
+  function stepGrammar() { set(stepHead() + grammarHtml(DAYS[LS.d]) + '<button class="btn" onclick="App.next()">Weiter → Übungen' + E("Next → exercises") + '</button>'); }
 
   // practice = auto word drills + the day's grammar drills
   function autoDrills(D) {
@@ -129,16 +131,16 @@ var App = (function () {
     pick(D.w, 4).forEach(function (w) {
       var wrong = pick(pool.filter(function (x) { return x[1] !== w[1]; }), 2).map(function (x) { return x[1]; });
       var o = shuffle([w[1]].concat(wrong));
-      out.push({ k: "mc", q: "Was bedeutet „" + w[0] + "“?", o: o, a: o.indexOf(w[1]), say: w[0], why: w[2] + " — " + w[3], word: w[0] });
+      out.push({ k: "mc", q: "Was bedeutet „" + w[0] + "“?", en: "What does it mean?", o: o, a: o.indexOf(w[1]), say: w[0], why: w[2] + " — " + w[3], word: w[0] });
     });
     pick(D.w, 2).forEach(function (w) {
       var wrong = pick(D.w.filter(function (x) { return x[0] !== w[0]; }), 2).map(function (x) { return x[0]; });
       var o = shuffle([w[0]].concat(wrong));
-      out.push({ k: "mc", q: "🎧 Hör zu — welches Wort?", o: o, a: o.indexOf(w[0]), audio: w[0], hear: 1, word: w[0] });
+      out.push({ k: "mc", q: "🎧 Hör zu — welches Wort?", en: "Listen — which word?", o: o, a: o.indexOf(w[0]), audio: w[0], hear: 1, word: w[0] });
     });
     pick(D.w, 2).forEach(function (w) {
       var bare = w[0].replace(/^(der|die|das)\s+/, "");
-      out.push({ k: "gap", q: "✍️ Auf Deutsch: „" + w[1] + "“", a: [w[0], bare], en: w[2], h: /^(der|die|das)\s/.test(w[0]) ? "Noun — write it with der/die/das" : "", word: w[0] });
+      out.push({ k: "gap", q: "✍️ Auf Deutsch: „" + w[1] + "“", a: [w[0], bare], en: "Write it in German", ex: w[2] + " — " + w[3], h: /^(der|die|das)\s/.test(w[0]) ? "Noun — write it with der/die/das" : "", word: w[0] });
     });
     return out;
   }
@@ -152,7 +154,7 @@ var App = (function () {
     if (LS.i >= LS.items.length) {
       var pct = Math.round(100 * LS.right / LS.items.length);
       set(stepHead() + '<div class="card flash"><div class="big">' + (pct >= 80 ? "🎉" : "💪") + " " + pct + '%</div><div class="mut">' + LS.right + " / " + LS.items.length + " richtig · Fehler landen in 🔁 Review → Fehler</div></div>" +
-        '<button class="btn" onclick="App.next()">Weiter → Sprechen</button><button class="btn alt" onclick="App.redoPractice()">Nochmal üben</button>');
+        '<button class="btn" onclick="App.next()">Weiter → Sprechen' + E("Next → speaking") + '</button><button class="btn alt" onclick="App.redoPractice()">Nochmal üben</button>');
       return;
     }
     var it = LS.items[LS.i];
@@ -160,15 +162,15 @@ var App = (function () {
     if (it.audio) setTimeout(function () { speak(it.audio); }, 250);
   }
   function drillHtml(it) {
-    var h = '<div class="card"><h3>' + esc(it.q) + "</h3>";
+    var h = '<div class="card"><h3>' + esc(it.q) + "</h3>" + (it.k !== "order" ? E(it.en) : "");
     if (it.say && !it.hear) h += sayBtn(it.say);
     if (it.audio) h += '<button class="btn alt" onclick="App.say(' + q(it.audio) + ')">🔊 Nochmal hören</button>';
     if (it.k === "mc") h += it.o.map(function (o, j) { return '<button class="opt" onclick="App.mc(' + j + ',this)">' + esc(o) + "</button>"; }).join("");
-    if (it.k === "gap") h += (it.en && !it.word ? '<div class="mut sm">' + esc(it.en) + "</div>" : "") + '<input class="t" id="gap" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Antwort…" onkeydown="if(event.key===\'Enter\')App.gapCheck()"><button class="btn" onclick="App.gapCheck()">Prüfen</button>' + (it.h ? '<div class="mut sm">💡 ' + esc(it.h) + "</div>" : "");
+    if (it.k === "gap") h += '<input class="t" id="gap" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Antwort…" onkeydown="if(event.key===\'Enter\')App.gapCheck()"><button class="btn" onclick="App.gapCheck()">Prüfen</button>' + (it.h ? '<div class="mut sm">💡 ' + esc(it.h) + "</div>" : "");
     if (it.k === "order") {
       it._sh = it._sh || shuffle(it.w.map(function (w, j) { return j; }));
       it._ans = [];
-      h += '<div class="mut sm">' + esc(it.en) + '</div><div class="ans" id="ans"></div><div class="chips" id="chips">' + it._sh.map(function (j) { return '<button class="chip" id="c' + j + '" onclick="App.chip(' + j + ')">' + esc(it.w[j]) + "</button>"; }).join("") + '</div><button class="btn" onclick="App.orderCheck()">Prüfen</button><button class="btn alt" onclick="App.orderReset()">↺ Zurück</button>';
+      h += E(it.en) + '<div class="ans" id="ans"></div><div class="chips" id="chips">' + it._sh.map(function (j) { return '<button class="chip" id="c' + j + '" onclick="App.chip(' + j + ')">' + esc(it.w[j]) + "</button>"; }).join("") + '</div><button class="btn" onclick="App.orderCheck()">Prüfen</button><button class="btn alt" onclick="App.orderReset()">↺ Zurück</button>';
     }
     return h + '<div id="fb"></div></div>';
   }
@@ -198,7 +200,7 @@ var App = (function () {
     if (g === "no" && !v.trim()) return;
     var full = it.k === "gap" && it.q.indexOf("___") >= 0 ? it.q.replace(/_+/, it.a[0]) : it.a[0];
     feedback(g !== "no", (g === "ok" ? "✅ Richtig!" : g === "typo" ? "🟡 Fast! Tippfehler — richtig: " + esc(it.a[0]) : "❌ Richtig: " + esc(it.a[0])) +
-      '<div class="sm" style="font-weight:400;margin-top:4px">' + esc(full) + (it.en ? " — " + esc(it.en) : "") + "</div>", it);
+      '<div class="sm" style="font-weight:400;margin-top:4px">' + esc(it.ex || full) + "</div>", it);
   }
   function chip(j) {
     var it = curItem(), b = document.getElementById("c" + j);
@@ -221,6 +223,7 @@ var App = (function () {
   function stepSpeak() {
     var D = DAYS[LS.d];
     LS.sp = D.eg.map(function (e) { return e[0]; }).concat(pick(D.w, 3).map(function (w) { return w[2]; })).slice(0, 5);
+    LS.spEn = {}; D.eg.forEach(function (e) { LS.spEn[e[0]] = e[1]; }); D.w.forEach(function (w) { LS.spEn[w[2]] = w[3]; });
     LS.spScore = {};
     speakPage();
   }
@@ -228,10 +231,10 @@ var App = (function () {
     var h = stepHead() + '<div class="mut">🔊 Listen → 🎤 say it → see your score. 70%+ = 🟢. (Uses Google speech recognition, German.)</div>';
     LS.sp.forEach(function (s, k) {
       var sc = LS.spScore[k];
-      h += '<div class="card"><div class="ex" style="border:0"><div style="flex:1" class="de">' + esc(s) + "</div>" + sayBtn(s) + sayBtn(s, 1) + "</div>" +
+      h += '<div class="card"><div class="ex" style="border:0"><div style="flex:1"><div class="de">' + esc(s) + "</div>" + E(LS.spEn[s]) + "</div>" + sayBtn(s) + sayBtn(s, 1) + "</div>" +
         '<button class="btn alt" onclick="App.speakTry(' + k + ')">🎤 Jetzt sprechen</button>' + (sc ? '<div class="fb ' + (sc.p >= 70 ? "ok" : "gold") + '">' + sc.p + "% · gehört: „" + esc(sc.h) + "“</div>" : "") + "</div>";
     });
-    set(h + '<button class="btn" onclick="App.next()">Weiter → Mein Leben</button>');
+    set(h + '<button class="btn" onclick="App.next()">Weiter → Mein Leben' + E("Next → my life") + '</button>');
   }
   function speakTry(k) {
     var target = LS.sp[k];
@@ -256,7 +259,7 @@ var App = (function () {
     return h;
   }
   function write(d) { sub = "write"; LS = null; set('<h2>✍️ Mein Leben</h2>' + writeHtml(d)); wc(); }
-  function stepWrite() { set(stepHead() + writeHtml(LS.d) + '<button class="btn ok" onclick="App.next()">🎉 Lektion abschließen</button>'); wc(); }
+  function stepWrite() { set(stepHead() + writeHtml(LS.d) + '<button class="btn ok" onclick="App.next()">🎉 Lektion abschließen' + E("Finish lesson") + '</button>'); wc(); }
   function wc() { var t = document.getElementById("txt"); if (!t) return; document.getElementById("wc").textContent = L.words(t.value) + " Wörter"; try { localStorage.setItem("draft" + WD, t.value); } catch (e) { } }
   function checkText(d, free) {
     var t = document.getElementById("txt").value, D = DAYS[d];
@@ -276,7 +279,7 @@ var App = (function () {
   }
   function model(d) {
     var m = DAYS[d].my.m;
-    openModal('<h3>👀 Musterlösung</h3><div class="entry">' + esc(m) + '</div><div class="row">' + '<button class="btn alt" onclick="App.say(' + q(m) + ')">🔊 Hören</button><button class="btn" onclick="App.closeModal()">OK</button></div><div class="mut sm">Steal good phrases — then rewrite them with YOUR details.</div>');
+    openModal('<h3>👀 Musterlösung</h3>' + E("Model answer") + '<div class="entry" style="margin-top:8px">' + esc(m) + '</div>' + (MY_EN[d] ? '<div class="en" style="margin:8px 0">🇬🇧 ' + esc(MY_EN[d]) + "</div>" : "") + '<div><div class="row">' + '<button class="btn alt" onclick="App.say(' + q(m) + ')">🔊 Hören</button><button class="btn" onclick="App.closeModal()">OK</button></div><div class="mut sm">Steal good phrases — then rewrite them with YOUR details.</div></div>');
   }
   function sayText() { var t = document.getElementById("txt").value; if (t.trim()) speak(t); }
   function readAloud() {
@@ -307,7 +310,7 @@ var App = (function () {
     if (first) xp(50);
     if (S.cur === LS.d && LS.d < 29) S.cur = LS.d + 1;
     save();
-    set('<div class="card flash"><div class="big">🎉 Tag ' + (LS.d + 1) + " geschafft!</div><div class=\"mut\">" + (first ? "+50 XP · " : "") + "🔥 " + L.liveStreak(S.st, T) + " Tage Streak</div><div style=\"margin-top:10px\">„Mach ich!“ — und du hast es gemacht.</div></div>" +
+    set('<div class="card flash"><div class="big">🎉 Tag ' + (LS.d + 1) + " geschafft!</div><div class=\"mut\">" + (first ? "+50 XP · " : "") + "🔥 " + L.liveStreak(S.st, T) + " Tage Streak</div><div style=\"margin-top:10px\">„Mach ich!“ — und du hast es gemacht.</div>" + E("“I'll do it!” — and you did it.") + "</div>" +
       '<button class="btn" onclick="App.go(\'home\')">🏠 Zurück</button>' + (L.dueKeys(S.cards, T).length ? '<button class="btn alt" onclick="App.flash()">🔁 Noch schnell wiederholen</button>' : ""));
     speak("Super! Tag " + (LS.d + 1) + " geschafft!");
     LS = null; sub = "done";
@@ -464,6 +467,14 @@ var App = (function () {
       [].forEach.call(all, function (b) { b.disabled = true; });
     });
     EX.right += right; EX.n += qs.length;
+    var en = m === "lesen" ? EXAM_EN.lesen[EX.t] : null, hen = m === "hoeren" ? EXAM_EN.hoeren[EX.t] : null;
+    qs.forEach(function (x, k) {
+      var card = document.querySelector('.opt[data-k="' + k + '"]').parentNode;
+      var t = en ? en.q[k] : hen ? hen[k] : "";
+      if (m === "hoeren") card.insertAdjacentHTML("beforeend", '<div class="note sm"><b>📜 Transkript:</b> ' + esc(x.say) + E(t) + "</div>");
+      else card.querySelector("b").insertAdjacentHTML("afterend", E(t));
+    });
+    if (en) V().querySelector(".card .entry").insertAdjacentHTML("afterend", '<div class="en" style="margin-top:8px">🇬🇧 ' + esc(en.text) + "</div>");
     if (m === "hoeren") { S.acc.h[0] += right; S.acc.h[1] += qs.length; save(); }
     var last = V().querySelector(".btn:last-child"); last.outerHTML = '<div class="fb ' + (right >= qs.length * 0.6 ? "ok" : "bad") + '">' + right + " / " + qs.length + ' richtig</div><button class="btn" onclick="App.exNext()">Weiter →</button>';
     window.scrollTo(0, 0);

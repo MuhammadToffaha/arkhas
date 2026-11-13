@@ -2,8 +2,8 @@
 const fs = require("fs"), path = require("path"), vm = require("vm");
 const www = path.join(__dirname, "../app/src/main/assets/www");
 const ctx = {}; vm.createContext(ctx);
-["days1.js", "days2.js", "days3.js", "exam.js", "logic.js"].forEach(f => vm.runInContext(fs.readFileSync(path.join(www, f), "utf8").replace(/^var (DAYS|EXAM|L) =/m, "this.$1 ="), ctx, { filename: f }));
-const { DAYS, EXAM, L } = ctx;
+["days1.js", "days2.js", "days3.js", "exam.js", "en.js", "logic.js"].forEach(f => vm.runInContext(fs.readFileSync(path.join(www, f), "utf8").replace(/^var (DAYS|EXAM|L|MY_EN|EXAM_EN) =/gm, "this.$1 ="), ctx, { filename: f }));
+const { DAYS, EXAM, L, MY_EN, EXAM_EN } = ctx;
 let fails = 0, n = 0;
 const ok = (c, m) => { n++; if (!c) { fails++; console.log("❌ " + m); } };
 
@@ -37,6 +37,11 @@ EXAM.lesen.forEach(t => t.q.forEach(x => ok(x.a >= 0 && x.a < x.o.length, "lesen
 EXAM.hoeren.forEach(t => t.items.forEach(x => ok(x.say && x.a >= 0 && x.a < x.o.length, "hören idx " + x.q)));
 ok(EXAM.lesen.reduce((s, t) => s + t.q.length, 0) === 20, "20 Lesen items");
 ok(EXAM.hoeren.reduce((s, t) => s + t.items.length, 0) === 20, "20 Hören items");
+
+// ---- 🇬🇧 translations ----
+ok(MY_EN.length === 30 && MY_EN.every(Boolean), "30 model-answer translations");
+EXAM.lesen.forEach((t, i) => ok(EXAM_EN.lesen[i] && EXAM_EN.lesen[i].text && EXAM_EN.lesen[i].q.length === t.q.length, "Lesen EN " + (i + 1)));
+EXAM.hoeren.forEach((t, i) => ok(EXAM_EN.hoeren[i] && EXAM_EN.hoeren[i].length === t.items.length, "Hören EN " + (i + 1)));
 
 // ---- logic ----
 ok(L.grade("Bin", ["bin"]) === "ok", "grade case");

@@ -1,10 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- 🇩🇪 speech bubble in German flag stripes + check mark: "Mach ich!" (I'll do it!) -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp" android:height="108dp" android:viewportWidth="108" android:viewportHeight="108">
-    <path android:fillColor="#FFFFFF" android:pathData="M30,30h48a6,6 0,0 1,6 6v28a6,6 0,0 1,-6 6h-26l-12,10v-10h-10a6,6 0,0 1,-6 -6v-28a6,6 0,0 1,6 -6z" />
-    <path android:fillColor="#1A1A1A" android:pathData="M30,34h48v8h-48z" />
-    <path android:fillColor="#DD0000" android:pathData="M30,44h48v8h-48z" />
-    <path android:fillColor="#FFCE00" android:pathData="M30,54h48v8h-48z" />
-    <path android:fillColor="#22C55E" android:pathData="M64,62l6,6 14,-16 4,4 -18,20 -10,-10z" />
+    <path android:fillColor="#00000000" android:pathData="M0,0h1v1h-1z" />
 </vector>
