@@ -771,6 +771,11 @@
 
   const EVENT_1111 = /11[.\s_-]?11|singles?[\s_+-]?day|double[\s_-]?11|عيد العزاب/i;
 
+  // 📚 books are left out of the deals: they flood the 70%+ lists and nobody asked for them
+  const BOOK_RE = /\b(paperback|hardcover|hardback|kindle edition|audiobook|audio cd|board book|mass market|spiral[- ]bound|novel|isbn)\b|كتاب|رواية|روايه/i;
+  const isBook = (o) => BOOK_RE.test(o.title) || /amazon\.[^/]+\/(?:.*\/)?dp\/\d{9}[\dX](?:[/?]|$)/i.test(o.url)
+    || /stripbooks|\/books?(?:[/?-]|$)|\/kotob|i=stripbooks/i.test(o.url) || /^books?$/i.test(o.cat || "");
+
   async function findEventPages(store, fetcher, DOMParserImpl, max = 6) {
     const cfg = store.events || {};
     const home = cfg.home || store.base_url;
@@ -877,7 +882,7 @@
           if (!okPages.length) throw pages[0].reason;
           got = okPages.flatMap((x) => x.value);
         }
-        const keep = got.filter((o) => o.title && o.price && o.url)
+        const keep = got.filter((o) => o.title && o.price && o.url && !isBook(o))
           .map((o) => Object.assign(o, { pct: pctOff(o), source: s.name }, s.category && !o.cat ? { cat: s.category } : {}))
           // tagged pages (Mega Deals) are deals by definition, even when the old price isn't shown
           .filter((o) => (o.pct >= opt.minPct || o.tag) && o.pct < 95)   // 95%+ off is almost always a data error
@@ -1076,7 +1081,7 @@
     return names;
   }
 
-  const API = { photoQueries, barcodeNames, lensTitles, lensQueries, lensCaptcha: captcha, findStoreFilter, mergeFilter, findEventPages, EVENT_RE, EVENT_1111, TRAFFIC, normalize, tokens, isArabic, setSynonyms, equivalents, translateQuery, queryVariants, queryVariantsAsync, cleanQuery, parsePrice, ADAPTERS, DEAL_FEEDS, deals, pctOff, productId,
+  const API = { photoQueries, barcodeNames, lensTitles, lensQueries, lensCaptcha: captcha, findStoreFilter, mergeFilter, findEventPages, isBook, EVENT_RE, EVENT_1111, TRAFFIC, normalize, tokens, isArabic, setSynonyms, equivalents, translateQuery, queryVariants, queryVariantsAsync, cleanQuery, parsePrice, ADAPTERS, DEAL_FEEDS, deals, pctOff, productId,
     relevance, matchInfo, specs, rank, top, parse, parseSerp, buildUrl, serpUrl, externalLinks, search };
   if (typeof module !== "undefined" && module.exports) module.exports = API;
   else root.Arkhas = API;

@@ -99,28 +99,28 @@ test("UI: ⚡ tab shows deal cards, sorting and store filter", async () => {
   assert.equal(doc.querySelector("#dealsView").hidden, false);
   assert.equal(doc.querySelector("#searchView").hidden, true);
   const until = async (f) => { const t = Date.now(); while (!f()) { if (Date.now() - t > 15000) throw new Error("timeout"); await new Promise((r) => setTimeout(r, 20)); } };
-  await until(() => doc.querySelector("#d_bar").hidden && doc.querySelectorAll(".dc").length >= 1);
+  await until(() => doc.querySelector("#d_bar").hidden && doc.querySelectorAll("#d_out .dc").length >= 1);
   // default range = 🔥 every flash-sale product + everything 70%+ : here the Jumia flash page items, biggest first
   assert.equal(doc.querySelector("#d_range button.on").dataset.r, "hot");
-  const cards = [...doc.querySelectorAll(".dc")];
+  const cards = [...doc.querySelectorAll("#d_out .dc")];
   assert.equal(cards[0].querySelector(".off").textContent, "-50%");
   assert.ok(cards.every((c) => c.querySelector(".flb") || parseInt(c.querySelector(".off").textContent.slice(1)) >= 70), "only ⚡ flash items or 70%+");
   [...doc.querySelectorAll("#d_range button")].find((b) => b.dataset.r === "all").click();
-  assert.ok(doc.querySelectorAll(".dc").length >= 5);
+  assert.ok(doc.querySelectorAll("#d_out .dc").length >= 5);
   assert.equal(prefs.dealRange, "all");
-  assert.equal(doc.querySelector(".dc .off").textContent, "-50%");
+  assert.equal(doc.querySelector("#d_out .dc .off").textContent, "-50%");
   [...doc.querySelectorAll("#d_sort button")].find((b) => b.dataset.k === "price").click();
-  assert.match(doc.querySelector(".dc .ttl").textContent, /SSD|Air Fryer/);
+  assert.match(doc.querySelector("#d_out .dc .ttl").textContent, /SSD|Air Fryer/);
   // store dropdown: closed by default, opens, "clear all" then tick one store
   assert.equal(doc.querySelector("#d_panel").hidden, true);
   doc.querySelector("#d_ddbtn").click();
   assert.equal(doc.querySelector("#d_panel").hidden, false);
   assert.ok(doc.querySelectorAll("#d_stores input[type=checkbox]").length >= 20, "every store with deals is listed");
   doc.querySelector("#d_none").click();
-  assert.equal(doc.querySelectorAll(".dc").length, 0);
+  assert.equal(doc.querySelectorAll("#d_out .dc").length, 0);
   const box = doc.querySelector('#d_stores input[data-s="Cairo Sales"]');
   box.checked = true; box.dispatchEvent(new win.Event("change", { bubbles: true }));
-  assert.equal(doc.querySelectorAll(".dc").length, 1);
+  assert.equal(doc.querySelectorAll("#d_out .dc").length, 1);
   assert.match(doc.querySelector("#d_ddlbl").textContent, /Cairo Sales/);
   assert.ok(!JSON.parse(prefs.dealHide).includes("Cairo Sales"), "choice remembered");
   doc.body.click();
@@ -165,9 +165,9 @@ test("70%+ chip shows every deal from 70% up (70, 75, 77, 88), biggest first; Am
   await win.arkhasReady;
   doc.querySelector("#nav_deals").click();
   const until = async (f) => { const t = Date.now(); while (!f()) { if (Date.now() - t > 8000) throw new Error("timeout"); await new Promise((r) => setTimeout(r, 20)); } };
-  await until(() => doc.querySelector("#d_bar").hidden && doc.querySelectorAll(".dc").length);
+  await until(() => doc.querySelector("#d_bar").hidden && doc.querySelectorAll("#d_out .dc").length);
   [...doc.querySelectorAll("#d_range button")].find((b) => b.dataset.r === "r70").click();
-  assert.deepEqual([...doc.querySelectorAll(".dc .off")].map((x) => x.textContent), ["-88%", "-77%", "-75%", "-70%"]);
+  assert.deepEqual([...doc.querySelectorAll("#d_out .dc .off")].map((x) => x.textContent), ["-88%", "-77%", "-75%", "-70%"]);
 });
 
 test("same product from two pages / with ?ref= tracking is listed once", async () => {

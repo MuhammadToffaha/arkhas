@@ -426,3 +426,31 @@ test("🖤 dedicated Friday section: campaign pages only, grouped by store, 11.1
   assert.equal(w.document.querySelectorAll("#bf_out .dc").length, 1);
   assert.match(w.document.querySelector("#bf_out .dc").textContent, /11\.11/);
 });
+
+test("📚 books are left out of the deals (format words, Arabic, Amazon ISBN links); notebooks stay", () => {
+  const E = globalThis.__ArkhasForBooks || (() => { const w = new JSDOM(`<script>${readFileSync(new URL("../web/engine.js", import.meta.url), "utf8")}</script>`, { runScripts: "dangerously" }).window; return w.Arkhas; })();
+  const b = (title, url = "https://x/1") => E.isBook({ title, url });
+  assert.ok(b("Atomic Habits (Paperback)"));
+  assert.ok(b("كتاب الطبخ المصري"));
+  assert.ok(b("Some title", "https://www.amazon.eg/Some-Title/dp/1847941834/ref=sr_1_1"));
+  assert.ok(!b("Lenovo IdeaPad Notebook 15"));
+  assert.ok(!b("MacBook Air M3", "https://www.amazon.eg/dp/B0CX23V2ZK"));
+  const stores = JSON.parse(readFileSync(new URL("../web/stores.json", import.meta.url), "utf8"));
+  assert.ok(!stores.some((s) => s.deals && (s.deals.urls || []).some((u) => /k=books/.test(u.url || u))), "no book deal pages");
+});
+
+test("🖤 Friday tab lists campaign deals + every flash-sale product + everything 70%+, no duplicates", async () => {
+  const W = new URL("../web/", import.meta.url);
+  const html = readFileSync(new URL("index.html", W), "utf8").replace('<script src="engine.js"></script>', () => `<script>${readFileSync(new URL("engine.js", W), "utf8")}</script>`);
+  const dom = new JSDOM(html, { runScripts: "dangerously", url: "https://app.local/" });
+  const w = dom.window; await new Promise((r) => setTimeout(r, 50));
+  w.eval(`const mk = (i, pct, tag) => Object.assign({ title: "x" + i, price: 100, old_price: 100 / (1 - pct / 100), pct, url: "https://x/" + i, source: "Jumia" }, tag ? { tag } : {});
+    friData = { deals: [mk(1, 40, "bf"), mk(2, 20, "1111")], sources: [], total: 1, at: Date.now() };
+    dealsData = { deals: [mk(1, 40, "bf"), mk(3, 5, "flash"), mk(4, 75), mk(5, 55), mk(6, 0, "mega")], sources: [], total: 1, at: Date.now() };
+    renderFri();`);
+  const ttl = () => [...w.document.querySelectorAll("#bf_out .dc .ttl")].map((x) => x.textContent).sort();
+  assert.deepEqual(ttl(), ["x1", "x2", "x3", "x4", "x6"], "55% non-flash left out, x1 once");
+  const chip = (k) => w.document.querySelector(`#bf_kind button[data-fk="${k}"]`);
+  chip("flash").click(); assert.deepEqual(ttl(), ["x3", "x6"]);
+  chip("r70").click(); assert.deepEqual(ttl(), ["x4"]);
+});
