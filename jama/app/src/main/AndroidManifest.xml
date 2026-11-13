@@ -17,6 +17,7 @@
         <package android:name="com.toffaha.bonian" />
         <package android:name="com.toffaha.rowaremote" />
         <package android:name="com.toffaha.zakaa" />
+        <package android:name="com.toffaha.machich" />
     </queries>
 
     <application
