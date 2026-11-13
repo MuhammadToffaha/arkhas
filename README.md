@@ -48,6 +48,10 @@ If `web/index.html` ever needs new native features, bump `arkhas-bridge` in it; 
 
 **Signing key**: `android/keystore/arkhas.jks` keeps every build installable over the last one. Before sharing the app with others, move it into repo secrets `ARKHAS_KEYSTORE_B64` + `ARKHAS_KEYSTORE_PASSWORD` and remove the file and fallback password from `.github/workflows/android.yml`. Keep the same key.
 
+## 🇩🇪 Mach ich! (`machich/`)
+
+German **A2 in 30 days**, Busuu-style: 30 lessons (360 words with German voice, grammar in English, exercises, 🎤 speaking score), ✍️ **Mein Leben** diary about your own life with instant mistake hints, spaced repetition + mistakes notebook + Diktat, and a full **Goethe A2 mock exam** (Lesen, Hören, Schreiben, Sprechen). Releases `machich-vN`, installed and updated by JAMA. Details: [machich/README.md](machich/README.md).
+
 ## 📺 ROWA Remote (`remote/`)
 
 Phone → **ROWA Android TV** remote over Wi-Fi. Two ways in, picked automatically: **Google TV Remote** protocol (port 6466, pair with a code) or **ADB over Wi-Fi** (port 5555, "Allow debugging" once). 🩺 Connection check tells what's blocked; 🔍 finds the TV by mDNS **and** a Wi-Fi subnet scan.

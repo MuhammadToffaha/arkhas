@@ -1,0 +1,63 @@
+name: machich-apk
+
+# 🇩🇪 Mach ich! (German A2 in 30 days). Lives in this repo; releases are tagged machich-vN and are NEVER marked "latest",
+# so Arkhas' own updater (releases/latest) keeps seeing only Arkhas. JAMA installs/updates it by the machich-v prefix.
+on:
+  push:
+    branches: [main]
+    paths: ["machich/**", ".github/workflows/machich.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  apk:
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: machich
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: 🧪 30 days of content + logic
+        run: node tests/logic.test.js
+
+      - name: 🤖 Robot student uses every screen (headless browser)
+        run: |
+          npm i --no-save --silent playwright@1
+          npx playwright install --with-deps chromium > /dev/null
+          node tests/play.test.js
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      # own run counter -> version 1.0.N, versionCode N
+      - name: Build signed APK
+        env:
+          VERSION_CODE: ${{ github.run_number }}
+        run: |
+          chmod +x gradlew
+          yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null || true
+          set -o pipefail
+          ./gradlew assembleRelease --no-daemon 2>&1 | tee build.log || {
+            { grep -E "^e: |error:|ERROR:|Unresolved reference" build.log | grep -v "^> Task" | head -8
+              grep -A4 "What went wrong" build.log | head -5; } | while IFS= read -r l; do echo "::error::${l:0:900}"; done
+            exit 1
+          }
+          cp app/build/outputs/apk/release/app-release.apk "$GITHUB_WORKSPACE/machich.apk"
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: machich-v${{ github.run_number }}
+          name: Mach ich! 1.0.${{ github.run_number }}
+          body: |
+            🇩🇪 Mach ich! — German A2 in 30 days: 30 lessons, 360 words with German voice, spaced repetition, speaking check, ✍️ Mein Leben diary with instant hints, full Goethe A2 mock exam.
+            📱 Install from JAMA, or download machich.apk on the phone.
+            Designed by Muhammad Toffaha
+          files: machich.apk
+          make_latest: false

@@ -38,6 +38,8 @@ object Store {
             "الموبايل ريموت لتلفزيون روا على الواي فاي", "Phone remote for the ROWA TV over Wi-Fi", tagPrefix = "remote-v"),
         ManagedApp("zakaa", "com.toffaha.zakaa", "arkhas", "🧠", "ذكاء", "Zakaa",
             "ألغاز وحاجات ذكية للأطفال — 320 مستوى", "Smart puzzles for kids — 320 levels", tagPrefix = "zakaa-v"),
+        ManagedApp("machich", "com.toffaha.machich", "arkhas", "🇩🇪", "ماخ إيش!", "Mach ich!",
+            "ألماني A2 في 30 يوم + امتحان جوته", "German A2 in 30 days + Goethe mock exam", tagPrefix = "machich-v"),
         ManagedApp("jama", BuildConfig.APPLICATION_ID, "arkhas", "🧩", "جاما", "JAMA",
             "مدير التطبيقات — بيثبّت ويحدّث الكل", "App manager — installs and updates everything", tagPrefix = "jama-v"),
     )
