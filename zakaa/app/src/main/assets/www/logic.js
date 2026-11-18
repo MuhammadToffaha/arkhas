@@ -285,14 +285,21 @@
   const GEN = { pipes: genPipes, lights: genLights, seq: genSeq, odd: genOdd, math: genMath, sudoku: genSudoku, words: genWord, mem: genMem };
 
   // ---------- 👧👦 players, stars, hints ----------
-  const START = age => (age >= 9 ? 7 : age >= 8 ? 4 : 1);        // older kids may skip the baby levels
-  const newKid = (id, name, age, av) => ({ id, name, age, av, hints: 5, prog: {}, gift: '' });
+  // 🎚️ each player picks سهل / متوسط / صعب: where his levels start and how many 💡 he gets as a daily gift
+  const DIFFS = [
+    { id: 'easy', name: 'سهل', icon: '🌱', start: 1, gift: 3 },
+    { id: 'mid', name: 'متوسط', icon: '🔥', start: 9, gift: 2 },
+    { id: 'hard', name: 'صعب', icon: '👑', start: 17, gift: 1 }];
+  const diffOf = kid => DIFFS.find(d => d.id === (kid && kid.diff)) || DIFFS[0];
+  const defaultDiff = age => (age >= 9 ? 'mid' : 'easy');
+  const START = kid => diffOf(kid).start;
+  const newKid = (id, name, age, av) => ({ id, name, age, av, diff: defaultDiff(age), hints: 5, prog: {}, gift: '' });
   function newState() {
     return { v: 1, current: '', sound: true, kids: [newKid('k1', 'اللاعب الأول', 9, '🦁'), newKid('k2', 'اللاعب التاني', 8, '🦊'), newKid('k3', 'اللاعب التالت', 6, '🐼')] };
   }
   function migrate(s) {
     if (!s || !Array.isArray(s.kids) || !s.kids.length) return newState();
-    for (const k of s.kids) { if (!k.prog || typeof k.prog !== 'object') k.prog = {}; k.hints = Math.max(0, Number(k.hints) || 0); k.age = Number(k.age) || 8; if (!k.av) k.av = '🙂'; }
+    for (const k of s.kids) { if (!k.prog || typeof k.prog !== 'object') k.prog = {}; k.hints = Math.max(0, Number(k.hints) || 0); k.age = Number(k.age) || 8; if (!k.av) k.av = '🙂'; if (!DIFFS.some(d => d.id === k.diff)) k.diff = defaultDiff(k.age); }
     if (s.sound === undefined) s.sound = true;
     return s;
   }
@@ -300,7 +307,7 @@
   function unlocked(kid, g) {
     let top = 0; const p = kid.prog[g] || {};
     for (const l in p) if (p[l] > 0) top = Math.max(top, Number(l));
-    return Math.min(MAX, Math.max(START(kid.age), top + 1));
+    return Math.min(MAX, Math.max(START(kid), top + 1));
   }
   const totalStars = kid => GAME_IDS.reduce((s, g) => s + Object.values(kid.prog[g] || {}).reduce((a, b) => a + b, 0), 0);
   const passed = (kid, g) => Object.values(kid.prog[g] || {}).filter(v => v > 0).length;
@@ -319,10 +326,10 @@
     kid.prog[g][lvl] = Math.max(prev, s); kid.hints += gained;
     return { first: prev === 0, gained, best: kid.prog[g][lvl] };
   }
-  function dailyGift(kid, today) { if (kid.gift === today) return 0; kid.gift = today; kid.hints += 2; return 2; }
+  function dailyGift(kid, today) { if (kid.gift === today) return 0; kid.gift = today; const g = diffOf(kid).gift; kid.hints += g; return g; }
 
   const api = { MAX, GAME_IDS, TIERS, tier, rng, seedOf, shuffle, ROUNDS, GEN, genSeq, genOdd, genMath, genPipes, pipesState, rotMask, pipesSize,
     genLights, lightsPress, genSudoku, sudSolve, sudokuShape, genWord, WORDS, genMem, OPS, PRIMES,
-    START, newState, migrate, starsOf, unlocked, totalStars, passed, stars, passLevel, dailyGift };
+    START, DIFFS, diffOf, defaultDiff, newState, migrate, starsOf, unlocked, totalStars, passed, stars, passLevel, dailyGift };
   if (typeof module !== 'undefined' && module.exports) module.exports = api; else root.ZL = api;
 })(this);

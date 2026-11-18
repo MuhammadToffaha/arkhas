@@ -55,6 +55,7 @@ class MainActivity : AppCompatActivity() {
         }
         root.addView(web)
         setContentView(root)
+        volumeControlStream = android.media.AudioManager.STREAM_MUSIC   // 🔊 volume keys control the game sound
         // Android 15 draws edge-to-edge: keep the page out of the status / nav bars.
         ViewCompat.setOnApplyWindowInsetsListener(root) { v, ins ->
             val b = ins.getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.ime())

@@ -118,7 +118,15 @@ t('🧠 memory: grows longer and faster', () => {
 t('⭐ stars, 💡 hints, 🔓 unlocks', () => {
   const s = L.newState(), [k9, k8, k6] = s.kids;
   assert.deepStrictEqual([k9.age, k8.age, k6.age], [9, 8, 6]);
-  assert.strictEqual(L.unlocked(k6, 'seq'), 1); assert.strictEqual(L.unlocked(k8, 'seq'), 4); assert.strictEqual(L.unlocked(k9, 'seq'), 7);
+  assert.deepStrictEqual([k9.diff, k8.diff, k6.diff], ['mid', 'easy', 'easy'], 'default difficulty from age');
+  assert.strictEqual(L.unlocked(k6, 'seq'), 1); assert.strictEqual(L.unlocked(k8, 'seq'), 1); assert.strictEqual(L.unlocked(k9, 'seq'), 9);
+  // 🎚️ each player picks his own difficulty
+  const kx = JSON.parse(JSON.stringify(k8));
+  kx.diff = 'hard'; assert.strictEqual(L.unlocked(kx, 'math'), 17); assert.strictEqual(L.diffOf(kx).name, 'صعب');
+  kx.diff = 'mid'; assert.strictEqual(L.unlocked(kx, 'math'), 9);
+  kx.prog.math = { 25: 2 }; kx.diff = 'easy'; assert.strictEqual(L.unlocked(kx, 'math'), 26, 'going back to easy never locks what he already passed');
+  assert.strictEqual(L.migrate({ kids: [{ id: 'a', name: 'x', age: 10 }] }).kids[0].diff, 'mid', 'old saves get a difficulty');
+  assert.strictEqual(L.migrate({ kids: [{ id: 'a', name: 'x', age: 6, diff: 'hard' }] }).kids[0].diff, 'hard', 'chosen difficulty is kept');
   assert.strictEqual(L.stars({ hints: 0, mistakes: 1 }), 3); assert.strictEqual(L.stars({ hints: 1, mistakes: 0 }), 2); assert.strictEqual(L.stars({ hints: 3, mistakes: 0 }), 1);
   assert.strictEqual(L.stars({ hints: 0, mistakes: 0, par: 2, moves: 9 }), 2);
   let r = L.passLevel(k6, 'seq', 1, 2); assert.deepStrictEqual([r.first, r.gained, k6.hints], [true, 1, 6]);      // pass → +1 hint
@@ -127,7 +135,8 @@ t('⭐ stars, 💡 hints, 🔓 unlocks', () => {
   r = L.passLevel(k6, 'seq', 1, 1); assert.strictEqual(L.starsOf(k6, 'seq', 1), 3);                               // best is kept
   assert.strictEqual(L.unlocked(k6, 'seq'), 2); assert.strictEqual(L.totalStars(k6), 3);
   L.passLevel(k6, 'seq', 40, 1); assert.strictEqual(L.unlocked(k6, 'seq'), 40);
-  assert.strictEqual(L.dailyGift(k8, '2026-11-10'), 2); assert.strictEqual(L.dailyGift(k8, '2026-11-10'), 0);
+  assert.strictEqual(L.dailyGift(k8, '2026-11-10'), 3); assert.strictEqual(L.dailyGift(k8, '2026-11-10'), 0);
+  assert.strictEqual(L.dailyGift(k9, '2026-11-10'), 2); const kh = Object.assign({}, k9, { diff: 'hard', gift: '' }); assert.strictEqual(L.dailyGift(kh, '2026-11-10'), 1);
   assert.strictEqual(L.migrate(null).kids.length, 3); assert.deepStrictEqual(L.migrate({ kids: [{ id: 'a', name: 'x' }] }).kids[0].prog, {});
 });
 
@@ -160,12 +169,13 @@ t('👨‍👧‍👦 family time: charades words and ideas are complete', () =>
   assert.ok(F.CATS.every(c => c.d >= 1 && c.d <= 5)); for (let d = 1; d <= 5; d++) assert.ok(F.CATS.some(c => c.d === d));
   assert.ok(F.CATS.find(c => c.id === 'scenes').words.every(w => w.ar.includes(' ')), 'extreme = whole scenes');
   const [k9, k8, k6] = L.newState().kids;
-  assert.deepStrictEqual([F.chUnlocked(k6), F.chUnlocked(k8), F.chUnlocked(k9)], [1, 2, 3]);
+  assert.deepStrictEqual([F.chUnlocked(k6), F.chUnlocked(k8), F.chUnlocked(k9)], [1, 1, 4]);
+  assert.strictEqual(F.chUnlocked(Object.assign({}, k8, { diff: 'hard', ch: {} })), 7);
   let cr = F.chPass(k6, 1, 0); assert.deepStrictEqual([cr.gained, F.chUnlocked(k6), k6.hints], [0, 1, 5]);          // failed: nothing opens
   cr = F.chPass(k6, 1, 1); assert.deepStrictEqual([cr.first, cr.gained, F.chUnlocked(k6), k6.hints], [true, 1, 2, 6]);
   cr = F.chPass(k6, 1, 3); assert.deepStrictEqual([cr.gained, k6.ch[1], k6.hints], [1, 3, 7]);
   cr = F.chPass(k6, 1, 3); assert.strictEqual(cr.gained, 0);
-  assert.strictEqual(F.chUnlocked(k9), 3, 'each player has his own progress');
+  assert.strictEqual(F.chUnlocked(k9), 4, 'each player has his own progress');
   F.chPass(k6, 15, 1); assert.strictEqual(F.chUnlocked(k6), 15);
   for (const t of F.TYPES) assert.ok(F.ideas(t.id).length >= 4, 'enough ideas of type ' + t.id);
   assert.strictEqual(F.ideaOfDay('2026-11-10').id, F.ideaOfDay('2026-11-10').id); assert.notStrictEqual(F.ideaOfDay('2026-11-10').id, F.ideaOfDay('2026-11-11').id);

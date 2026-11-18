@@ -136,8 +136,8 @@
   }
   /** 0 = not passed. goal → ⭐, goal+2 → ⭐⭐, goal+4 → ⭐⭐⭐ */
   function chStars(lvl, score) { const g = CH_LEVELS[lvl - 1].goal; return score >= g + 4 ? 3 : score >= g + 2 ? 2 : score >= g ? 1 : 0; }
-  const chStart = age => (age >= 9 ? 3 : age >= 8 ? 2 : 1);
-  function chUnlocked(kid) { let top = 0; const p = kid.ch || {}; for (const l in p) if (p[l] > 0) top = Math.max(top, Number(l)); return Math.min(CH_MAX, Math.max(chStart(kid.age), top + 1)); }
+  const chStart = kid => ({ easy: 1, mid: 4, hard: 7 })[kid && kid.diff] || 1;                 // 🌱 سهل • 🌿 متوسط • 🔥 صعب
+  function chUnlocked(kid) { let top = 0; const p = kid.ch || {}; for (const l in p) if (p[l] > 0) top = Math.max(top, Number(l)); return Math.min(CH_MAX, Math.max(chStart(kid), top + 1)); }
   /** first pass = +1 hint 💡 for the puzzles, first ⭐⭐⭐ = one more */
   function chPass(kid, lvl, s) {
     if (!kid.ch) kid.ch = {}; const prev = kid.ch[lvl] || 0, gained = s > 0 ? (prev === 0 ? 1 : 0) + (s === 3 && prev < 3 ? 1 : 0) : 0;

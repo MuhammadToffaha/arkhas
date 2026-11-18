@@ -56,7 +56,7 @@ async function robot({ game, lvl, useHint }) {
   ok(await p.locator('.kid').count() === 3, 'three players on first open');
   ok((await p.textContent('#kids')).includes('9 سنين') && (await p.textContent('#kids')).includes('6 سنين'), 'ages 9, 8, 6');
   await p.locator('.kid').nth(2).click();                          // the 6-year-old
-  ok((await p.textContent('#hHints')).includes('7'), 'daily gift: 5 + 2 hints');
+  ok((await p.textContent('#hHints')).includes('8'), 'daily gift on easy: 5 + 3 hints');
   await p.evaluate(() => App.openGame('seq'));
   ok(await p.locator('.lv button.lock').count() === 39, '6-year-old starts at level 1, the rest locked');
   await p.locator('.lv button').nth(5).click();
@@ -65,11 +65,30 @@ async function robot({ game, lvl, useHint }) {
   const wrong = await p.evaluate(() => { const a = window.ZL.genSeq(1, 0).answer; const b = [...document.querySelectorAll('.opt')].find(x => x.dataset.v !== String(a)); b.click(); return b.className; });
   ok(wrong.includes('bad'), 'wrong answer turns red');
   let r = await p.evaluate(robot, { game: 'seq', lvl: 1 });
-  ok(r.stars === 3 && r.gift.includes('+2') && r.tip && r.hints === 9, 'first perfect pass → 3⭐, +2 💡, smart tip ' + JSON.stringify(r));
+  ok(r.stars === 3 && r.gift.includes('+2') && r.tip && r.hints === 10, 'first perfect pass → 3⭐, +2 💡, smart tip ' + JSON.stringify(r));
   await p.evaluate(() => { App.unpop(); App.go('levels'); });
   ok(await p.locator('.lv button.lock').count() === 38, 'level 2 unlocked after passing level 1');
   await p.evaluate(() => { App.go('who'); }); await p.locator('.kid').nth(0).click(); await p.evaluate(() => App.openGame('math'));
-  ok(await p.locator('.lv button.lock').count() === 33, '9-year-old starts with 7 levels open');
+  ok(await p.locator('.lv button.lock').count() === 31, '9-year-old (متوسط) starts with 9 levels open');
+  // ✏️ rename + 🎚️ difficulty
+  await p.evaluate(() => App.go('who'));
+  await p.locator('.kid .ed').first().click();
+  await p.fill('#kName', 'بطل الألغاز'); await p.locator('#pop .diffs button').nth(2).click(); await p.locator('#pop .btn').first().click();
+  ok((await p.textContent('#kids')).includes('بطل الألغاز'), 'name changed on the players screen');
+  ok(await p.evaluate(() => { const k = JSON.parse(localStorage.zakaa).kids[0]; return k.name === 'بطل الألغاز' && k.diff === 'hard'; }), 'name + difficulty saved');
+  await p.locator('.kid .ed').first().click(); await p.fill('#kName', '   '); await p.locator('#pop .btn').first().click();
+  ok(await p.evaluate(() => document.getElementById('popBg').classList.contains('show') && JSON.parse(localStorage.zakaa).kids[0].name === 'بطل الألغاز'), 'empty name is not saved');
+  await p.evaluate(() => App.unpop());
+  await p.locator('.kid').first().locator('.diffs button').first().click();
+  ok(await p.evaluate(() => JSON.parse(localStorage.zakaa).kids[0].diff === 'easy'), 'one-tap difficulty on the card');
+  await p.locator('.kid').first().locator('.diffs button').nth(2).click();
+  await p.locator('.kid').first().click(); await p.evaluate(() => App.openGame('math'));
+  ok(await p.locator('.lv button.lock').count() === 23, 'صعب opens up to level 17');
+  ok((await p.textContent('#hName')).includes('بطل الألغاز') && (await p.textContent('#hDiff')).includes('صعب'), 'home shows new name + difficulty');
+  await p.evaluate(() => App.go('home')); await p.locator('#v-home .me').click();
+  ok(await p.evaluate(() => document.getElementById('kName') && document.getElementById('kName').value === 'بطل الألغاز'), 'tap the name on home to edit it');
+  await p.fill('#kName', 'مالك الصغير'); await p.locator('#pop .btn').first().click();
+  ok((await p.textContent('#hName')).includes('مالك الصغير'), 'rename from home updates at once');
   await p.evaluate(() => App.settings());
   ok((await p.textContent('#pop')).includes('Designed by Muhammad Toffaha'), 'credit line in settings');
   await p.evaluate(() => App.onUpdate(JSON.stringify({ code: 9, name: 'x', notes: '', url: 'u' })));
@@ -83,7 +102,7 @@ async function robot({ game, lvl, useHint }) {
   await p.evaluate(() => App.famSet('kid', 'k3'));
   ok(await p.locator('#fBody .lv button').count() === 15 && await p.locator('#fBody .lv button.lock').count() === 14, '6-year-old: charades level 1 open, 14 locked');
   await p.evaluate(() => App.famSet('kid', 'k1'));
-  ok(await p.locator('#fBody .lv button.lock').count() === 12, '9-year-old: 3 charades levels open');
+  ok(await p.locator('#fBody .lv button.lock').count() === 8, 'صعب player: 7 charades levels open');
   await p.evaluate(() => { App.famSet('kid', 'k3'); App.chLevel(2); });
   ok(!(await p.evaluate(() => document.getElementById('popBg').classList.contains('show'))), 'locked charades level does not open');
   await p.evaluate(() => App.chLevel(1));

@@ -36,16 +36,28 @@ input:focus{border-color:var(--c)}
 /* who */
 .logo{text-align:center;margin:18px 0 4px;font-weight:800;font-size:54px;line-height:1.1;color:var(--c)}
 .logo small{display:block;font-size:17px;color:var(--mute);font-weight:700}
-.kid{display:flex;align-items:center;gap:14px;padding:14px 16px;margin-top:16px;width:100%;text-align:right}
+.kid{display:flex;flex-wrap:wrap;align-items:center;gap:12px 14px;padding:14px 16px;margin-top:16px;width:100%;text-align:right}
+.diffs.row{flex-basis:100%;display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:0}
+.diffs.row button{padding:7px 4px;font-size:15px;border-radius:14px}
 .kid .av{font-size:50px;width:76px;height:76px;border-radius:24px;display:grid;place-items:center;flex:none}
 .kid b{font-size:22px;font-weight:800;display:block;line-height:1.3}
 .kid span{color:var(--mute);font-weight:700;font-size:15px}
-.kid .ed{margin-inline-start:auto;width:44px;height:44px;border-radius:14px;background:var(--bg);font-size:20px;flex:none}
+.kid .ed{margin-inline-start:auto;width:58px;height:58px;border-radius:16px;background:var(--bg);font-size:22px;flex:none;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.1;box-shadow:0 3px 0 var(--line)}
+.kid .ed small{font-size:12px;font-weight:800;color:var(--mute)}
+.kinfo{flex:1;min-width:0}
+.diffs{display:flex;gap:4px;margin-top:6px;flex-wrap:nowrap}
+.diffs button{padding:3px 7px;border-radius:12px;background:var(--bg);font-weight:800;font-size:12.5px;color:var(--mute);white-space:nowrap}
+.diffs button.on{color:#fff}.diffs button.easy{background:#22b573}.diffs button.mid{background:#f97316}.diffs button.hard{background:#7c5cff}
+.diffs.big{justify-content:center}.diffs.big button{padding:9px 14px;font-size:17px;border-radius:16px;background:#fff;box-shadow:0 4px 0 var(--line)}
+.diffs.big button.on{box-shadow:0 4px 0 rgba(0,0,0,.2)}
+.diffs.big button.easy{background:#22b573}.diffs.big button.mid{background:#f97316}.diffs.big button.hard{background:#7c5cff}
+.dnote{font-size:13px;font-weight:700;color:var(--mute);margin:8px 4px 0;text-align:center}
+.dchip{padding:6px 12px;border-radius:16px;font-weight:800;font-size:15px}
 .gear{position:absolute;top:14px;left:16px;width:48px;height:48px;border-radius:16px;font-size:24px}
 
 /* home */
 .hud{display:flex;align-items:center;gap:10px}
-.hud .me{display:flex;align-items:center;gap:8px;padding:6px 14px 6px 10px;font-weight:800;font-size:18px}
+.hud .me{display:flex;align-items:center;gap:8px;padding:6px 12px 6px 10px;font-weight:800;font-size:17px;white-space:nowrap;min-width:0;overflow:hidden}
 .hud .me i{font-style:normal;font-size:30px}
 .pill{margin-inline-start:auto;background:#fff;border-radius:16px;padding:6px 12px;font-weight:800;font-size:17px;box-shadow:0 4px 0 var(--line);direction:ltr}
 .pill+.pill{margin-inline-start:0}
@@ -228,7 +240,8 @@ h2{font-size:24px;font-weight:800;margin:20px 4px 12px}
 
 <section class="view" id="v-home">
   <div class="hud">
-    <button class="toy me" onclick="App.go('who')"><i id="hAv"></i><span id="hName"></span></button>
+    <button class="toy me" onclick="App.editKid(App.kidId())"><i id="hAv"></i><span id="hName"></span><small style="font-size:14px">✏️</small></button>
+    <button class="toy dchip" id="hDiff" onclick="App.go('who')"></button>
     <span class="pill" id="hStars"></span><span class="pill" id="hHints"></span>
   </div>
   <button class="fam sm" onclick="App.family()"><i>🏡</i><span><b>وقت العيلة</b><small>العب مع بابا وماما</small></span></button>

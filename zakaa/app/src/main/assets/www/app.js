@@ -45,19 +45,37 @@
   function unpop() { $('popBg').classList.remove('show'); }
 
   // ---------- 🔊 sound ----------
-  let ac;
-  function tone(f, d, type, when) {
+  let ac, out;
+  /** everything goes through a limiter, so wins can be LOUD without crackling */
+  function bus() {
+    ac = ac || new (window.AudioContext || window.webkitAudioContext)();
+    if (ac.state === 'suspended') ac.resume();
+    if (!out) {
+      const comp = ac.createDynamicsCompressor(); comp.threshold.value = -10; comp.knee.value = 6; comp.ratio.value = 12; comp.attack.value = 0.002; comp.release.value = 0.2;
+      out = ac.createGain(); out.gain.value = 1.6; comp.connect(out); out.connect(ac.destination); bus.in = comp;
+    }
+    return bus.in;
+  }
+  function tone(f, d, type, when, vol) {
     if (!S.sound) return;
     try {
-      ac = ac || new (window.AudioContext || window.webkitAudioContext)();
-      const o = ac.createOscillator(), g = ac.createGain(), t = ac.currentTime + (when || 0);
-      o.type = type || 'sine'; o.frequency.value = f; g.gain.setValueAtTime(0.16, t); g.gain.exponentialRampToValueAtTime(0.001, t + d);
-      o.connect(g); g.connect(ac.destination); o.start(t); o.stop(t + d);
+      const dst = bus(), o = ac.createOscillator(), g = ac.createGain(), t = ac.currentTime + (when || 0), v = vol || 0.18;
+      o.type = type || 'sine'; o.frequency.value = f;
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(v, t + 0.012); g.gain.exponentialRampToValueAtTime(0.0001, t + d);
+      o.connect(g); g.connect(dst); o.start(t); o.stop(t + d + 0.02);
     } catch (e) {}
   }
+  /** 🎺 victory fanfare: bright melody + chord, loud */
+  function fanfare(big) {
+    const L1 = [[523, 0], [659, 0.11], [784, 0.22], [1047, 0.33], [784, 0.5], [1047, 0.62]];
+    for (const [f, w] of L1) { tone(f, 0.22, 'square', w, 0.55); tone(f * 2, 0.18, 'triangle', w, 0.3); }
+    const end = 0.8;
+    for (const f of [523, 659, 784, 1047]) { tone(f, big ? 1.3 : 0.9, 'sawtooth', end, 0.3); tone(f, big ? 1.3 : 0.9, 'triangle', end, 0.45); }
+    if (big) [1319, 1568, 2093].forEach((f, i) => tone(f, 0.25, 'square', end + 0.15 + i * 0.1, 0.35));
+  }
   const sfx = {
-    tap: () => tone(520, 0.06), ok: () => { tone(660, 0.1); tone(880, 0.16, 'sine', 0.1); }, bad: () => tone(170, 0.22, 'square'),
-    win: () => [523, 659, 784, 1047].forEach((f, i) => tone(f, 0.2, 'triangle', i * 0.12)), note: i => tone(330 + i * 45, 0.25, 'triangle')
+    tap: () => tone(520, 0.06), ok: () => { tone(660, 0.12, 'triangle', 0, 0.4); tone(880, 0.18, 'triangle', 0.1, 0.45); }, bad: () => tone(170, 0.22, 'square', 0, 0.2),
+    win: big => fanfare(big), note: i => tone(330 + i * 45, 0.25, 'triangle', 0, 0.35)
   };
 
   // ---------- navigation ----------
@@ -73,8 +91,9 @@
   function renderWho() {
     $('kids').innerHTML = S.kids.map(k => `<div class="toy kid" onclick="App.pickKid('${k.id}')">
       <div class="av" style="background:${['#ffe1b3', '#d9ceff', '#c6f1dd'][S.kids.indexOf(k) % 3]}">${k.av}</div>
-      <div><b>${esc(k.name)}</b><span>${k.age} سنين • ⭐ ${L.totalStars(k)} • 💡 ${k.hints}</span></div>
-      <button class="ed" onclick="event.stopPropagation();App.editKid('${k.id}')">✏️</button></div>`).join('');
+      <div class="kinfo"><b>${esc(k.name)}</b><span>${k.age} سنين • ⭐ ${L.totalStars(k)} • 💡 ${k.hints}</span></div>
+      <button class="ed" onclick="event.stopPropagation();App.editKid('${k.id}')">✏️<small>تعديل</small></button>
+      <div class="diffs row" onclick="event.stopPropagation()">${L.DIFFS.map(d => `<button class="${k.diff === d.id ? 'on ' + d.id : ''}" onclick="App.setDiff('${k.id}','${d.id}')">${d.icon} ${d.name}</button>`).join('')}</div></div>`).join('');
   }
   function pickKid(id) {
     kid = S.kids.find(k => k.id === id); S.current = id;
@@ -82,18 +101,27 @@
     if (gift) toast(`🎁 هدية النهارده يا ${kid.name}: +${gift} 💡`);
   }
   function editKid(id) {
-    const k = S.kids.find(x => x.id === id); App._av = k.av;
+    const k = S.kids.find(x => x.id === id); App._av = k.av; App._diff = k.diff;
     pop(`<h3>✏️ بيانات اللاعب</h3>
-      <div class="field"><label>الاسم</label><input id="kName" maxlength="14" value="${esc(k.name)}"></div>
+      <div class="field"><label>الاسم</label><input id="kName" maxlength="14" value="${esc(k.name)}" placeholder="اكتب اسم اللاعب" onfocus="this.select()" onkeydown="if(event.key==='Enter')App.saveKid('${id}')"></div>
+      <div class="field"><label>المستوى</label><div class="diffs big">${L.DIFFS.map(d => `<button class="${d.id === k.diff ? 'on ' + d.id : ''}" onclick="App._diff='${d.id}';this.parentNode.querySelectorAll('button').forEach(b=>b.className=b===this?'on ${d.id}':'')">${d.icon} ${d.name}</button>`).join('')}</div>
+        <div class="dnote">🌱 سهل: يبدأ من أول مستوى • 🔥 متوسط: من مستوى 9 • 👑 صعب: من مستوى 17</div></div>
       <div class="field"><label>السن</label><select id="kAge">${[4, 5, 6, 7, 8, 9, 10, 11, 12].map(a => `<option ${a === k.age ? 'selected' : ''}>${a}</option>`).join('')}</select></div>
       <div class="field"><label>الصورة</label><div class="avs">${AVATARS.map(a => `<button class="${a === k.av ? 'on' : ''}" onclick="App._av='${a}';this.parentNode.querySelectorAll('button').forEach(b=>b.classList.toggle('on',b===this))">${a}</button>`).join('')}</div></div>
       <div class="row2"><button class="btn" onclick="App.saveKid('${id}')">💾 حفظ</button><button class="btn ghost" onclick="App.unpop()">إلغاء</button></div>
       <button style="margin-top:14px;color:var(--bad);font-weight:700" onclick="App.askReset('${id}')">🗑️ امسح تقدّم اللاعب ده</button>`);
+    setTimeout(() => { const i = $('kName'); if (i) i.focus(); }, 250);
+  }
+  function setDiff(id, d) {
+    const k = S.kids.find(x => x.id === id), D = L.DIFFS.find(x => x.id === d); if (!k || !D) return;
+    k.diff = d; save(); sfx.tap(); renderWho(); if (kid && kid.id === id) hud();
+    toast(`${D.icon} ${k.name}: ${D.name} — يبدأ من مستوى ${D.start}`);
   }
   function saveKid(id) {
     const k = S.kids.find(x => x.id === id);
-    k.name = $('kName').value.trim() || k.name; k.age = Number($('kAge').value) || k.age; k.av = App._av || k.av;
-    save(); unpop(); renderWho();
+    const nm = $('kName').value.trim(); if (!nm) { $('kName').focus(); return toast('✍️ اكتب الاسم'); }
+    k.name = nm; k.age = Number($('kAge').value) || k.age; k.av = App._av || k.av; if (L.DIFFS.some(d => d.id === App._diff)) k.diff = App._diff;
+    save(); unpop(); sfx.ok(); toast('✅ اتحفظ: ' + nm); if ($('v-home').classList.contains('on') && kid && kid.id === id) renderHome(); else renderWho();
   }
   function askReset(id) {
     pop(`<div class="big">⚠️</div><p>تمسح كل النجوم والمستويات بتاعة اللاعب ده؟</p>
@@ -102,7 +130,7 @@
   function doReset(id) { const k = S.kids.find(x => x.id === id); k.prog = {}; k.hints = 5; save(); unpop(); renderWho(); toast('🧹 اتمسح'); }
 
   function hud() {
-    $('hAv').textContent = kid.av; $('hName').textContent = kid.name;
+    $('hAv').textContent = kid.av; $('hName').textContent = kid.name; $('hDiff').textContent = L.diffOf(kid).icon + ' ' + L.diffOf(kid).name;
     $('hStars').textContent = '⭐ ' + L.totalStars(kid); $('hHints').textContent = '💡 ' + kid.hints;
     $('lHints').textContent = '💡 ' + kid.hints; $('pHint').textContent = '💡 ' + kid.hints;
   }
@@ -152,7 +180,7 @@
   function quit() { clearTimers(); go('levels'); }
   function finish() {
     const s = L.stars(stats), r = L.passLevel(kid, game, lvl, s), g = GAMES[game], last = lvl >= L.MAX;
-    save(); hud(); sfx.win(); confetti();
+    save(); hud(); sfx.win(true); confetti();
     const newTier = !last && L.tier(lvl + 1) !== L.tier(lvl);
     pop(`<div class="stars">${[1, 2, 3].map(i => `<span class="${i <= s ? 'on' : ''}">⭐</span>`).join('')}</div>
       <h3>${last ? '🏆 بطل الأبطال!' : s === 3 ? 'ممتاز يا ' + esc(kid.name) + '!' : s === 2 ? 'برافو يا ' + esc(kid.name) + '!' : 'عدّيت يا ' + esc(kid.name) + '!'}</h3>
@@ -439,7 +467,7 @@
     const list = r.ok.length + r.skip.length ? `<div class="res">${r.ok.map(w => row(w, '✅')).join('')}${r.skip.map(w => row(w, '⏭️')).join('')}</div>` : '';
     if (r.lvl) {                                                 // a level of one player
       const k = S.kids.find(x => x.id === r.kid), lv = F.CH_LEVELS[r.lvl - 1], st = F.chStars(r.lvl, r.ok.length), res = F.chPass(k, r.lvl, st), last = r.lvl >= F.CH_MAX;
-      save(); renderFamily(); if (st) { sfx.win(); confetti(); } else sfx.bad();
+      save(); renderFamily(); if (st) { sfx.win(true); confetti(); } else sfx.bad();
       return pop(`<div class="stars">${[1, 2, 3].map(i => `<span class="${i <= st ? 'on' : ''}">⭐</span>`).join('')}</div>
         <h3>${st ? (st === 3 ? 'ممتاز يا ' : 'برافو يا ') + esc(k.name) + '!' : 'قرّبت يا ' + esc(k.name) + '!'}</h3>
         <p>${r.ok.length} كلمة صح من ${lv.goal} مطلوبين${st ? '' : ' — جرّبوا تاني 💪'}</p>
@@ -490,7 +518,7 @@
   function onInstallMsg(m) { toast(m); if (/فشل|⚠️|🔐/.test(m)) unpop(); }
 
   window.App = {
-    go, pickKid, editKid, saveKid, askReset, doReset, openGame, play, hint, quit, unpop, settings, setSound, pref, checkNow,
+    go, pickKid, editKid, saveKid, setDiff, kidId: () => kid && kid.id, askReset, doReset, openGame, play, hint, quit, unpop, settings, setSound, pref, checkNow,
     onUpdate, showUpdate, doUpdate, onProgress, onInstallMsg,
     family, famSet, idea, ideaMark, startCharades, chLevel, chMark, chStop,
     locked() { toast('🔒 عدّي المستوى اللي قبله الأول'); },
