@@ -410,7 +410,7 @@
       $('fBody').innerHTML = `<button class="today" onclick="App.idea('${day.id}')"><i>${day.e}</i><span><small>⭐ فكرة النهارده • ${day.min} دقيقة</small><b>${day.title}</b></span></button>
         <div class="chips">${[{ id: 'all', name: 'الكل', icon: '✨' }, { id: 'fav', name: 'المفضلة', icon: '❤️' }].concat(F.TYPES).map(t => `<button class="${idType === t.id ? 'on' : ''}" onclick="App.famSet('type','${t.id}')">${t.icon} ${t.name}</button>`).join('')}</div>
         <div class="ideas">${(idType === 'fav' ? F.IDEAS.filter(i => S.family.fav[i.id]) : list).map(i => `<button class="idea" style="background:${col(i.t)}" onclick="App.idea('${i.id}')">
-          <i>${i.e}</i>${S.family.done[i.id] ? '<span class="tick">✅</span>' : ''}<b>${i.title}</b><small>⏱️ ${i.min} دقيقة • ${i.mood === 'calm' ? '😌 هادية' : '⚡ حركة'}</small></button>`).join('') || '<p style="grid-column:1/-1;text-align:center;font-weight:700;color:var(--mute)">لسه مفيش مفضلة. افتح أي فكرة ودوس ❤️</p>'}</div>
+          <i>${i.e}</i>${S.family.done[i.id] ? '<span class="tick">✅</span>' : ''}${i.yt ? '<span class="play">▶</span>' : ''}<b>${i.title}</b><small>⏱️ ${i.min} دقيقة • ${i.mood === 'calm' ? '😌 هادية' : '⚡ حركة'}</small></button>`).join('') || '<p style="grid-column:1/-1;text-align:center;font-weight:700;color:var(--mute)">لسه مفيش مفضلة. افتح أي فكرة ودوس ❤️</p>'}</div>
         <p style="text-align:center;font-weight:800;color:var(--mute);margin-top:16px">عملتوا ${doneN} من ${F.IDEAS.length} فكرة 👏</p>`;
     }
   }
@@ -420,9 +420,17 @@
       <div class="det"><h4>🧺 هنحتاج</h4><ul>${i.need.map(n => `<li>${n}</li>`).join('')}</ul>
       <h4>👣 الخطوات</h4><ol>${i.steps.map(n => `<li>${n}</li>`).join('')}</ol>
       <div class="why">🧠 <b>ليه؟</b> ${i.why}</div>${i.safe ? `<div class="safe">⚠️ ${i.safe}</div>` : ''}</div>
+      <div class="vids">${i.yt ? `<button class="vbtn" onclick="App.openVid('${id}',0)"><i>▶</i><span><b>شوفوا الفيديو</b><small>يوتيوب • فيديو قصير</small></span></button>` : ''}
+        <button class="vbtn alt" onclick="App.openVid('${id}',1)"><i>🔍</i><span><b>${i.yt ? 'فيديوهات تانية' : 'دوّروا على فيديو'}</b><small>بحث في يوتيوب</small></span></button></div>
+      <p class="vnote">👀 يُفضّل الكبار يتفرّجوا الأول، أو تتفرّجوا سوا.</p>
       <div class="row2" style="margin-top:16px"><button class="btn" style="${d ? 'background:var(--good);box-shadow:0 6px 0 #17875a' : ''}" onclick="App.ideaMark('${id}','done')">${d ? '✅ عملناها' : '☑️ عملناها؟'}</button>
       <button class="btn ghost" onclick="App.ideaMark('${id}','fav')">${f ? '❤️ في المفضلة' : '🤍 مفضلة'}</button></div>
       <button class="btn ghost" style="margin-top:12px" onclick="App.unpop()">رجوع</button>`);
+  }
+  function openVid(id, alt) {
+    const i = F.IDEAS.find(x => x.id === id); if (!i) return;
+    const u = alt || !i.yt ? F.ytSearch(i) : F.ytUrl(i);
+    try { N.openUrl(u); } catch (e) { window.open(u, '_blank'); }
   }
   function ideaMark(id, k) {
     if (S.family[k][id]) delete S.family[k][id]; else { S.family[k][id] = 1; if (k === 'done') { sfx.win(); confetti(); } }
@@ -520,7 +528,7 @@
   window.App = {
     go, pickKid, editKid, saveKid, setDiff, kidId: () => kid && kid.id, askReset, doReset, openGame, play, hint, quit, unpop, settings, setSound, pref, checkNow,
     onUpdate, showUpdate, doUpdate, onProgress, onInstallMsg,
-    family, famSet, idea, ideaMark, startCharades, chLevel, chMark, chStop,
+    family, famSet, idea, ideaMark, openVid, startCharades, chLevel, chMark, chStop,
     locked() { toast('🔒 عدّي المستوى اللي قبله الأول'); },
     back() {
       if ($('chOv').classList.contains('show')) { chStop(); return true; }

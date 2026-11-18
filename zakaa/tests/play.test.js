@@ -134,6 +134,16 @@ async function robot({ game, lvl, useHint }) {
   await p.evaluate(() => App.famSet('type', 'sci')); ok(await p.locator('.idea').count() === 8, 'filter by type');
   await p.locator('.idea').first().click();
   ok((await p.textContent('#pop')).includes('الخطوات') && (await p.textContent('#pop')).includes('ليه؟'), 'idea shows materials, steps and why');
+  await p.evaluate(() => { window.open = u => { window._opened = u; }; App.unpop(); App.idea('volcano'); });
+  ok(await p.locator('#pop .vbtn').count() === 2, 'idea has a video button + a YouTube search button');
+  await p.locator('#pop .vbtn').first().click();
+  ok(await p.evaluate(() => /^https:\/\/www\.youtube\.com\/watch\?v=[\w-]{11}$/.test(window._opened)), 'video button opens the YouTube video');
+  await p.locator('#pop .vbtn.alt').click();
+  ok(await p.evaluate(() => window._opened.startsWith('https://www.youtube.com/results?search_query=')), 'backup button opens a YouTube search');
+  await p.evaluate(() => { App.unpop(); App.idea('story'); });
+  ok(await p.locator('#pop .vbtn').count() === 1 && await p.locator('#pop .vbtn.alt').count() === 1, 'idea without a picked video still has the search button');
+  await p.evaluate(() => { App.unpop(); App.famSet('type', 'all'); });
+  ok(await p.locator('.idea .play').count() === 27, '▶ badge on idea tiles');
   await p.evaluate(() => App.ideaMark('volcano', 'done'));
   ok(await p.evaluate(() => JSON.parse(localStorage.zakaa).family.done.volcano === 1), 'done idea is saved');
   await p.evaluate(() => { App.unpop(); App.startCharades('mix', 30); }); await p.waitForTimeout(300);

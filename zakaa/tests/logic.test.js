@@ -177,6 +177,15 @@ t('👨‍👧‍👦 family time: charades words and ideas are complete', () =>
   cr = F.chPass(k6, 1, 3); assert.strictEqual(cr.gained, 0);
   assert.strictEqual(F.chUnlocked(k9), 4, 'each player has his own progress');
   F.chPass(k6, 15, 1); assert.strictEqual(F.chUnlocked(k6), 15);
+  // ▶️ YouTube for every idea
+  const ids = F.IDEAS.filter(i => i.yt).map(i => i.yt);
+  assert.ok(ids.length >= F.IDEAS.length - 2, 'almost every idea has its own video');
+  assert.ok(ids.every(v => /^[\w-]{11}$/.test(v)) && uniq(ids), 'video ids look right and are not repeated');
+  for (const i of F.IDEAS) {
+    assert.ok(i.q && i.q.length > 5, i.id + ' has a search');
+    assert.ok(/^https:\/\/www\.youtube\.com\/results\?search_query=\S+$/.test(F.ytSearch(i)), i.id);
+    if (i.yt) assert.strictEqual(F.ytUrl(i), 'https://www.youtube.com/watch?v=' + i.yt);
+  }
   for (const t of F.TYPES) assert.ok(F.ideas(t.id).length >= 4, 'enough ideas of type ' + t.id);
   assert.strictEqual(F.ideaOfDay('2026-11-10').id, F.ideaOfDay('2026-11-10').id); assert.notStrictEqual(F.ideaOfDay('2026-11-10').id, F.ideaOfDay('2026-11-11').id);
 });

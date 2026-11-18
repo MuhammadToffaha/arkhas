@@ -119,6 +119,13 @@
       'الشكر كل يوم بيخلّي المخ ياخد باله من الحاجات الحلوة.')
   ];
 
+  // ▶️ a short YouTube video for each idea (picked by hand) + a YouTube search as backup if a video ever disappears
+  const VID = {"volcano": "vgGorIptHa0", "rainbow": "tmuCSCTtIaM", "milk": "88B4_FlBufg", "float": "wxjmvCsWyL0", "balloon": "T29OYbFrTgU", "walk": "k8YtroKjVxo", "static": "6fKYQ5nAH5M", "shadow": "cDKIByiLsMw", "leaf": "oeW2jyriifc", "tape": "f2JwbZdYbL4", "plane": "hb8JOKy_AQE", "dough": "Wgcbj-yc6rg", "hands": "cPmy7l4cCRs", "scope": "0Iyp_q-1wrY", "sandwich": "9G-tCLeK-Ik", "skewer": "55VV0FXzebw", "nicecream": "hRCfxHJKldY", "dates": "D-FpRpVdcEw", "lava": "m9ST61u3gnU", "treasure": "W8MUw3pCvwU", "statues": "QJbvpcJSkbI", "keepup": "xvoO4Vspnfw", "course": "uGHazSRyKaY", "ispy": "5ybJXkE0VaY", "twenty": "-DhYcvp3ZfE", "tray": "DBrqh1GA9og", "thanks": "svZdWcGUc7s"};
+  const VQ = {"volcano": "color volcano experiment kids", "rainbow": "skittles rainbow experiment kids", "milk": "magic milk experiment kids", "float": "sink or float experiment kids", "balloon": "baking soda vinegar balloon experiment", "walk": "walking water experiment kids", "static": "balloon static electricity experiment kids", "shadow": "easy hand shadow puppets kids", "leaf": "leaf rubbing art kids", "tape": "tape resist painting kids", "plane": "easy paper airplane kids", "dough": "salt dough kids craft", "hands": "handprint family tree craft", "scope": "toilet paper roll binoculars craft", "sandwich": "funny face sandwich kids", "skewer": "rainbow fruit skewers kids", "nicecream": "banana nice cream kids", "dates": "date coconut balls no bake", "lava": "floor is lava game kids", "treasure": "indoor treasure hunt clues kids", "statues": "musical statues game kids", "keepup": "keep the balloon up game kids", "course": "indoor obstacle course kids", "story": "story telling game kids take turns", "ispy": "how to play i spy kids", "twenty": "how to play 20 questions", "tray": "kims game memory tray kids", "thanks": "gratitude jar kids craft"};
+  IDEAS.forEach(i => { i.yt = VID[i.id] || ''; i.q = VQ[i.id] || i.title; });
+  const ytUrl = i => (i.yt ? 'https://www.youtube.com/watch?v=' + i.yt : '');
+  const ytSearch = i => 'https://www.youtube.com/results?search_query=' + encodeURIComponent(i.q);
+
   function shuffle(r, arr) { const a = arr.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(r() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
   /** shuffled words of one category, or of all of them ('mix') */
   function deck(cat, r) {
@@ -145,6 +152,6 @@
     return { first: prev === 0 && s > 0, gained, best: kid.ch[lvl] };
   }
 
-  const api = { CATS, TYPES, IDEAS, deck, ideaOfDay, ideas, CH_TIERS, CH_RULES, CH_MAX, CH_LEVELS, levelDeck, chStars, chStart, chUnlocked, chPass };
+  const api = { ytUrl, ytSearch, CATS, TYPES, IDEAS, deck, ideaOfDay, ideas, CH_TIERS, CH_RULES, CH_MAX, CH_LEVELS, levelDeck, chStars, chStart, chUnlocked, chPass };
   if (typeof module !== 'undefined' && module.exports) module.exports = api; else root.ZF = api;
 })(this);
