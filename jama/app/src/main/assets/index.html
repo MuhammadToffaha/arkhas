@@ -56,6 +56,28 @@ header:after{content:"";position:absolute;width:190px;height:190px;border-radius
 .popbox b{display:block;font-size:18px;margin:6px 0 4px}
 .popb{display:flex;gap:8px;margin-top:14px}.popb .btn{flex:1}
 @keyframes pin{from{transform:scale(.85);opacity:0}}
+.tabs{display:flex;gap:6px;margin-top:12px;position:relative;z-index:1}
+.tabs button{flex:1;border:0;font:inherit;font-weight:800;font-size:14px;border-radius:12px;padding:7px;background:#ffffff26;color:#fff}
+.tabs button.on{background:#fff;color:var(--g1)}
+.ai .box{margin-top:12px}.ai .box:first-child{margin-top:-18px;position:relative;z-index:2}
+.dot{width:12px;height:12px;border-radius:50%;flex:none;background:var(--muted)}
+.dot.ok{background:var(--ok);box-shadow:0 0 0 4px #10b98128}.dot.bad{background:var(--hot);box-shadow:0 0 0 4px #ff2d6322}
+.btns{display:flex;gap:8px;margin-top:10px}.btns .btn{flex:1;font-size:14px;padding:10px}
+.msgs{display:flex;flex-direction:column;gap:8px;max-height:52vh;overflow-y:auto;margin-bottom:10px}
+.msg{padding:9px 12px;border-radius:16px;font-size:14.5px;white-space:pre-wrap;word-wrap:break-word;max-width:88%}
+.msg.u{align-self:flex-end;background:var(--grad);color:#fff;border-end-end-radius:4px}
+.msg.a{align-self:flex-start;background:var(--bg);border-end-start-radius:4px}
+.msg.e{align-self:center;background:#ff2d6312;color:var(--hot);font-size:13px}
+.msg small{display:block;opacity:.6;font-size:11px;margin-top:2px}
+.ask{display:flex;gap:8px;align-items:flex-end}
+.ask textarea{flex:1;resize:none;min-height:44px;max-height:120px}
+input.f,.ask textarea{font:inherit;font-size:14.5px;color:var(--ink);background:var(--bg);border:1.5px solid var(--line);border-radius:14px;padding:10px 12px;width:100%}
+input.f{margin-top:4px;direction:ltr}
+label.l{display:block;font-size:13px;font-weight:700;color:var(--muted);margin-top:10px}
+details summary{font-weight:800;cursor:pointer;list-style:none}details summary::-webkit-details-marker{display:none}
+pre{direction:ltr;text-align:left;background:var(--bg);border-radius:12px;padding:10px;font-size:11px;overflow-x:auto;white-space:pre}
+ol{padding-inline-start:20px;font-size:13.5px;margin:8px 0}
+.empty{color:var(--muted);text-align:center;font-size:13.5px;padding:10px}
 </style>
 </head>
 <body>
@@ -64,8 +86,10 @@ header:after{content:"";position:absolute;width:190px;height:190px;border-radius
     <div class="logo">🧩 JAMA<small id="tagline"></small></div>
     <button class="lang" id="lang">EN</button>
   </div>
+  <div class="tabs"><button id="tabApps" class="on"></button><button id="tabAi"></button></div>
 </header>
 <div class="wrap">
+ <div id="appsView">
   <div class="actions">
     <button class="btn" id="all"></button>
     <button class="btn alt" id="check"></button>
@@ -80,6 +104,30 @@ header:after{content:"";position:absolute;width:190px;height:190px;border-radius
       <label class="sw"><input type="checkbox" id="auto"><i></i></label>
     </div>
   </div>
+ </div>
+
+ <div id="aiView" class="ai" hidden>
+  <div class="box">
+    <div class="row"><span class="dot" id="aiDot"></span><div class="t"><b id="aiStat"></b><div class="d" id="aiStatD" style="white-space:normal"></div></div></div>
+    <div class="btns"><button class="btn alt" id="aiTest"></button><button class="btn" id="aiStart"></button></div>
+  </div>
+  <div class="box">
+    <div class="msgs" id="msgs"></div>
+    <div class="ask"><textarea id="q" rows="1"></textarea><button class="go" id="send"></button></div>
+    <div class="btns"><button class="btn alt" id="clear"></button></div>
+  </div>
+  <div class="box"><details id="setBox"><summary id="setT"></summary>
+    <label class="l" id="urlL"></label><input class="f" id="aiUrl" autocomplete="off" spellcheck="false">
+    <label class="l" id="keyL"></label><input class="f" id="aiKey" type="password" autocomplete="off" spellcheck="false">
+    <label class="l" id="modelL"></label><input class="f" id="aiModel" autocomplete="off" spellcheck="false">
+    <div class="btns"><button class="btn" id="aiSave"></button><button class="btn alt" id="dash"></button></div>
+    <div class="sub" id="shareD" style="text-align:start;margin-top:10px"></div>
+  </details></div>
+  <div class="box"><details id="setupBox"><summary id="setupT"></summary>
+    <ol id="steps"></ol><pre id="setupCmd"></pre>
+    <div class="btns"><button class="btn" id="copy"></button><button class="btn alt" id="termux"></button></div>
+  </details></div>
+ </div>
   <div class="credit" dir="ltr"><span id="ver"></span><br>Designed by Muhammad Toffaha</div>
 </div>
 
@@ -98,14 +146,34 @@ const T = {
     notInst: "مش متثبّت", cur: "عندك {v}", latest: "الجديد {v}", upToDate: "✓ أحدث نسخة", err: "⚠️ {e}",
     autoT: "🤫 تحديث تلقائي صامت للكل", autoD: "مرة كل يوم على الواي فاي: JAMA بيحدّث كل التطبيقات ونفسه لوحده. أول مرة لكل تطبيق أندرويد ممكن يطلب موافقة واحدة.",
     perm: "🔓 اسمح لـ JAMA بتثبيت التطبيقات مرة واحدة", permB: "اسمح",
-    popT: "{n} تحديث جديد 🎉", popD: "في نسخ أحدث من: {names}", popGo: "🔄 حدّث الكل", later: "بعدين", ver: "JAMA {v}", browser: "افتح JAMA على أندرويد عشان تثبّت التطبيقات." },
+    popT: "{n} تحديث جديد 🎉", popD: "في نسخ أحدث من: {names}", popGo: "🔄 حدّث الكل", later: "بعدين", ver: "JAMA {v}", browser: "افتح JAMA على أندرويد عشان تثبّت التطبيقات.",
+    tabApps: "📦 التطبيقات", tabAi: "🤖 الذكاء الاصطناعي",
+    aiOk: "✅ السيرفر شغّال", aiOkD: "{n} موديل متاح · كل تطبيقاتك تقدر تستخدمه", aiDown: "😴 السيرفر مش شغّال", aiDownD: "اضغط ▶️ شغّل السيرفر (أول مرة اعمل الإعداد تحت)",
+    aiBad: "⚠️ فيه مشكلة", aiNoKey: "🔑 حط المفتاح الموحّد", aiNoKeyD: "افتح الإعدادات تحت والصق المفتاح من صفحة Keys في لوحة التحكم", aiWait: "⏳ بنفحص…",
+    test: "🔌 افحص", start: "▶️ شغّل السيرفر", starting: "⏳ بيشغّل… استنى 30 ثانية", needPerm: "🔓 اسمح لـ JAMA يشغّل Termux", getTermux: "⬇️ نزّل Termux",
+    ask: "اسأل أي حاجة…", send: "➤", clear: "🧹 محادثة جديدة", empty: "💬 اسأل أي سؤال — الراوتر بيختار أحسن موديل مجاني", thinking: "⏳ بيفكّر…",
+    setT: "⚙️ الإعدادات", urlL: "🌐 عنوان السيرفر", keyL: "🔑 المفتاح الموحّد", keySaved: "•••• محفوظ (سيبه فاضي عشان يفضل زي ما هو)", modelL: "🧠 الموديل (auto = الراوتر يختار)",
+    save: "💾 احفظ وافحص", dash: "📊 لوحة التحكم", saved: "✅ اتحفظ",
+    shareD: "🔗 أرخص وحلال وباقي تطبيقاتك تقدر تقرا نفس الإعدادات من JAMA — مفتاح واحد للكل.",
+    setupT: "🛠️ الإعداد أول مرة (Termux)", copy: "📋 انسخ الأمر", copied: "✅ اتنسخ", termux: "📟 افتح Termux",
+    steps: ["نزّل Termux من F-Droid (مش من جوجل بلاي)", "انسخ الأمر ده والصقه في Termux واستنى يخلص (5–15 دقيقة)", "افتح 📊 لوحة التحكم، اعمل حساب، وضيف مفاتيح Groq / Gemini / OpenRouter المجانية", "انسخ المفتاح الموحّد من صفحة Keys وحطه في ⚙️ الإعدادات"] },
   en: { tag: "All your apps in one place", all: "🔄 Update all", check: "🔍 Check for updates", checking: "⏳ Checking…",
     sub: "Last check: {t}", never: "never", allGood: "✅ All apps are up to date", nUpd: "🎁 {n} new update(s)",
     install: "⬇️ Install", update: "🔄 Update", open: "▶️ Open", queued: "⏳ Queued", downloading: "⬇️ {p}%", installing: "📦 Installing…", confirm: "👆 Confirm",
     notInst: "Not installed", cur: "You have {v}", latest: "New {v}", upToDate: "✓ Up to date", err: "⚠️ {e}",
     autoT: "🤫 Silent auto-update for all", autoD: "Once a day on Wi-Fi: JAMA updates every app and itself. The first time per app Android may ask once.",
     perm: "🔓 Allow JAMA to install apps (once)", permB: "Allow",
-    popT: "{n} new update(s) 🎉", popD: "Newer versions of: {names}", popGo: "🔄 Update all", later: "Later", ver: "JAMA {v}", browser: "Open JAMA on Android to install the apps." },
+    popT: "{n} new update(s) 🎉", popD: "Newer versions of: {names}", popGo: "🔄 Update all", later: "Later", ver: "JAMA {v}", browser: "Open JAMA on Android to install the apps.",
+    tabApps: "📦 Apps", tabAi: "🤖 AI",
+    aiOk: "✅ Server running", aiOkD: "{n} models available · all your apps can use it", aiDown: "😴 Server not running", aiDownD: "Tap ▶️ Start server (first time: do the setup below)",
+    aiBad: "⚠️ Problem", aiNoKey: "🔑 Add your unified key", aiNoKeyD: "Open Settings below and paste the key from the dashboard's Keys page", aiWait: "⏳ Checking…",
+    test: "🔌 Test", start: "▶️ Start server", starting: "⏳ Starting… wait ~30 s", needPerm: "🔓 Allow JAMA to run Termux", getTermux: "⬇️ Get Termux",
+    ask: "Ask anything…", send: "➤", clear: "🧹 New chat", empty: "💬 Ask anything — the router picks the best free model", thinking: "⏳ Thinking…",
+    setT: "⚙️ Settings", urlL: "🌐 Server URL", keyL: "🔑 Unified API key", keySaved: "•••• saved (leave empty to keep it)", modelL: "🧠 Model (auto = router picks)",
+    save: "💾 Save & test", dash: "📊 Dashboard", saved: "✅ Saved",
+    shareD: "🔗 Arkhas, Halal and your other apps can read these same settings from JAMA — one key for all.",
+    setupT: "🛠️ First-time setup (Termux)", copy: "📋 Copy command", copied: "✅ Copied", termux: "📟 Open Termux",
+    steps: ["Install Termux from F-Droid (not Google Play)", "Copy this command, paste it in Termux, wait until done (5–15 min)", "Open 📊 Dashboard, create the account, add free Groq / Gemini / OpenRouter keys", "Copy the unified key from the Keys page into ⚙️ Settings"] },
 };
 let L = "ar", S = null, popShown = false;
 try { L = localStorage.getItem("lang") || "ar"; } catch (e) {}
@@ -129,6 +197,8 @@ function render() {
   $("#check").textContent = S && S.checking ? t.checking : t.check;
   $("#autoT").textContent = t.autoT; $("#autoD").textContent = t.autoD;
   $("#permT").textContent = t.perm; $("#permB").textContent = t.permB;
+  $("#tabApps").textContent = t.tabApps; $("#tabAi").textContent = t.tabAi;
+  renderAi();
   if (!S) { $("#sub").textContent = N ? "" : t.browser; return; }
   $("#ver").textContent = fmt(t.ver, { v: S.version });
   $("#auto").checked = !!S.auto;
@@ -167,7 +237,84 @@ $("#permB").onclick = () => N && N.allowInstalls();
 $("#lang").onclick = () => { L = L === "ar" ? "en" : "ar"; try { localStorage.setItem("lang", L); } catch (e) {} render(); };
 $("#popLater").onclick = () => { $("#pop").hidden = true; };
 $("#popGo").onclick = () => { $("#pop").hidden = true; N && N.updateAll(); };
-window.jamaBack = () => { if (!$("#pop").hidden) { $("#pop").hidden = true; return true; } return false; };
+window.jamaBack = () => { if (!$("#pop").hidden) { $("#pop").hidden = true; return true; } if (TAB === "ai") { tab("apps"); return true; } return false; };
+
+// ───────── 🤖 AI hub ─────────
+let TAB = "apps", A = null, AS = { st: "", n: 0, err: "" }, CHAT = [], busy = false, starting = false;
+try { CHAT = JSON.parse(localStorage.getItem("aiChat") || "[]"); } catch (e) {}
+function tab(x) {
+  TAB = x; $("#appsView").hidden = x !== "apps"; $("#aiView").hidden = x !== "ai";
+  $("#tabApps").classList.toggle("on", x === "apps"); $("#tabAi").classList.toggle("on", x === "ai");
+  if (x === "ai") { loadAi(); if (N && A && A.hasKey && AS.st !== "ok") test(); }
+}
+function loadAi() { if (N) try { A = JSON.parse(N.aiSettings()); } catch (e) {} renderAi(); }
+function test() { if (!N) return; AS.st = "wait"; renderAi(); N.aiTest(); }
+function keepChat() { try { localStorage.setItem("aiChat", JSON.stringify(CHAT.slice(-40))); } catch (e) {} }
+function renderAi() {
+  const t = T[L]; if (!$("#aiStat")) return;
+  ["test", "clear", "dash", "copy", "termux"].forEach((k) => { const b = $("#" + (k === "test" ? "aiTest" : k)); if (b && !b.dataset.flash) b.textContent = t[k]; });
+  $("#send").textContent = t.send; $("#q").placeholder = t.ask;
+  ["setT", "urlL", "keyL", "modelL", "shareD", "setupT"].forEach((k) => $("#" + k).textContent = t[k]);
+  if (!$("#aiSave").dataset.flash) $("#aiSave").textContent = t.save;
+  $("#steps").innerHTML = t.steps.map((x) => `<li>${esc(x)}</li>`).join("");
+  if (N && !$("#setupCmd").textContent) $("#setupCmd").textContent = N.aiSetup();
+  if (A) {
+    if (document.activeElement !== $("#aiUrl")) $("#aiUrl").value = A.url;
+    if (document.activeElement !== $("#aiModel")) $("#aiModel").value = A.model;
+    $("#aiKey").placeholder = A.hasKey ? t.keySaved : "sk-…";
+  }
+  let dot = "", st = t.aiWait, d = "";
+  if (A && !A.hasKey) { dot = "bad"; st = t.aiNoKey; d = t.aiNoKeyD; }
+  else if (AS.st === "ok") { dot = "ok"; st = t.aiOk; d = fmt(t.aiOkD, { n: AS.n }); }
+  else if (AS.st === "down") { dot = "bad"; st = t.aiDown; d = t.aiDownD; }
+  else if (AS.st === "bad") { dot = "bad"; st = t.aiBad; d = AS.err; }
+  $("#aiDot").className = "dot " + dot; $("#aiStat").textContent = st; $("#aiStatD").textContent = d;
+  const sb = $("#aiStart");
+  sb.hidden = AS.st === "ok";
+  sb.textContent = starting ? t.starting : A && !A.termux ? t.getTermux : A && !A.termuxPerm ? t.needPerm : t.start;
+  sb.disabled = starting;
+  $("#msgs").innerHTML = CHAT.length ? CHAT.map((m) => `<div class="msg ${m.role === "user" ? "u" : m.role === "error" ? "e" : "a"}">${esc(m.content)}${m.model ? `<small>${esc(m.model)}</small>` : ""}</div>`).join("")
+    + (busy ? `<div class="msg a">${t.thinking}</div>` : "") : `<div class="empty">${t.empty}</div>`;
+  $("#msgs").scrollTop = 1e6;
+  $("#send").disabled = busy;
+}
+window.onAi = (tag, r) => {
+  if (tag === "test") { AS = r.ok ? { st: "ok", n: r.models } : { st: r.down ? "down" : "bad", err: r.error }; if (r.ok) starting = false; }
+  if (tag === "chat") {
+    busy = false;
+    if (r.ok) CHAT.push({ role: "assistant", content: r.text, model: r.model });
+    else { CHAT.push({ role: "error", content: "⚠️ " + r.error }); if (r.down) AS.st = "down"; }
+    keepChat();
+  }
+  if (tag === "start") {
+    if (!r.ok) { starting = false; AS = { st: "bad", err: r.error }; }
+    else { let k = 0; const poll = () => { if (AS.st === "ok" || ++k > 12) { starting = false; renderAi(); return; } N.aiTest(); setTimeout(poll, 5000); }; setTimeout(poll, 4000); }
+  }
+  if (tag === "perm") A = r;
+  renderAi();
+};
+function flash(el, txt) { el.dataset.flash = 1; el.textContent = txt; setTimeout(() => { delete el.dataset.flash; renderAi(); }, 1500); }
+$("#tabApps").onclick = () => tab("apps");
+$("#tabAi").onclick = () => tab("ai");
+$("#aiTest").onclick = test;
+$("#aiStart").onclick = () => { if (!N) return; if (A && A.termux && A.termuxPerm) { starting = true; renderAi(); } N.aiStart(); };
+$("#aiSave").onclick = () => {
+  if (!N) return;
+  const r = N.aiSave($("#aiUrl").value, $("#aiKey").value, $("#aiModel").value);
+  if (r !== "ok") { AS = { st: "bad", err: r }; renderAi(); return; }
+  $("#aiKey").value = ""; flash($("#aiSave"), T[L].saved); loadAi(); test();
+};
+$("#dash").onclick = () => N && N.openDashboard();
+$("#copy").onclick = () => { if (!N) return; N.copy(N.aiSetup()); flash($("#copy"), T[L].copied); };
+$("#termux").onclick = () => N && N.openTermux();
+$("#clear").onclick = () => { CHAT = []; keepChat(); renderAi(); };
+function send() {
+  const q = $("#q").value.trim(); if (!q || busy || !N) return;
+  CHAT.push({ role: "user", content: q }); $("#q").value = ""; busy = true; keepChat(); renderAi();
+  N.aiChat(JSON.stringify(CHAT.filter((m) => m.role === "user" || m.role === "assistant").slice(-20).map((m) => ({ role: m.role, content: m.content }))));
+}
+$("#send").onclick = send;
+$("#q").oninput = (e) => { e.target.style.height = "auto"; e.target.style.height = Math.min(120, e.target.scrollHeight) + "px"; };
 
 if (N) { try { S = JSON.parse(N.state()); } catch (e) {} S && (S.checking = true); N.refresh(); }
 render();
