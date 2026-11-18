@@ -100,10 +100,51 @@ class MainActivity : AppCompatActivity() {
         }
         @JavascriptInterface fun setAuto(on: Boolean) { AutoUpdate.set(this@MainActivity, on); push() }
         @JavascriptInterface fun allowInstalls() = askPermission()
+        // 🤖 AI hub (FreeLLMAPI on the phone via Termux) — slow calls answer through window.onAi(tag, json)
+        @JavascriptInterface fun aiSettings(): String = Ai.settings(this@MainActivity).toString()
+        @JavascriptInterface fun aiSave(url: String, key: String, model: String): String = try {
+            // empty key = keep the saved one (the page never sees the stored key)
+            Ai.save(this@MainActivity, url, key.ifBlank { Ai.key(this@MainActivity) }, model); "ok"
+        } catch (e: Exception) { e.message ?: "error" }
+        @JavascriptInterface fun aiTest() = net.execute { ai("test", Ai.test(this@MainActivity).toString()) }
+        @JavascriptInterface fun aiChat(messages: String) = net.execute {
+            val r = runCatching { Ai.chat(this@MainActivity, org.json.JSONArray(messages)) }
+                .getOrElse { org.json.JSONObject().put("ok", false).put("error", it.message ?: "error") }
+            ai("chat", r.toString())
+        }
+        @JavascriptInterface fun aiStart() {
+            if (!Ai.termuxInstalled(this@MainActivity)) {
+                runOnUiThread { runCatching { startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://f-droid.org/packages/com.termux/"))) } }
+                return
+            }
+            if (!Ai.termuxPermission(this@MainActivity)) { runOnUiThread { requestPermissions(arrayOf(Ai.TERMUX_PERM), 2) }; return }
+            val r = runCatching { Ai.startServer(this@MainActivity); "ok" }.getOrElse { it.message ?: "error" }
+            ai("start", org.json.JSONObject().put("ok", r == "ok").put("error", r).toString())
+        }
+        @JavascriptInterface fun aiSetup(): String = Ai.SETUP
+        @JavascriptInterface fun copy(text: String) = runOnUiThread {
+            getSystemService(android.content.ClipboardManager::class.java)
+                .setPrimaryClip(android.content.ClipData.newPlainText("JAMA", text))
+        }
+        @JavascriptInterface fun openTermux() = runOnUiThread {
+            packageManager.getLaunchIntentForPackage(Ai.TERMUX)?.let { startActivity(it) }
+                ?: runCatching { startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://f-droid.org/packages/com.termux/"))) }
+        }
+        @JavascriptInterface fun openDashboard() = runOnUiThread {
+            runCatching { startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(Ai.DASHBOARD))) }
+        }
         @JavascriptInterface fun releases(id: String) {
             val a = runCatching { Store.app(id) }.getOrNull() ?: return
             runOnUiThread { startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/${Store.OWNER}/${a.repo}/releases"))) }
         }
+    }
+
+    private fun ai(tag: String, json: String) =
+        runOnUiThread { web.evaluateJavascript("window.onAi&&window.onAi('$tag',$json)", null) }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == 2) ai("perm", Ai.settings(this).toString())
     }
 
     private fun askPermission() = runOnUiThread {
