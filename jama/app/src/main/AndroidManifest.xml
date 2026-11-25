@@ -7,6 +7,11 @@
     <uses-permission android:name="android.permission.UPDATE_PACKAGES_WITHOUT_USER_ACTION" />
     <uses-permission android:name="android.permission.ENFORCE_UPDATE_OWNERSHIP" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- 🤖 start the FreeLLMAPI server in Termux -->
+    <uses-permission android:name="com.termux.permission.RUN_COMMAND" />
+
+    <!-- 🔗 only apps signed with the same key (Muhammad's apps) may read the AI settings -->
+    <permission android:name="com.toffaha.jama.permission.AI" android:protectionLevel="signature" />
 
     <!-- see which of the managed apps are installed (Android 11+) -->
     <queries>
@@ -18,6 +23,7 @@
         <package android:name="com.toffaha.rowaremote" />
         <package android:name="com.toffaha.zakaa" />
         <package android:name="com.toffaha.machich" />
+        <package android:name="com.termux" />
     </queries>
 
     <application
@@ -25,7 +31,8 @@
         android:icon="@mipmap/ic_launcher"
         android:roundIcon="@mipmap/ic_launcher"
         android:supportsRtl="true"
-        android:theme="@style/Theme.Jama">
+        android:theme="@style/Theme.Jama"
+        android:networkSecurityConfig="@xml/network_security_config">
 
         <activity
             android:name=".MainActivity"
@@ -43,5 +50,11 @@
                 <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
             </intent-filter>
         </receiver>
+
+        <provider
+            android:name=".AiProvider"
+            android:authorities="com.toffaha.jama.ai"
+            android:exported="true"
+            android:readPermission="com.toffaha.jama.permission.AI" />
     </application>
 </manifest>
