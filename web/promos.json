@@ -1,27 +1,68 @@
 {
- "updated": "2026-10-28T09:50:16Z",
+ "updated": "2026-11-25T13:10:39Z",
  "country": "eg",
  "sources": [
   "yajny.com/ar-eg"
  ],
  "codes": [
   {
-   "store": "تو بي",
-   "logo": "https://yajny.nyc3.digitaloceanspaces.com/public/2b-website-english-logo-3bd98246-af39-4916-85e1-88579f780cfb.webp",
-   "link": "https://2b.com.eg/ar/",
-   "code": "DD55",
-   "title": "احصل على خصم 10% على طلبك (حتى 100 جنيه) - 2B",
+   "store": "أمازون مصر",
+   "logo": "https://yajny.nyc3.digitaloceanspaces.com/public/store/amazon-6d210d83-d961-4dbd-8fe9-9ff60f7ff775.png",
+   "link": "https://www.amazon.eg/l/21863792031/?_encoding=UTF8&pd_rd_w=z1m7m&content-id=amzn1.sym.1a732091-376e-4ed0-8f11-7c3db819df40&pf_rd_p=1a732091-376e-4ed0-8f11-7c3db819df40&pf_rd_r=1HJV1D4DVV1H9FV5R4QG&pd_rd_wg=NrK0U&pd_rd_r=da6e8b29-2adf-4178-a67a-33308993eafe&ref_=pd_hp_d_hero_unk&language=ar_AE",
+   "code": "GLAM10",
+   "title": "كود خصم أمازون في مصر: أسبوع الجمال خصم 10% حتى 500 جنيه",
    "expires": "2027-12-31",
+   "used": 11,
+   "page": "https://yajny.com/ar-eg/store/amazon",
+   "source": "yajny"
+  },
+  {
+   "store": "انكر",
+   "logo": "https://yajny.nyc3.digitaloceanspaces.com/public/download-2026-11-23t112049350-d5d9907f-c3e5-45c7-9d3b-b0330c070493.png",
+   "link": "https://www.store.anker.com/ae",
+   "code": "A25",
+   "title": "خصم 10% على منتجات Anker",
    "page": "https://yajny.com/ar-eg/coupons",
+   "source": "yajny"
+  },
+  {
+   "store": "باث اند بودي وركس",
+   "logo": "https://yajny.nyc3.digitaloceanspaces.com/public/store/bbw-225bc008-be20-4654-98ee-b629056a5677.png",
+   "link": "https://www.bathandbodyworks.com.eg/ar/shop-top-offers/",
+   "code": "0IL",
+   "title": "رمز خصم باث اند بودي ووركس للمتسوقين في مصر",
+   "expires": "2027-12-31",
+   "used": 2,
+   "page": "https://yajny.com/ar-eg/store/bath-body-works-egypt",
+   "source": "yajny"
+  },
+  {
+   "store": "باث اند بودي وركس",
+   "logo": "https://yajny.nyc3.digitaloceanspaces.com/public/store/bbw-225bc008-be20-4654-98ee-b629056a5677.png",
+   "link": "https://www.bathandbodyworks.com.eg/ar/shop-top-offers/",
+   "code": "02Q",
+   "title": "استخدم كود خصم باث اند بودي ووركس ووفّر عند التسوق أونلاين",
+   "expires": "2027-12-31",
+   "page": "https://yajny.com/ar-eg/store/bath-body-works-egypt",
+   "source": "yajny"
+  },
+  {
+   "store": "باث اند بودي وركس",
+   "logo": "https://yajny.nyc3.digitaloceanspaces.com/public/store/bbw-225bc008-be20-4654-98ee-b629056a5677.png",
+   "link": "https://www.bathandbodyworks.com.eg/ar/shop-top-offers/",
+   "code": "A69",
+   "title": "أحدث كوبون خصم باث اند بودي ووركس في مصر",
+   "expires": "2027-12-31",
+   "page": "https://yajny.com/ar-eg/store/bath-body-works-egypt",
    "source": "yajny"
   },
   {
    "store": "تو بي",
    "logo": "https://yajny.nyc3.digitaloceanspaces.com/public/2b-website-english-logo-3bd98246-af39-4916-85e1-88579f780cfb.webp",
-   "link": "https://2b.com.eg/ar/offers/valu-12-installment.html",
-   "code": "DD56",
-   "title": "2B | تقسيط حتى 12 شهر بدون فوائد مع ڤاليو",
-   "expires": "2026-12-31",
+   "link": "https://2b.com.eg/ar/",
+   "code": "DD55",
+   "title": "كود خصم تو بي في مصر: اشتري الآن ووفر حتى 100 جنيه",
+   "expires": "2027-12-31",
    "page": "https://yajny.com/ar-eg/store/2b",
    "source": "yajny"
   },
@@ -30,29 +71,40 @@
    "logo": "https://yajny.nyc3.digitaloceanspaces.com/public/store/jumia-6bf1ba21-7600-4ad1-bda4-772a273376c4.png",
    "link": "https://yajny.com/ar-eg/store/jumia-egypt",
    "code": "AYJNN6",
-   "title": "خصم %10",
-   "expires": "2026-12-31",
-   "used": 3,
+   "title": "استخدم كود خصم جوميا ووفّر عند التسوق أونلاين",
+   "expires": "2027-12-31",
+   "used": 2,
    "page": "https://yajny.com/ar-eg/store/jumia-egypt",
    "source": "yajny"
   },
   {
-   "store": "جيت باك جلوبال",
-   "logo": "https://yajny.nyc3.digitaloceanspaces.com/public/jetpac-global-website-english-logo-c4e9706b-60ff-4b8c-bed2-3bf554af78b7.webp",
-   "link": "https://www.jetpacglobal.com/",
-   "code": "JP96",
-   "title": "كود خصم %10",
-   "page": "https://yajny.com/ar-eg/coupons",
+   "store": "حرائر",
+   "logo": "https://yajny.nyc3.digitaloceanspaces.com/public/haraer-website-english-logo-f7d5e74a-99a3-4ffa-a971-d47aab287c98.webp",
+   "link": "https://www.emirates.com/eg/English/special-offers/",
+   "code": "7F",
+   "title": "استخدم كود خصم حرائر ووفّر عند التسوق أونلاين",
+   "expires": "2027-12-31",
+   "page": "https://yajny.com/ar-eg/store/haraer-egypt",
+   "source": "yajny"
+  },
+  {
+   "store": "حرائر",
+   "logo": "https://yajny.nyc3.digitaloceanspaces.com/public/haraer-website-english-logo-f7d5e74a-99a3-4ffa-a971-d47aab287c98.webp",
+   "link": "https://www.emirates.com/eg/English/special-offers/",
+   "code": "MM45",
+   "title": "وفّر مع كوبون حرائر في مصر",
+   "expires": "2027-12-31",
+   "page": "https://yajny.com/ar-eg/store/haraer-egypt",
    "source": "yajny"
   },
   {
    "store": "ديفاكتو مصر",
    "logo": "https://yajny.nyc3.digitaloceanspaces.com/public/defacto-egypt-website-english-logo-e4c70813-259c-480c-bca3-6f34bb468850.webp",
-   "link": "https://www.defacto.com.eg/ar-eg",
+   "link": "https://www.defacto.com/ar-eg",
    "code": "DEFA30",
-   "title": "كود ديفاكتو لفترة محدودة: خصم 10% على الطلبات اليوم",
-   "expires": "2026-12-31",
-   "used": 2,
+   "title": "كوبون ديفاكتو مصر اون لاين (DEFA20) مع عروض تصل إلى 10% خصم",
+   "expires": "2027-06-01",
+   "used": 3,
    "page": "https://yajny.com/ar-eg/store/defacto",
    "source": "yajny"
   },
@@ -62,6 +114,17 @@
    "link": "https://www.decathlon.eg/ar/",
    "code": "YJ2",
    "title": "خصم %10",
+   "expires": "2027-12-31",
+   "used": 1,
+   "page": "https://yajny.com/ar-eg/store/Decathlon",
+   "source": "yajny"
+  },
+  {
+   "store": "ديكاتلون مصر",
+   "logo": "https://yajny.nyc3.digitaloceanspaces.com/public/decathlon-egypt-website-english-logo-138c7d44-b4c5-4f56-a936-a63f92ad15c7.webp",
+   "link": "https://www.decathlon.eg/ar/",
+   "code": "YJ10",
+   "title": "استخدم كود خصم ديكاتلون ووفّر عند التسوق أونلاين",
    "expires": "2027-12-31",
    "page": "https://yajny.com/ar-eg/store/Decathlon",
    "source": "yajny"
@@ -73,35 +136,58 @@
    "code": "YJ1",
    "title": "كوبون لخصم %10 على جميع الطلبات حتى 200جنية",
    "expires": "2026-12-31",
-   "used": 2,
+   "used": 3,
    "page": "https://yajny.com/ar-eg/store/rayashop",
    "source": "yajny"
   },
   {
-   "store": "سارة ميك أب",
-   "logo": "https://yajny.nyc3.digitaloceanspaces.com/public/download-66-8ede625b-a1b7-4b2e-8ee0-b4c1bf542ba9.png",
-   "link": "https://sara-makeup.com/ar/",
-   "code": "YJ",
-   "title": "كود خصم %10",
-   "page": "https://yajny.com/ar-eg/coupons",
+   "store": "راية شوب",
+   "logo": "https://yajny.nyc3.digitaloceanspaces.com/public/store/raya-shop-492d9886-7070-4516-8c6e-c58e6c480999.png",
+   "link": "https://www.rayashop.com/ar",
+   "code": "YAJ",
+   "title": "كود خصم متجر رايا في مصر: كوبون لخصم 10% على جميع الطلبات حتى 200جنية",
+   "expires": "2027-12-31",
+   "page": "https://yajny.com/ar-eg/store/rayashop",
    "source": "yajny"
   },
   {
-   "store": "ستيفانو",
-   "logo": "https://yajny.nyc3.digitaloceanspaces.com/public/download-64-45fc3f03-85c4-490f-9d83-e4dd00273e35.png",
-   "link": "https://stevanosa.com/ar",
+   "store": "ريك راك",
+   "logo": "https://yajny.nyc3.digitaloceanspaces.com/public/ricrac-website-english-logo-bfcc2773-2f09-4e8a-b232-b9c5ec13e599.webp",
+   "link": "https://www.emirates.com/eg/English/special-offers/",
    "code": "YJ",
-   "title": "كود خصم %10",
-   "page": "https://yajny.com/ar-eg/coupons",
+   "title": "استخدم كود خصم ريك راك ووفّر عند التسوق أونلاين",
+   "expires": "2027-12-31",
+   "page": "https://yajny.com/ar-eg/store/ricrac",
    "source": "yajny"
   },
   {
-   "store": "سيلين",
-   "logo": "https://yajny.nyc3.digitaloceanspaces.com/public/download-65-2a693ec7-6a2d-416e-8083-bf31722a467c.png",
-   "link": "https://selene-official.com/en\\ar",
-   "code": "AA62",
-   "title": "كود خصم %10",
-   "page": "https://yajny.com/ar-eg/coupons",
+   "store": "ريك راك",
+   "logo": "https://yajny.nyc3.digitaloceanspaces.com/public/ricrac-website-english-logo-bfcc2773-2f09-4e8a-b232-b9c5ec13e599.webp",
+   "link": "https://www.emirates.com/eg/English/special-offers/",
+   "code": "YAJNY",
+   "title": "وفّر مع كوبون ريك راك في مصر",
+   "expires": "2027-12-31",
+   "page": "https://yajny.com/ar-eg/store/ricrac",
+   "source": "yajny"
+  },
+  {
+   "store": "ريك راك",
+   "logo": "https://yajny.nyc3.digitaloceanspaces.com/public/ricrac-website-english-logo-bfcc2773-2f09-4e8a-b232-b9c5ec13e599.webp",
+   "link": "https://www.emirates.com/eg/English/special-offers/",
+   "code": "YJ1",
+   "title": "رمز خصم ريك راك للمتسوقين في مصر",
+   "expires": "2027-12-31",
+   "page": "https://yajny.com/ar-eg/store/ricrac",
+   "source": "yajny"
+  },
+  {
+   "store": "سيفورا",
+   "logo": "https://yajny.nyc3.digitaloceanspaces.com/public/store/sephora.png",
+   "link": "https://www.sephora.eg/",
+   "code": "SS100",
+   "title": "استخدم كود خصم سيفورا ووفّر عند التسوق أونلاين",
+   "expires": "2027-12-31",
+   "page": "https://yajny.com/ar-eg/store/sephora-egypt",
    "source": "yajny"
   },
   {
@@ -109,10 +195,90 @@
    "logo": "https://yajny.nyc3.digitaloceanspaces.com/public/jazeera-airways-website-english-logo-8db4ee54-f941-447e-af28-76654335e218.webp",
    "link": "https://www.jazeeraairways.com/ar-kw/flights",
    "code": "ARBYJ910",
-   "title": "احصل على رحلات طيران اقتصادية وصفقات على طيران الجزيرة",
-   "expires": "2028-01-07",
-   "used": 1,
-   "page": "https://yajny.com/ar-eg/store/jazeeraairways",
+   "title": "استخدم كود خصم طيران الجزيرة ووفّر عند التسوق أونلاين",
+   "expires": "2027-12-31",
+   "page": "https://yajny.com/ar-eg/store/jazeera-airways-egypt",
+   "source": "yajny"
+  },
+  {
+   "store": "طيران الهند",
+   "logo": "https://yajny.nyc3.digitaloceanspaces.com/public/air-india-global-website-english-logo-01537f26-1044-4e36-8cc6-4e4e49f5534f.webp",
+   "link": "https://yajny.com/ar-eg/store/%20Air%20India%20Global",
+   "code": "AIRAEB",
+   "title": "كود خصم طيران الهند في مصر: احجز رحلتك مع طيران الهند واستمتع بعروض مميزة على تذاكر الطيران إلى العديد من الوجهات.",
+   "expires": "2027-12-31",
+   "page": "https://yajny.com/ar-eg/store/air-india-egypt",
+   "source": "yajny"
+  },
+  {
+   "store": "فوت لوكر",
+   "logo": "https://yajny.nyc3.digitaloceanspaces.com/public/store/footlocker-38049d9d-a356-4a95-af43-0e1a51bb2f38.png",
+   "link": "https://o-16-3705-1.bstny.net?sub1=CBCLKID",
+   "code": "APG6",
+   "title": "كود خصم فوت لوكر في مصر: خصم 10%",
+   "expires": "2027-12-31",
+   "page": "https://yajny.com/ar-eg/store/foot-locker-egypt",
+   "source": "yajny"
+  },
+  {
+   "store": "فوت لوكر",
+   "logo": "https://yajny.nyc3.digitaloceanspaces.com/public/store/footlocker-38049d9d-a356-4a95-af43-0e1a51bb2f38.png",
+   "link": "https://o-16-3705-1.bstny.net?sub1=CBCLKID",
+   "code": "A9IU",
+   "title": "وفّر مع كوبون فوت لوكر في مصر",
+   "expires": "2027-12-31",
+   "page": "https://yajny.com/ar-eg/store/foot-locker-egypt",
+   "source": "yajny"
+  },
+  {
+   "store": "فوت لوكر",
+   "logo": "https://yajny.nyc3.digitaloceanspaces.com/public/store/footlocker-38049d9d-a356-4a95-af43-0e1a51bb2f38.png",
+   "link": "https://o-16-3705-1.bstny.net?sub1=CBCLKID",
+   "code": "A0PE",
+   "title": "رمز خصم فوت لوكر للمتسوقين في مصر",
+   "expires": "2027-12-31",
+   "page": "https://yajny.com/ar-eg/store/foot-locker-egypt",
+   "source": "yajny"
+  },
+  {
+   "store": "فوت لوكر",
+   "logo": "https://yajny.nyc3.digitaloceanspaces.com/public/store/footlocker-38049d9d-a356-4a95-af43-0e1a51bb2f38.png",
+   "link": "https://o-16-3705-1.bstny.net?sub1=CBCLKID",
+   "code": "A0RE",
+   "title": "استخدم كود خصم فوت لوكر ووفّر عند التسوق أونلاين",
+   "expires": "2027-12-31",
+   "page": "https://yajny.com/ar-eg/store/foot-locker-egypt",
+   "source": "yajny"
+  },
+  {
+   "store": "فوت لوكر",
+   "logo": "https://yajny.nyc3.digitaloceanspaces.com/public/store/footlocker-38049d9d-a356-4a95-af43-0e1a51bb2f38.png",
+   "link": "https://o-16-3705-1.bstny.net?sub1=CBCLKID",
+   "code": "AC9H",
+   "title": "أحدث كوبون خصم فوت لوكر في مصر",
+   "expires": "2027-12-31",
+   "page": "https://yajny.com/ar-eg/store/foot-locker-egypt",
+   "source": "yajny"
+  },
+  {
+   "store": "كارفور مصر",
+   "logo": "https://yajny.nyc3.digitaloceanspaces.com/public/store/carrefour-eg.png",
+   "link": "https://www.emirates.com/eg/English/special-offers/",
+   "code": "CSAA",
+   "title": "وفّر مع كوبون كارفور في مصر",
+   "expires": "2027-12-31",
+   "used": 7,
+   "page": "https://yajny.com/ar-eg/store/carrefour-egypt",
+   "source": "yajny"
+  },
+  {
+   "store": "كنز",
+   "logo": "https://yajny.nyc3.digitaloceanspaces.com/public/kenzz-website-english-logo-8139953a-f7af-4c8f-bfd8-6954da8174ad.webp",
+   "link": "https://kenzz.com/",
+   "code": "AAB100",
+   "title": "استخدم كود خصم كنز ووفّر عند التسوق أونلاين",
+   "expires": "2027-12-31",
+   "page": "https://yajny.com/ar-eg/store/Kenzz",
    "source": "yajny"
   },
   {
@@ -126,6 +292,35 @@
    "source": "yajny"
   },
   {
+   "store": "كيزيك",
+   "logo": "https://yajny.nyc3.digitaloceanspaces.com/public/download-2026-11-23t121226055-f767663a-85dd-4607-a3fc-3f25d6f794e2.png",
+   "link": "https://kizik.com/en-ae",
+   "code": "AA102",
+   "title": "خصم 20% على أحذية Kizik",
+   "page": "https://yajny.com/ar-eg/coupons",
+   "source": "yajny"
+  },
+  {
+   "store": "لايك كارد",
+   "logo": "https://yajny.nyc3.digitaloceanspaces.com/public/store/like-card-20a8267f-7d11-48fd-ba75-91c119a3b2bb.png",
+   "link": "https://www.emirates.com/eg/English/special-offers/",
+   "code": "YJ11",
+   "title": "استخدم كود خصم لايك كارد ووفّر عند التسوق أونلاين",
+   "expires": "2027-12-31",
+   "page": "https://yajny.com/ar-eg/store/like-card-egypt",
+   "source": "yajny"
+  },
+  {
+   "store": "لايك كارد",
+   "logo": "https://yajny.nyc3.digitaloceanspaces.com/public/store/like-card-20a8267f-7d11-48fd-ba75-91c119a3b2bb.png",
+   "link": "https://www.emirates.com/eg/English/special-offers/",
+   "code": "YJ10",
+   "title": "وفّر مع كوبون لايك كارد في مصر",
+   "expires": "2027-12-31",
+   "page": "https://yajny.com/ar-eg/store/like-card-egypt",
+   "source": "yajny"
+  },
+  {
    "store": "ماجستيك فارما",
    "logo": "https://yajny.nyc3.digitaloceanspaces.com/public/download-73-378780b0-7e2b-4253-8631-4aca43d36465.png",
    "link": "https://e-majestic.com/ar",
@@ -136,12 +331,74 @@
    "source": "yajny"
   },
   {
-   "store": "مشاعر",
-   "logo": "https://yajny.nyc3.digitaloceanspaces.com/public/download-74-d7108c8a-af34-4748-bbf9-b6e5771e9691.png",
-   "link": "https://mashaer.store/ar",
-   "code": "SS37",
-   "title": "كود خصم يصل إلي %10",
+   "store": "ماكس مصر",
+   "logo": "https://yajny.nyc3.digitaloceanspaces.com/public/store/max-e0d93b98-34ec-47be-a628-0df051a6fe7b.png",
+   "link": "https://www.emirates.com/eg/English/special-offers/",
+   "code": "A38F",
+   "title": "وفّر مع كوبون ماكس في مصر",
+   "expires": "2027-12-31",
+   "used": 1,
+   "page": "https://yajny.com/ar-eg/store/max-egypt",
+   "source": "yajny"
+  },
+  {
+   "store": "ماكس مصر",
+   "logo": "https://yajny.nyc3.digitaloceanspaces.com/public/store/max-e0d93b98-34ec-47be-a628-0df051a6fe7b.png",
+   "link": "https://www.emirates.com/eg/English/special-offers/",
+   "code": "YJ10",
+   "title": "كود خصم ماكس في مصر: توفير على الطلبات المؤهلة",
+   "expires": "2027-12-31",
+   "page": "https://yajny.com/ar-eg/store/max-egypt",
+   "source": "yajny"
+  },
+  {
+   "store": "ماكس مصر",
+   "logo": "https://yajny.nyc3.digitaloceanspaces.com/public/store/max-e0d93b98-34ec-47be-a628-0df051a6fe7b.png",
+   "link": "https://www.emirates.com/eg/English/special-offers/",
+   "code": "MA26",
+   "title": "رمز خصم ماكس للمتسوقين في مصر",
+   "expires": "2027-12-31",
+   "page": "https://yajny.com/ar-eg/store/max-egypt",
+   "source": "yajny"
+  },
+  {
+   "store": "ماكس مصر",
+   "logo": "https://yajny.nyc3.digitaloceanspaces.com/public/store/max-e0d93b98-34ec-47be-a628-0df051a6fe7b.png",
+   "link": "https://www.emirates.com/eg/English/special-offers/",
+   "code": "AKFM",
+   "title": "استخدم كود خصم ماكس ووفّر عند التسوق أونلاين",
+   "expires": "2027-12-31",
+   "page": "https://yajny.com/ar-eg/store/max-egypt",
+   "source": "yajny"
+  },
+  {
+   "store": "ماكس مصر",
+   "logo": "https://yajny.nyc3.digitaloceanspaces.com/public/store/max-e0d93b98-34ec-47be-a628-0df051a6fe7b.png",
+   "link": "https://www.emirates.com/eg/English/special-offers/",
+   "code": "AL60",
+   "title": "أحدث كوبون خصم ماكس في مصر",
+   "expires": "2027-12-31",
+   "page": "https://yajny.com/ar-eg/store/max-egypt",
+   "source": "yajny"
+  },
+  {
+   "store": "ماي بروتين",
+   "logo": "https://yajny.nyc3.digitaloceanspaces.com/public/myprotien-uea-website-english-logo-0d45bd2c-1965-4727-8fc8-ee1d38c63f23.webp",
+   "link": "https://www.myprotein.com/",
+   "code": "AA40",
+   "title": "خصم 12% على جميع المنتجات",
    "page": "https://yajny.com/ar-eg/coupons",
+   "source": "yajny"
+  },
+  {
+   "store": "نون مصر",
+   "logo": "https://yajny.nyc3.digitaloceanspaces.com/public/store/noon-53b95f5d-5591-43eb-a3cf-ac40abdca61c.png",
+   "link": "https://www.noon.com/egypt-ar/",
+   "code": "B49",
+   "title": "استخدم كود خصم نون ووفّر عند التسوق أونلاين",
+   "expires": "2027-12-31",
+   "used": 3,
+   "page": "https://yajny.com/ar-eg/store/noon-egypt",
    "source": "yajny"
   },
   {
@@ -161,6 +418,16 @@
    "code": "ARABY67",
    "title": "كود خصم يصل إلي %10",
    "expires": "2026-12-31",
+   "page": "https://yajny.com/ar-eg/store/WayUp%20sports",
+   "source": "yajny"
+  },
+  {
+   "store": "واي اب سبورت",
+   "logo": "https://yajny.nyc3.digitaloceanspaces.com/public/wayup-sports-eg-website-english-logo-00f540cd-e77b-4082-ac8c-64c5ac7ffdc0.webp",
+   "link": "https://wayupsports.com/ar",
+   "code": "G3",
+   "title": "استخدم كود خصم واي اب سبورتس ووفّر عند التسوق أونلاين",
+   "expires": "2027-12-31",
    "page": "https://yajny.com/ar-eg/store/WayUp%20sports",
    "source": "yajny"
   },
