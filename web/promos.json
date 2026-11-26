@@ -1,5 +1,5 @@
 {
- "updated": "2026-11-25T13:10:39Z",
+ "updated": "2026-11-26T12:50:36Z",
  "country": "eg",
  "sources": [
   "yajny.com/ar-eg"
@@ -397,7 +397,7 @@
    "code": "B49",
    "title": "استخدم كود خصم نون ووفّر عند التسوق أونلاين",
    "expires": "2027-12-31",
-   "used": 3,
+   "used": 4,
    "page": "https://yajny.com/ar-eg/store/noon-egypt",
    "source": "yajny"
   },
