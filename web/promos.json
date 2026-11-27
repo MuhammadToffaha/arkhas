@@ -1,5 +1,5 @@
 {
- "updated": "2026-11-26T12:50:36Z",
+ "updated": "2026-11-27T12:44:02Z",
  "country": "eg",
  "sources": [
   "yajny.com/ar-eg"
@@ -40,9 +40,10 @@
    "store": "باث اند بودي وركس",
    "logo": "https://yajny.nyc3.digitaloceanspaces.com/public/store/bbw-225bc008-be20-4654-98ee-b629056a5677.png",
    "link": "https://www.bathandbodyworks.com.eg/ar/shop-top-offers/",
-   "code": "02Q",
-   "title": "استخدم كود خصم باث اند بودي ووركس ووفّر عند التسوق أونلاين",
+   "code": "A69",
+   "title": "أحدث كوبون خصم باث اند بودي ووركس في مصر",
    "expires": "2027-12-31",
+   "used": 1,
    "page": "https://yajny.com/ar-eg/store/bath-body-works-egypt",
    "source": "yajny"
   },
@@ -50,8 +51,8 @@
    "store": "باث اند بودي وركس",
    "logo": "https://yajny.nyc3.digitaloceanspaces.com/public/store/bbw-225bc008-be20-4654-98ee-b629056a5677.png",
    "link": "https://www.bathandbodyworks.com.eg/ar/shop-top-offers/",
-   "code": "A69",
-   "title": "أحدث كوبون خصم باث اند بودي ووركس في مصر",
+   "code": "02Q",
+   "title": "استخدم كود خصم باث اند بودي ووركس ووفّر عند التسوق أونلاين",
    "expires": "2027-12-31",
    "page": "https://yajny.com/ar-eg/store/bath-body-works-egypt",
    "source": "yajny"
@@ -308,7 +309,8 @@
    "title": "استخدم كود خصم لايك كارد ووفّر عند التسوق أونلاين",
    "expires": "2027-12-31",
    "page": "https://yajny.com/ar-eg/store/like-card-egypt",
-   "source": "yajny"
+   "source": "yajny",
+   "used": 1
   },
   {
    "store": "لايك كارد",
